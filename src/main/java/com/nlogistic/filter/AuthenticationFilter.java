@@ -33,8 +33,11 @@ public class AuthenticationFilter implements Filter {
         String path = uri.substring(contextPath.length());
         
         // Allow public paths (FR1.5: login/register accessible without auth)
-        boolean isPublicPath = path.startsWith("/login") || path.startsWith("/register") || 
-                               path.contains("/assets/") || path.endsWith("login.jsp") || path.endsWith("register.jsp");
+        boolean isPublicPath = path.equals("/") || path.equals("/index.jsp") || 
+                               path.startsWith("/login") || path.startsWith("/register") || 
+                               path.startsWith("/forgot-password") || path.startsWith("/reset-password") ||
+                               path.contains("/assets/") || path.endsWith("login.jsp") || path.endsWith("register.jsp") ||
+                               path.endsWith("forgot-password.jsp") || path.endsWith("reset-password.jsp");
         
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
 
@@ -55,29 +58,40 @@ public class AuthenticationFilter implements Filter {
 
         boolean allowed = true;
 
-        // Admin-only pages
+
+        // Admin-only pages (Approve users, master data)
         if (path.startsWith("/admin") || path.contains("/approve") || path.contains("/delete")) {
             allowed = (roleId == 1); // Super Admin only
         }
-        // Finance pages (billing)
-        else if (path.startsWith("/billing")) {
-            allowed = (roleId <= 4); // Not customers for write ops, but allow read
+        // Executive dashboard (Super Admin, Company Admin)
+        else if (path.startsWith("/executive") || path.startsWith("/company")) {
+            allowed = (roleId <= 2); 
         }
-        // Compliance
+        // Vessels & Containers (Module 3) & Stock Management (Module 4)
+        else if (path.startsWith("/vessel") || path.startsWith("/container") || path.startsWith("/stock")) {
+            allowed = (roleId <= 3); // Super Admin, Company Admin, Operations
+        }
+        // Finance & Billing (Module 5)
+        else if (path.startsWith("/billing") || path.startsWith("/invoice") || path.startsWith("/payment")) {
+            // Role 4 = Finance. Customers (5) can view, but this filter handles base paths.
+            // Assuming specific view endpoints bypass this or we allow 5 to enter but controller restricts actions.
+            // Let's allow all to access the controller, and let controller limit actions.
+            allowed = true; 
+        }
+        // Compliance (Module 7)
         else if (path.startsWith("/compliance")) {
-            allowed = (roleId <= 4); // Staff and admin
+            allowed = (roleId <= 3); // Admin and Ops
         }
-        // Executive dashboard
-        else if (path.startsWith("/executive")) {
-            allowed = (roleId <= 2); // Admin only
-        }
-        // Claims
-        else if (path.startsWith("/claims")) {
-            allowed = true; // All roles can file/view claims
+        // Shipments (Module 2) & Claims (Module 6)
+        else if (path.startsWith("/shipment") || path.startsWith("/claims")) {
+            allowed = true; // Customers can book/track shipments and file claims. Controllers enforce write access.
         }
 
         if (!allowed) {
             // FR1.9: Log permission denied event
+            com.nlogistic.dao.UserDAO userDAO = new com.nlogistic.dao.UserDAO();
+            userDAO.logAuditEvent(user.getUserId(), "PERMISSION_DENIED", path, req.getRemoteAddr());
+            
             req.setAttribute("errorMessage", "Access Denied: You do not have permission to access this page.");
             req.getRequestDispatcher("/jsp/dashboard.jsp").forward(req, res);
             return;

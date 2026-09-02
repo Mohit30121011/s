@@ -23,18 +23,21 @@ public class UserDAO {
             cs.registerOutParameter(4, Types.VARCHAR);
             cs.execute();
             return cs.getString(4); // SUCCESS, USER_NOT_FOUND, INVALID_PASSWORD, ACCOUNT_LOCKED, ACCOUNT_INACTIVE
-        } catch (Exception e) { e.printStackTrace(); }
-        return "ERROR";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "DB_ERROR: " + e.getMessage();
+        }
     }
 
     /**
      * After successful loginAttempt, fetch the user object for session.
      */
     public User getUserByUsername(String username) {
-        String sql = "SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE u.username = ?";
+        String sql = "SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE u.username = ? OR u.email = ?";
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
+            ps.setString(2, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     User u = new User();
@@ -78,10 +81,10 @@ public class UserDAO {
     }
 
     /**
-     * DB signature: register_user(p_username, p_email, p_password_hash, p_phone, p_role_id, p_company_id)
+     * DB signature: register_user(p_username, p_email, p_password_hash, p_phone, p_role_id, p_company_id, p_status)
      */
-    public void registerUser(String username, String email, String password, String phone, int roleId, Integer companyId) {
-        String sql = "{CALL register_user(?, ?, ?, ?, ?, ?)}";
+    public void registerUser(String username, String email, String password, String phone, int roleId, Integer companyId, String status) {
+        String sql = "{CALL register_user(?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, username);
@@ -90,6 +93,7 @@ public class UserDAO {
             cs.setString(4, phone);
             cs.setInt(5, roleId);
             if (companyId != null) cs.setInt(6, companyId); else cs.setNull(6, Types.INTEGER);
+            cs.setString(7, status);
             cs.execute();
         } catch (Exception e) { e.printStackTrace(); }
     }
@@ -292,6 +296,118 @@ public class UserDAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+    public java.util.List<com.nlogistic.model.User> getPendingUsers() {
+        java.util.List<com.nlogistic.model.User> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM users WHERE status = 'Inactive'";
+        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                com.nlogistic.model.User u = new com.nlogistic.model.User();
+                u.setUserId(rs.getInt("user_id"));
+                u.setUsername(rs.getString("username"));
+                u.setEmail(rs.getString("email"));
+                u.setPhone(rs.getString("phone"));
+                u.setRoleId(rs.getInt("role_id"));
+                u.setStatus(rs.getString("status"));
+                u.setCompanyId(rs.getInt("company_id"));
+                list.add(u);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public boolean updateUserStatus(int userId, String status) {
+        String sql = "UPDATE users SET status = ? WHERE user_id = ?";
+        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }    /**
+     * Finds a user by email and generates a password reset token.
+     * Returns the generated token, or null if user not found.
+     */
+    public String generatePasswordResetToken(String email) {
+        User user = getUserByUsername(email); // Since this queries by username OR email
+        if (user == null) return null;
+        
+        String token = java.util.UUID.randomUUID().toString();
+        // Set expiry to 15 minutes from now
+        String sql = "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, user.getUserId());
+            ps.setString(2, token);
+            ps.executeUpdate();
+            return token;
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    /**
+     * Validates the token and returns the associated user ID.
+     * Returns -1 if invalid, expired, or used.
+     */
+    public int validateResetToken(String token) {
+        String sql = "SELECT user_id FROM password_resets WHERE token = ? AND used = FALSE AND expires_at > NOW()";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("user_id");
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
+    }
+
+    /**
+     * Resets the user's password using the token and marks the token as used.
+     */
+    public boolean resetPasswordWithToken(String token, String newPassword) {
+        int userId = validateResetToken(token);
+        if (userId == -1) return false;
+
+        String updatePassSql = "UPDATE users SET password_hash = SHA2(?, 256) WHERE user_id = ?";
+        String updateTokenSql = "UPDATE password_resets SET used = TRUE WHERE token = ?";
+
+        try (Connection conn = DBConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps1 = conn.prepareStatement(updatePassSql);
+                 PreparedStatement ps2 = conn.prepareStatement(updateTokenSql)) {
+                
+                ps1.setString(1, newPassword);
+                ps1.setInt(2, userId);
+                ps1.executeUpdate();
+
+                ps2.setString(1, token);
+                ps2.executeUpdate();
+
+                conn.commit();
+                return true;
+            } catch (Exception ex) {
+                conn.rollback();
+                ex.printStackTrace();
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+    public void logAuditEvent(int userId, String action, String entityName, String ipAddress) {
+        String sql = "INSERT INTO audit_log (user_id, action, entity_name, entity_id, ip_address) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, action);
+            ps.setString(3, entityName);
+            ps.setInt(4, userId); // Use user_id as entity_id for these events
+            ps.setString(5, ipAddress);
+            ps.executeUpdate();
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
 }

@@ -51,7 +51,13 @@ public class LoginServlet extends HttpServlet {
             case "INVALID_PASSWORD":    errorMsg = "Invalid password. Please try again."; break;
             case "ACCOUNT_LOCKED":      errorMsg = "Account is locked due to too many failed attempts. Please wait 15 minutes."; break;
             case "ACCOUNT_INACTIVE":    errorMsg = "Account is inactive. Please contact administrator."; break;
-            default:                    errorMsg = "Login failed. Please try again."; break;
+            default:
+                if (result != null && result.startsWith("DB_ERROR:")) {
+                    errorMsg = "Database Connection Failed: " + result.substring(10) + ". Please check DBConnectionManager.java for correct MySQL password or ensure stored procedure exists.";
+                } else {
+                    errorMsg = "Login failed. Please try again.";
+                }
+                break;
         }
         request.setAttribute("errorMessage", errorMsg);
         request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
