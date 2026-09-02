@@ -6,6 +6,8 @@
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- html2pdf CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
     :root {
@@ -86,13 +88,14 @@
     /* Filter Bar */
     .filter-bar {
         background: var(--bg-surface);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 16px 24px;
+        border: none;
+        border-radius: 16px;
+        padding: 20px 24px;
         display: flex;
         align-items: center;
         gap: 24px;
         margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
     }
 
     .filter-group {
@@ -103,34 +106,58 @@
     }
 
     .filter-label {
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--text-sub);
+        font-size: 13px;
+        font-weight: 600;
+        color: #4B5563;
+        margin-left: 4px;
     }
 
     .filter-input-wrap {
         display: flex;
         align-items: center;
         gap: 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 8px 12px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 10px 16px;
+        background: #F9FAFB;
+        transition: all 0.2s ease;
+    }
+
+    .filter-input-wrap:focus-within {
         background: white;
+        border-color: var(--orange-brand);
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15);
     }
 
     .filter-input-wrap i {
-        color: var(--text-sub);
-        font-size: 14px;
+        color: #9CA3AF;
+        font-size: 15px;
+        transition: color 0.2s ease;
     }
 
-    .filter-input-wrap select, .filter-input-wrap input {
+    .filter-input-wrap:focus-within i {
+        color: var(--orange-brand);
+    }
+
+        .filter-input-wrap select, .filter-input-wrap input {
+        appearance: none;
+        -webkit-appearance: none;
         border: none;
         outline: none;
         font-size: 14px;
         font-weight: 500;
         color: var(--text-main);
         width: 100%;
-        background: transparent;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+    .filter-input-wrap select {
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 4px center;
+        background-size: 16px;
+        padding-right: 28px;
     }
 
     .btn-reset {
@@ -138,19 +165,31 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        font-weight: 500;
-        color: var(--text-main);
+        font-weight: 600;
+        color: #4B5563;
         background: white;
         border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 10px 20px;
+        border-radius: 10px;
+        padding: 11px 20px;
         cursor: pointer;
-        transition: all 0.2s;
-        margin-top: 22px; /* align with inputs */
+        transition: all 0.3s ease;
+        margin-top: 25px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
 
     .btn-reset:hover {
-        background: #F3F4F6;
+        background: #F9FAFB;
+        border-color: #D1D5DB;
+        color: var(--text-main);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    
+    .btn-reset i {
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-reset:hover i {
+        transform: rotate(-180deg);
     }
 
     /* KPI Cards */
@@ -390,14 +429,14 @@
 
 </style>
 
-<div class="main-content">
+<div class="main-content" id="dashboardContent">
     <div class="dashboard-header">
         <div>
             <div class="page-title">Profit & Loss Analytics <i class="fas fa-info-circle"></i></div>
             <div class="breadcrumb">Dashboard > Finance > <span>Profit & Loss</span></div>
         </div>
         <div class="header-actions">
-            <button class="btn-outline-custom"><i class="fa-solid fa-download"></i> Export</button>
+            <button type="button" class="btn-outline-custom" onclick="exportDashboardToPDF()"><i class="fa-solid fa-download"></i> Export</button>
             <button class="btn-outline-custom btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
         </div>
     </div>
@@ -429,10 +468,16 @@
             </div>
         </div>
         <div class="filter-group">
-            <div class="filter-label">Date Range (YYYY-MM-DD to YYYY-MM-DD)</div>
+            <div class="filter-label">Time Period</div>
             <div class="filter-input-wrap">
-                <i class="fa-regular fa-calendar"></i>
-                <input type="text" name="dateRange" value="${not empty selectedDateRange ? selectedDateRange : ''}" placeholder="e.g. 2026-01-01 to 2026-12-31" onchange="this.form.submit()">
+                <i class="far fa-calendar-alt"></i>
+                <select class="form-select-custom" name="dateRange"  onchange="this.form.submit()">
+                    <option value="">All Time</option>
+                    <option value="2026-09-01 to 2026-09-30" <c:if test="${selectedDateRange == '2026-09-01 to 2026-09-30'}">selected</c:if>>This Month (Sep 2026)</option>
+                    <option value="2026-08-01 to 2026-08-31" <c:if test="${selectedDateRange == '2026-08-01 to 2026-08-31'}">selected</c:if>>Last Month (Aug 2026)</option>
+                    <option value="2026-07-01 to 2026-09-30" <c:if test="${selectedDateRange == '2026-07-01 to 2026-09-30'}">selected</c:if>>Q3 2026 (Jul-Sep)</option>
+                    <option value="2026-01-01 to 2026-12-31" <c:if test="${selectedDateRange == '2026-01-01 to 2026-12-31'}">selected</c:if>>This Year (2026)</option>
+                </select>
             </div>
         </div>
         <a href="${pageContext.request.contextPath}/finance/profit-loss" class="btn-reset" style="text-decoration: none;"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</a>
@@ -584,7 +629,7 @@
         <div class="card-header" style="margin-bottom: 32px;">
             <div class="card-title">Profit & Loss Summary <i class="fas fa-info-circle"></i></div>
             <div style="display: flex; gap: 12px;">
-                <button class="btn-outline-custom"><i class="fa-solid fa-download"></i> Export</button>
+                <button type="button" class="btn-outline-custom" onclick="exportDashboardToPDF()"><i class="fa-solid fa-download"></i> Export</button>
                 <button class="btn-outline-custom btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </div>
         </div>
@@ -888,7 +933,32 @@
       renderDonutChart(mode);
   }
 
+  
+  function exportDashboardToPDF() {
+      const element = document.getElementById('dashboardContent');
+      
+      // We can temporarily hide the header actions/filters during export if needed, 
+      // but let's keep them so the user sees the filter context.
+      
+      const opt = {
+          margin:       0.2,
+          filename:     'Profit_Loss_Analytics.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+      };
+      
+      // Add a loading state to the button
+      const buttons = document.querySelectorAll('button[onclick="exportDashboardToPDF()"]');
+      buttons.forEach(btn => btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Exporting...');
+      
+      html2pdf().set(opt).from(element).save().then(() => {
+          buttons.forEach(btn => btn.innerHTML = '<i class="fa-solid fa-download"></i> Export');
+      });
+  }
+
   document.addEventListener("DOMContentLoaded", function() {
+
       renderTrendChart('monthly');
       renderDonutChart('cost');
   });
