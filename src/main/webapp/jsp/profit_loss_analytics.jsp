@@ -43,7 +43,6 @@
     .page-title i {
         font-size: 14px;
         color: var(--text-sub);
-        font-weight: 400;
         cursor: help;
     }
 
@@ -263,7 +262,7 @@
         align-items: center;
         gap: 8px;
     }
-    .card-title i { font-size: 14px; color: var(--text-sub); font-weight: 400; cursor: help; }
+    .card-title i { font-size: 14px; color: var(--text-sub); cursor: help; }
     
     .card-subtitle {
         font-size: 12px;
@@ -394,7 +393,7 @@
 <div class="main-content">
     <div class="dashboard-header">
         <div>
-            <div class="page-title">Profit & Loss Analytics <i class="fa-solid fa-circle-info"></i></div>
+            <div class="page-title">Profit & Loss Analytics <i class="fas fa-info-circle"></i></div>
             <div class="breadcrumb">Dashboard > Finance > <span>Profit & Loss</span></div>
         </div>
         <div class="header-actions">
@@ -505,7 +504,7 @@
         <div class="chart-card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">Net Profit / Loss Trend <i class="fa-solid fa-circle-info"></i></div>
+                    <div class="card-title">Net Profit / Loss Trend <i class="fas fa-info-circle"></i></div>
                     <div class="card-subtitle">All values in USD</div>
                 </div>
                 <div style="display: flex; gap: 12px; align-items: center;">
@@ -525,7 +524,7 @@
         <!-- Donut Chart -->
         <div class="chart-card">
             <div class="card-header">
-                <div class="card-title">Loss Reason Breakdown <i class="fa-solid fa-circle-info"></i></div>
+                <div class="card-title">Loss Reason Breakdown <i class="fas fa-info-circle"></i></div>
                 <div class="toggle-group">
                     <button type="button" class="toggle-btn active" id="btnByCost" onclick="toggleLossBreakdown('cost')">By Cost</button>
                     <button type="button" class="toggle-btn" id="btnByShipments" onclick="toggleLossBreakdown('shipments')">By Shipments</button>
@@ -583,7 +582,7 @@
     <!-- Table Section -->
     <div class="chart-card">
         <div class="card-header" style="margin-bottom: 32px;">
-            <div class="card-title">Profit & Loss Summary <i class="fa-solid fa-circle-info"></i></div>
+            <div class="card-title">Profit & Loss Summary <i class="fas fa-info-circle"></i></div>
             <div style="display: flex; gap: 12px;">
                 <button class="btn-outline-custom"><i class="fa-solid fa-download"></i> Export</button>
                 <button class="btn-outline-custom btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
@@ -673,8 +672,8 @@
       </c:forEach>
   ];
 
-  const totalLossCost = <fmt:formatNumber value="${totalLoss}" type="number" groupingUsed="true" maxFractionDigits="0"/>;
-  const totalLossShipments = <fmt:formatNumber value="${totalLossShipments}" type="number" groupingUsed="true" maxFractionDigits="0"/>;
+  const totalLossCost = ${totalLoss};
+  const totalLossShipments = ${totalLossShipments};
 
   function renderTrendChart(period) {
       let raw = trendDatasets[period] || [];
@@ -895,6 +894,8 @@
   });
 </script>
 <jsp:include page="/jsp/layout/footer.jsp" />
+
+
 
 
 
