@@ -1914,12 +1914,13 @@
     function openEditPermissions(userId) {
         document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
         selectStaffMember(userId);
+        switchDrawerTab('permissions');
     }
 
     function openStaffProfileModal(userId) {
         document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
         selectStaffMember(userId);
-        switchDrawerTab('role');
+        switchDrawerTab('details');
     }
 
     function resetStaffPassword(userId) {
