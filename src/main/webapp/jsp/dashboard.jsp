@@ -14,7 +14,7 @@
     --info: #3B82F6; --info-light: #EFF6FF;
     --purple: #8B5CF6; --purple-light: #F5F3FF;
     --text-main: #1F2937; --text-sub: #64748B; --border: #E7E9ED;
-    --bg: #F8F9FB; --card: #FFFFFF;
+    --bg: #F1F3F7; --card: #FFFFFF;
 }
 body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .dash-wrap { padding: 0; max-width: 100%; margin: 0; }

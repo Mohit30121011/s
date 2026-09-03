@@ -26,7 +26,7 @@
             --nl-primary-border: #FFD4C2;
 
             /* Backgrounds & Surfaces */
-            --nl-bg: #F8F9FB;
+            --nl-bg: #F1F3F7;
             --nl-surface: #FFFFFF;
             --nl-surface-hover: #FAFAFA;
             --nl-surface-subtle: #F9FAFB;
