@@ -496,7 +496,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <ul class="sub-nav collapse show" id="shipmentsSubmenu">
                     <li><a href="${pageContext.request.contextPath}/shipments">All Shipments</a></li>
                     <li><a href="${pageContext.request.contextPath}/shipments/create" >Create Shipment</a></li>
-                    <li><a href="${pageContext.request.contextPath}/shipments/tracking">Live Tracking</a></li><li><a href="#">Drafts</a></li>
+                    <li><a href="${pageContext.request.contextPath}/shipments/tracking">Live Tracking</a></li>
                 </ul>
             </div>
             
@@ -521,9 +521,9 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fa-solid fa-user-group main-icon"></i> Customers
-                </a>
+                <a href="${pageContext.request.contextPath}/customers" class="nav-link">
+                        <i class="fa-solid fa-user-group main-icon"></i> Customers
+                    </a>
             </div>
             
             <div class="nav-item">

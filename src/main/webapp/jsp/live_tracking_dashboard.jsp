@@ -1,5 +1,6 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -190,8 +191,22 @@
                             <c:otherwise><span class="status-badge status-green">${shipment.status}</span></c:otherwise>
                         </c:choose>
                     </td>
-                    <td>TBD</td>
-                    <td style="color: var(--text-muted);">Just now</td>
+                    <td>
+    <c:choose>
+        <c:when test="${not empty shipment.eta}">
+            <fmt:formatDate value="${shipment.eta}" pattern="MMM dd, yyyy" />
+        </c:when>
+        <c:otherwise>Pending</c:otherwise>
+    </c:choose>
+</td>
+<td style="color: var(--text-muted);">
+    <c:choose>
+        <c:when test="${not empty shipment.updatedAt}">
+            <fmt:formatDate value="${shipment.updatedAt}" pattern="MMM dd, hh:mm a" />
+        </c:when>
+        <c:otherwise>N/A</c:otherwise>
+    </c:choose>
+</td>
                     <td class="chevron-col" style="padding-right: 24px;"><i class="fa-solid fa-chevron-right"></i></td>
                 </tr>
             </c:forEach>

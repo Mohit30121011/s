@@ -64,10 +64,10 @@
                                     <td class="text-end pe-4">
                                         <form action="${pageContext.request.contextPath}/admin/companies" method="POST" class="d-inline">
                                             <input type="hidden" name="companyId" value="${company.companyId}">
-                                            <button type="submit" name="action" value="accept" class="btn btn-sm btn-success rounded-circle me-1" title="Accept" style="width: 32px; height: 32px;">
+                                            <button type="button" onclick="handleAction(event, this.form, \'accept\')"  class="btn btn-sm btn-success rounded-circle me-1" title="Accept" style="width: 32px; height: 32px;">
                                                 <i class="fa-solid fa-check"></i>
                                             </button>
-                                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger rounded-circle" title="Reject" style="width: 32px; height: 32px;">
+                                            <button type="button" onclick="handleAction(event, this.form, \'reject\')"  class="btn btn-sm btn-danger rounded-circle" title="Reject" style="width: 32px; height: 32px;">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         </form>

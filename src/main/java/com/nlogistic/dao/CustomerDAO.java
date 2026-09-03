@@ -38,7 +38,12 @@ public class CustomerDAO {
             while (rs.next()) {
                 Customer c = new Customer();
                 c.setCustomerId(rs.getInt("customer_id"));
+                c.setUserId(rs.getInt("user_id"));
                 c.setCustomerName(rs.getString("customer_name"));
+                c.setAddress(rs.getString("address"));
+                c.setKycDocPath(rs.getString("kyc_doc_path"));
+                c.setCreditLimit(rs.getDouble("credit_limit"));
+                c.setCreatedAt(rs.getTimestamp("created_at"));
                 list.add(c);
             }
         } catch (Exception e) { 
