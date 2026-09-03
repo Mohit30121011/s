@@ -158,6 +158,46 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     .dash-header-right { width: 100%; justify-content: space-between; }
 }
 
+.period-select,
+.date-badge-form select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #FFFFFF !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 13px !important;
+    border: 1px solid #E2E5EA !important;
+    border-radius: 8px !important;
+    padding: 6px 30px 6px 12px !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: #4B5563 !important;
+    cursor: pointer !important;
+    outline: none !important;
+    transition: all 0.15s ease !important;
+}
+
+.period-select:hover,
+.date-badge-form select:hover {
+    border-color: #D1D5DB !important;
+    background-color: #F9FAFB !important;
+}
+
+.period-select:focus,
+.date-badge-form select:focus {
+    border-color: #FC8019 !important;
+    box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+}
+
+.date-badge-form select {
+    border-radius: 20px !important;
+    padding: 7px 32px 7px 14px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    background-position: right 12px center !important;
+}
 </style>
 
 <div class="dash-wrap">

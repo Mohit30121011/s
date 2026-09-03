@@ -1342,9 +1342,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <c:if test="${empty requestScope.hideTopHeader}">
         <!-- Top Navbar -->
         <header class="top-header">
-            <div class="search-box">
-                <i class="ti ti-search text-muted"></i>
-                <input type="text" placeholder="Search shipments, containers, vessels... (Ctrl+K)">
+            <div class="search-bar">
+                <i class="ti ti-search"></i>
+                <input type="text" placeholder="Search shipments, containers, vessels...">
+                <span class="shortcut">/</span>
             </div>
 
             <div class="header-actions">
