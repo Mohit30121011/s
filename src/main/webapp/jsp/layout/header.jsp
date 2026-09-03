@@ -546,6 +546,7 @@
 
         /* 8. Top Header Standard */
         .top-header {
+            overflow: visible !important;
             height: 70px !important;
             background: #FFFFFF !important;
             border-bottom: 1px solid var(--nl-border) !important;
@@ -801,6 +802,7 @@
 
         /* Top Header */
         .top-header {
+            overflow: visible !important;
             height: 72px;
             background: #fff;
             border-bottom: 1px solid var(--border-color);
@@ -817,6 +819,7 @@
            OMNIBOX GLOBAL SEARCH BAR & SUGGESTION PALETTE
            ========================================================================== */
         .search-bar {
+            overflow: visible !important;
             position: relative;
             width: 420px;
             transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2281,7 +2284,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    document.addEventListener('DOMContentLoaded', function() {
+    function initOmnibox() {
+
         const wrap = document.getElementById('globalOmniboxWrap');
         const input = document.getElementById('globalOmniboxInput');
         const dropdown = document.getElementById('globalOmniboxDropdown');
@@ -2307,10 +2311,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Focus & Blur
+                input.addEventListener('click', function() {
+            wrap.classList.add('is-focused');
+            renderSuggestions(input.value.trim());
+            dropdown.style.setProperty('display', 'flex', 'important');
+        });
+
         input.addEventListener('focus', function() {
             wrap.classList.add('is-focused');
             renderSuggestions(input.value.trim());
-            dropdown.style.display = 'flex';
+            dropdown.style.setProperty('display', 'flex', 'important');
         });
 
         // Input handler
@@ -2324,7 +2334,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 shortcut.style.display = 'block';
             }
             renderSuggestions(query);
-            dropdown.style.display = 'flex';
+            dropdown.style.setProperty('display', 'flex', 'important');
         });
 
         // Clear button
@@ -2358,7 +2368,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectOmniboxItem(currentFilteredItems[0]);
                 }
             } else if (e.key === 'Escape') {
-                dropdown.style.display = 'none';
+                dropdown.style.setProperty('display', 'none', 'important');
                 wrap.classList.remove('is-focused');
                 input.blur();
             }
@@ -2367,7 +2377,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Close when clicking outside
         document.addEventListener('click', function(e) {
             if (!wrap.contains(e.target)) {
-                dropdown.style.display = 'none';
+                dropdown.style.setProperty('display', 'none', 'important');
                 wrap.classList.remove('is-focused');
             }
         });
@@ -2389,11 +2399,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return text.replace(regex, '<mark class="nl-search-mark">$1</mark>');
         }
 
-                function escapeRegex(str) {
+        function escapeRegex(str) {
             return str.split('').map(function(ch) {
                 return ('\\^$*+?.()|{}[]'.indexOf(ch) !== -1) ? '\\' + ch : ch;
             }).join('');
-        }()|[\]\\]/g, '\\$&');
         }
 
         function renderSuggestions(query) {
@@ -2476,7 +2485,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function selectOmniboxItem(item) {
-            dropdown.style.display = 'none';
+            dropdown.style.setProperty('display', 'none', 'important');
             wrap.classList.remove('is-focused');
             input.blur();
 
@@ -2501,7 +2510,13 @@ document.addEventListener('DOMContentLoaded', function() {
         function escapeHtml(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOmnibox);
+    } else {
+        initOmnibox();
+    }
 })();
 </script>
 
