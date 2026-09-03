@@ -5,9 +5,11 @@
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
-    /* Reset and Layout Root */
+    /* ===================================================
+       ROOT SPLIT-SCREEN RESET & HIGH-PERFORMANCE ANIMATIONS
+       =================================================== */
     body {
-        background-color: #0F172A !important;
+        background-color: #0B1120 !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow-x: hidden !important;
@@ -16,7 +18,7 @@
         margin-left: 0 !important;
         width: 100% !important;
         min-height: 100vh !important;
-        background: #0F172A !important;
+        background: #0B1120 !important;
     }
     .content-area {
         padding: 0 !important;
@@ -24,23 +26,79 @@
         width: 100% !important;
     }
 
-    /* Split-Screen Authentication Container */
-    .nl-auth-split-wrapper {
+    /* Keyframe Animations */
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(24px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        0% {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes floatOrb1 {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(-30px, 20px) scale(1.08);
+        }
+    }
+
+    @keyframes floatOrb2 {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(25px, -25px) scale(1.06);
+        }
+    }
+
+    @keyframes beaconPulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+
+    @keyframes shimmerBtn {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Pure Split Layout (No card inside container) */
+    .nl-split-container {
         display: flex;
         min-height: 100vh;
         width: 100%;
-        background: #0B1120;
     }
 
     /* ===================================================
-       LEFT HERO SHOWCASE PANEL (55% Desktop)
+       LEFT HERO SPLIT (Dark Slate Showcase with Ambient FX)
        =================================================== */
-    .nl-auth-hero-panel {
+    .nl-split-left {
         flex: 1.15;
-        background: radial-gradient(circle at 10% 20%, rgba(252, 128, 25, 0.12) 0%, transparent 40%),
-                    radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.12) 0%, transparent 45%),
-                    linear-gradient(135deg, #090E1A 0%, #0F172A 60%, #131E36 100%);
-        padding: 56px 64px;
+        background: linear-gradient(145deg, #070C18 0%, #0F172A 55%, #151F38 100%);
+        padding: 50px 60px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -49,206 +107,247 @@
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* Ambient Subtle Grid Pattern */
-    .nl-auth-hero-panel::before {
+    /* Ambient Glowing Orbs */
+    .nl-ambient-orb-1 {
+        position: absolute;
+        width: 380px;
+        height: 380px;
+        top: -80px;
+        left: -80px;
+        background: radial-gradient(circle, rgba(252, 128, 25, 0.18) 0%, transparent 70%);
+        border-radius: 50%;
+        filter: blur(50px);
+        pointer-events: none;
+        animation: floatOrb1 10s ease-in-out infinite;
+    }
+    .nl-ambient-orb-2 {
+        position: absolute;
+        width: 440px;
+        height: 440px;
+        bottom: -100px;
+        right: -80px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, transparent 70%);
+        border-radius: 50%;
+        filter: blur(60px);
+        pointer-events: none;
+        animation: floatOrb2 12s ease-in-out infinite;
+    }
+
+    /* Subtle Geometric Grid */
+    .nl-split-left::before {
         content: "";
         position: absolute;
         inset: 0;
-        background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 36px 36px;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+        background-size: 32px 32px;
         pointer-events: none;
+        z-index: 1;
     }
 
-    /* Top Brand Bar */
-    .nl-hero-brand {
+    /* Left Header Brand */
+    .nl-hero-nav {
         position: relative;
         z-index: 2;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .nl-brand-box {
+    .nl-brand-link {
         display: flex;
         align-items: center;
         gap: 14px;
         text-decoration: none;
     }
-    .nl-brand-logo-mark {
-        width: 44px;
-        height: 44px;
+    .nl-brand-gem {
+        width: 46px;
+        height: 46px;
         background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 6px 18px rgba(252, 128, 25, 0.35);
+        box-shadow: 0 8px 24px rgba(252, 128, 25, 0.4);
         color: #FFFFFF;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 900;
         letter-spacing: -0.5px;
+        transition: transform 0.3s ease;
     }
-    .nl-brand-text-name {
-        font-size: 20px;
+    .nl-brand-link:hover .nl-brand-gem {
+        transform: rotate(6deg) scale(1.05);
+    }
+    .nl-brand-name {
+        font-size: 21px;
         font-weight: 800;
         letter-spacing: -0.3px;
         color: #FFFFFF;
         line-height: 1.1;
     }
-    .nl-brand-text-sub {
-        font-size: 11.5px;
+    .nl-brand-sub {
+        font-size: 11px;
         color: #94A3B8;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
         text-transform: uppercase;
         font-weight: 600;
     }
-    .nl-version-badge {
+    .nl-status-pill {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         background: rgba(255, 255, 255, 0.06);
         border: 1px solid rgba(255, 255, 255, 0.12);
         color: #E2E8F0;
         font-size: 12px;
         font-weight: 600;
-        padding: 5px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(10px);
     }
-    .nl-version-badge .pulse-circle {
-        width: 7px;
-        height: 7px;
+    .nl-pulse-beacon {
+        width: 8px;
+        height: 8px;
         background: #10B981;
         border-radius: 50%;
-        box-shadow: 0 0 8px #10B981;
+        animation: beaconPulse 2s infinite;
     }
 
-    /* Hero Center Content */
-    .nl-hero-center {
+    /* Left Hero Main Content */
+    .nl-hero-body {
         position: relative;
         z-index: 2;
         margin: 40px 0;
         max-width: 620px;
     }
-    .nl-hero-pill {
+    .nl-hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         background: rgba(252, 128, 25, 0.12);
-        border: 1px solid rgba(252, 128, 25, 0.3);
+        border: 1px solid rgba(252, 128, 25, 0.32);
         color: #FC8019;
         font-size: 12px;
         font-weight: 700;
         padding: 6px 14px;
         border-radius: 20px;
         margin-bottom: 20px;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.4px;
         text-transform: uppercase;
+        animation: fadeInUp 0.7s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .nl-hero-title {
-        font-size: 38px;
+    .nl-hero-heading {
+        font-size: 40px;
         font-weight: 800;
-        line-height: 1.2;
+        line-height: 1.18;
         color: #F8FAFC;
-        letter-spacing: -0.8px;
+        letter-spacing: -0.9px;
         margin-bottom: 16px;
+        animation: fadeInUp 0.7s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .nl-hero-title span {
+    .nl-hero-heading span {
         background: linear-gradient(135deg, #FC8019 0%, #FF9E4A 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .nl-hero-desc {
+    .nl-hero-description {
         font-size: 15.5px;
         color: #94A3B8;
         line-height: 1.6;
-        margin-bottom: 32px;
+        margin-bottom: 34px;
+        animation: fadeInUp 0.7s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
-    /* Feature Pillars */
-    .nl-feature-cards {
+    /* Feature Cards with Hover Effects */
+    .nl-features-stack {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 14px;
         margin-bottom: 36px;
+        animation: fadeInUp 0.7s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .nl-feat-item {
+    .nl-feature-item {
         display: flex;
         align-items: flex-start;
         gap: 16px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        padding: 14px 18px;
-        backdrop-filter: blur(6px);
-        transition: all 0.2s ease;
+        padding: 15px 18px;
+        backdrop-filter: blur(8px);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .nl-feat-item:hover {
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(252, 128, 25, 0.3);
-        transform: translateX(4px);
+    .nl-feature-item:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(252, 128, 25, 0.4);
+        transform: translateX(6px);
     }
-    .nl-feat-icon {
-        width: 38px;
-        height: 38px;
+    .nl-feature-icon {
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 19px;
+        font-size: 20px;
         flex-shrink: 0;
+        transition: transform 0.25s ease;
     }
-    .nl-feat-icon.orange { background: rgba(252, 128, 25, 0.15); color: #FC8019; }
-    .nl-feat-icon.blue   { background: rgba(37, 99, 235, 0.15); color: #60A5FA; }
-    .nl-feat-icon.green  { background: rgba(16, 185, 129, 0.15); color: #34D399; }
-    .nl-feat-title {
+    .nl-feature-item:hover .nl-feature-icon {
+        transform: scale(1.1);
+    }
+    .nl-feature-icon.orange { background: rgba(252, 128, 25, 0.16); color: #FC8019; }
+    .nl-feature-icon.blue   { background: rgba(37, 99, 235, 0.16); color: #60A5FA; }
+    .nl-feature-icon.emerald{ background: rgba(16, 185, 129, 0.16); color: #34D399; }
+    .nl-feature-title {
         font-size: 14px;
         font-weight: 700;
         color: #F1F5F9;
-        margin-bottom: 2px;
+        margin-bottom: 3px;
     }
-    .nl-feat-desc {
+    .nl-feature-text {
         font-size: 12.5px;
         color: #94A3B8;
-        line-height: 1.4;
+        line-height: 1.45;
     }
 
-    /* Live Telemetry Card */
-    .nl-telemetry-strip {
+    /* Live Telemetry Metric Strip */
+    .nl-telemetry-panel {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 14px;
         padding: 16px 20px;
-        backdrop-filter: blur(12px);
+        backdrop-filter: blur(14px);
+        animation: fadeInUp 0.7s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .nl-stat-box {
+    .nl-tele-col {
         text-align: center;
         border-right: 1px solid rgba(255, 255, 255, 0.08);
         padding: 0 10px;
     }
-    .nl-stat-box:last-child {
+    .nl-tele-col:last-child {
         border-right: none;
     }
-    .nl-stat-val {
-        font-size: 22px;
+    .nl-tele-number {
+        font-size: 24px;
         font-weight: 800;
         color: #FFFFFF;
         line-height: 1.1;
     }
-    .nl-stat-lbl {
+    .nl-tele-label {
         font-size: 11px;
         font-weight: 600;
         color: #94A3B8;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
+        letter-spacing: 0.5px;
         margin-top: 4px;
     }
 
-    /* Hero Footer */
-    .nl-hero-footer {
+    /* Left Hero Footer */
+    .nl-hero-bottom {
         position: relative;
         z-index: 2;
         font-size: 12px;
@@ -256,219 +355,232 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        animation: fadeInUp 0.7s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
     /* ===================================================
-       RIGHT AUTHENTICATION FORM PANEL (45% Desktop)
+       RIGHT FORM SPLIT (Pure White Seamless Canvas)
        =================================================== */
-    .nl-auth-form-panel {
-        flex: 0.95;
-        background: #E5EBF2;
+    .nl-split-right {
+        flex: 1;
+        background: #FFFFFF !important;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-        padding: 40px 32px;
-    }
-    .nl-auth-card {
-        background: #FFFFFF;
-        width: 100%;
-        max-width: 460px;
-        border-radius: 20px;
-        padding: 40px 36px;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
-        border: 1px solid #E2E8F0;
+        align-items: center;
+        padding: 50px 48px;
         position: relative;
+        overflow-y: auto;
     }
 
-    /* Mobile Brand (Hidden on desktop) */
-    .nl-mobile-brand {
+    /* Inner Form Centering Wrapper (No nested card border/box) */
+    .nl-form-container {
+        width: 100%;
+        max-width: 440px;
+        animation: fadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* Mobile Brand (Shown on small screens) */
+    .nl-compact-brand {
         display: none;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        margin-bottom: 24px;
+        gap: 12px;
+        margin-bottom: 28px;
     }
 
-    .nl-auth-header {
-        text-align: center;
-        margin-bottom: 26px;
+    /* Form Header */
+    .nl-form-header {
+        margin-bottom: 28px;
     }
-    .nl-auth-icon-badge {
-        width: 50px;
-        height: 50px;
+    .nl-form-icon-circle {
+        width: 52px;
+        height: 52px;
         background: #FFF2EB;
         border-radius: 14px;
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
         color: #FC8019;
-        font-size: 24px;
-        margin-bottom: 14px;
-        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.15);
-    }
-    .nl-auth-title {
         font-size: 26px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 14px rgba(252, 128, 25, 0.16);
+        transition: transform 0.3s ease;
+    }
+    .nl-form-icon-circle:hover {
+        transform: scale(1.08) rotate(5deg);
+    }
+    .nl-form-title {
+        font-size: 28px;
         font-weight: 800;
-        color: #1E293B;
-        letter-spacing: -0.4px;
+        color: #0F172A;
+        letter-spacing: -0.5px;
         margin-bottom: 6px;
     }
-    .nl-auth-subtitle {
-        font-size: 13.5px;
+    .nl-form-subtitle {
+        font-size: 14px;
         color: #64748B;
-        line-height: 1.4;
+        line-height: 1.45;
     }
 
-    /* Quick-Fill Demo Pills */
-    .nl-demo-pills-wrap {
+    /* 1-Click Quick Demo Account Bar */
+    .nl-demo-box {
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
         border-radius: 12px;
-        padding: 10px 14px;
-        margin-bottom: 22px;
+        padding: 12px 14px;
+        margin-bottom: 24px;
+        transition: border-color 0.2s ease;
     }
-    .nl-demo-label {
+    .nl-demo-box:hover {
+        border-color: #CBD5E1;
+    }
+    .nl-demo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.6px;
         color: #64748B;
         margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
     }
-    .nl-demo-btns {
+    .nl-demo-group {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
     }
-    .nl-demo-btn {
+    .nl-demo-chip {
         background: #FFFFFF;
         border: 1px solid #CBD5E1;
         color: #334155;
         font-size: 12px;
         font-weight: 600;
-        padding: 4px 11px;
-        border-radius: 6px;
+        padding: 5px 12px;
+        border-radius: 7px;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
     }
-    .nl-demo-btn:hover {
+    .nl-demo-chip:hover {
         background: #FFF2EB;
         border-color: #FC8019;
         color: #FC8019;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(252, 128, 25, 0.15);
     }
-    .nl-demo-btn i {
-        font-size: 13px;
+    .nl-demo-chip:active {
+        transform: scale(0.96);
     }
 
-    /* Form Fields */
-    .nl-field-group {
-        margin-bottom: 18px;
+    /* Input Field Elements */
+    .nl-input-group {
+        margin-bottom: 20px;
     }
-    .nl-field-label {
+    .nl-label-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
         font-size: 13px;
         font-weight: 600;
-        color: #334155;
-        margin-bottom: 7px;
+        color: #1E293B;
+        margin-bottom: 8px;
     }
-    .nl-forgot-link {
+    .nl-link-orange {
         font-size: 12px;
         font-weight: 600;
         color: #FC8019;
         text-decoration: none;
         transition: color 0.15s ease;
     }
-    .nl-forgot-link:hover {
+    .nl-link-orange:hover {
         color: #E87010;
         text-decoration: underline;
     }
-    .nl-input-wrap {
+
+    .nl-input-box {
         position: relative;
         display: flex;
         align-items: center;
     }
-    .nl-input-icon {
+    .nl-input-lead-icon {
         position: absolute;
         left: 14px;
         color: #94A3B8;
-        font-size: 17px;
+        font-size: 18px;
         pointer-events: none;
-        transition: color 0.15s ease;
+        transition: color 0.2s ease, transform 0.2s ease;
     }
-    .nl-input {
+    .nl-text-input {
         width: 100%;
-        height: 46px;
-        padding: 0 42px 0 42px;
-        font-size: 14px;
+        height: 48px;
+        padding: 0 44px 0 44px;
+        font-size: 14.5px;
         font-weight: 500;
-        color: #1E293B;
+        color: #0F172A;
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
         border-radius: 10px;
-        transition: all 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         outline: none;
     }
-    .nl-input:focus {
+    .nl-text-input:focus {
         background: #FFFFFF;
         border-color: #FC8019;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15);
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.15);
     }
-    .nl-input:focus + .nl-input-icon,
-    .nl-input-wrap:focus-within .nl-input-icon {
+    .nl-input-box:focus-within .nl-input-lead-icon {
         color: #FC8019;
+        transform: scale(1.1);
     }
-    .nl-eye-btn {
+    .nl-password-toggle-btn {
         position: absolute;
         right: 12px;
         background: transparent;
         border: none;
         color: #94A3B8;
-        font-size: 18px;
+        font-size: 19px;
         cursor: pointer;
         padding: 4px 6px;
         border-radius: 6px;
-        transition: color 0.15s ease;
+        transition: all 0.2s ease;
     }
-    .nl-eye-btn:hover {
+    .nl-password-toggle-btn:hover {
         color: #FC8019;
+        transform: scale(1.1);
     }
 
-    /* Remember Checkbox */
-    .nl-remember-wrap {
+    /* Remember Workstation Checkbox */
+    .nl-checkbox-wrapper {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 22px;
-        font-size: 13px;
+        gap: 9px;
+        margin-bottom: 24px;
+        font-size: 13.5px;
         color: #475569;
         cursor: pointer;
         user-select: none;
     }
-    .nl-remember-wrap input[type="checkbox"] {
+    .nl-checkbox-wrapper input[type="checkbox"] {
         accent-color: #FC8019;
-        width: 16px;
-        height: 16px;
+        width: 17px;
+        height: 17px;
         cursor: pointer;
     }
 
-    /* Submit Button */
-    .nl-btn-signin {
+    /* High-Impact Submit Button */
+    .nl-submit-cta {
         width: 100%;
-        height: 48px;
+        height: 50px;
         background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%);
+        background-size: 200% auto;
         border: none;
         border-radius: 10px;
         color: #FFFFFF;
-        font-size: 15px;
+        font-size: 15.5px;
         font-weight: 700;
         letter-spacing: 0.2px;
         display: flex;
@@ -476,275 +588,292 @@
         justify-content: center;
         gap: 8px;
         cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 6px 18px rgba(252, 128, 25, 0.28);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 6px 20px rgba(252, 128, 25, 0.32);
     }
-    .nl-btn-signin:hover {
-        background: linear-gradient(135deg, #E87010 0%, #E65100 100%);
+    .nl-submit-cta:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(252, 128, 25, 0.38);
+        box-shadow: 0 10px 26px rgba(252, 128, 25, 0.42);
+        animation: shimmerBtn 2.5s infinite;
     }
-    .nl-btn-signin:active {
+    .nl-submit-cta:hover i {
+        transform: translateX(4px);
+    }
+    .nl-submit-cta i {
+        transition: transform 0.2s ease;
+        font-size: 17px;
+    }
+    .nl-submit-cta:active {
         transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.25);
     }
 
-    /* Alerts */
-    .nl-auth-alert {
+    /* Feedback Alert Banners */
+    .nl-alert-banner {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
-        padding: 12px 14px;
+        gap: 12px;
+        padding: 13px 16px;
         border-radius: 10px;
         font-size: 13px;
-        margin-bottom: 18px;
+        margin-bottom: 20px;
+        animation: fadeInUp 0.4s ease;
     }
-    .nl-auth-alert.danger {
+    .nl-alert-banner.danger {
         background: #FEF2F2;
         border: 1px solid #FCA5A5;
         color: #991B1B;
     }
-    .nl-auth-alert.success {
+    .nl-alert-banner.success {
         background: #ECFDF5;
         border: 1px solid #A7F3D0;
         color: #065F46;
     }
 
-    /* Footer & Register Link */
-    .nl-auth-card-footer {
-        margin-top: 24px;
-        padding-top: 20px;
+    /* Clean Bottom Footer */
+    .nl-form-footer {
+        margin-top: 28px;
+        padding-top: 22px;
         border-top: 1px solid #F1F5F9;
         text-align: center;
     }
-    .nl-register-text {
-        font-size: 13px;
+    .nl-register-hint {
+        font-size: 13.5px;
         color: #64748B;
     }
-    .nl-register-link {
+    .nl-register-action {
         font-weight: 700;
         color: #FC8019;
         text-decoration: none;
         transition: color 0.15s ease;
     }
-    .nl-register-link:hover {
+    .nl-register-action:hover {
         color: #E87010;
         text-decoration: underline;
     }
-
-    .nl-security-badge {
-        margin-top: 14px;
-        font-size: 11.5px;
+    .nl-security-seal {
+        margin-top: 16px;
+        font-size: 12px;
         color: #94A3B8;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        gap: 6px;
     }
 
     /* ===================================================
-       RESPONSIVE BREAKPOINTS
+       RESPONSIVE COLLAPSE FOR TABLET & MOBILE
        =================================================== */
     @media (max-width: 1024px) {
-        .nl-auth-hero-panel {
+        .nl-split-left {
             display: none !important;
         }
-        .nl-auth-form-panel {
+        .nl-split-right {
             flex: 1;
             min-height: 100vh;
-            padding: 30px 16px;
+            padding: 40px 24px;
         }
-        .nl-mobile-brand {
+        .nl-compact-brand {
             display: flex;
         }
     }
 </style>
 
-<div class="nl-auth-split-wrapper">
-    <!-- LEFT HERO SHOWCASE PANEL -->
-    <div class="nl-auth-hero-panel">
-        <!-- Top Brand Bar -->
-        <div class="nl-hero-brand">
-            <a href="<c:url value='/'/>" class="nl-brand-box">
-                <div class="nl-brand-logo-mark">N</div>
+<div class="nl-split-container">
+    <!-- LEFT HERO SHOWCASE SPLIT (55% Width) -->
+    <div class="nl-split-left">
+        <div class="nl-ambient-orb-1"></div>
+        <div class="nl-ambient-orb-2"></div>
+
+        <!-- Top Navigation Brand Bar -->
+        <div class="nl-hero-nav">
+            <a href="<c:url value='/'/>" class="nl-brand-link">
+                <div class="nl-brand-gem">N</div>
                 <div>
-                    <div class="nl-brand-text-name">N LOGISTIC</div>
-                    <div class="nl-brand-text-sub">Global Logistics Solution</div>
+                    <div class="nl-brand-name">N LOGISTIC</div>
+                    <div class="nl-brand-sub">Global Logistics Solution</div>
                 </div>
             </a>
-            <div class="nl-version-badge">
-                <span class="pulse-circle"></span> Enterprise v2.4 Live
+            <div class="nl-status-pill">
+                <span class="nl-pulse-beacon"></span>
+                <span>Enterprise v2.4 Live</span>
             </div>
         </div>
 
         <!-- Center Hero Content -->
-        <div class="nl-hero-center">
-            <div class="nl-hero-pill">
-                <i class="ti ti-shield-check"></i> ISO 9001 &amp; CT-PAT Certified
+        <div class="nl-hero-body">
+            <div class="nl-hero-badge">
+                <i class="ti ti-shield-check"></i> ISO 9001 &amp; CT-PAT Certified Platform
             </div>
-            <h1 class="nl-hero-title">
+            <h1 class="nl-hero-heading">
                 Next-Gen Freight Orchestration &amp; <span>Global Telemetry.</span>
             </h1>
-            <p class="nl-hero-desc">
-                Centralized enterprise portal for international shipping operations. Monitor multimodal container movements, AIS vessel tracking, and dynamic pricing across active global corridors.
+            <p class="nl-hero-description">
+                Centralized enterprise terminal for international container logistics. Orchestrate multimodal shipments, track AIS vessels, and manage dynamic pricing across active global corridors.
             </p>
 
-            <!-- Feature Highlights -->
-            <div class="nl-feature-cards">
-                <div class="nl-feat-item">
-                    <div class="nl-feat-icon orange">
+            <!-- Feature Showcase Cards -->
+            <div class="nl-features-stack">
+                <div class="nl-feature-item">
+                    <div class="nl-feature-icon orange">
                         <i class="ti ti-ship"></i>
                     </div>
                     <div>
-                        <div class="nl-feat-title">Live AIS Vessel &amp; Container Tracking</div>
-                        <div class="nl-feat-desc">Sub-second telemetry and precision ETA tracking across 30+ international sea ports.</div>
+                        <div class="nl-feature-title">Live AIS Vessel &amp; Container Telemetry</div>
+                        <div class="nl-feature-text">Real-time GPS tracking with precision ETA milestone calculations across 30+ international ports.</div>
                     </div>
                 </div>
 
-                <div class="nl-feat-item">
-                    <div class="nl-feat-icon blue">
+                <div class="nl-feature-item">
+                    <div class="nl-feature-icon blue">
                         <i class="ti ti-timeline"></i>
                     </div>
                     <div>
-                        <div class="nl-feat-title">Checkpoint Automation &amp; Audit Logs</div>
-                        <div class="nl-feat-desc">Tamper-proof milestone recording with instant dispatch and customs clearance notifications.</div>
+                        <div class="nl-feature-title">Automated Checkpoint Verification</div>
+                        <div class="nl-feature-text">Instant transition tracking from customs clearance to final port gate-in with tamper-proof audit trails.</div>
                     </div>
                 </div>
 
-                <div class="nl-feat-item">
-                    <div class="nl-feat-icon green">
+                <div class="nl-feature-item">
+                    <div class="nl-feature-icon emerald">
                         <i class="ti ti-trending-up"></i>
                     </div>
                     <div>
-                        <div class="nl-feat-title">AI Dynamic Pricing Engine</div>
-                        <div class="nl-feat-desc">Seasonal surge multipliers and real-time route capacity demand calculations.</div>
+                        <div class="nl-feature-title">AI Dynamic Pricing &amp; Demand Engine</div>
+                        <div class="nl-feature-text">Seasonal multipliers and predictive route demand forecasting algorithms (FR3.5).</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Telemetry Stats Strip -->
-            <div class="nl-telemetry-strip">
-                <div class="nl-stat-box">
-                    <div class="nl-stat-val">30</div>
-                    <div class="nl-stat-lbl">Global Ports</div>
+            <!-- Real-Time Metrics Strip -->
+            <div class="nl-telemetry-panel">
+                <div class="nl-tele-col">
+                    <div class="nl-tele-number">30</div>
+                    <div class="nl-tele-label">Global Ports</div>
                 </div>
-                <div class="nl-stat-box">
-                    <div class="nl-stat-val">300+</div>
-                    <div class="nl-stat-lbl">Active Containers</div>
+                <div class="nl-tele-col">
+                    <div class="nl-tele-number">300+</div>
+                    <div class="nl-tele-label">Active Containers</div>
                 </div>
-                <div class="nl-stat-box">
-                    <div class="nl-stat-val">99.9%</div>
-                    <div class="nl-stat-lbl">Tracking Uptime</div>
+                <div class="nl-tele-col">
+                    <div class="nl-tele-number">99.9%</div>
+                    <div class="nl-tele-label">Tracking Uptime</div>
                 </div>
             </div>
         </div>
 
-        <!-- Hero Footer -->
-        <div class="nl-hero-footer">
+        <!-- Left Hero Footer -->
+        <div class="nl-hero-bottom">
             <div>&copy; 2026 N Logistic Maritime Systems Inc. All rights reserved.</div>
             <div class="d-flex align-items-center gap-3">
-                <span>Privacy Policy</span>
+                <span>Privacy Shield</span>
                 <span>&bull;</span>
                 <span>Terms of Service</span>
             </div>
         </div>
     </div>
 
-    <!-- RIGHT AUTHENTICATION FORM PANEL -->
-    <div class="nl-auth-form-panel">
-        <div class="nl-auth-card">
+    <!-- RIGHT SEAMLESS SPLIT (Pure White, No Container Inside Container) -->
+    <div class="nl-split-right">
+        <div class="nl-form-container">
             <!-- Mobile Brand Header -->
-            <div class="nl-mobile-brand">
-                <div class="nl-brand-logo-mark" style="width: 36px; height: 36px; font-size: 18px;">N</div>
-                <div class="nl-brand-text-name" style="color: #0F172A; font-size: 18px;">N LOGISTIC</div>
+            <div class="nl-compact-brand">
+                <div class="nl-brand-gem" style="width: 40px; height: 40px; font-size: 20px;">N</div>
+                <div>
+                    <div class="nl-brand-name" style="color: #0F172A; font-size: 19px;">N LOGISTIC</div>
+                    <div class="nl-brand-sub" style="color: #64748B;">Global Logistics Solution</div>
+                </div>
             </div>
 
-            <!-- Card Header -->
-            <div class="nl-auth-header">
-                <div class="nl-auth-icon-badge">
+            <!-- Form Header -->
+            <div class="nl-form-header">
+                <div class="nl-form-icon-circle">
                     <i class="ti ti-lock-access"></i>
                 </div>
-                <h2 class="nl-auth-title">Welcome Back</h2>
-                <p class="nl-auth-subtitle">Sign in to your N Logistic enterprise account to manage fleet operations.</p>
+                <h2 class="nl-form-title">Welcome Back</h2>
+                <p class="nl-form-subtitle">Sign in to your N Logistic enterprise account to manage fleet operations.</p>
             </div>
 
-            <!-- Quick-Fill Demo Account Pills -->
-            <div class="nl-demo-pills-wrap">
-                <div class="nl-demo-label">
+            <!-- 1-Click Quick Demo Login Bar -->
+            <div class="nl-demo-box">
+                <div class="nl-demo-header">
                     <span><i class="ti ti-bolt text-warning me-1"></i> 1-Click Quick Demo Login</span>
-                    <span style="font-size: 10px; color: #94A3B8;">Auto-fill</span>
+                    <span style="font-size: 10px; color: #94A3B8;">Auto-Fill</span>
                 </div>
-                <div class="nl-demo-btns">
-                    <button type="button" class="nl-demo-btn" onclick="fillCredentials('superadmin', 'admin123')">
-                        <i class="ti ti-shield-lock"></i> Super Admin
+                <div class="nl-demo-group">
+                    <button type="button" class="nl-demo-chip" onclick="applyDemoCredentials('superadmin', 'admin123')">
+                        <i class="ti ti-shield-lock" style="color: #FC8019;"></i> Super Admin
                     </button>
-                    <button type="button" class="nl-demo-btn" onclick="fillCredentials('customer1', 'pass123')">
-                        <i class="ti ti-user"></i> Customer
+                    <button type="button" class="nl-demo-chip" onclick="applyDemoCredentials('customer1', 'pass123')">
+                        <i class="ti ti-user" style="color: #2563EB;"></i> Customer
                     </button>
-                    <button type="button" class="nl-demo-btn" onclick="fillCredentials('staff1', 'pass123')">
-                        <i class="ti ti-briefcase"></i> Staff
+                    <button type="button" class="nl-demo-chip" onclick="applyDemoCredentials('staff1', 'pass123')">
+                        <i class="ti ti-briefcase" style="color: #059669;"></i> Staff
                     </button>
                 </div>
             </div>
 
-            <!-- Feedback Notifications -->
+            <!-- Alerts -->
             <c:if test="${not empty errorMessage}">
-                <div class="nl-auth-alert danger">
-                    <i class="ti ti-alert-circle fs-5" style="color: #DC2626;"></i>
+                <div class="nl-alert-banner danger">
+                    <i class="ti ti-alert-circle fs-5" style="color: #DC2626; flex-shrink: 0; margin-top: 1px;"></i>
                     <div>${errorMessage}</div>
                 </div>
             </c:if>
             <c:if test="${not empty successMessage}">
-                <div class="nl-auth-alert success">
-                    <i class="ti ti-circle-check fs-5" style="color: #059669;"></i>
+                <div class="nl-alert-banner success">
+                    <i class="ti ti-circle-check fs-5" style="color: #059669; flex-shrink: 0; margin-top: 1px;"></i>
                     <div>${successMessage}</div>
                 </div>
             </c:if>
 
             <!-- Authentication Form -->
-            <form action="<c:url value='/login'/>" method="POST" id="loginForm">
-                <!-- Username Field -->
-                <div class="nl-field-group">
-                    <label class="nl-field-label" for="loginUsername">Username / Email</label>
-                    <div class="nl-input-wrap">
-                        <i class="ti ti-user nl-input-icon"></i>
-                        <input type="text" id="loginUsername" name="username" class="nl-input" required placeholder="Enter username or email address" autocomplete="username">
+            <form action="<c:url value='/login'/>" method="POST" id="authLoginForm">
+                <!-- Username / Email Field -->
+                <div class="nl-input-group">
+                    <div class="nl-label-row">
+                        <label for="inputUsername">Username / Email</label>
+                    </div>
+                    <div class="nl-input-box">
+                        <i class="ti ti-user nl-input-lead-icon"></i>
+                        <input type="text" id="inputUsername" name="username" class="nl-text-input" required placeholder="Enter username or email address" autocomplete="username">
                     </div>
                 </div>
 
                 <!-- Password Field -->
-                <div class="nl-field-group">
-                    <div class="nl-field-label">
-                        <label for="loginPassword" style="margin: 0;">Password</label>
-                        <a href="<c:url value='/forgot-password'/>" class="nl-forgot-link">Forgot Password?</a>
+                <div class="nl-input-group">
+                    <div class="nl-label-row">
+                        <label for="inputPassword">Password</label>
+                        <a href="<c:url value='/forgot-password'/>" class="nl-link-orange">Forgot Password?</a>
                     </div>
-                    <div class="nl-input-wrap">
-                        <i class="ti ti-lock nl-input-icon"></i>
-                        <input type="password" id="loginPassword" name="password" class="nl-input" required placeholder="Enter your account password" autocomplete="current-password">
-                        <button type="button" class="nl-eye-btn" onclick="togglePasswordVisibility()" title="Toggle password visibility">
-                            <i class="ti ti-eye-off" id="eyeIcon"></i>
+                    <div class="nl-input-box">
+                        <i class="ti ti-lock nl-input-lead-icon"></i>
+                        <input type="password" id="inputPassword" name="password" class="nl-text-input" required placeholder="Enter account password" autocomplete="current-password">
+                        <button type="button" class="nl-password-toggle-btn" onclick="togglePasswordVisibility()" title="Toggle password visibility">
+                            <i class="ti ti-eye-off" id="eyeToggleIcon"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Remember Device Option -->
-                <label class="nl-remember-wrap">
+                <label class="nl-checkbox-wrapper">
                     <input type="checkbox" name="rememberMe" checked>
                     <span>Remember this workstation for 30 days</span>
                 </label>
 
-                <!-- Submit Button -->
-                <button type="submit" class="nl-btn-signin" id="submitBtn">
+                <!-- Submit CTA Button -->
+                <button type="submit" class="nl-submit-cta" id="loginSubmitBtn">
                     <span>Sign In to Terminal</span>
                     <i class="ti ti-arrow-right"></i>
                 </button>
 
-                <!-- Footer & Register Link -->
-                <div class="nl-auth-card-footer">
-                    <div class="nl-register-text">
+                <!-- Footer Links -->
+                <div class="nl-form-footer">
+                    <div class="nl-register-hint">
                         Don't have an enterprise account? 
-                        <a href="<c:url value='/register'/>" class="nl-register-link">Register here &rarr;</a>
+                        <a href="<c:url value='/register'/>" class="nl-register-action">Register here &rarr;</a>
                     </div>
-                    <div class="nl-security-badge">
+                    <div class="nl-security-seal">
                         <i class="ti ti-shield-lock" style="color: #10B981;"></i>
                         <span>256-Bit SSL Encrypted Enterprise Terminal</span>
                     </div>
@@ -755,33 +884,39 @@
 </div>
 
 <script>
+    // Show/Hide Password Toggle
     function togglePasswordVisibility() {
-        const pwdInput = document.getElementById('loginPassword');
-        const eyeIcon = document.getElementById('eyeIcon');
-        if (pwdInput.type === 'password') {
-            pwdInput.type = 'text';
-            eyeIcon.classList.remove('ti-eye-off');
-            eyeIcon.classList.add('ti-eye');
+        const input = document.getElementById('inputPassword');
+        const icon = document.getElementById('eyeToggleIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('ti-eye-off');
+            icon.classList.add('ti-eye');
         } else {
-            pwdInput.type = 'password';
-            eyeIcon.classList.remove('ti-eye');
-            eyeIcon.classList.add('ti-eye-off');
+            input.type = 'password';
+            icon.classList.remove('ti-eye');
+            icon.classList.add('ti-eye-off');
         }
     }
 
-    function fillCredentials(user, pass) {
-        const uInput = document.getElementById('loginUsername');
-        const pInput = document.getElementById('loginPassword');
-        uInput.value = user;
-        pInput.value = pass;
-        
-        // Highlight inputs briefly
-        uInput.style.borderColor = '#FC8019';
-        pInput.style.borderColor = '#FC8019';
+    // 1-Click Quick Demo Autofill with feedback animation
+    function applyDemoCredentials(u, p) {
+        const uEl = document.getElementById('inputUsername');
+        const pEl = document.getElementById('inputPassword');
+        uEl.value = u;
+        pEl.value = p;
+
+        uEl.style.borderColor = '#FC8019';
+        pEl.style.borderColor = '#FC8019';
+        uEl.style.background = '#FFF9F5';
+        pEl.style.background = '#FFF9F5';
+
         setTimeout(() => {
-            uInput.style.borderColor = '#E2E8F0';
-            pInput.style.borderColor = '#E2E8F0';
-        }, 800);
+            uEl.style.borderColor = '#E2E8F0';
+            pEl.style.borderColor = '#E2E8F0';
+            uEl.style.background = '#F8FAFC';
+            pEl.style.background = '#F8FAFC';
+        }, 700);
     }
 </script>
 
