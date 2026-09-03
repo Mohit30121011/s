@@ -199,7 +199,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     background-position: right 12px center !important;
 }
 
-/* Modern SaaS Bootstrap Dropdowns */
+/* Premium Subtle Dropdowns (No glaring solid colors) */
 .btn-dropdown {
     display: inline-flex;
     align-items: center;
@@ -221,8 +221,9 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 }
 .btn-dropdown:focus,
 .btn-dropdown[aria-expanded="true"] {
-    border-color: #FC8019;
-    box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    border-color: #D1D5DB;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    background: #FFFFFF;
 }
 .btn-dropdown i {
     font-size: 12px;
@@ -254,8 +255,9 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 }
 .btn-dropdown-pill:focus,
 .btn-dropdown-pill[aria-expanded="true"] {
-    border-color: #FC8019;
-    box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    border-color: #D1D5DB;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    background: #FFFFFF;
 }
 .btn-dropdown-pill i {
     font-size: 13px;
@@ -272,28 +274,40 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04) !important;
     padding: 6px !important;
     background: #FFFFFF !important;
-    min-width: 140px !important;
+    min-width: 145px !important;
     margin-top: 6px !important;
 }
 
 .dropdown-item {
     font-size: 13px !important;
     font-weight: 500 !important;
-    color: #374151 !important;
-    padding: 8px 12px !important;
+    color: #4B5563 !important;
+    padding: 7px 12px !important;
     border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     transition: all 120ms ease !important;
 }
 
 .dropdown-item:hover {
-    background-color: #FFF2EB !important;
-    color: #FC8019 !important;
+    background-color: #F8F9FA !important;
+    color: #111827 !important;
 }
 
 .dropdown-item.active,
 .dropdown-item:active {
-    background-color: #FC8019 !important;
-    color: #FFFFFF !important;
+    background-color: #FFF7ED !important;
+    color: #FC8019 !important;
+    font-weight: 600 !important;
+}
+
+.dropdown-item.active::after {
+    content: "✓";
+    font-size: 12px;
+    font-weight: 700;
+    color: #FC8019;
+    margin-left: 8px;
 }
 
 </style>
