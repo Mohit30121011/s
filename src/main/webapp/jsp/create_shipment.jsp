@@ -254,23 +254,43 @@
 </form>
 
 <style>
-    /* Custom Tom Select Styling */
+    
+    /* Custom Tom Select & Dropdown Chevron Styling */
+    .form-select-custom {
+        background-color: #FFFFFF !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 18px center !important;
+        background-size: 12px 10px !important;
+        padding-right: 42px !important;
+        cursor: pointer !important;
+    }
+    .ts-wrapper.single .ts-control,
     .ts-control {
         border: 1.5px solid #E2E8F0 !important;
         border-radius: 50px !important;
-        padding: 11px 20px !important;
+        padding: 11px 42px 11px 20px !important;
         font-size: 14px;
-        background: #fff;
+        background-color: #FFFFFF !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 18px center !important;
+        background-size: 12px 10px !important;
         min-height: 44px;
         display: flex !important;
         align-items: center !important;
+        cursor: pointer !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+    .ts-wrapper.single.input-active .ts-control,
+    .ts-wrapper.single.dropdown-active .ts-control,
     .ts-control.focus {
         border-color: #FC8019 !important;
         box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
     }
-    .ts-dropdown {
+.ts-dropdown {
         border-radius: 12px;
         border: 1px solid #E5E7EB;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);

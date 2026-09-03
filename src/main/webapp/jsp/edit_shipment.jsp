@@ -127,8 +127,7 @@
         font-weight: 700;
     }
 
-    .form-control-custom,
-    .form-select-custom {
+    .form-control-custom {
         width: 100%;
         padding: 11px 20px;
         border: 1.5px solid #E2E8F0;
@@ -137,6 +136,24 @@
         background: #FFFFFF;
         color: #0F172A;
         min-height: 44px;
+        transition: all 0.2s ease;
+    }
+    .form-select-custom {
+        width: 100%;
+        padding: 11px 42px 11px 20px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px !important;
+        font-size: 13.5px;
+        background-color: #FFFFFF !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 18px center !important;
+        background-size: 12px 10px !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        color: #0F172A;
+        min-height: 44px;
+        cursor: pointer;
         transition: all 0.2s ease;
     }
 
