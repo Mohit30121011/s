@@ -17,7 +17,7 @@
     --bg: #F8F9FB; --card: #FFFFFF;
 }
 body { background: var(--bg); font-family: 'Inter', sans-serif; }
-.dash-wrap { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.dash-wrap { padding: 0; max-width: 100%; margin: 0; }
 
 /* Page Header */
 .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
@@ -48,9 +48,11 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .kpi-delta.down { color: var(--danger); }
 
 /* Grid layouts */
-.grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.grid-3col-side { display: grid; grid-template-columns: 1fr 1.25fr 1.15fr; gap: 16px; margin-bottom: 16px; }
+.grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: stretch; }
+.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: stretch; }
+.grid-3col-side { display: grid; grid-template-columns: 1.05fr 1.25fr 1.2fr; gap: 16px; margin-bottom: 24px; align-items: stretch; }
+.grid-3col .card, .grid-2col .card, .grid-3col-side .card { height: 100%; display: flex; flex-direction: column; }
+.grid-3col .card-body, .grid-2col .card-body, .grid-3col-side .card-body { flex: 1; display: flex; flex-direction: column; }
 
 /* Cards */
 .card { background: var(--card); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); border-radius: 12px; overflow: hidden; }
@@ -64,7 +66,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .period-select { font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text-sub); background: #fff; cursor: pointer; outline: none; }
 
 /* Chart containers */
-.chart-wrap { position: relative; height: 220px; }
+.chart-wrap { position: relative; height: 260px; flex: 1; }
 .chart-wrap-sm { position: relative; height: 200px; }
 
 /* Shipments by Status Layout Fix */
