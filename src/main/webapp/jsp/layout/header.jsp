@@ -1070,7 +1070,7 @@
             padding: 6px !important;
             background: #FFFFFF !important;
             margin-top: 4px !important;
-            z-index: 1050 !important;
+            z-index: 99999 !important;
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
         }

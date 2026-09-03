@@ -8,17 +8,24 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Global Enterprise Custom Dropdown Initializer across the entire system
-        function initCustomSelects() {
-            document.querySelectorAll('select.form-select, select.form-select-custom, select:not(.no-custom-select)').forEach(function(el) {
+        function initCustomSelects(root) {
+            const scope = root || document;
+            scope.querySelectorAll('select.form-select, select.form-select-custom, select:not(.no-custom-select)').forEach(function(el) {
                 if (!el.tomselect && !el.classList.contains('tomselected')) {
                     const shouldSort = (el.dataset.sort === 'asc');
+                    const firstOption = el.options[0];
+                    const defaultPlaceholder = firstOption ? firstOption.text.trim() : 'Select...';
                     try {
-                        new TomSelect(el, {
+                        const ts = new TomSelect(el, {
                             create: false,
                             sortField: shouldSort ? { field: "text", direction: "asc" } : null,
                             dropdownParent: 'body',
-                            controlInput: el.options.length > 8 ? '<input>' : null
+                            allowEmptyOption: true,
+                            placeholder: defaultPlaceholder
                         });
+                        if (el.value && !ts.getValue()) {
+                            ts.setValue(el.value);
+                        }
                     } catch(err) {
                         console.warn("TomSelect init error:", err);
                     }
@@ -26,6 +33,16 @@
             });
         }
         initCustomSelects();
+
+        // Auto-refresh and re-sync any TomSelect dropdowns inside Bootstrap modals
+        document.addEventListener('shown.bs.modal', function(event) {
+            initCustomSelects(event.target);
+            event.target.querySelectorAll('select.tomselected').forEach(function(sel) {
+                if (sel.tomselect) {
+                    sel.tomselect.sync();
+                }
+            });
+        });
     });
     </script>
 </body>

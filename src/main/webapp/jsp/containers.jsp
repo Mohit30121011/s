@@ -405,7 +405,7 @@
 
         <div class="filter-select-wrap">
             <select id="statusFilter" class="form-select form-select-custom">
-                <option value="" selected>All Statuses</option>
+                <option value="All" selected>All Statuses</option>
                 <option value="Available">Available</option>
                 <option value="Allocated">Allocated</option>
                 <option value="In-Transit">In-Transit</option>
@@ -415,7 +415,7 @@
 
         <div class="filter-select-wrap">
             <select id="typeFilter" class="form-select form-select-custom">
-                <option value="" selected>All Types</option>
+                <option value="All" selected>All Types</option>
                 <option value="Dry">Dry</option>
                 <option value="Reefer">Reefer</option>
                 <option value="Open Top">Open Top</option>
@@ -653,7 +653,7 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="<c:url value='/containers/add'/>" method="POST">
+            <form action="<c:url value='/containers/add'/>" method="POST" enctype="multipart/form-data">
                 <div class="modal-body p-4">
                     <div class="row g-3">
                         <!-- Container Number -->
@@ -666,8 +666,8 @@
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Location (Port) <span style="color: #FC8019;">*</span></label>
                             <select name="portId" class="form-select form-select-custom" required>
-                                <c:forEach var="port" items="${ports}">
-                                    <option value="${port.portId}">${port.portName} (${port.country})</option>
+                                <c:forEach var="port" items="${ports}" varStatus="pStatus">
+                                    <option value="${port.portId}" ${pStatus.first ? 'selected' : ''}>${port.portName} (${port.country})</option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -695,10 +695,45 @@
                             </select>
                         </div>
 
-                        <!-- Image URL (FR3.1) -->
-                        <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Image URL <span class="text-muted fw-normal">(Optional)</span></label>
-                            <input type="url" name="imageUrl" class="form-control" placeholder="https://... (or leave blank for illustration)" style="border-radius: 8px; font-size: 13.5px;">
+                        <!-- Container Image File Picker (FR3.1) -->
+                        <div class="col-12">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">
+                                <i class="ti ti-photo me-1" style="color: #FC8019;"></i> Container Image <span class="text-muted fw-normal">(File Picker / Upload)</span>
+                            </label>
+                            
+                            <!-- Hidden File Input -->
+                            <input type="file" name="containerImageFile" id="containerImageFileInput" accept="image/png, image/jpeg, image/webp, image/gif" class="d-none" onchange="handleImageFilePicker(this)">
+                            
+                            <!-- Dropzone / Picker Trigger -->
+                            <div id="imagePickerDropzone" onclick="document.getElementById('containerImageFileInput').click()" style="border: 2px dashed #E2E8F0; border-radius: 10px; padding: 18px 20px; text-align: center; cursor: pointer; background: #FFF9F5; transition: all 0.2s ease;">
+                                <div style="width: 44px; height: 44px; background: #FFF2EB; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: #FC8019; font-size: 22px; margin-bottom: 6px;">
+                                    <i class="ti ti-upload"></i>
+                                </div>
+                                <div style="font-weight: 600; font-size: 13.5px; color: #1F2937;">Click to Choose Container Image</div>
+                                <div style="font-size: 11.5px; color: #94A3B8; margin-top: 2px;">Supports PNG, JPG, JPEG, WEBP up to 10MB</div>
+                            </div>
+
+                            <!-- Live Image Preview Card -->
+                            <div id="imagePickerPreview" style="display: none; align-items: center; gap: 14px; padding: 10px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; margin-top: 8px;">
+                                <img id="imagePreviewElement" src="" alt="Container Preview" style="width: 54px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid #E2E8F0;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div id="imagePreviewFilename" style="font-size: 13px; font-weight: 600; color: #1F2937; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.jpg</div>
+                                    <div id="imagePreviewFilesize" style="font-size: 11px; color: #64748B;">0 KB</div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSelectedImage()" style="border-radius: 6px; font-size: 12px; padding: 4px 10px;">
+                                    <i class="ti ti-trash"></i> Remove
+                                </button>
+                            </div>
+
+                            <!-- Alternative Web URL Input Link -->
+                            <div class="mt-2">
+                                <a href="javascript:void(0)" onclick="toggleImageWebUrl()" style="font-size: 12px; color: #FC8019; text-decoration: none; font-weight: 500;">
+                                    <i class="ti ti-link"></i> <span id="toggleUrlText">Or enter image web URL instead</span>
+                                </a>
+                                <div id="webUrlInputWrapper" style="display: none; margin-top: 6px;">
+                                    <input type="url" name="imageUrl" id="containerWebUrlInput" class="form-control" placeholder="https://example.com/container.jpg" style="border-radius: 8px; font-size: 13px;">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Status (FR3.1) -->
@@ -759,6 +794,59 @@
 </div>
 
 <script>
+
+
+window.handleImageFilePicker = function(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('imagePreviewElement').src = e.target.result;
+            document.getElementById('imagePreviewFilename').textContent = file.name;
+            const sizeInKb = (file.size / 1024).toFixed(1);
+            document.getElementById('imagePreviewFilesize').textContent = sizeInKb + ' KB';
+            document.getElementById('imagePickerPreview').style.display = 'flex';
+            document.getElementById('imagePickerDropzone').style.borderColor = '#10B981';
+            document.getElementById('imagePickerDropzone').style.background = '#ECFDF5';
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+window.removeSelectedImage = function() {
+    const input = document.getElementById('containerImageFileInput');
+    if (input) input.value = '';
+    document.getElementById('imagePickerPreview').style.display = 'none';
+    const dropzone = document.getElementById('imagePickerDropzone');
+    if (dropzone) {
+        dropzone.style.borderColor = '#E2E8F0';
+        dropzone.style.background = '#FFF9F5';
+    }
+};
+
+window.toggleImageWebUrl = function() {
+    const wrapper = document.getElementById('webUrlInputWrapper');
+    const toggleText = document.getElementById('toggleUrlText');
+    if (wrapper.style.display === 'none' || !wrapper.style.display) {
+        wrapper.style.display = 'block';
+        toggleText.textContent = 'Hide web URL input';
+    } else {
+        wrapper.style.display = 'none';
+        toggleText.textContent = 'Or enter image web URL instead';
+    }
+};
+
+// Modal TomSelect sync on shown
+const addModal = document.getElementById('addContainerModal');
+if (addModal) {
+    addModal.addEventListener('shown.bs.modal', function() {
+        this.querySelectorAll('select.tomselected').forEach(function(sel) {
+            if (sel.tomselect) {
+                sel.tomselect.sync();
+            }
+        });
+    });
+}
 
 window.applyContainerSizePreset = function(size) {
     const tare = document.getElementById('newTareWeight');
@@ -943,8 +1031,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function filterCards() {
         const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const selectedStatus = statusFilter ? statusFilter.value.toLowerCase().trim() : '';
-        const selectedType = typeFilter ? typeFilter.value.toLowerCase().trim() : '';
+        const selectedStatus = (statusFilter ? statusFilter.value : 'All').toLowerCase().trim();
+        const selectedType = (typeFilter ? typeFilter.value : 'All').toLowerCase().trim();
         matchingCards = [];
 
         if (clearBtn) {
@@ -955,6 +1043,9 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
+        const isAllStatus = (!selectedStatus || selectedStatus === 'all');
+        const isAllType = (!selectedType || selectedType === 'all');
+
         allCards.forEach(col => {
             const num = (col.dataset.number || '').toLowerCase();
             const status = (col.dataset.status || '').toLowerCase();
@@ -963,8 +1054,8 @@ document.addEventListener("DOMContentLoaded", function() {
             const cardText = col.textContent.toLowerCase();
 
             const matchesQuery = !query || num.includes(query) || type.includes(query) || size.includes(query) || cardText.includes(query);
-            const matchesStatus = !selectedStatus || status === selectedStatus;
-            const matchesType = !selectedType || type === selectedType;
+            const matchesStatus = isAllStatus || status === selectedStatus;
+            const matchesType = isAllType || type === selectedType;
 
             if (matchesQuery && matchesStatus && matchesType) {
                 matchingCards.push(col);
