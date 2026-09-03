@@ -365,6 +365,50 @@
     .custom-alert { border-radius: 12px; padding: 14px 18px; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
     .custom-alert.success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
     .custom-alert.danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+
+    /* Custom Modern Confirmation Modal */
+    .nl-modal-backdrop {
+        position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999999; padding: 20px; opacity: 0;
+        transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
+    }
+    .nl-modal-backdrop.show { opacity: 1; pointer-events: auto; }
+    .nl-modal-dialog {
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); max-width: 440px; width: 100%;
+        padding: 32px 28px 24px; text-align: center; position: relative;
+        transform: scale(0.92) translateY(12px); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nl-modal-backdrop.show .nl-modal-dialog { transform: scale(1) translateY(0); }
+    .nl-modal-close {
+        position: absolute; top: 18px; right: 18px; background: #F1F5F9; border: none;
+        width: 32px; height: 32px; border-radius: 50px; display: flex; align-items: center;
+        justify-content: center; color: #64748B; cursor: pointer; font-size: 16px; transition: all 0.15s ease;
+    }
+    .nl-modal-close:hover { background: #E2E8F0; color: #0F172A; }
+    .nl-modal-icon-box {
+        width: 60px; height: 60px; border-radius: 18px; margin: 0 auto 18px;
+        display: flex; align-items: center; justify-content: center; font-size: 28px;
+    }
+    .nl-modal-icon-box.danger { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    .nl-modal-icon-box.success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .nl-modal-title { font-size: 19px; font-weight: 700; color: #0F172A; margin-bottom: 8px; letter-spacing: -0.3px; }
+    .nl-modal-desc { font-size: 13.5px; color: #64748B; line-height: 1.5; margin: 0 0 24px 0; }
+    .nl-modal-actions { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .nl-modal-btn {
+        padding: 9px 24px; border-radius: 50px; font-size: 13px; font-weight: 600;
+        cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); border: none;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .nl-modal-btn.cancel { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .nl-modal-btn.cancel:hover { background: #E2E8F0; color: #0F172A; }
+    .nl-modal-btn.confirm.danger { background: #DC2626 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28); }
+    .nl-modal-btn.confirm.danger:hover { background: #B91C1C !important; transform: translateY(-1px); }
+    .nl-modal-btn.confirm.success { background: #10B981 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28); }
+    .nl-modal-btn.confirm.success:hover { background: #059669 !important; transform: translateY(-1px); }
+
 </style>
 
 <div class="approvals-page-container">
@@ -608,7 +652,7 @@
                                             <form method="POST" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="reject">
-                                                <button type="submit" class="btn-approval-reject" title="Reject Customer Account" onclick="return confirm('Reject this customer account?');">
+                                                <button type="button" class="btn-approval-reject" title="Reject Customer Account" onclick="showCustomConfirm({title: 'Reject Customer Account?', desc: 'Are you sure you want to reject this customer registration request?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});">
                                                     <i class="ti ti-x"></i> Reject
                                                 </button>
                                             </form>
@@ -618,7 +662,7 @@
                                         <form method="POST" class="d-inline m-0">
                                             <input type="hidden" name="userId" value="${u.userId}">
                                             <input type="hidden" name="action" value="reject">
-                                            <button type="submit" class="btn-approval-reject" title="Suspend customer account" onclick="return confirm('Suspend this customer account?');" style="padding: 5px 14px; font-size: 11.5px;">
+                                            <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
                                                 <i class="ti ti-ban"></i> Suspend
                                             </button>
                                         </form>
@@ -627,7 +671,7 @@
                                         <form method="POST" class="d-inline m-0">
                                             <input type="hidden" name="userId" value="${u.userId}">
                                             <input type="hidden" name="action" value="accept">
-                                            <button type="submit" class="btn-approval-accept" title="Reactivate customer account" onclick="return confirm('Reactivate this customer account?');" style="padding: 5px 14px; font-size: 11.5px;">
+                                            <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
                                                 <i class="ti ti-reload"></i> Reactivate
                                             </button>
                                         </form>
@@ -654,9 +698,86 @@
             </button>
         </div>
     </div>
+
+    <!-- Custom Action Confirmation Modal -->
+    <div id="nlCustomConfirmModal" class="nl-modal-backdrop" style="display: none;">
+        <div class="nl-modal-dialog">
+            <button type="button" class="nl-modal-close" onclick="closeCustomConfirmModal()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+            <div class="nl-modal-icon-box danger" id="nlConfirmIconBox">
+                <i class="ti ti-alert-triangle" id="nlConfirmIcon"></i>
+            </div>
+            <h5 class="nl-modal-title" id="nlConfirmTitle">Confirm Action</h5>
+            <p class="nl-modal-desc" id="nlConfirmDesc">Are you sure you want to proceed with this action?</p>
+            <div class="nl-modal-actions">
+                <button type="button" class="nl-modal-btn cancel" onclick="closeCustomConfirmModal()">Cancel</button>
+                <button type="button" class="nl-modal-btn confirm danger" id="nlConfirmSubmitBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
+
+    let pendingFormToSubmit = null;
+
+    function showCustomConfirm(options) {
+        pendingFormToSubmit = options.form;
+        document.getElementById('nlConfirmTitle').textContent = options.title || 'Confirm Action';
+        document.getElementById('nlConfirmDesc').textContent = options.desc || 'Are you sure you want to proceed?';
+        
+        const iconBox = document.getElementById('nlConfirmIconBox');
+        iconBox.className = 'nl-modal-icon-box ' + (options.type || 'danger');
+        
+        const icon = document.getElementById('nlConfirmIcon');
+        icon.className = options.icon || (options.type === 'success' ? 'ti ti-check' : 'ti ti-alert-triangle');
+        
+        const confirmBtn = document.getElementById('nlConfirmSubmitBtn');
+        confirmBtn.className = 'nl-modal-btn confirm ' + (options.type || 'danger');
+        confirmBtn.textContent = options.confirmText || 'Confirm';
+        
+        const modal = document.getElementById('nlCustomConfirmModal');
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+    }
+
+    function closeCustomConfirmModal() {
+        const modal = document.getElementById('nlCustomConfirmModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            pendingFormToSubmit = null;
+        }, 200);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('nlConfirmSubmitBtn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                if (pendingFormToSubmit) {
+                    const form = pendingFormToSubmit;
+                    closeCustomConfirmModal();
+                    form.submit();
+                }
+            });
+        }
+
+        const modal = document.getElementById('nlCustomConfirmModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) closeCustomConfirmModal();
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeCustomConfirmModal();
+        });
+    });
+
     let currentTab = 'Pending';
 
     function filterByTab(tab) {
