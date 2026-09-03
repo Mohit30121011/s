@@ -567,17 +567,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 </ul>
             </div>
 
-            <!-- FINANCE MODULE -->
-            <div class="nav-item">
-                <a href="#financeSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
-                    <i class="fa-solid fa-file-invoice-dollar main-icon"></i> Billing & Finance
-                    <i class="fa-solid fa-angle-down caret"></i>
-                </a>
-                <ul class="sub-nav collapse" id="financeSubmenu">
-                    <li><a href="${pageContext.request.contextPath}/finance/profit-loss">Profit & Loss</a></li>
-                    <li><a href="${pageContext.request.contextPath}/invoices">Invoices (FR5)</a></li>
-                </ul>
-            </div>
+
             
             <!-- TRACKING & SCANNING MODULE (FR8) -->
             <div class="nav-item">
