@@ -150,13 +150,7 @@
         }
 
         
-        .sub-nav.collapse {
-            display: none;
-        }
-        .sub-nav.collapse.show {
-            display: block;
-            animation: fadeInSubnav 0.22s ease-in-out;
-        }
+
         @keyframes fadeInSubnav {
             from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
@@ -463,11 +457,11 @@
             
             <c:if test="${sessionScope.user.roleId == 1}">
             <div class="nav-item">
-                <a href="#approvalsSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="approvalsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-check-to-slot main-icon"></i> Approvals
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="approvalsSubmenu">
+                <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/admin/companies">Company</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/users">Users</a></li>
                 </ul>
@@ -475,11 +469,11 @@
             </c:if>
             
             <div class="nav-item">
-                <a href="#shipmentsSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="shipmentsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-truck-fast main-icon"></i> Shipments
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="shipmentsSubmenu">
+                <ul class="sub-nav" id="shipmentsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/shipments">All Shipments</a></li>
                     <li><a href="${pageContext.request.contextPath}/shipments/create" >Create Shipment</a></li>
                     <li><a href="${pageContext.request.contextPath}/shipments/tracking">Live Tracking</a></li>
@@ -487,21 +481,21 @@
             </div>
             
             <div class="nav-item">
-                <a href="#containersSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="containersSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-box main-icon"></i> Containers
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="containersSubmenu">
+                <ul class="sub-nav" id="containersSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/containers">All Containers</a></li>
                 </ul>
             </div>
             
             <div class="nav-item">
-                <a href="#vesselsSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="vesselsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-ship main-icon"></i> Vessels
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="vesselsSubmenu">
+                <ul class="sub-nav" id="vesselsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/vessels">All Vessels</a></li>
                 </ul>
             </div>
@@ -525,11 +519,11 @@
             </div>
             
             <div class="nav-item">
-                <a href="#complianceSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="complianceSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-shield-check main-icon"></i> Compliance & Billing
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="complianceSubmenu">
+                <ul class="sub-nav" id="complianceSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/compliance">Government Compliance</a></li>
                     <li><a href="${pageContext.request.contextPath}/billing">Billing & Invoices</a></li>
                 </ul>
@@ -543,11 +537,11 @@
 
             <!-- STOCK & INVENTORY MODULE -->
             <div class="nav-item">
-                <a href="#stockSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="stockSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-boxes-stacked main-icon"></i> Stock & Inventory
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="stockSubmenu">
+                <ul class="sub-nav" id="stockSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/upload-stock">Upload / Manage Stock</a></li>
                     <li><a href="${pageContext.request.contextPath}/ledger">Inventory Ledger (FR4.5)</a></li>
                 </ul>
@@ -557,11 +551,11 @@
             
             <!-- TRACKING & SCANNING MODULE (FR8) -->
             <div class="nav-item">
-                <a href="#barcodeSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                <a href="javascript:void(0);" data-target="barcodeSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="fa-solid fa-qrcode main-icon"></i> Tracking & Scanning
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse" id="barcodeSubmenu">
+                <ul class="sub-nav" id="barcodeSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/barcodes">Manage Barcodes (FR8)</a></li>
                     <li><a href="${pageContext.request.contextPath}/scan-barcode">Scan Barcodes</a></li>
                 </ul>
@@ -596,30 +590,30 @@
         </div>
     
 <script>
-// Unified Sidebar Controller (Active Link Detection + Clean Accordion Toggle)
+// Dedicated Zero-Conflict Sidebar Controller
 document.addEventListener('DOMContentLoaded', function() {
     let path = window.location.pathname;
     let links = Array.from(document.querySelectorAll('.sidebar a'));
     
-    // 1. Detect & Highlight Active Page
+    // 1. Highlight active child link and expand its parent
     let activeLink = links.find(link => {
         let href = link.getAttribute('href');
-        return href && href !== '#' && path === href;
+        return href && href !== '#' && href !== 'javascript:void(0);' && path === href;
     });
     
     if (!activeLink) {
         activeLink = links.find(link => {
             let href = link.getAttribute('href');
-            return href && href !== '#' && href !== '/NLogistic/' && path.startsWith(href);
+            return href && href !== '#' && href !== 'javascript:void(0);' && href !== '/NLogistic/' && path.startsWith(href);
         });
     }
 
     if (activeLink) {
         activeLink.classList.add('active');
-        let parentCollapse = activeLink.closest('.sub-nav.collapse');
-        if (parentCollapse) {
-            parentCollapse.classList.add('show');
-            let parentToggle = document.querySelector('.sidebar a[href="#' + parentCollapse.id + '"]');
+        let parentSub = activeLink.closest('.sub-nav');
+        if (parentSub) {
+            parentSub.style.display = 'block';
+            let parentToggle = document.querySelector('.sidebar a[data-target="' + parentSub.id + '"]');
             if (parentToggle) {
                 parentToggle.classList.remove('collapsed');
                 parentToggle.classList.add('active-group');
@@ -628,30 +622,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 2. Smooth Accordion & Toggle
-    document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(toggle) {
+    // 2. Instant & Smooth Toggle (Open / Close cleanly on repeated clicks)
+    document.querySelectorAll('.sidebar .sidebar-dropdown-toggle').forEach(function(toggle) {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            e.stopImmediatePropagation();
             
-            let href = this.getAttribute('href') || this.getAttribute('data-bs-target') || '';
-            let targetId = href.replace('#', '').trim();
+            let targetId = this.getAttribute('data-target');
             let target = document.getElementById(targetId);
             
             if (target) {
-                let isOpen = target.classList.contains('show');
+                let isOpen = (target.style.display === 'block');
                 
                 if (isOpen) {
-                    target.classList.remove('show');
+                    // Close this submenu (goes back up)
+                    target.style.display = 'none';
                     this.classList.add('collapsed');
                     this.setAttribute('aria-expanded', 'false');
                 } else {
-                    // Close any other open submenu for a clean sidebar
-                    document.querySelectorAll('.sidebar .sub-nav.collapse.show').forEach(function(other) {
+                    // Accordion: Close all other submenus first
+                    document.querySelectorAll('.sidebar .sub-nav').forEach(function(other) {
                         if (other.id !== targetId) {
-                            other.classList.remove('show');
-                            let otherToggle = document.querySelector('.sidebar a[href="#' + other.id + '"]');
+                            other.style.display = 'none';
+                            let otherToggle = document.querySelector('.sidebar a[data-target="' + other.id + '"]');
                             if (otherToggle) {
                                 otherToggle.classList.add('collapsed');
                                 otherToggle.setAttribute('aria-expanded', 'false');
@@ -659,8 +652,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                     
-                    // Open target submenu
-                    target.classList.add('show');
+                    // Open clicked submenu
+                    target.style.display = 'block';
                     this.classList.remove('collapsed');
                     this.setAttribute('aria-expanded', 'true');
                 }
