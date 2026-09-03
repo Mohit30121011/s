@@ -2,9 +2,7 @@ package com.nlogistic.util;
 
 import java.io.InputStream;
 import java.util.Properties;
-import javax.mail.Authenticator;
 import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -31,9 +29,9 @@ public class EmailService {
     public static boolean sendPasswordResetEmail(String toEmail, String username, String resetLink) {
         final String host = mailProps.getProperty("mail.smtp.host", "smtp.gmail.com");
         final String port = mailProps.getProperty("mail.smtp.port", "587");
-        final String usernameSmtp = mailProps.getProperty("mail.smtp.username", "");
+        final String usernameSmtp = mailProps.getProperty("mail.smtp.username", "").trim();
         final String passwordSmtp = mailProps.getProperty("mail.smtp.password", "").replaceAll("\\s+", "");
-        final String fromEmail = mailProps.getProperty("mail.from.email", usernameSmtp);
+        final String fromEmail = mailProps.getProperty("mail.from.email", usernameSmtp).trim();
         final String fromName = mailProps.getProperty("mail.from.name", "NLogistic Enterprise");
 
         if (usernameSmtp.isEmpty() || passwordSmtp.isEmpty()) {
@@ -49,13 +47,9 @@ public class EmailService {
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
         props.put("mail.smtp.ssl.trust", host);
 
+        Transport transport = null;
         try {
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(usernameSmtp, passwordSmtp);
-                }
-            });
+            Session session = Session.getInstance(props, null);
 
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(fromEmail, fromName));
@@ -67,7 +61,7 @@ public class EmailService {
                     + "  <div style=\"display: flex; align-items: center; gap: 10px;\">"
                     + "    <h2 style=\"color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;\">N<span style=\"color: #FC8019;\">Logistic</span> Enterprise</h2>"
                     + "  </div>"
-                    + "  <p style=\"color: #94A3B8; font-size: 13px; margin: 6px 0 0;\">RBAC & Identity Access Management System</p>"
+                    + "  <p style=\"color: #94A3B8; font-size: 13px; margin: 6px 0 0;\">RBAC &amp; Identity Access Management System</p>"
                     + "</div>"
                     + "<div style=\"padding: 32px;\">"
                     + "  <h3 style=\"color: #0F172A; font-size: 18px; font-weight: 700; margin-top: 0;\">Password Reset Request</h3>"
@@ -90,13 +84,24 @@ public class EmailService {
                     + "</div>";
 
             message.setContent(htmlContent, "text/html; charset=utf-8");
-            Transport.send(message);
+
+            int portNum = 587;
+            try { portNum = Integer.parseInt(port); } catch (Exception ignored) {}
+
+            transport = session.getTransport("smtp");
+            transport.connect(host, portNum, usernameSmtp, passwordSmtp);
+            transport.sendMessage(message, message.getAllRecipients());
+
             System.out.println(">>> Real Password Reset Email sent successfully to: " + toEmail);
             return true;
         } catch (Exception e) {
             System.err.println("Failed to send real email to " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
             return false;
+        } finally {
+            if (transport != null) {
+                try { transport.close(); } catch (Exception ignored) {}
+            }
         }
     }
 }
