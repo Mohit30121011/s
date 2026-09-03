@@ -318,6 +318,30 @@
         transition: all 0.15s ease;
         outline: none;
     }
+    
+    /* Dynamic Validation Styling */
+    .nl-form-control.is-valid-input {
+        border-color: #10B981 !important;
+        background: #F0FDF4 !important;
+    }
+    .nl-form-control.is-invalid-input {
+        border-color: #EF4444 !important;
+        background: #FEF2F2 !important;
+    }
+    .nl-validation-hint {
+        font-size: 11.5px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        line-height: 1.3;
+    }
+    .nl-validation-hint.muted { color: #64748B; }
+    .nl-validation-hint.success { color: #059669; font-weight: 600; }
+    .nl-validation-hint.error { color: #DC2626; font-weight: 600; }
+    @keyframes spinLoader { to { transform: rotate(360deg); } }
+    .spin { animation: spinLoader 0.9s linear infinite; display: inline-block; }
+
     .nl-form-control:focus {
         background: #FFFFFF;
         border-color: #FC8019;
@@ -557,7 +581,7 @@
             <!-- Header -->
             <div class="nl-reg-header">
                 <div class="nl-eyebrow-tag">
-                    <i class="ti ti-user-plus"></i> Organization Onboarding
+                    <i class="ti ti-user-plus" id="submitBtnIcon"></i> Organization Onboarding
                 </div>
                 <h1 class="nl-reg-heading">Create Your Enterprise Account</h1>
                 <p class="nl-reg-subheading">Select your profile below. All company accounts are verified and approved by the Super Admin before activation.</p>
@@ -572,6 +596,13 @@
             </c:if>
 
             <!-- Account Type Selector Cards  -->
+            
+            <!-- Client-side Error Banner -->
+            <div class="nl-reg-alert danger" id="clientAlert" style="display: none;">
+                <i class="ti ti-alert-circle fs-5" style="color: #DC2626; flex-shrink: 0; margin-top: 1px;"></i>
+                <div id="clientAlertText">Please correct the highlighted errors.</div>
+            </div>
+
             <div class="nl-type-grid">
                 <div class="nl-type-card active" id="companyCard" onclick="switchAccountType('company')">
                     <div class="nl-type-icon company">
@@ -597,7 +628,7 @@
             </div>
 
             <!-- Registration Form -->
-            <form action="<c:url value='/register'/>" method="POST" enctype="multipart/form-data" id="registerForm">
+            <form action="<c:url value='/register'/>" method="POST" enctype="multipart/form-data" id="registerForm" onsubmit="return validateRegisterForm(event)">
                 <input type="hidden" name="type" id="accountTypeInput" value="company">
 
                 <!-- SECTION 1: ORGANIZATION / PROFILE DETAILS -->
@@ -614,7 +645,7 @@
                         <label id="nameLabel" for="inputName">Company Name <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-building lead-icon" id="nameLeadIcon"></i>
-                            <input type="text" id="inputName" name="companyName" class="nl-form-control" placeholder="e.g. Apex Global Logistics Ltd" required>
+                            <input type="text" id="inputName" name="companyName" class="nl-form-control" placeholder="e.g. Apex Global Logistics Ltd" required minlength="3" maxlength="150">
                         </div>
                     </div>
 
@@ -623,7 +654,7 @@
                         <label for="inputLicense">License / Registration Number <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-license lead-icon"></i>
-                            <input type="text" id="inputLicense" name="licenseNo" class="nl-form-control" placeholder="e.g. REG-2026-MUM-8910" required>
+                            <input type="text" id="inputLicense" name="licenseNo" class="nl-form-control" placeholder="e.g. REG-2026-MUM-8910" required minlength="3" maxlength="50" style="text-transform: uppercase;">
                         </div>
                     </div>
 
@@ -632,7 +663,7 @@
                         <label for="inputGst">GST / Tax ID <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-receipt lead-icon"></i>
-                            <input type="text" id="inputGst" name="gstNo" class="nl-form-control" placeholder="e.g. 27AAAAA0000A1Z5" required>
+                            <input type="text" id="inputGst" name="gstNo" class="nl-form-control" placeholder="e.g. 27AAAAA0000A1Z5" required minlength="5" maxlength="50" style="text-transform: uppercase;">
                         </div>
                     </div>
 
@@ -652,7 +683,7 @@
                         <label id="addressLabel" for="inputAddress">Registered Company Address <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-map-pin lead-icon"></i>
-                            <input type="text" id="inputAddress" name="address" class="nl-form-control" placeholder="Complete address (Street, City, State, Postal Code)" required>
+                            <input type="text" id="inputAddress" name="address" class="nl-form-control" placeholder="Complete address (Street, City, State, Postal Code)" required minlength="5" maxlength="255">
                         </div>
                     </div>
                 </div>
@@ -681,7 +712,7 @@
                         <label for="inputPhone">Admin Contact Phone <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-phone lead-icon"></i>
-                            <input type="tel" id="inputPhone" name="phone" class="nl-form-control" placeholder="+91 98201 12345" required>
+                            <input type="tel" id="inputPhone" name="phone" class="nl-form-control" placeholder="+91 98201 12345" required minlength="8" maxlength="20">
                         </div>
                     </div>
 
@@ -690,7 +721,7 @@
                         <label for="inputUsername">Admin Username <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-user lead-icon"></i>
-                            <input type="text" id="inputUsername" name="username" class="nl-form-control" placeholder="Choose login username" required autocomplete="username">
+                            <input type="text" id="inputUsername" name="username" class="nl-form-control" placeholder="Choose login username" required minlength="3" maxlength="50" autocomplete="username">
                         </div>
                     </div>
 
@@ -699,10 +730,13 @@
                         <label for="inputPassword">Create Password <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-lock lead-icon"></i>
-                            <input type="password" id="inputPassword" name="password" class="nl-form-control" placeholder="Minimum 8 characters" required autocomplete="new-password">
+                            <input type="password" id="inputPassword" name="password" class="nl-form-control" placeholder="Minimum 8 characters" required minlength="8" maxlength="100" autocomplete="new-password" oninput="handlePasswordInput()">
                             <button type="button" class="nl-pwd-toggle" onclick="toggleRegPassword('inputPassword', this)" title="Show/Hide">
                                 <i class="ti ti-eye-off"></i>
                             </button>
+                        </div>
+                        <div class="nl-validation-hint muted" id="pwdLengthHint">
+                            <i class="ti ti-info-circle"></i> Minimum 8 characters required
                         </div>
                     </div>
 
@@ -711,10 +745,13 @@
                         <label for="inputConfirmPassword">Confirm Password <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-lock-check lead-icon"></i>
-                            <input type="password" id="inputConfirmPassword" name="confirmPassword" class="nl-form-control" placeholder="Re-enter password" required autocomplete="new-password">
+                            <input type="password" id="inputConfirmPassword" name="confirmPassword" class="nl-form-control" placeholder="Re-enter password" required minlength="8" maxlength="100" autocomplete="new-password" oninput="handleConfirmPasswordInput()">
                             <button type="button" class="nl-pwd-toggle" onclick="toggleRegPassword('inputConfirmPassword', this)" title="Show/Hide">
                                 <i class="ti ti-eye-off"></i>
                             </button>
+                        </div>
+                        <div class="nl-validation-hint muted" id="pwdMatchHint">
+                            <i class="ti ti-lock"></i> Re-enter to confirm password match
                         </div>
                     </div>
                 </div>
@@ -737,7 +774,7 @@
                     <div class="nl-btn-group">
                         <a href="<c:url value='/login'/>" class="nl-btn-cancel">Cancel</a>
                         <button type="submit" class="nl-btn-submit" id="submitRegBtn">
-                            <i class="ti ti-user-plus"></i>
+                            <i class="ti ti-user-plus" id="submitBtnIcon"></i>
                             <span id="submitBtnText">Register Company</span>
                         </button>
                     </div>
@@ -862,6 +899,133 @@
             approvalNotice.innerHTML = '<i class="ti ti-info-circle" style="color: #2563EB;"></i><div style="color: #1E40AF;"><strong>Customer Verification:</strong> KYC documents uploaded will be verified by the compliance department before your customer portal access is activated.</div>';
         }
     }
+
+    // Real-Time Password Length Validation
+    function handlePasswordInput() {
+        const pwdInput = document.getElementById('inputPassword');
+        const lengthHint = document.getElementById('pwdLengthHint');
+        const val = pwdInput.value;
+
+        if (val.length === 0) {
+            pwdInput.classList.remove('is-valid-input', 'is-invalid-input');
+            lengthHint.className = 'nl-validation-hint muted';
+            lengthHint.innerHTML = '<i class="ti ti-info-circle"></i> Minimum 8 characters required';
+        } else if (val.length < 8) {
+            pwdInput.classList.add('is-invalid-input');
+            pwdInput.classList.remove('is-valid-input');
+            lengthHint.className = 'nl-validation-hint error';
+            lengthHint.innerHTML = '<i class="ti ti-alert-triangle"></i> Too short: ' + val.length + '/8 characters';
+        } else {
+            pwdInput.classList.add('is-valid-input');
+            pwdInput.classList.remove('is-invalid-input');
+            lengthHint.className = 'nl-validation-hint success';
+            lengthHint.innerHTML = '<i class="ti ti-check"></i> Password length requirement met (' + val.length + ' chars)';
+        }
+
+        const confirmInput = document.getElementById('inputConfirmPassword');
+        if (confirmInput.value.length > 0) {
+            handleConfirmPasswordInput();
+        }
+    }
+
+    // Real-Time Confirm Password Matching
+    function handleConfirmPasswordInput() {
+        const pwdInput = document.getElementById('inputPassword');
+        const confirmInput = document.getElementById('inputConfirmPassword');
+        const matchHint = document.getElementById('pwdMatchHint');
+        const pwd = pwdInput.value;
+        const confirmPwd = confirmInput.value;
+
+        if (confirmPwd.length === 0) {
+            confirmInput.classList.remove('is-valid-input', 'is-invalid-input');
+            matchHint.className = 'nl-validation-hint muted';
+            matchHint.innerHTML = '<i class="ti ti-lock"></i> Re-enter to confirm password match';
+            return;
+        }
+
+        if (pwd === confirmPwd) {
+            confirmInput.classList.add('is-valid-input');
+            confirmInput.classList.remove('is-invalid-input');
+            matchHint.className = 'nl-validation-hint success';
+            matchHint.innerHTML = '<i class="ti ti-circle-check" style="color: #059669;"></i> Passwords match perfectly!';
+        } else {
+            confirmInput.classList.add('is-invalid-input');
+            confirmInput.classList.remove('is-valid-input');
+            matchHint.className = 'nl-validation-hint error';
+            matchHint.innerHTML = '<i class="ti ti-alert-circle" style="color: #DC2626;"></i> Passwords do not match';
+        }
+    }
+
+    // Comprehensive Pre-Submission Validation
+    function validateRegisterForm(e) {
+        const clientAlert = document.getElementById('clientAlert');
+        const clientAlertText = document.getElementById('clientAlertText');
+        const pwdInput = document.getElementById('inputPassword');
+        const confirmInput = document.getElementById('inputConfirmPassword');
+        const pwd = pwdInput.value;
+        const confirmPwd = confirmInput.value;
+
+        if (!pwd || pwd.length < 8) {
+            e.preventDefault();
+            clientAlert.style.display = 'flex';
+            clientAlertText.textContent = 'Password must be at least 8 characters long.';
+            pwdInput.focus();
+            pwdInput.classList.add('is-invalid-input');
+            return false;
+        }
+
+        if (pwd !== confirmPwd) {
+            e.preventDefault();
+            clientAlert.style.display = 'flex';
+            clientAlertText.textContent = 'Create Password and Confirm Password do not match. Please verify.';
+            confirmInput.focus();
+            confirmInput.classList.add('is-invalid-input');
+            return false;
+        }
+
+        const phoneInput = document.getElementById('inputPhone');
+        const phoneDigits = phoneInput.value.replace(/[^0-9]/g, '');
+        if (phoneDigits.length < 8) {
+            e.preventDefault();
+            clientAlert.style.display = 'flex';
+            clientAlertText.textContent = 'Please enter a valid phone number with at least 8 digits.';
+            phoneInput.focus();
+            phoneInput.classList.add('is-invalid-input');
+            return false;
+        }
+
+        const accountType = document.getElementById('accountTypeInput').value;
+        if (accountType === 'customer') {
+            const kycInput = document.getElementById('inputKyc');
+            if (!kycInput.files || kycInput.files.length === 0) {
+                e.preventDefault();
+                clientAlert.style.display = 'flex';
+                clientAlertText.textContent = 'Please select and upload a valid KYC Document (PDF, JPG, PNG).';
+                kycInput.focus();
+                return false;
+            }
+        }
+
+        const terms = document.getElementById('termsAgree');
+        if (!terms.checked) {
+            e.preventDefault();
+            clientAlert.style.display = 'flex';
+            clientAlertText.textContent = 'You must agree to the Terms & Conditions and Privacy Policy.';
+            terms.focus();
+            return false;
+        }
+
+        const submitBtn = document.getElementById('submitRegBtn');
+        const submitBtnIcon = document.getElementById('submitBtnIcon');
+        const submitBtnText = document.getElementById('submitBtnText');
+        submitBtn.disabled = true;
+        if (submitBtnIcon) submitBtnIcon.className = 'ti ti-loader-2 spin';
+        submitBtnText.textContent = 'Submitting Registration...';
+
+        clientAlert.style.display = 'none';
+        return true;
+    }
+
 </script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />

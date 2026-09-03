@@ -33,55 +33,74 @@ public class RegisterServlet extends HttpServlet {
         }
 
         try {
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirmPassword");
+            String address = request.getParameter("address");
+
+            // Common validations
+            if (username == null || username.trim().length() < 3) {
+                throw new Exception("Username must be at least 3 characters long.");
+            }
+            if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                throw new Exception("Please enter a valid email address.");
+            }
+            if (phone == null || phone.trim().length() < 8) {
+                throw new Exception("Please enter a valid phone number (minimum 8 digits).");
+            }
+            if (address == null || address.trim().isEmpty()) {
+                throw new Exception("Address cannot be empty.");
+            }
+            if (password == null || password.length() < 8) {
+                throw new Exception("Password must be at least 8 characters long.");
+            }
+            if (!password.equals(confirmPassword)) {
+                throw new Exception("Create Password and Confirm Password do not match.");
+            }
+
             if ("company".equals(type)) {
-                // FR1.2: Company registration requires company name, license/registration number,
-                // GST/Tax ID, address and admin contact, and is subject to Super Admin approval before activation.
                 String companyName = request.getParameter("companyName");
                 String licenseNo = request.getParameter("licenseNo");
                 String gstNo = request.getParameter("gstNo");
-                String address = request.getParameter("address");
-                
-                // Admin contact fields
-                                String email = request.getParameter("email");
-                String phone = request.getParameter("phone");
-                String username = request.getParameter("username");
-                String password = request.getParameter("password");
-                String confirmPassword = request.getParameter("confirmPassword");
 
-                if (password == null || !password.equals(confirmPassword)) {
-                    throw new Exception("Passwords do not match.");
+                if (companyName == null || companyName.trim().isEmpty()) {
+                    throw new Exception("Company Name is required.");
+                }
+                if (licenseNo == null || licenseNo.trim().isEmpty()) {
+                    throw new Exception("License / Registration Number is required.");
+                }
+                if (gstNo == null || gstNo.trim().isEmpty()) {
+                    throw new Exception("GST / Tax ID is required.");
                 }
 
-                // Register Company with 'Pending' approval status
-                int companyId = companyDAO.registerCompany(companyName, licenseNo, gstNo, address, email, phone);
+                // Register Company with 'Pending' status
+                int companyId = companyDAO.registerCompany(companyName.trim(), licenseNo.trim().toUpperCase(), gstNo.trim().toUpperCase(), address.trim(), email.trim(), phone.trim());
 
                 if (companyId > 0) {
-                    // Register Company Admin (Role 2) with status 'Inactive' until Super Admin approves
-                    userDAO.registerUser(username, email, password, phone, 2, companyId, "Inactive");
+                    // Register Company Admin (Role 2) with status 'Inactive' pending Super Admin approval
+                    int userId = userDAO.createUser(username.trim(), email.trim(), password, phone.trim(), 2, companyId, "Inactive");
+                    if (userId <= 0) {
+                        throw new Exception("Username or email already in use. Please choose a different one.");
+                    }
                 } else {
-                    throw new Exception("Could not register company in database. Please verify the details.");
+                    throw new Exception("Could not register company in database. Please verify your company details.");
                 }
 
                 request.setAttribute("successMessage", "Company registration submitted successfully! Your account is pending Super Admin review & approval before activation.");
                 request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
             } else {
-                // FR1.3: Customer registration requires name, email, phone, address and a KYC document upload
+                // Customer registration
                 String customerName = request.getParameter("customerName");
                 if (customerName == null || customerName.trim().isEmpty()) {
                     customerName = request.getParameter("companyName");
                 }
-                String email = request.getParameter("email");
-                String phone = request.getParameter("phone");
-                String address = request.getParameter("address");
-                String username = request.getParameter("username");
-                String password = request.getParameter("password");
-                String confirmPassword = request.getParameter("confirmPassword");
-
-                if (password == null || !password.equals(confirmPassword)) {
-                    throw new Exception("Passwords do not match.");
+                if (customerName == null || customerName.trim().isEmpty()) {
+                    throw new Exception("Customer full name is required.");
                 }
 
-                // Handle KYC document file upload
+                // Handle KYC document upload
                 String kycDocPath = null;
                 try {
                     Part kycPart = request.getPart("kycDoc");
@@ -89,32 +108,39 @@ public class RegisterServlet extends HttpServlet {
                         String submitted = new File(kycPart.getSubmittedFileName()).getName();
                         String ext = "";
                         int dot = submitted.lastIndexOf('.');
-                        if (dot > 0) ext = submitted.substring(dot);
+                        if (dot > 0) ext = submitted.substring(dot).toLowerCase();
+                        if (!ext.equals(".pdf") && !ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".png")) {
+                            throw new Exception("KYC document must be a PDF, JPG, or PNG file.");
+                        }
                         String fileName = "kyc_" + System.currentTimeMillis() + ext;
                         String uploadDir = getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "kyc";
                         File dir = new File(uploadDir);
                         if (!dir.exists()) dir.mkdirs();
                         kycPart.write(uploadDir + File.separator + fileName);
                         kycDocPath = request.getContextPath() + "/uploads/kyc/" + fileName;
+                    } else {
+                        throw new Exception("Please upload a valid KYC document (PDF, JPG, PNG).");
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    if (ex.getMessage() != null && ex.getMessage().contains("KYC")) {
+                        throw ex;
+                    }
                 }
 
-                // Register User (Role 5 = Customer) with status 'Inactive' (gated)
-                int newUserId = userDAO.createUser(username, email, password, phone, 5, null, "Inactive");
+                // Register User (Role 5 = Customer) with status 'Inactive'
+                int newUserId = userDAO.createUser(username.trim(), email.trim(), password, phone.trim(), 5, null, "Inactive");
                 if (newUserId > 0) {
-                    userDAO.registerCustomer(newUserId, customerName, address, kycDocPath, 0.0);
+                    userDAO.registerCustomer(newUserId, customerName.trim(), address.trim(), kycDocPath, 0.0);
                 } else {
                     throw new Exception("Username or email already exists. Please choose another.");
                 }
 
-                request.setAttribute("successMessage", "Customer registration submitted successfully! KYC document received and pending approval.");
+                request.setAttribute("successMessage", "Customer registration submitted successfully! KYC document received and pending verification.");
                 request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Registration failed: " + e.getMessage());
+            request.setAttribute("errorMessage", e.getMessage());
             request.getRequestDispatcher("/jsp/register.jsp").forward(request, response);
         }
     }
