@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 

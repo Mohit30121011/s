@@ -24,6 +24,8 @@ public class ShipmentDAO {
         private String status;
         private java.sql.Date bookingDate;
         private String vesselName;
+        private java.util.Date eta;
+        private java.util.Date updatedAt;
         private java.sql.Date expectedArrivalDate;
         private java.sql.Date actualArrivalDate;
         private Integer delayDays;
@@ -39,6 +41,10 @@ public class ShipmentDAO {
 
         public String getVesselName() { return vesselName; }
         public void setVesselName(String vesselName) { this.vesselName = vesselName; }
+        public java.util.Date getEta() { return eta; }
+        public void setEta(java.util.Date eta) { this.eta = eta; }
+        public java.util.Date getUpdatedAt() { return updatedAt; }
+        public void setUpdatedAt(java.util.Date updatedAt) { this.updatedAt = updatedAt; }
 
         public int getShipmentId() { return shipmentId; }
         public void setShipmentId(int shipmentId) { this.shipmentId = shipmentId; }
@@ -65,7 +71,9 @@ public class ShipmentDAO {
     public List<ShipmentDetail> getAllShipments() {
         List<ShipmentDetail> list = new ArrayList<>();
         String sql = "SELECT s.shipment_id, c.customer_name, cnt.container_number, v.vessel_name, " +
-                     "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date " +
+                     "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date, " +
+                     "(SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id) as last_updated, " +
+                     "(SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1) as eta " +
                      "FROM shipment s " +
                      "JOIN customers c ON s.customer_id = c.customer_id " +
                      "JOIN containers cnt ON s.container_id = cnt.container_id " +
@@ -86,6 +94,8 @@ public class ShipmentDAO {
                 d.setStatus(rs.getString("status"));
                 d.setBookingDate(rs.getDate("booking_date"));
                 d.setVesselName(rs.getString("vessel_name"));
+                d.setEta(rs.getDate("eta"));
+                d.setUpdatedAt(rs.getTimestamp("last_updated"));
                 list.add(d);
             }
         } catch (Exception e) {
@@ -122,6 +132,8 @@ public class ShipmentDAO {
                     d.setStatus(rs.getString("status"));
                     d.setBookingDate(rs.getDate("booking_date"));
                     d.setVesselName(rs.getString("vessel_name"));
+                d.setEta(rs.getDate("eta"));
+                d.setUpdatedAt(rs.getTimestamp("last_updated"));
                 }
             }
         } catch (Exception e) {

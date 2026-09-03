@@ -496,7 +496,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 <ul class="sub-nav collapse show" id="shipmentsSubmenu">
                     <li><a href="${pageContext.request.contextPath}/shipments">All Shipments</a></li>
                     <li><a href="${pageContext.request.contextPath}/shipments/create" >Create Shipment</a></li>
-                    <li><a href="${pageContext.request.contextPath}/shipments/tracking">Live Tracking</a></li><li><a href="#">Drafts</a></li>
                 </ul>
             </div>
             
