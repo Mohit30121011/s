@@ -33,7 +33,7 @@
 				<i class="fa-solid fa-filter"></i>
 			</button>
 		</form>
-	</div>
+	</div>         			
 
 	<c:if test="${not empty sessionScope.successMessage}">
 		<div class="alert alert-success shadow-sm border-0 mb-4"

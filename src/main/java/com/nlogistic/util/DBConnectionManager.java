@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnectionManager {
 	private static final String URL = "jdbc:mysql://localhost:3306/nlogistic_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
 	private static final String USER = "root";
-	private static final String PASSWORD = "";       // root has no password on local dev       
+	private static final String PASSWORD = "NewPassword123!";       // root has password on local dev       
 
 	static {
 		try {
