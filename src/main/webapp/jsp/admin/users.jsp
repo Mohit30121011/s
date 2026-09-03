@@ -202,8 +202,6 @@
     .staff-toolbar .ts-wrapper.form-select-custom,
     .staff-toolbar .ts-wrapper.form-control {
         width: auto !important;
-        min-width: 165px !important;
-        max-width: 220px !important;
         flex-shrink: 0 !important;
         border: none !important;
         padding: 0 !important;
@@ -211,6 +209,14 @@
         background-image: none !important;
         box-shadow: none !important;
         min-height: auto !important;
+    }
+    .staff-toolbar .ts-wrapper:nth-of-type(1) {
+        min-width: 160px !important;
+        max-width: 185px !important;
+    }
+    .staff-toolbar .ts-wrapper:nth-of-type(2) {
+        min-width: 245px !important;
+        max-width: 280px !important;
     }
     .staff-toolbar .ts-wrapper.single .ts-control {
         border-radius: 50px !important;
@@ -225,7 +231,28 @@
         color: #334155 !important;
         display: flex !important;
         align-items: center !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    }
+    .staff-toolbar .ts-wrapper.single .ts-control > .item {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 42px !important;
+        display: inline-block !important;
+    }
+    .staff-toolbar .ts-wrapper.single .ts-control > input {
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        position: absolute !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
     .staff-toolbar .ts-wrapper.single .ts-control:after {
         border-color: #64748B transparent transparent transparent !important;
