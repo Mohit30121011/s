@@ -39,6 +39,18 @@ public class ContainerServlet extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/containers?error=true");
             }
+        } else if (pathInfo != null && pathInfo.equals("/add")) {
+            String number = request.getParameter("containerNumber");
+            String type = request.getParameter("type");
+            String size = request.getParameter("size");
+            double tare = Double.parseDouble(request.getParameter("tareWeightKg"));
+            double maxGross = Double.parseDouble(request.getParameter("maxGrossWeightKg"));
+            double capKg = Double.parseDouble(request.getParameter("goodsCapacityKg"));
+            double capCbm = Double.parseDouble(request.getParameter("goodsCapacityCbm"));
+            int portId = Integer.parseInt(request.getParameter("portId"));
+            
+            boolean success = containerDAO.addContainer(number, type, size, tare, maxGross, capKg, capCbm, portId, currentUser.getCompanyId());
+            response.sendRedirect(request.getContextPath() + "/containers?add=" + success);
         } else if (pathInfo != null && pathInfo.equals("/delete")) {
 containerDAO.deleteContainer(Integer.parseInt(request.getParameter("id")), currentUser.getUserId());
             response.sendRedirect(request.getContextPath() + "/containers");

@@ -92,4 +92,54 @@ public class ContainerDAO {
         c.setOwnerCompanyId(rs.getInt("owner_company_id"));
         return c;
     }
+
+    public List<Container> getAllContainers() {
+        return getContainers("All", 1000, 0); // Alias for backwards compatibility
+    }
+
+    public boolean updateContainerStatus(int containerId, String status, int portId) {
+        String sql = "UPDATE containers SET status = ?, current_port_id = ? WHERE container_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, portId);
+            ps.setInt(3, containerId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteContainer(int containerId, int userId) {
+        String sql = "DELETE FROM containers WHERE container_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, containerId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean addContainer(String number, String type, String size, double tare, double maxGross, double capKg, double capCbm, int portId, int ownerId) {
+        String sql = "INSERT INTO containers (container_number, type, size, tare_weight_kg, max_gross_weight_kg, goods_capacity_kg, goods_capacity_cbm, status, current_port_id, owner_company_id) VALUES (?, ?, ?, ?, ?, ?, ?, 'Available', ?, ?)";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, number);
+            ps.setString(2, type);
+            ps.setString(3, size);
+            ps.setDouble(4, tare);
+            ps.setDouble(5, maxGross);
+            ps.setDouble(6, capKg);
+            ps.setDouble(7, capCbm);
+            ps.setInt(8, portId);
+            ps.setInt(9, ownerId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

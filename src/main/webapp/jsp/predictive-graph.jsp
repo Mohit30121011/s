@@ -28,7 +28,7 @@
 					${selectedType == 'Open Top' ? 'selected' : ''}>Open Top
 					Containers</option>
 			</select>
-			<button class="btn btn-primary" type="button"
+			<button class="btn btn-primary" type="button"            
 				style="border-radius: 8px;">      						    
 				<i class="fa-solid fa-filter"></i>
 			</button>
