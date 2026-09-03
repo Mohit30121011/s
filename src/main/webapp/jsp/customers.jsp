@@ -126,6 +126,19 @@
                   <input type="text" class="form-control" name="address" required placeholder="e.g. 123 Logistics Way, NY">
               </div>
               <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">Linked User Account</label>
+                  <select class="form-select" name="userId" required>
+                      <option value="">Select a User</option>
+                      <c:forEach var="u" items="${users}">
+                          <option value="${u.userId}">${u.username} (${u.email})</option>
+                      </c:forEach>
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">KYC Document Path</label>
+                  <input type="text" class="form-control" name="kycDocPath" placeholder="e.g. /docs/kyc/customer_abc.pdf">
+              </div>
+              <div class="mb-3">
                   <label class="form-label text-muted small fw-medium">Credit Limit ($)</label>
                   <input type="number" class="form-control" name="creditLimit" required placeholder="e.g. 50000" step="0.01">
               </div>

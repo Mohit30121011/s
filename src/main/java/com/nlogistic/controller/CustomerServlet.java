@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.nlogistic.dao.CustomerDAO;
+import com.nlogistic.dao.UserDAO;
 import com.nlogistic.model.Customer;
 import com.nlogistic.model.User;
 
@@ -26,7 +27,9 @@ public class CustomerServlet extends HttpServlet {
         }
 
         List<Customer> customers = customerDAO.getAllCustomers();
+        List<User> users = new UserDAO().getAllUsers();
         request.setAttribute("customers", customers);
+        request.setAttribute("users", users);
         request.getRequestDispatcher("/jsp/customers.jsp").forward(request, response);
     }
 
@@ -49,12 +52,19 @@ public class CustomerServlet extends HttpServlet {
                 } catch (NumberFormatException e) {}
             }
             
+            String userIdStr = request.getParameter("userId");
+            String kycDocPath = request.getParameter("kycDocPath");
+            int linkedUserId = user.getUserId();
+            if (userIdStr != null && !userIdStr.trim().isEmpty()) {
+                try { linkedUserId = Integer.parseInt(userIdStr); } catch (Exception e) {}
+            }
+            
             Customer c = new Customer();
-            c.setUserId(user.getUserId()); // Link to current user or set a dummy
+            c.setUserId(linkedUserId);
             c.setCustomerName(name);
             c.setAddress(address);
             c.setCreditLimit(creditLimit);
-            c.setKycDocPath("");
+            c.setKycDocPath(kycDocPath != null ? kycDocPath : "");
             
             customerDAO.registerCustomer(c);
             request.getSession().setAttribute("successMessage", "Customer added successfully.");
