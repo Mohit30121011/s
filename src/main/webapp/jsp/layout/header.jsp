@@ -1857,7 +1857,7 @@
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/admin/companies">Company</a></li>
+                    <li><a href="${pageContext.request.contextPath}/jsp/admin/companies.jsp">Company</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/users">Users</a></li>
                 </ul>
             </div>
@@ -2244,7 +2244,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Governance & Administration
         {
             title: "Company Approvals",
-            url: ctx + "/approvals",
+            url: ctx + "/jsp/admin/companies.jsp",
             category: "Administration",
             subtitle: "Super Admin verification & activation portal for new companies",
             keywords: "approvals approve company pending verification activate super admin app comp",

@@ -1,88 +1,537 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
+    if ("POST".equalsIgnoreCase(request.getMethod())) {
+        String action = request.getParameter("action");
+        String compIdStr = request.getParameter("companyId");
+        if (compIdStr != null && action != null) {
+            try {
+                int compId = Integer.parseInt(compIdStr);
+                com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
+                if ("accept".equals(action)) {
+                    cDao.updateCompanyStatus(compId, "Active");
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE users SET status = 'Active' WHERE company_id = ?")) {
+                        ps.setInt(1, compId);
+                        ps.executeUpdate();
+                    } catch(Exception ex) { ex.printStackTrace(); }
+                    session.setAttribute("successMessage", "Company Approved & Activated Successfully.");
+                } else if ("reject".equals(action)) {
+                    cDao.updateCompanyStatus(compId, "Suspended");
+                    session.setAttribute("errorMessage", "Company Rejected / Suspended.");
+                }
+            } catch(Exception ex) { ex.printStackTrace(); }
+            response.sendRedirect(request.getRequestURI());
+            return;
+        }
+    }
+
+    if (request.getAttribute("allCompanies") == null) {
+        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
+        java.util.List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
+        java.util.List<com.nlogistic.model.Company> pendComps = cDao.getPendingCompanies();
+        int pendingCount = (pendComps != null) ? pendComps.size() : 0;
+        int activeCount = 0;
+        int suspendedCount = 0;
+        int totalCount = (allComps != null) ? allComps.size() : 0;
+
+        if (allComps != null) {
+            for (com.nlogistic.model.Company c : allComps) {
+                if ("Active".equalsIgnoreCase(c.getApprovalStatus())) {
+                    activeCount++;
+                } else if ("Suspended".equalsIgnoreCase(c.getApprovalStatus()) || "Rejected".equalsIgnoreCase(c.getApprovalStatus())) {
+                    suspendedCount++;
+                }
+            }
+        }
+
+        request.setAttribute("allCompanies", allComps);
+        request.setAttribute("pendingCompanies", pendComps);
+        request.setAttribute("pendingCount", pendingCount);
+        request.setAttribute("activeCount", activeCount);
+        request.setAttribute("suspendedCount", suspendedCount);
+        request.setAttribute("totalCount", totalCount);
+    }
+%>
+
 <jsp:include page="/jsp/layout/header.jsp" />
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 fw-bold">Company Approvals</h4>
-    <div class="custom-breadcrumb mb-0">
+<style>
+    /* ==========================================================================
+       COMPANY APPROVALS & TENANT GOVERNANCE THEME (SWIGGY ORANGE ENTERPRISE)
+       ========================================================================== */
+    .approvals-page-container {
+        padding: 0 4px 40px;
+    }
+    .custom-breadcrumb {
+        display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748B; margin-bottom: 16px;
+    }
+    .custom-breadcrumb a { color: #64748B; text-decoration: none; transition: color 0.15s ease; }
+    .custom-breadcrumb a:hover { color: #FC8019; }
+    .custom-breadcrumb i { font-size: 11px; color: #94A3B8; }
+    .custom-breadcrumb .current { color: #FC8019; font-weight: 600; }
+
+    .telemetry-header-card {
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 28px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+    .telemetry-header-left { display: flex; align-items: center; gap: 16px; }
+    .telemetry-icon-box {
+        width: 52px; height: 52px; border-radius: 14px;
+        background: linear-gradient(135deg, #FFF0E5 0%, #FFE4D6 100%);
+        display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 26px;
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.15); flex-shrink: 0;
+    }
+    .telemetry-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.3px; }
+    .telemetry-subtitle { font-size: 13.5px; color: #64748B; margin: 0; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); border-color: #CBD5E1; }
+    .kpi-label { font-size: 12.5px; font-weight: 600; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .kpi-value { font-size: 26px; font-weight: 800; color: #0F172A; line-height: 1; }
+    .kpi-icon-pill { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .kpi-icon-pill.amber { background: #FFFBEB; color: #D97706; }
+    .kpi-icon-pill.green { background: #ECFDF5; color: #059669; }
+    .kpi-icon-pill.red { background: #FEF2F2; color: #DC2626; }
+    .kpi-icon-pill.blue { background: #EFF6FF; color: #2563EB; }
+
+    .approvals-toolbar {
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px 14px 0 0; padding: 16px 24px;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid #F1F5F9;
+    }
+    .nav-tabs-pill { display: flex; align-items: center; gap: 8px; background: #F8FAFC; padding: 4px; border-radius: 50px; border: 1px solid #E2E8F0; }
+    .tab-pill-btn {
+        background: transparent; border: none; padding: 7px 18px; border-radius: 50px; font-size: 13px; font-weight: 600;
+        color: #64748B; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; gap: 6px;
+    }
+    .tab-pill-btn:hover { color: #0F172A; }
+    .tab-pill-btn.active { background: #FFFFFF; color: #FC8019; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+    .tab-counter { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 50px; background: #F1F5F9; color: #475569; }
+    .tab-pill-btn.active .tab-counter { background: #FFF0E5; color: #FC8019; }
+
+    .table-search-wrap { position: relative; width: 300px; }
+    .table-search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; }
+    .table-search-input { width: 100%; height: 40px; padding-left: 42px !important; padding-right: 18px !important; border-radius: 50px !important; font-size: 13px !important; border: 1.5px solid #E2E8F0 !important; background: #F8FAFC !important; }
+    .table-search-input:focus { background: #FFFFFF !important; border-color: #FC8019 !important; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important; }
+
+    .approvals-table-panel { background: #FFFFFF; border: 1px solid #E2E8F0; border-top: none; border-radius: 0 0 16px 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); overflow: hidden; }
+    .approvals-table { width: 100%; border-collapse: collapse; margin: 0; }
+    .approvals-table th { background: #F8FAFC; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; text-align: left; }
+    .approvals-table th i { margin-right: 4px; color: #94A3B8; font-size: 13px; }
+    .approvals-table td { padding: 16px 20px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; font-size: 13.5px; color: #1E293B; transition: background-color 0.12s ease; }
+    .company-row:hover td { background-color: #FAFAFA; }
+
+    .company-cell { display: flex; align-items: center; gap: 14px; }
+    .company-avatar {
+        width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%);
+        color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); flex-shrink: 0; letter-spacing: 0.5px;
+    }
+    .company-info-wrap { min-width: 0; }
+    .company-name-title { font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 2px; }
+    .company-meta-badge { font-size: 11px; color: #64748B; display: inline-flex; align-items: center; gap: 4px; }
+
+    .contact-cell { display: flex; flex-direction: column; gap: 4px; }
+    .contact-link { display: inline-flex; align-items: center; gap: 6px; color: #475569; font-size: 12.5px; text-decoration: none; transition: color 0.15s ease; }
+    .contact-link:hover { color: #FC8019; }
+    .contact-link i { font-size: 13px; color: #94A3B8; }
+
+    .tax-badge-wrap { display: flex; flex-direction: column; gap: 5px; }
+    .tax-chip {
+        font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        background: #F1F5F9; border: 1px solid #E2E8F0; padding: 3px 8px; border-radius: 6px; color: #334155;
+        font-weight: 600; display: inline-flex; align-items: center; gap: 6px; width: fit-content;
+    }
+    .tax-chip-label { font-size: 10px; color: #64748B; text-transform: uppercase; font-family: inherit; font-weight: 700; }
+
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+    .status-pill.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .status-pill.active { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .status-pill.suspended { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+
+    .actions-flex { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+    .btn-approval-accept {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%); border: 1.5px solid transparent; color: #FFFFFF !important;
+        padding: 7px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;
+        cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.22);
+    }
+    .btn-approval-accept:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(16, 185, 129, 0.35); }
+    .btn-approval-accept i { font-size: 13px; transition: transform 0.2s ease; }
+    .btn-approval-accept:hover i { transform: scale(1.15); }
+
+    .btn-approval-reject {
+        background: #FFFFFF; border: 1.5px solid #FCA5A5; color: #DC2626 !important; padding: 7px 18px; border-radius: 50px;
+        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+    }
+    .btn-approval-reject:hover { background: #FEF2F2; border-color: #EF4444; color: #B91C1C !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.18); }
+    .btn-approval-reject i { font-size: 13px; transition: transform 0.2s ease; }
+    .btn-approval-reject:hover i { transform: scale(1.15); }
+
+    .empty-caught-up-card { padding: 60px 24px; text-align: center; background: #FFFFFF; }
+    .empty-shield-icon-box {
+        width: 68px; height: 68px; border-radius: 20px; background: #ECFDF5; border: 1px solid #A7F3D0;
+        color: #059669; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+    .empty-caught-up-title { font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+    .empty-caught-up-desc { font-size: 13.5px; color: #64748B; max-width: 440px; margin: 0 auto 20px; line-height: 1.5; }
+    .btn-view-all-tenants {
+        background: #FFFFFF; border: 1.5px solid #E2E8F0; color: #475569; padding: 9px 24px; border-radius: 50px;
+        font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+    }
+    .btn-view-all-tenants:hover { background: #F8FAFC; border-color: #CBD5E1; color: #0F172A; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
+
+    .custom-alert { border-radius: 12px; padding: 14px 18px; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .custom-alert.success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+    .custom-alert.danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+</style>
+
+<div class="approvals-page-container">
+
+    <!-- Breadcrumb -->
+    <div class="custom-breadcrumb">
         <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-        <i class="fa-solid fa-chevron-right custom-breadcrumb-separator mx-2"></i>
-        <span class="active">Company Approvals</span>
+        <i class="ti ti-chevron-right"></i>
+        <span>Management</span>
+        <i class="ti ti-chevron-right"></i>
+        <span class="current">Company Approvals</span>
     </div>
-</div>
 
-<c:if test="${not empty sessionScope.successMessage}">
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.successMessage}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <c:remove var="successMessage" scope="session"/>
-</c:if>
-<c:if test="${not empty sessionScope.errorMessage}">
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fa-solid fa-circle-exclamation me-2"></i>${sessionScope.errorMessage}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <c:remove var="errorMessage" scope="session"/>
-</c:if>
+    <!-- Alert Notifications -->
+    <c:if test="${not empty sessionScope.successMessage}">
+        <div class="custom-alert success">
+            <i class="ti ti-circle-check" style="font-size: 18px;"></i>
+            <span>${sessionScope.successMessage}</span>
+        </div>
+        <c:remove var="successMessage" scope="session"/>
+    </c:if>
+    <c:if test="${not empty sessionScope.errorMessage}">
+        <div class="custom-alert danger">
+            <i class="ti ti-circle-x" style="font-size: 18px;"></i>
+            <span>${sessionScope.errorMessage}</span>
+        </div>
+        <c:remove var="errorMessage" scope="session"/>
+    </c:if>
 
-<div class="card">
-    <div class="card-body p-0">
+    <!-- Top Telemetry Header -->
+    <div class="telemetry-header-card">
+        <div class="telemetry-header-left">
+            <div class="telemetry-icon-box">
+                <i class="ti ti-shield-check"></i>
+            </div>
+            <div>
+                <h4 class="telemetry-title">Company Approvals &amp; Tenant Governance</h4>
+                <p class="telemetry-subtitle">Super Admin regulatory verification portal for B2B corporate registrations and freight licenses</p>
+            </div>
+        </div>
+        <div>
+            <span class="badge" style="background: #FFF0E5; color: #FC8019; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 50px; border: 1px solid #FED7AA;">
+                <i class="ti ti-lock-access me-1"></i> Super Admin Clearance Required
+            </span>
+        </div>
+    </div>
+
+    <!-- 4 KPI Summary Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-label">Pending Approval</div>
+                <div class="kpi-value" style="color: #D97706;">${not empty pendingCount ? pendingCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill amber">
+                <i class="ti ti-clock-hour-4"></i>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-label">Active Verified</div>
+                <div class="kpi-value" style="color: #059669;">${not empty activeCount ? activeCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill green">
+                <i class="ti ti-circle-check"></i>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-label">Suspended / Rejected</div>
+                <div class="kpi-value" style="color: #DC2626;">${not empty suspendedCount ? suspendedCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill red">
+                <i class="ti ti-ban"></i>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-label">Total Registered Tenants</div>
+                <div class="kpi-value" style="color: #2563EB;">${not empty totalCount ? totalCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill blue">
+                <i class="ti ti-building-community"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar: Filter Tabs & Real-Time Search -->
+    <div class="approvals-toolbar">
+        <div class="nav-tabs-pill">
+            <button type="button" class="tab-pill-btn active" id="tabPendingBtn" onclick="filterByTab('Pending')">
+                <i class="ti ti-clock"></i> Pending Review
+                <span class="tab-counter">${not empty pendingCount ? pendingCount : 0}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" id="tabActiveBtn" onclick="filterByTab('Active')">
+                <i class="ti ti-circle-check"></i> Active Companies
+                <span class="tab-counter">${not empty activeCount ? activeCount : 0}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" id="tabAllBtn" onclick="filterByTab('All')">
+                <i class="ti ti-list"></i> All Tenants
+                <span class="tab-counter">${not empty totalCount ? totalCount : 0}</span>
+            </button>
+        </div>
+
+        <div class="table-search-wrap">
+            <i class="ti ti-search"></i>
+            <input type="text" id="companySearchInput" class="table-search-input form-control" placeholder="Search company, GST, license, email..." oninput="handleCompanySearch()">
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="approvals-table-panel">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted" style="font-size: 13px; text-transform: uppercase;">
+            <table class="approvals-table" id="companiesTable">
+                <thead>
                     <tr>
-                        <th class="py-3 ps-4 border-0 rounded-start">Company Name</th>
-                        <th class="py-3 border-0">Email</th>
-                        <th class="py-3 border-0">Phone</th>
-                        <th class="py-3 border-0">GST / PAN</th>
-                        <th class="py-3 border-0">Address</th>
-                        <th class="py-3 border-0 text-end pe-4 rounded-end">Actions</th>
+                        <th style="padding-left: 24px;"><i class="ti ti-building"></i> Company Name</th>
+                        <th><i class="ti ti-file-certificate"></i> GST / License No</th>
+                        <th><i class="ti ti-address-book"></i> Contact Info</th>
+                        <th><i class="ti ti-map-pin"></i> Registered Address</th>
+                        <th><i class="ti ti-activity"></i> Status</th>
+                        <th style="padding-right: 24px; text-align: right;"><i class="ti ti-settings"></i> Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${empty pendingCompanies}">
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="fa-solid fa-inbox fs-2 mb-3 text-light-gray"></i>
-                                    <p class="mb-0">No pending company approvals.</p>
-                                </td>
-                            </tr>
-                        </c:when>
-                        <c:otherwise>
-                            <c:forEach var="company" items="${pendingCompanies}">
-                                <tr>
-                                    <td class="ps-4 fw-medium text-dark">${company.companyName}</td>
-                                    <td>${company.contactEmail}</td>
-                                    <td>${company.contactPhone}</td>
-                                    <td>
-                                        <span class="d-block small text-muted">GST: ${company.gstNo}</span>
-                                        <span class="d-block small text-muted">PAN: ${company.licenseNo}</span>
-                                    </td>
-                                    <td><small class="text-muted">${company.address}</small></td>
-                                    <td class="text-end pe-4">
-                                        <form action="${pageContext.request.contextPath}/admin/companies" method="POST" class="d-inline">
-                                            <input type="hidden" name="companyId" value="${company.companyId}">
-                                            <button type="submit" name="action" value="accept"  class="btn btn-sm btn-success rounded-circle me-1" title="Accept" style="width: 32px; height: 32px;">
-                                                <i class="fa-solid fa-check"></i>
-                                            </button>
-                                            <button type="submit" name="action" value="reject"  class="btn btn-sm btn-danger rounded-circle" title="Reject" style="width: 32px; height: 32px;">
-                                                <i class="fa-solid fa-xmark"></i>
+                <tbody id="companiesTableBody">
+                    <c:forEach var="comp" items="${allCompanies}">
+                        <tr class="company-row" 
+                            data-status="${comp.approvalStatus}" 
+                            data-search="${comp.companyName.toLowerCase()} ${comp.gstNo.toLowerCase()} ${comp.licenseNo.toLowerCase()} ${comp.contactEmail.toLowerCase()} ${comp.contactPhone} ${comp.address.toLowerCase()}">
+                            
+                            <!-- Company Name + Avatar -->
+                            <td style="padding-left: 24px;">
+                                <div class="company-cell">
+                                    <div class="company-avatar">
+                                        <c:set var="initials" value="${comp.companyName.substring(0, comp.companyName.length() >= 2 ? 2 : 1).toUpperCase()}" />
+                                        ${initials}
+                                    </div>
+                                    <div class="company-info-wrap">
+                                        <div class="company-name-title">${comp.companyName}</div>
+                                        <div class="company-meta-badge">
+                                            <i class="ti ti-hash"></i> CMP-${comp.companyId}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- GST / PAN / License -->
+                            <td>
+                                <div class="tax-badge-wrap">
+                                    <div class="tax-chip" title="GST / Tax Identification">
+                                        <span class="tax-chip-label">GST</span>
+                                        <span>${not empty comp.gstNo ? comp.gstNo : 'N/A'}</span>
+                                    </div>
+                                    <div class="tax-chip" title="Company License / Registration">
+                                        <span class="tax-chip-label">LIC</span>
+                                        <span>${not empty comp.licenseNo ? comp.licenseNo : 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Contact Details -->
+                            <td>
+                                <div class="contact-cell">
+                                    <a href="mailto:${comp.contactEmail}" class="contact-link" title="Send Email">
+                                        <i class="ti ti-mail"></i>
+                                        <span>${comp.contactEmail}</span>
+                                    </a>
+                                    <a href="tel:${comp.contactPhone}" class="contact-link" title="Call Phone">
+                                        <i class="ti ti-phone"></i>
+                                        <span>${comp.contactPhone}</span>
+                                    </a>
+                                </div>
+                            </td>
+
+                            <!-- Address -->
+                            <td style="max-width: 260px;">
+                                <div style="display: flex; align-items: flex-start; gap: 6px; font-size: 13px; color: #475569; line-height: 1.4;">
+                                    <i class="ti ti-map-pin" style="color: #94A3B8; font-size: 14px; margin-top: 2px; flex-shrink: 0;"></i>
+                                    <span>${comp.address}</span>
+                                </div>
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                <c:choose>
+                                    <c:when test="${comp.approvalStatus == 'Pending'}">
+                                        <span class="status-pill pending">
+                                            <i class="ti ti-clock"></i> Pending Review
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${comp.approvalStatus == 'Active'}">
+                                        <span class="status-pill active">
+                                            <i class="ti ti-circle-check"></i> Approved
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="status-pill suspended">
+                                            <i class="ti ti-ban"></i> Suspended
+                                        </span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+
+                            <!-- Actions -->
+                            <td style="padding-right: 24px; text-align: right;">
+                                <c:choose>
+                                    <c:when test="${comp.approvalStatus == 'Pending'}">
+                                        <div class="actions-flex">
+                                            <!-- Approve Button -->
+                                            <form  method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="companyId" value="${comp.companyId}">
+                                                <input type="hidden" name="action" value="accept">
+                                                <button type="submit" class="btn-approval-accept" title="Approve and activate company">
+                                                    <i class="ti ti-check"></i> Approve
+                                                </button>
+                                            </form>
+                                            <!-- Reject Button -->
+                                            <form  method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="companyId" value="${comp.companyId}">
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="submit" class="btn-approval-reject" title="Reject registration" onclick="return confirm('Are you sure you want to reject this company registration?');">
+                                                    <i class="ti ti-x"></i> Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </c:when>
+                                    <c:when test="${comp.approvalStatus == 'Active'}">
+                                        <form  method="POST" class="d-inline m-0">
+                                            <input type="hidden" name="companyId" value="${comp.companyId}">
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="btn-approval-reject" title="Suspend verified company" onclick="return confirm('Suspend this active enterprise tenant?');" style="padding: 5px 14px; font-size: 11.5px;">
+                                                <i class="ti ti-ban"></i> Suspend
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <form  method="POST" class="d-inline m-0">
+                                            <input type="hidden" name="companyId" value="${comp.companyId}">
+                                            <input type="hidden" name="action" value="accept">
+                                            <button type="submit" class="btn-approval-accept" title="Reactivate company" style="padding: 5px 14px; font-size: 11.5px;">
+                                                <i class="ti ti-reload"></i> Reactivate
+                                            </button>
+                                        </form>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                        </tr>
+                    </c:forEach>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Modern Empty State (shown if tab has 0 records) -->
+        <div id="emptyStateBox" class="empty-caught-up-card" style="display: none;">
+            <div class="empty-shield-icon-box">
+                <i class="ti ti-shield-check"></i>
+            </div>
+            <div class="empty-caught-up-title" id="emptyStateTitle">All Caught Up!</div>
+            <p class="empty-caught-up-desc" id="emptyStateDesc">
+                There are currently no pending company registration requests requiring Super Admin verification. All corporate onboarding is up to date.
+            </p>
+            <button type="button" class="btn-view-all-tenants" onclick="filterByTab('All')">
+                <i class="ti ti-list"></i> View All Registered Tenants
+            </button>
         </div>
     </div>
 </div>
 
+<script>
+    let currentTab = 'Pending';
 
+    function filterByTab(tab) {
+        currentTab = tab;
+
+        document.getElementById('tabPendingBtn').classList.toggle('active', tab === 'Pending');
+        document.getElementById('tabActiveBtn').classList.toggle('active', tab === 'Active');
+        document.getElementById('tabAllBtn').classList.toggle('active', tab === 'All');
+
+        applyFilters();
+    }
+
+    function handleCompanySearch() {
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const query = document.getElementById('companySearchInput').value.trim().toLowerCase();
+        const rows = document.querySelectorAll('.company-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            const searchData = row.getAttribute('data-search') || '';
+
+            const matchesTab = (currentTab === 'All') || (status === currentTab);
+            const matchesQuery = !query || searchData.includes(query);
+
+            if (matchesTab && matchesQuery) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const table = document.getElementById('companiesTable');
+        const emptyState = document.getElementById('emptyStateBox');
+        const emptyTitle = document.getElementById('emptyStateTitle');
+        const emptyDesc = document.getElementById('emptyStateDesc');
+
+        if (visibleCount === 0) {
+            table.style.display = 'none';
+            emptyState.style.display = 'block';
+
+            if (query) {
+                emptyTitle.textContent = 'No Companies Found';
+                emptyDesc.textContent = 'No company records matched your search query "' + query + '". Try adjusting your keywords.';
+            } else if (currentTab === 'Pending') {
+                emptyTitle.textContent = 'All Caught Up!';
+                emptyDesc.textContent = 'There are currently no pending company registration requests requiring Super Admin verification. All corporate onboarding is up to date.';
+            } else if (currentTab === 'Active') {
+                emptyTitle.textContent = 'No Active Companies';
+                emptyDesc.textContent = 'There are currently no companies with Active approval status in the system.';
+            } else {
+                emptyTitle.textContent = 'No Company Records';
+                emptyDesc.textContent = 'No registered companies found in the database.';
+            }
+        } else {
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        filterByTab('Pending');
+    });
+</script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />
-

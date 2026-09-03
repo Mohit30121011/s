@@ -31,7 +31,30 @@ public class AdminCompanyServlet extends HttpServlet {
         }
 
         List<Company> pendingCompanies = companyDAO.getPendingCompanies();
+        List<Company> allCompanies = companyDAO.getAllCompanies();
+
+        int pendingCount = (pendingCompanies != null) ? pendingCompanies.size() : 0;
+        int activeCount = 0;
+        int suspendedCount = 0;
+        int totalCount = (allCompanies != null) ? allCompanies.size() : 0;
+
+        if (allCompanies != null) {
+            for (Company comp : allCompanies) {
+                if ("Active".equalsIgnoreCase(comp.getApprovalStatus())) {
+                    activeCount++;
+                } else if ("Suspended".equalsIgnoreCase(comp.getApprovalStatus()) || "Rejected".equalsIgnoreCase(comp.getApprovalStatus())) {
+                    suspendedCount++;
+                }
+            }
+        }
+
         request.setAttribute("pendingCompanies", pendingCompanies);
+        request.setAttribute("allCompanies", allCompanies);
+        request.setAttribute("pendingCount", pendingCount);
+        request.setAttribute("activeCount", activeCount);
+        request.setAttribute("suspendedCount", suspendedCount);
+        request.setAttribute("totalCount", totalCount);
+
         request.getRequestDispatcher("/jsp/admin/companies.jsp").forward(request, response);
     }
 
