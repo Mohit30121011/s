@@ -1069,6 +1069,23 @@
             background: #FFFFFF !important;
             margin-top: 4px !important;
             z-index: 1050 !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        .ts-dropdown .ts-dropdown-content {
+            max-height: 340px !important;
+            overflow-y: auto !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        .ts-dropdown::-webkit-scrollbar,
+        .ts-dropdown .ts-dropdown-content::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
         }
 
         .ts-dropdown .option {
