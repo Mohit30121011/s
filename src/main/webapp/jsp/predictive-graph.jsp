@@ -32,14 +32,14 @@
 				style="border-radius: 8px;">      						    
 				<i class="fa-solid fa-filter"></i>
 			</button>
-		</form>
-	</div>         			
+		</form>   
+	</div>         			     
 
 	<c:if test="${not empty sessionScope.successMessage}">
 		<div class="alert alert-success shadow-sm border-0 mb-4"
 			style="border-radius: 8px;">
 			<i class="fa-solid fa-circle-check me-2"></i>
-			${sessionScope.successMessage}
+			${sessionScope.successMessage}  
 			<c:remove var="successMessage" scope="session" />
 		</div>
 	</c:if>

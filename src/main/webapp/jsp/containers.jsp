@@ -100,12 +100,54 @@
                                         <i class="fa-solid fa-ellipsis-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#updateContainerModal${container.containerId}"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Update</a></li>
+                                        <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="if(confirm('Delete Container?')) { document.getElementById('deleteForm${container.containerId}').submit(); }"><i class="fa-solid fa-trash me-2"></i>Delete</a></li>
                                     </ul>
                                 </div>
                                 <form id="deleteForm${container.containerId}" action="<c:url value='/containers/delete'/>" method="POST" style="display:none;">
                                     <input type="hidden" name="id" value="${container.containerId}">
                                 </form>
+                                
+                                <!-- Update Container Modal -->
+                                <div class="modal fade" id="updateContainerModal${container.containerId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content" style="border-radius: 12px; border: none;">
+                                            <div class="modal-header border-bottom-0">
+                                                <h5 class="modal-title fw-bold">Update ${container.containerNumber}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="<c:url value='/containers/update'/>" method="POST">
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="containerId" value="${container.containerId}">
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted fw-bold">Status</label>
+                                                        <select name="status" class="form-select" required>
+                                                            <option value="Available" ${container.status == 'Available' ? 'selected' : ''}>Available</option>
+                                                            <option value="Under Maintenance" ${container.status == 'Under Maintenance' ? 'selected' : ''}>Under Maintenance</option>
+                                                            <option value="In-Transit" ${container.status == 'In-Transit' ? 'selected' : ''}>In-Transit</option>
+                                                            <option value="Allocated" ${container.status == 'Allocated' ? 'selected' : ''}>Allocated</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted fw-bold">Current Port</label>
+                                                        <select name="portId" class="form-select" required>
+                                                            <c:forEach var="port" items="${ports}">
+                                                                <option value="${port.portId}" ${container.currentPortId == port.portId ? 'selected' : ''}>${port.portName} (${port.country})</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-top-0 pt-0">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary" style="background-color: #1434A4;">Update</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </c:if>
                         </div>
                     </div>
