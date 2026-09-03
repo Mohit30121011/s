@@ -68,6 +68,48 @@ public class FinanceServlet extends HttpServlet {
             request.setAttribute("customerProfitability", profitLossDAO.getCustomerProfitability(companyId, routeId, startDate, endDate));
             
             request.getRequestDispatcher("/jsp/profit_loss_analytics.jsp").forward(request, response);
+        } else if (pathInfo.equals("/shipment-drilldown")) {
+            String idParam = request.getParameter("id");
+            if (idParam != null && !idParam.isEmpty()) {
+                int shipmentId = 0;
+                try {
+                    if(idParam.startsWith("SHP-")) {
+                        shipmentId = Integer.parseInt(idParam.substring(4));
+                    } else {
+                        shipmentId = Integer.parseInt(idParam);
+                    }
+                    com.nlogistic.model.ShipmentDrilldown sd = profitLossDAO.getShipmentDrilldownDetails(shipmentId);
+                    request.setAttribute("drilldown", sd);
+                    request.setAttribute("allLossReasons", profitLossDAO.getAllLossReasons());
+                    request.getRequestDispatcher("/jsp/shipment_drilldown.jsp").forward(request, response);
+                    return;
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            response.sendRedirect(request.getContextPath() + "/finance/profit-loss");
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && pathInfo.equals("/shipment-drilldown/save")) {
+            String shipmentIdStr = request.getParameter("shipmentId");
+            String[] reasonIds = request.getParameterValues("reasonIds");
+            
+            if (shipmentIdStr != null && !shipmentIdStr.isEmpty()) {
+                try {
+                    int shipmentId = Integer.parseInt(shipmentIdStr);
+                    profitLossDAO.saveLossReasons(shipmentId, reasonIds);
+                    response.sendRedirect(request.getContextPath() + "/finance/shipment-drilldown?id=" + shipmentId);
+                    return;
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            response.sendRedirect(request.getContextPath() + "/finance/profit-loss");
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }

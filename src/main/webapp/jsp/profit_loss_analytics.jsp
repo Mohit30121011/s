@@ -648,7 +648,7 @@
             </thead>
             <tbody>
                 <c:forEach var="item" items="${companySummary}">
-                    <tr>
+                    <tr onclick="window.location.href='${pageContext.request.contextPath}/finance/shipment-drilldown?id=1'" style="cursor: pointer;">
                         <td style="font-weight: 600;">${item.companyName}</td>
                         <td>$ <fmt:formatNumber value="${item.totalRevenue}" type="number" groupingUsed="true" maxFractionDigits="0"/></td>
                         <td>$ <fmt:formatNumber value="${item.totalCost}" type="number" groupingUsed="true" maxFractionDigits="0"/></td>

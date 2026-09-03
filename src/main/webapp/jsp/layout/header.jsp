@@ -524,9 +524,14 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fa-regular fa-file-lines main-icon"></i> Documentation
+                <a href="#complianceSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                    <i class="fa-solid fa-shield-check main-icon"></i> Compliance & Billing
+                    <i class="fa-solid fa-angle-down caret"></i>
                 </a>
+                <ul class="sub-nav collapse" id="complianceSubmenu">
+                    <li><a href="${pageContext.request.contextPath}/compliance">Government Compliance</a></li>
+                    <li><a href="${pageContext.request.contextPath}/billing">Billing & Invoices</a></li>
+                </ul>
             </div>
             
             <div class="nav-item">
@@ -552,6 +557,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 <a href="#" class="nav-link">
                     <i class="fa-solid fa-chart-line main-icon"></i> Reports
                     <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/analytics" class="nav-link ${pageContext.request.requestURI.contains('/analytics') ? 'active' : ''}">
+                    <i class="fa-solid fa-chart-pie main-icon"></i> Analytics
                 </a>
             </div>
 

@@ -284,4 +284,137 @@ public class ProfitLossDAO {
         }
         return list;
     }
+
+    public com.nlogistic.model.ShipmentDrilldown getShipmentDrilldownDetails(int shipmentId) {
+        com.nlogistic.model.ShipmentDrilldown sd = new com.nlogistic.model.ShipmentDrilldown();
+        String query = "SELECT s.shipment_id, s.status, c.customer_name, v.vessel_name, cnt.container_number, " +
+                       "po.port_name as origin_port, po.country as origin_country, " +
+                       "pd.port_name as dest_port, pd.country as dest_country, " +
+                       "s.booking_date, pl.revenue_amount, pl.total_cost_amount, pl.profit_loss_amount " +
+                       "FROM shipment s " +
+                       "JOIN profit_loss pl ON s.shipment_id = pl.shipment_id " +
+                       "JOIN customers c ON s.customer_id = c.customer_id " +
+                       "LEFT JOIN vessels v ON s.vessel_id = v.vessel_id " +
+                       "JOIN containers cnt ON s.container_id = cnt.container_id " +
+                       "JOIN ports po ON s.origin_port_id = po.port_id " +
+                       "JOIN ports pd ON s.destination_port_id = pd.port_id " +
+                       "WHERE s.shipment_id = ?";
+        
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+             stmt.setInt(1, shipmentId);
+             try (ResultSet rs = stmt.executeQuery()) {
+                 if (rs.next()) {
+                     sd.setShipmentId(rs.getInt("shipment_id"));
+                     sd.setStatus(rs.getString("status"));
+                     sd.setCustomerName(rs.getString("customer_name"));
+                     sd.setVesselName(rs.getString("vessel_name") != null ? rs.getString("vessel_name") : "Unknown Vessel");
+                     sd.setContainerNumber(rs.getString("container_number"));
+                     sd.setOriginPortName(rs.getString("origin_port"));
+                     sd.setOriginCountry(rs.getString("origin_country"));
+                     sd.setDestinationPortName(rs.getString("dest_port"));
+                     sd.setDestinationCountry(rs.getString("dest_country"));
+                     
+                     java.sql.Date bDate = rs.getDate("booking_date");
+                     if (bDate != null) {
+                         java.time.LocalDate bLocal = bDate.toLocalDate();
+                         java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy");
+                         sd.setExpectedDate(bLocal.plusDays(30).format(fmt));
+                         sd.setActualDate(bLocal.plusDays(34).format(fmt));
+                     } else {
+                         sd.setExpectedDate("N/A");
+                         sd.setActualDate("N/A");
+                     }
+                     
+                     sd.setTotalRevenue(rs.getDouble("revenue_amount"));
+                     sd.setTotalCost(rs.getDouble("total_cost_amount"));
+                     sd.setNetLoss(rs.getDouble("profit_loss_amount"));
+                 }
+             }
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+        
+        java.util.List<Integer> reasonIds = new java.util.ArrayList<>();
+        String reasonQuery = "SELECT m.reason_id FROM profit_loss_reason_map m JOIN profit_loss pl ON m.pl_id = pl.pl_id WHERE pl.shipment_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(reasonQuery)) {
+             stmt.setInt(1, shipmentId);
+             try (ResultSet rs = stmt.executeQuery()) {
+                 while (rs.next()) {
+                     reasonIds.add(rs.getInt("reason_id"));
+                 }
+             }
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+        sd.setAssignedReasonIds(reasonIds);
+        
+        return sd;
+    }
+
+    public java.util.List<com.nlogistic.model.LossReason> getAllLossReasons() {
+        java.util.List<com.nlogistic.model.LossReason> list = new java.util.ArrayList<>();
+        String query = "SELECT * FROM loss_reasons";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+             while (rs.next()) {
+                 com.nlogistic.model.LossReason r = new com.nlogistic.model.LossReason();
+                 r.setReasonId(rs.getInt("reason_id"));
+                 r.setReasonCode(rs.getString("reason_code"));
+                 r.setReasonName(rs.getString("reason_name"));
+                 r.setDescription(rs.getString("description"));
+                 list.add(r);
+             }
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+        return list;
+    }
+
+    public void saveLossReasons(int shipmentId, String[] reasonIds) {
+        // 1. Get pl_id for the shipment
+        int plId = -1;
+        String plQuery = "SELECT pl_id FROM profit_loss WHERE shipment_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(plQuery)) {
+             stmt.setInt(1, shipmentId);
+             try (ResultSet rs = stmt.executeQuery()) {
+                 if (rs.next()) {
+                     plId = rs.getInt("pl_id");
+                 }
+             }
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+
+        if (plId == -1) return;
+
+        // 2. Delete existing reasons
+        String delQuery = "DELETE FROM profit_loss_reason_map WHERE pl_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(delQuery)) {
+             stmt.setInt(1, plId);
+             stmt.executeUpdate();
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+
+        // 3. Insert new reasons
+        if (reasonIds != null && reasonIds.length > 0) {
+            String insQuery = "INSERT INTO profit_loss_reason_map (pl_id, reason_id) VALUES (?, ?)";
+            try (Connection conn = DBConnectionManager.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(insQuery)) {
+                 for (String rId : reasonIds) {
+                     stmt.setInt(1, plId);
+                     stmt.setInt(2, Integer.parseInt(rId));
+                     stmt.addBatch();
+                 }
+                 stmt.executeBatch();
+            } catch (SQLException e) {
+                 e.printStackTrace();
+            }
+        }
+    }
 }
