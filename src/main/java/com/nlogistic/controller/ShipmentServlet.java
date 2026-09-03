@@ -2,6 +2,7 @@ package com.nlogistic.controller;
 
 import com.nlogistic.dao.*;
 import com.nlogistic.model.Shipment;
+import java.util.List;
 import com.nlogistic.model.User;
 
 import javax.servlet.ServletException;
@@ -29,8 +30,24 @@ public class ShipmentServlet extends HttpServlet {
             request.setAttribute("shipments", shipmentDAO.getAllShipments());
             request.getRequestDispatcher("/jsp/shipments.jsp").forward(request, response);
                                 } else if (pathInfo.equals("/tracking")) {
-            // Live Tracking Dashboard View
-            request.setAttribute("shipments", shipmentDAO.getAllShipments());
+            // Live Tracking Dashboard View with REAL DB Data
+            List<ShipmentDAO.ShipmentDetail> allShipments = shipmentDAO.getAllShipments();
+            request.setAttribute("shipments", allShipments);
+
+            int totalCount = allShipments.size();
+            long inTransitCount = allShipments.stream().filter(s -> "In Transit".equalsIgnoreCase(s.getStatus())).count();
+            long customsHoldCount = allShipments.stream().filter(s -> "Customs Hold".equalsIgnoreCase(s.getStatus())).count();
+            long deliveredCount = allShipments.stream().filter(s -> "Delivered".equalsIgnoreCase(s.getStatus())).count();
+            long activeCount = allShipments.stream().filter(s -> !"Delivered".equalsIgnoreCase(s.getStatus()) && !"Cancelled".equalsIgnoreCase(s.getStatus())).count();
+            long delayedCount = allShipments.stream().filter(s -> "Delayed".equalsIgnoreCase(s.getStatus())).count();
+
+            request.setAttribute("totalCount", totalCount);
+            request.setAttribute("activeCount", activeCount);
+            request.setAttribute("inTransitCount", inTransitCount);
+            request.setAttribute("customsHoldCount", customsHoldCount);
+            request.setAttribute("delayedCount", delayedCount);
+            request.setAttribute("vessels", vesselDAO.getAllVessels());
+
             request.getRequestDispatcher("/jsp/live_tracking_dashboard.jsp").forward(request, response);
                 } else if (pathInfo.equals("/tracking/detail")) {
             // Live Tracking Timeline Detail View

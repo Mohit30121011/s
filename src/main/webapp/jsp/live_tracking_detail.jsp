@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -129,9 +129,33 @@
                 <h4 style="margin: 0; font-weight: 800; color: var(--text-dark);">Shipment #SHP-${shipment.shipmentId}</h4>
             </div>
         </div>
-        <div class="badge-delayed">
-            <i class="fa-solid fa-triangle-exclamation"></i> Delayed by 4 Days
-        </div>
+        <c:choose>
+            <c:when test="${not empty shipment.delayDays && shipment.delayDays > 0}">
+                <div class="badge-delayed">
+                    <i class="ti ti-alert-triangle"></i> Delayed by ${shipment.delayDays} Days
+                </div>
+            </c:when>
+            <c:when test="${shipment.status == 'Delivered'}">
+                <div class="status-badge" style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                    <i class="ti ti-circle-check me-1"></i> Delivered Successfully
+                </div>
+            </c:when>
+            <c:when test="${shipment.status == 'In Transit'}">
+                <div class="status-badge" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                    <i class="ti ti-navigation me-1"></i> In Transit &bull; On Schedule
+                </div>
+            </c:when>
+            <c:when test="${shipment.status == 'Customs Hold'}">
+                <div class="status-badge" style="background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                    <i class="ti ti-clock me-1"></i> Customs Hold
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="status-badge" style="background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                    ${shipment.status}
+                </div>
+            </c:otherwise>
+        </c:choose>
     </div>
     
     <div class="summary-grid">
@@ -157,7 +181,10 @@
                 ${shipment.containerNumber} <i class="fa-regular fa-copy" style="color: var(--text-muted); cursor: pointer;"></i>
             </span>
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                Expected: 10 Jun 2025 &nbsp;|&nbsp; Actual: 14 Jun 2025
+                Expected: <fmt:formatDate value="${shipment.expectedArrivalDate != null ? shipment.expectedArrivalDate : shipment.eta}" pattern="dd MMM yyyy" />
+                <c:if test="${shipment.actualArrivalDate != null}">
+                    &nbsp;|&nbsp; Actual: <fmt:formatDate value="${shipment.actualArrivalDate}" pattern="dd MMM yyyy" />
+                </c:if>
             </div>
         </div>
     </div>
