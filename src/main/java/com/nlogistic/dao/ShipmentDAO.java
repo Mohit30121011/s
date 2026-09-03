@@ -80,7 +80,7 @@ public class ShipmentDAO {
                      "JOIN vessels v ON s.vessel_id = v.vessel_id " +
                      "JOIN ports p1 ON s.origin_port_id = p1.port_id " +
                      "JOIN ports p2 ON s.destination_port_id = p2.port_id " +
-                     "ORDER BY s.booking_date DESC";
+                     "ORDER BY s.shipment_id DESC";
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -182,6 +182,32 @@ public class ShipmentDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+        public int bookShipmentAndReturnId(Shipment s) {
+        String sql = "{CALL book_shipment(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection conn = DBConnectionManager.getConnection();
+             CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setInt(1, s.getCustomerId());
+            cs.setInt(2, s.getContainerId());
+            cs.setInt(3, s.getOriginPortId());
+            cs.setInt(4, s.getDestinationPortId());
+            cs.setInt(5, s.getVesselId());
+            cs.setString(6, s.getCargoDescription());
+            cs.setDouble(7, s.getCargoWeightKg());
+            cs.setDouble(8, s.getCargoVolumeCbm());
+            cs.setDouble(9, s.getCargoDeclaredValue());
+            cs.setDouble(10, s.getFreightCost());
+            cs.setDouble(11, s.getInsuranceCost());
+            cs.setDouble(12, s.getOtherCharges());
+            cs.setInt(13, s.getCreatedBy());
+            cs.registerOutParameter(14, Types.INTEGER);
+            cs.execute();
+            return cs.getInt(14);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     public boolean bookShipment(Shipment s) {
@@ -365,11 +391,12 @@ public class ShipmentDAO {
             ps.executeUpdate();
             
             // Also log to container_movements
-            String movementSql = "INSERT INTO container_movements (shipment_id, status, updated_by) VALUES (?, ?, ?)";
+            String movementSql = "INSERT INTO container_movements (shipment_id, status, checkpoint_location, updated_by) VALUES (?, ?, ?, ?)";
             try (PreparedStatement ms = conn.prepareStatement(movementSql)) {
                 ms.setInt(1, s.getShipmentId());
-                ms.setString(2, s.getStatus() + " (Full Edit)");
-                ms.setInt(3, userId);
+                ms.setString(2, s.getStatus());
+                ms.setString(3, "Full Edit Details");
+                ms.setInt(4, userId);
                 ms.executeUpdate();
             }
             

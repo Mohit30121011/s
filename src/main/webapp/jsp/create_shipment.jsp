@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
@@ -12,6 +12,15 @@
         <span class="active">New</span>
     </div>
 </div>
+
+<c:if test="${not empty sessionScope.errorMessage || param.error == 'true'}">
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 10px; border: 1px solid #FECACA; background: #FEF2F2; color: #991B1B; font-size: 14px; font-weight: 500;">
+        <i class="ti ti-alert-circle me-2" style="font-size: 17px; vertical-align: -2px;"></i>
+        ${not empty sessionScope.errorMessage ? sessionScope.errorMessage : 'Failed to book shipment. Please ensure cargo weight and volume do not exceed container capacity.'}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
 
 <form action="${pageContext.request.contextPath}/shipments/save" method="POST">
     <div class="card-custom">

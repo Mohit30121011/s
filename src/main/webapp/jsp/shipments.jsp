@@ -176,6 +176,21 @@
         </div>
     </div>
 
+        <c:if test="${not empty sessionScope.successMessage}">
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; color: #065F46; font-size: 14px; font-weight: 500;">
+            <i class="ti ti-circle-check me-2" style="font-size: 17px; vertical-align: -2px;"></i> ${sessionScope.successMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <c:remove var="successMessage" scope="session"/>
+    </c:if>
+    <c:if test="${not empty sessionScope.errorMessage}">
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 10px; border: 1px solid #FECACA; background: #FEF2F2; color: #991B1B; font-size: 14px; font-weight: 500;">
+            <i class="ti ti-alert-circle me-2" style="font-size: 17px; vertical-align: -2px;"></i> ${sessionScope.errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <c:remove var="errorMessage" scope="session"/>
+    </c:if>
+
     <!-- Filter & Action Row -->
     <div class="filter-card">
         <div class="filter-search">
