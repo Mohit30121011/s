@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnectionManager {
 	private static final String URL = "jdbc:mysql://localhost:3306/nlogistic_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
 	private static final String USER = "root";
-	private static final String PASSWORD = "NewPassword123!";       // root has password on local dev       
+	private static final String PASSWORD = "NewPassword123!";                
 
 	static {
 		try {
@@ -16,9 +16,9 @@ public class DBConnectionManager {
 			e.printStackTrace();
 			throw new RuntimeException("MySQL JDBC Driver not found.");
 		}     
-	}    
+	}              
 
-	public static Connection getConnection() throws SQLException {
+	public static Connection getConnection() throws SQLException {   
 		return DriverManager.getConnection(URL, USER, PASSWORD);
 	}   
 }         

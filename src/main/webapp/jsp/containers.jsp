@@ -34,7 +34,7 @@
     <div class="row g-4">
         <c:forEach var="container" items="${containers}">
             <div class="col-12 col-md-6 col-lg-4 col-xl-3">
-                <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; overflow: hidden; transition: transform 0.2s;">
+                <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; transition: transform 0.2s;">
                     <!-- Container Image Placeholder -->
                     <div style="height: 180px; background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #e2e8f0; position: relative;">
                         <c:choose>
@@ -96,7 +96,7 @@
                             </c:choose>
                             <c:if test="${sessionScope.user.roleId <= 3}">
                                 <div class="dropdown">
-                                    <button class="btn btn-light border" type="button" data-bs-toggle="dropdown" style="border-radius: 8px;">
+                                    <button class="btn btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 8px;">
                                         <i class="fa-solid fa-ellipsis-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
