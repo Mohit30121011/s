@@ -537,67 +537,17 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius: 10px; padding: 6px; border: 1px solid #E2E8F0;">
                                         <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#updateContainerModal${container.containerId}" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="openUpdateModal('${container.containerId}', '${container.containerNumber}', '${container.status}', '${container.currentPortId}')" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
                                                 <i class="ti ti-pencil" style="color: #FC8019;"></i> Update Status & Port
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider my-1"></li>
                                         <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:void(0)" onclick="if(confirm('Are you sure you want to delete container #${container.containerNumber}?')) { document.getElementById('deleteForm${container.containerId}').submit(); }" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
+                                            <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:void(0)" onclick="deleteContainer('${container.containerId}', '${container.containerNumber}')" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
                                                 <i class="ti ti-trash"></i> Delete Container
                                             </a>
                                         </li>
                                     </ul>
-                                </div>
-
-                                <form id="deleteForm${container.containerId}" action="<c:url value='/containers/delete'/>" method="POST" style="display:none;">
-                                    <input type="hidden" name="id" value="${container.containerId}">
-                                </form>
-
-                                <!-- Update Container Modal -->
-                                <div class="modal fade" id="updateContainerModal${container.containerId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content modal-content-custom">
-                                            <div class="modal-header modal-header-custom">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div style="width: 36px; height: 36px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 18px;">
-                                                        <i class="ti ti-edit"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="modal-title mb-0" style="font-weight: 700; font-size: 16px;">Update #${container.containerNumber}</h5>
-                                                    </div>
-                                                </div>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="<c:url value='/containers/update'/>" method="POST">
-                                                <input type="hidden" name="containerId" value="${container.containerId}">
-                                                <div class="modal-body p-4">
-                                                    <div class="mb-3">
-                                                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
-                                                        <select name="status" class="form-select form-select-custom" required>
-                                                            <option value="Available" ${container.status == 'Available' ? 'selected' : ''}>Available</option>
-                                                            <option value="In-Transit" ${container.status == 'In-Transit' ? 'selected' : ''}>In-Transit</option>
-                                                            <option value="Under Maintenance" ${container.status == 'Under Maintenance' ? 'selected' : ''}>Under Maintenance</option>
-                                                            <option value="Allocated" ${container.status == 'Allocated' ? 'selected' : ''}>Allocated</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
-                                                        <select name="portId" class="form-select form-select-custom" required>
-                                                            <c:forEach var="port" items="${ports}">
-                                                                <option value="${port.portId}" ${container.currentPortId == port.portId ? 'selected' : ''}>${port.portName} (${port.country})</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                                                    <button type="submit" class="modal-btn-submit">Save Changes</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
                                 </div>
                             </c:if>
                         </div>
@@ -634,6 +584,57 @@
         </div>
     </div>
 </div>
+
+
+<!-- Single Reusable Update Container Modal (Zero-Flicker Viewport Anchored) -->
+<div class="modal fade" id="singleUpdateContainerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-custom">
+            <div class="modal-header modal-header-custom">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 36px; height: 36px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 18px;">
+                        <i class="ti ti-edit"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0" style="font-weight: 700; font-size: 16px;">Update Container <span id="updateContainerNumberDisplay" style="color: #FC8019;"></span></h5>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<c:url value='/containers/update'/>" method="POST">
+                <input type="hidden" name="containerId" id="updateContainerId" value="">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
+                        <select name="status" id="updateStatusSelect" class="form-select form-select-custom" required>
+                            <option value="Available">Available</option>
+                            <option value="In-Transit">In-Transit</option>
+                            <option value="Under Maintenance">Under Maintenance</option>
+                            <option value="Allocated">Allocated</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
+                        <select name="portId" id="updatePortSelect" class="form-select form-select-custom" required>
+                            <c:forEach var="port" items="${ports}">
+                                <option value="${port.portId}">${port.portName} (${port.country})</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
+                    <button type="submit" class="modal-btn-submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form id="singleDeleteForm" action="<c:url value='/containers/delete'/>" method="POST" style="display:none;">
+    <input type="hidden" name="id" id="deleteContainerId" value="">
+</form>
 
 <!-- Add Container Modal -->
 <div class="modal fade" id="addContainerModal" tabindex="-1" aria-labelledby="addContainerModalLabel" aria-hidden="true">
@@ -710,6 +711,35 @@
 </div>
 
 <script>
+
+window.openUpdateModal = function(id, number, status, portId) {
+    document.getElementById('updateContainerId').value = id;
+    document.getElementById('updateContainerNumberDisplay').textContent = '#' + number;
+
+    const statusSelect = document.getElementById('updateStatusSelect');
+    if (statusSelect) {
+        statusSelect.value = status;
+        if (statusSelect.tomselect) statusSelect.tomselect.setValue(status);
+    }
+
+    const portSelect = document.getElementById('updatePortSelect');
+    if (portSelect) {
+        portSelect.value = portId;
+        if (portSelect.tomselect) portSelect.tomselect.setValue(portId);
+    }
+
+    const modalEl = document.getElementById('singleUpdateContainerModal');
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalInstance.show();
+};
+
+window.deleteContainer = function(id, number) {
+    if (confirm('Are you sure you want to delete container #' + number + '?')) {
+        document.getElementById('deleteContainerId').value = id;
+        document.getElementById('singleDeleteForm').submit();
+    }
+};
+
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('containerSearchInput');
     const clearBtn = document.getElementById('clearContainerSearchBtn');
