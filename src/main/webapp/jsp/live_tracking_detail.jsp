@@ -211,10 +211,24 @@
             <span class="summary-value">
                 <i class="ti ti-box" style="color: #64748B;"></i> ${shipment.containerNumber}
             </span>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                ETA: <fmt:formatDate value="${shipment.expectedArrivalDate != null ? shipment.expectedArrivalDate : shipment.eta}" pattern="dd MMM yyyy" />
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                <span style="color: #64748B;">ETA:</span>
+                <c:choose>
+                    <c:when test="${not empty shipment.expectedArrivalDate}">
+                        <strong style="color: #1F2937;"><fmt:formatDate value="${shipment.expectedArrivalDate}" pattern="MMM dd, yyyy" /></strong>
+                    </c:when>
+                    <c:when test="${not empty shipment.eta}">
+                        <strong style="color: #1F2937;"><fmt:formatDate value="${shipment.eta}" pattern="MMM dd, yyyy" /></strong>
+                    </c:when>
+                    <c:otherwise>
+                        <strong style="color: #1F2937;"><fmt:formatDate value="${shipment.bookingDate}" pattern="MMM dd, yyyy" /></strong>
+                    </c:otherwise>
+                </c:choose>
                 <c:if test="${shipment.actualArrivalDate != null}">
-                    &nbsp;|&nbsp; Arr: <fmt:formatDate value="${shipment.actualArrivalDate}" pattern="dd MMM yyyy" />
+                    <span style="color: #94A3B8;">&bull;</span>
+                    <span style="color: #059669; font-weight: 600;">
+                        <i class="ti ti-check"></i> Arr: <fmt:formatDate value="${shipment.actualArrivalDate}" pattern="MMM dd, yyyy" />
+                    </span>
                 </c:if>
             </div>
         </div>

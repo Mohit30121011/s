@@ -104,10 +104,12 @@ public class ShipmentDAO {
         return list;
     }
 
-        public ShipmentDetail getShipmentById(int id) {
+    public ShipmentDetail getShipmentById(int id) {
         ShipmentDetail d = null;
         String sql = "SELECT s.shipment_id, c.customer_name, cnt.container_number, v.vessel_name, " +
                      "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date, " +
+                     "COALESCE((SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id), s.booking_date) as last_updated, " +
+                     "COALESCE((SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1), DATE_ADD(s.booking_date, INTERVAL 14 DAY)) as eta, " +
                      "cm.expected_arrival_date, cm.actual_arrival_date, cm.delay_days " +
                      "FROM shipment s " +
                      "JOIN customers c ON s.customer_id = c.customer_id " +
@@ -132,8 +134,12 @@ public class ShipmentDAO {
                     d.setStatus(rs.getString("status"));
                     d.setBookingDate(rs.getDate("booking_date"));
                     d.setVesselName(rs.getString("vessel_name"));
-                d.setEta(rs.getDate("eta"));
-                d.setUpdatedAt(rs.getTimestamp("last_updated"));
+                    d.setEta(rs.getDate("eta"));
+                    d.setExpectedArrivalDate(rs.getDate("expected_arrival_date"));
+                    d.setActualArrivalDate(rs.getDate("actual_arrival_date"));
+                    Object delay = rs.getObject("delay_days");
+                    d.setDelayDays(delay != null ? ((Number) delay).intValue() : 0);
+                    d.setUpdatedAt(rs.getTimestamp("last_updated"));
                 }
             }
         } catch (Exception e) {
