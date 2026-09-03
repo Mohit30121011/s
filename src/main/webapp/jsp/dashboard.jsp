@@ -552,7 +552,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     <!-- Row 3: Routes + Containers + Alerts -->
     <div class="grid-3col">
         <!-- Top Routes -->
-        <div class="card">
+        <div class="card" id="top-routes-card">
             <div class="card-header">
                 <h3 class="card-title">Top Shipping Routes</h3>
                 <div class="dropdown">
@@ -815,6 +815,35 @@ var STATUS_COLORS = {
     });
 })();
 </script>
+
+<style>
+    @keyframes targetHighlightPulse {
+        0% { box-shadow: 0 0 0 0 rgba(252, 128, 25, 0.6) !important; border-color: #FC8019 !important; }
+        40% { box-shadow: 0 0 0 8px rgba(252, 128, 25, 0.25) !important; border-color: #FC8019 !important; transform: translateY(-2px); }
+        100% { box-shadow: var(--shadow-sm) !important; border-color: var(--border-color) !important; transform: translateY(0); }
+    }
+    .highlight-target {
+        animation: targetHighlightPulse 2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+</style>
+<script>
+    function handleDashboardHashHighlight() {
+        if (window.location.hash) {
+            const targetId = window.location.hash.substring(1);
+            const el = document.getElementById(targetId);
+            if (el) {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlight-target');
+                    setTimeout(() => el.classList.remove('highlight-target'), 2400);
+                }, 150);
+            }
+        }
+    }
+    window.addEventListener('DOMContentLoaded', handleDashboardHashHighlight);
+    window.addEventListener('hashchange', handleDashboardHashHighlight);
+</script>
+
 <jsp:include page="/jsp/layout/footer.jsp" />
 </body>
 </html>

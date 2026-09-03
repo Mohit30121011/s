@@ -803,39 +803,301 @@
             z-index: 999;
         }
 
+        /* ==========================================================================
+           OMNIBOX GLOBAL SEARCH BAR & SUGGESTION PALETTE
+           ========================================================================== */
         .search-bar {
             position: relative;
-            width: 400px;
+            width: 420px;
+            transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
-        .search-bar i {
+        .search-bar.is-focused {
+            width: 480px;
+        }
+
+        .search-bar i.search-icon {
             position: absolute;
-            left: 16px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            color: #9CA3AF;
+            color: #94A3B8;
+            font-size: 16px;
+            pointer-events: none;
+            transition: color 0.15s ease;
+            z-index: 2;
         }
-        
+        .search-bar.is-focused i.search-icon {
+            color: #FC8019;
+        }
+
         .search-bar input {
             width: 100%;
-            padding: 10px 16px 10px 40px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            background: #F9FAFB;
-            outline: none;
+            height: 44px;
+            padding: 10px 68px 10px 44px !important;
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 50px !important;
+            font-size: 13.5px !important;
+            font-weight: 500;
+            color: #0F172A !important;
+            background: #F8FAFC !important;
+            outline: none !important;
+            transition: all 0.2s ease !important;
         }
-        
+        .search-bar input:focus {
+            background: #FFFFFF !important;
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 36px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #E2E8F0;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.15s ease;
+            z-index: 3;
+        }
+        .search-clear-btn:hover {
+            background: #CBD5E1;
+            color: #0F172A;
+        }
+
         .search-bar .shortcut {
             position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 11px;
-            background: #E5E7EB;
-            padding: 2px 6px;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            color: #64748B;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-weight: 700;
+            pointer-events: none;
+            line-height: 1.2;
+            z-index: 2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        /* Omnibox Floating Suggestion Palette */
+        .nl-search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            min-width: 480px;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+            z-index: 1050;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: omniboxFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes omniboxFadeIn {
+            0% { opacity: 0; transform: translateY(-6px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .nl-search-header-hint {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94A3B8;
+            background: #FAFAFA;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .nl-search-header-hint span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nl-search-results-list {
+            max-height: 330px;
+            overflow-y: auto;
+            padding: 6px;
+            scroll-behavior: smooth;
+        }
+        .nl-search-results-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .nl-search-results-list::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 10px;
+        }
+
+        .nl-search-group-header {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #94A3B8;
+            padding: 8px 12px 4px;
+        }
+
+        .nl-search-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #0F172A;
+            transition: all 0.12s ease;
+            margin-bottom: 2px;
+        }
+        .nl-search-item:hover,
+        .nl-search-item.active-item {
+            background: #FFF7ED;
+            text-decoration: none;
+            color: #0F172A;
+        }
+
+        .nl-search-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+        }
+        .nl-search-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
+        }
+        .nl-search-item:hover .nl-search-item-icon,
+        .nl-search-item.active-item .nl-search-item-icon {
+            transform: scale(1.08);
+        }
+
+        .nl-search-item-icon.orange { background: #FFF2EB; color: #FC8019; }
+        .nl-search-item-icon.blue   { background: #EFF6FF; color: #2563EB; }
+        .nl-search-item-icon.green  { background: #ECFDF5; color: #059669; }
+        .nl-search-item-icon.purple { background: #FAF5FF; color: #7C3AED; }
+        .nl-search-item-icon.red    { background: #FEF2F2; color: #DC2626; }
+        .nl-search-item-icon.slate  { background: #F1F5F9; color: #475569; }
+
+        .nl-search-item-content {
+            min-width: 0;
+            flex: 1;
+        }
+        .nl-search-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+        .nl-search-mark {
+            background: #FEF08A;
+            color: #854D0E;
+            font-weight: 700;
+            padding: 0 1px;
+            border-radius: 2px;
+        }
+        .nl-search-item-sub {
+            font-size: 11.5px;
+            color: #64748B;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+        }
+
+        .nl-search-item-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .nl-search-item-badge {
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 5px;
+            background: #F1F5F9;
+            color: #475569;
+        }
+        .nl-search-item.active-item .nl-search-item-badge {
+            background: #FFEDD5;
+            color: #C2410C;
+        }
+        .nl-search-item i.item-arrow {
+            font-size: 13px;
+            color: #94A3B8;
+            transition: transform 0.15s ease, color 0.15s ease;
+        }
+        .nl-search-item:hover i.item-arrow,
+        .nl-search-item.active-item i.item-arrow {
+            color: #FC8019;
+            transform: translateX(2px);
+        }
+
+        .nl-search-empty {
+            padding: 28px 16px;
+            text-align: center;
+            color: #64748B;
+            font-size: 13px;
+        }
+        .nl-search-empty i {
+            font-size: 26px;
+            color: #94A3B8;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .nl-search-footer-bar {
+            background: #F8FAFC;
+            border-top: 1px solid #F1F5F9;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 11px;
+            color: #64748B;
+        }
+        .nl-search-footer-bar kbd {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+            padding: 1px 5px;
             border-radius: 4px;
-            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            color: #334155;
         }
 
         .header-actions {
@@ -1785,10 +2047,27 @@ document.addEventListener('DOMContentLoaded', function() {
         <c:if test="${empty requestScope.hideTopHeader and empty requestScope.hideSidebar and not empty sessionScope.user}">
         <!-- Top Navbar -->
         <header class="top-header">
-            <div class="search-bar">
-                <i class="ti ti-search"></i>
-                <input type="text" placeholder="Search shipments, containers, vessels...">
-                <span class="shortcut">/</span>
+            <div class="search-bar" id="globalOmniboxWrap">
+                <i class="ti ti-search search-icon"></i>
+                <input type="text" id="globalOmniboxInput" placeholder="Search shipments, routes, containers, actions..." autocomplete="off" spellcheck="false">
+                <button type="button" class="search-clear-btn" id="globalOmniboxClear" title="Clear search" style="display: none;">
+                    <i class="ti ti-x"></i>
+                </button>
+                <span class="shortcut" id="globalOmniboxShortcut" title="Press / to search">/</span>
+
+                <!-- Suggestion Dropdown Palette -->
+                <div class="nl-search-dropdown" id="globalOmniboxDropdown" style="display: none;">
+                    <div class="nl-search-header-hint">
+                        <span><i class="ti ti-command"></i> Quick Navigation &amp; Actions</span>
+                        <span>ESC to close</span>
+                    </div>
+                    <div class="nl-search-results-list" id="globalOmniboxResults"></div>
+                    <div class="nl-search-footer-bar">
+                        <span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> Navigate</span>
+                        <span><kbd>&crarr;</kbd> Open</span>
+                        <span><kbd>ESC</kbd> Close</span>
+                    </div>
+                </div>
             </div>
 
             <div class="header-actions">
@@ -1821,6 +2100,401 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </header>
         </c:if>
+
+<script>
+(function() {
+    const ctx = '${pageContext.request.contextPath}';
+
+    const OMNIBOX_DATA = [
+        // Shipments Module
+        {
+            title: "All Shipments",
+            url: ctx + "/shipments",
+            category: "Shipments & Logistics",
+            subtitle: "View, filter and manage all ocean cargo shipments",
+            keywords: "shipment shipments all list active booked ocean freight cargo shi",
+            icon: "ti ti-package",
+            color: "orange",
+            badge: "Page"
+        },
+        {
+            title: "Live Shipment Tracking",
+            url: ctx + "/shipments/tracking",
+            category: "Shipments & Logistics",
+            subtitle: "Interactive vessel positions, real-time status & ETA telemetry",
+            keywords: "live tracking track eta location map status shipment gps vessel shi",
+            icon: "ti ti-navigation",
+            color: "blue",
+            badge: "Live"
+        },
+        {
+            title: "Create New Shipment",
+            url: ctx + "/shipments/create",
+            category: "Shipments & Logistics",
+            subtitle: "Book new containerized cargo shipment with route config",
+            keywords: "create shipment new booking book add shipment cargo freight shi",
+            icon: "ti ti-plus",
+            color: "green",
+            badge: "Action"
+        },
+        {
+            title: "Shipment Financial Drilldown",
+            url: ctx + "/shipments/drilldown",
+            category: "Shipments & Logistics",
+            subtitle: "Unit economics, cargo loss attribution & financial audit",
+            keywords: "shipment drilldown financial loss profit audit margin revenue cost shi",
+            icon: "ti ti-file-analytics",
+            color: "purple",
+            badge: "Audit"
+        },
+
+        // Analytics & Deep Sections (Top Shipping Routes & Top Loss Reasons)
+        {
+            title: "Top Shipping Routes",
+            url: ctx + "/dashboard#top-routes-card",
+            category: "Analytics & Widgets",
+            subtitle: "Busiest global maritime shipping corridors & shipment share",
+            keywords: "top shipping routes top routes busiest route shipping routes ocean transit rou top",
+            icon: "ti ti-route",
+            color: "orange",
+            badge: "Widget",
+            isAnchor: true,
+            targetId: "top-routes-card"
+        },
+        {
+            title: "Top Loss Reasons & P&L Analytics",
+            url: ctx + "/finance/profit-loss",
+            category: "Analytics & Widgets",
+            subtitle: "Root-cause loss breakdown: Weather, Delays, Sea Traffic, Damaged Product",
+            keywords: "top loss reasons loss reasons profit loss financial analytics damages delays weather sea traffic los top rea",
+            icon: "ti ti-alert-triangle",
+            color: "red",
+            badge: "Finance"
+        },
+        {
+            title: "Containers Overview Widget",
+            url: ctx + "/dashboard#containers-overview-card",
+            category: "Analytics & Widgets",
+            subtitle: "Fleet breakdown: Dry, Reefer, Open Top, Flat Rack, Tank",
+            keywords: "containers overview widget dashboard fleet share con",
+            icon: "ti ti-chart-pie",
+            color: "blue",
+            badge: "Widget",
+            isAnchor: true,
+            targetId: "containers-overview-card"
+        },
+        {
+            title: "Recent System Alerts",
+            url: ctx + "/dashboard#recent-alerts-card",
+            category: "Analytics & Widgets",
+            subtitle: "Real-time audit log events, security warnings & status alerts",
+            keywords: "alerts recent alerts audit log notifications security warnings",
+            icon: "ti ti-bell",
+            color: "orange",
+            badge: "Widget",
+            isAnchor: true,
+            targetId: "recent-alerts-card"
+        },
+
+        // Containers & Operations
+        {
+            title: "Container Master Catalog",
+            url: ctx + "/containers",
+            category: "Containers & Operations",
+            subtitle: "Container master fleet catalog, ISO dimensions & tare weights",
+            keywords: "container containers catalog master fleet dry reefer tank flat rack con",
+            icon: "ti ti-box",
+            color: "blue",
+            badge: "Catalog"
+        },
+        {
+            title: "Allocate Container",
+            url: ctx + "/allocate-container",
+            category: "Containers & Operations",
+            subtitle: "Dynamic pricing algorithm, seasonal multipliers & cargo capacity allocation",
+            keywords: "allocate container allocation assign booking cargo capacity pricing con",
+            icon: "ti ti-truck-loading",
+            color: "orange",
+            badge: "Pricing"
+        },
+        {
+            title: "Inventory Movement Ledger",
+            url: ctx + "/ledger",
+            category: "Containers & Operations",
+            subtitle: "Tamper-evident append-only ledger of container check-ins & releases",
+            keywords: "ledger inventory movement history audit stock gate checkin release inv leg",
+            icon: "ti ti-book",
+            color: "purple",
+            badge: "Ledger"
+        },
+
+        // Governance & Administration
+        {
+            title: "Company Approvals",
+            url: ctx + "/approvals",
+            category: "Administration",
+            subtitle: "Super Admin verification & activation portal for new companies",
+            keywords: "approvals approve company pending verification activate super admin app comp",
+            icon: "ti ti-shield-check",
+            color: "green",
+            badge: "Super Admin"
+        },
+        {
+            title: "User Management & RBAC",
+            url: ctx + "/users",
+            category: "Administration",
+            subtitle: "Manage staff accounts, user permissions and access control roles",
+            keywords: "users user management staff rbac roles permissions accounts user",
+            icon: "ti ti-users",
+            color: "purple",
+            badge: "Admin"
+        },
+        {
+            title: "Executive Dashboard",
+            url: ctx + "/dashboard",
+            category: "Overview",
+            subtitle: "Main enterprise command center and logistics telemetry",
+            keywords: "dashboard home main executive kpi overview telemetry dash",
+            icon: "ti ti-dashboard",
+            color: "blue",
+            badge: "Home"
+        },
+        {
+            title: "My Account Profile",
+            url: ctx + "/profile",
+            category: "Account",
+            subtitle: "User credentials, security password settings & personal preferences",
+            keywords: "profile account settings password security user info prof",
+            icon: "ti ti-user",
+            color: "slate",
+            badge: "Profile"
+        }
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const wrap = document.getElementById('globalOmniboxWrap');
+        const input = document.getElementById('globalOmniboxInput');
+        const dropdown = document.getElementById('globalOmniboxDropdown');
+        const results = document.getElementById('globalOmniboxResults');
+        const clearBtn = document.getElementById('globalOmniboxClear');
+        const shortcut = document.getElementById('globalOmniboxShortcut');
+
+        if (!input || !dropdown) return;
+
+        let activeIndex = -1;
+        let currentFilteredItems = [];
+
+        // Global '/' key listener to focus search
+        document.addEventListener('keydown', function(e) {
+            if (e.key === '/' && document.activeElement !== input) {
+                const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+                    e.preventDefault();
+                    input.focus();
+                    input.select();
+                }
+            }
+        });
+
+        // Focus & Blur
+        input.addEventListener('focus', function() {
+            wrap.classList.add('is-focused');
+            renderSuggestions(input.value.trim());
+            dropdown.style.display = 'flex';
+        });
+
+        // Input handler
+        input.addEventListener('input', function() {
+            const query = input.value.trim();
+            if (query.length > 0) {
+                clearBtn.style.display = 'flex';
+                shortcut.style.display = 'none';
+            } else {
+                clearBtn.style.display = 'none';
+                shortcut.style.display = 'block';
+            }
+            renderSuggestions(query);
+            dropdown.style.display = 'flex';
+        });
+
+        // Clear button
+        clearBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            input.value = '';
+            clearBtn.style.display = 'none';
+            shortcut.style.display = 'block';
+            input.focus();
+            renderSuggestions('');
+        });
+
+        // Keyboard navigation inside dropdown
+        input.addEventListener('keydown', function(e) {
+            const items = results.querySelectorAll('.nl-search-item');
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = (activeIndex + 1) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = (activeIndex - 1 + items.length) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (activeIndex >= 0 && activeIndex < currentFilteredItems.length) {
+                    selectOmniboxItem(currentFilteredItems[activeIndex]);
+                } else if (items.length > 0) {
+                    selectOmniboxItem(currentFilteredItems[0]);
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+                wrap.classList.remove('is-focused');
+                input.blur();
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!wrap.contains(e.target)) {
+                dropdown.style.display = 'none';
+                wrap.classList.remove('is-focused');
+            }
+        });
+
+        function updateActiveItem(itemElements) {
+            itemElements.forEach((el, i) => {
+                if (i === activeIndex) {
+                    el.classList.add('active-item');
+                    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                } else {
+                    el.classList.remove('active-item');
+                }
+            });
+        }
+
+        function highlightMatch(text, query) {
+            if (!query) return text;
+            const regex = new RegExp('(' + escapeRegex(query) + ')', 'gi');
+            return text.replace(regex, '<mark class="nl-search-mark">$1</mark>');
+        }
+
+                function escapeRegex(str) {
+            return str.split('').map(function(ch) {
+                return ('\\^$*+?.()|{}[]'.indexOf(ch) !== -1) ? '\\' + ch : ch;
+            }).join('');
+        }()|[\]\\]/g, '\\$&');
+        }
+
+        function renderSuggestions(query) {
+            activeIndex = -1;
+            results.innerHTML = '';
+            const q = query.toLowerCase();
+
+            if (!q) {
+                // Show featured navigation when input is empty
+                currentFilteredItems = OMNIBOX_DATA.slice(0, 8);
+            } else {
+                currentFilteredItems = OMNIBOX_DATA.filter(item => {
+                    return item.title.toLowerCase().includes(q) ||
+                           item.keywords.toLowerCase().includes(q) ||
+                           item.subtitle.toLowerCase().includes(q) ||
+                           item.category.toLowerCase().includes(q);
+                });
+
+                // Sort: items whose title starts with query come first
+                currentFilteredItems.sort((a, b) => {
+                    const aStarts = a.title.toLowerCase().startsWith(q);
+                    const bStarts = b.title.toLowerCase().startsWith(q);
+                    if (aStarts && !bStarts) return -1;
+                    if (!aStarts && bStarts) return 1;
+                    return 0;
+                });
+            }
+
+            if (currentFilteredItems.length === 0) {
+                results.innerHTML = '<div class="nl-search-empty"><i class="ti ti-search-off"></i>No results found for "<strong>' + escapeHtml(query) + '</strong>"</div>';
+                return;
+            }
+
+            // Group by category
+            const groups = {};
+            currentFilteredItems.forEach(item => {
+                if (!groups[item.category]) groups[item.category] = [];
+                groups[item.category].push(item);
+            });
+
+            let globalIdx = 0;
+            for (const category in groups) {
+                const groupTitle = document.createElement('div');
+                groupTitle.className = 'nl-search-group-header';
+                groupTitle.textContent = category;
+                results.appendChild(groupTitle);
+
+                groups[category].forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'nl-search-item';
+                    itemEl.dataset.index = globalIdx;
+
+                    const highlightedTitle = highlightMatch(item.title, query);
+                    const highlightedSub = highlightMatch(item.subtitle, query);
+
+                    itemEl.innerHTML = 
+                        '<div class="nl-search-item-left">' +
+                            '<div class="nl-search-item-icon ' + item.color + '">' +
+                                '<i class="' + item.icon + '"></i>' +
+                            '</div>' +
+                            '<div class="nl-search-item-content">' +
+                                '<div class="nl-search-item-title">' + highlightedTitle + '</div>' +
+                                '<div class="nl-search-item-sub">' + highlightedSub + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="nl-search-item-right">' +
+                            '<span class="nl-search-item-badge">' + item.badge + '</span>' +
+                            '<i class="ti ti-chevron-right item-arrow"></i>' +
+                        '</div>';
+
+                    itemEl.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        selectOmniboxItem(item);
+                    });
+
+                    results.appendChild(itemEl);
+                    globalIdx++;
+                });
+            }
+        }
+
+        function selectOmniboxItem(item) {
+            dropdown.style.display = 'none';
+            wrap.classList.remove('is-focused');
+            input.blur();
+
+            if (item.isAnchor && item.targetId) {
+                const isDashboard = window.location.pathname.endsWith('/dashboard') || window.location.pathname.endsWith('/dashboard/');
+                if (isDashboard) {
+                    const el = document.getElementById(item.targetId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.classList.add('highlight-target');
+                        setTimeout(() => el.classList.remove('highlight-target'), 2400);
+                        history.pushState(null, null, '#' + item.targetId);
+                        return;
+                    }
+                }
+            }
+
+            // Normal page navigation
+            window.location.href = item.url;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    });
+})();
+</script>
+
 
         <!-- Form Area / Main Content Area -->
         <div class="content-area" <c:if test="${not empty requestScope.hideSidebar or empty sessionScope.user}">style="padding: 0 !important; width: 100% !important; min-height: 100vh !important;"</c:if>>
