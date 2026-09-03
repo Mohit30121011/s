@@ -126,10 +126,40 @@
     .form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
     
     .btn-icon-action {
-        background: transparent; border: none; font-size: 14px; padding: 6px; border-radius: 6px;
-        transition: background 0.2s; cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.18s ease;
+        padding: 0;
     }
-    .btn-icon-action:hover { background: #F3F4F6; }
+    .btn-icon-action.edit {
+        color: #475569;
+    }
+    .btn-icon-action.edit:hover {
+        color: #2563EB;
+        background: #EFF6FF;
+        border-color: #BFDBFE;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+    }
+    .btn-icon-action.delete {
+        color: #475569;
+    }
+    .btn-icon-action.delete:hover {
+        color: #DC2626;
+        background: #FEF2F2;
+        border-color: #FECACA;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
+    }
 </style>
 
 <div class="main-content">
@@ -191,11 +221,11 @@
                         </td>
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="${pageContext.request.contextPath}/shipments/edit?id=${s.shipmentId}" class="btn-icon-action" style="color: #0d6efd; text-decoration: none;" title="Edit Shipment">
-                                    <i class="fa-solid fa-pen"></i>
+                                <a href="${pageContext.request.contextPath}/shipments/edit?id=${s.shipmentId}" class="btn-icon-action edit" title="Edit Shipment">
+                                    <i class="ti ti-pencil"></i>
                                 </a>
-                                <button class="btn-icon-action" style="color: #dc3545;" data-bs-toggle="modal" data-bs-target="#deleteModal${s.shipmentId}" title="Delete Shipment">
-                                    <i class="fa-solid fa-trash"></i>
+                                <button class="btn-icon-action delete" data-bs-toggle="modal" data-bs-target="#deleteModal${s.shipmentId}" title="Delete Shipment">
+                                    <i class="ti ti-trash"></i>
                                 </button>
                             </div>
                         </td>

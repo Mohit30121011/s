@@ -100,9 +100,9 @@
                                         <i class="fa-solid fa-ellipsis-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#updateContainerModal${container.containerId}"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Update</a></li>
+                                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#updateContainerModal${container.containerId}"><i class="ti ti-pencil me-2 text-primary"></i>Update</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="if(confirm('Delete Container?')) { document.getElementById('deleteForm${container.containerId}').submit(); }"><i class="fa-solid fa-trash me-2"></i>Delete</a></li>
+                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="if(confirm('Delete Container?')) { document.getElementById('deleteForm${container.containerId}').submit(); }"><i class="ti ti-trash me-2"></i>Delete</a></li>
                                     </ul>
                                 </div>
                                 <form id="deleteForm${container.containerId}" action="<c:url value='/containers/delete'/>" method="POST" style="display:none;">

@@ -51,7 +51,7 @@
                                     <c:choose>
                                         <c:when test="${entry.type == 'IN'}"><span class="badge-in"><i class="fa-solid fa-arrow-down me-1"></i> IN</span></c:when>
                                         <c:when test="${entry.type == 'OUT'}"><span class="badge-out"><i class="fa-solid fa-arrow-up me-1"></i> OUT</span></c:when>
-                                        <c:otherwise><span class="badge-adj"><i class="fa-solid fa-pen-to-square me-1"></i> ADJ</span></c:otherwise>
+                                        <c:otherwise><span class="badge-adj"><i class="ti ti-pencil me-1"></i> ADJ</span></c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td class="fw-bold text-end 
