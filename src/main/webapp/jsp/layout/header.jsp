@@ -1642,7 +1642,30 @@
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
-                /* ==========================================================================
+                
+        /* ==========================================================================
+           GLOBAL AUTO-FLIP (DROPUP) FOR EDGE / VIEWPORT COLLISION DETECTION
+           ========================================================================== */
+        .ts-dropdown.ts-dropup {
+            margin-top: 0 !important;
+            margin-bottom: 4px !important;
+            border-radius: 12px !important;
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.12), 0 -8px 10px -6px rgba(0, 0, 0, 0.08) !important;
+            animation: dropUpIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .ts-dropdown.ts-dropup.nl-page-size-ts,
+        .nl-page-size-ts .ts-dropdown.ts-dropup {
+            border-radius: 10px !important;
+            margin-top: 0 !important;
+            margin-bottom: 4px !important;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.14) !important;
+        }
+        @keyframes dropUpIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==========================================================================
            GLOBAL PAGINATION ROWS-PER-PAGE TOMSELECT DROPDOWN
            ========================================================================== */
         .ts-wrapper.nl-page-size-ts {
