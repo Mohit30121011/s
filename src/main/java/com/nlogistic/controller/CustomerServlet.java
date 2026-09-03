@@ -27,9 +27,7 @@ public class CustomerServlet extends HttpServlet {
         }
 
         List<Customer> customers = customerDAO.getAllCustomers();
-        List<User> users = new UserDAO().getAllUsers();
         request.setAttribute("customers", customers);
-        request.setAttribute("users", users);
         request.getRequestDispatcher("/jsp/customers.jsp").forward(request, response);
     }
 
@@ -52,21 +50,30 @@ public class CustomerServlet extends HttpServlet {
                 } catch (NumberFormatException e) {}
             }
             
-            String userIdStr = request.getParameter("userId");
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
             String kycDocPath = request.getParameter("kycDocPath");
-            int linkedUserId = user.getUserId();
-            if (userIdStr != null && !userIdStr.trim().isEmpty()) {
-                try { linkedUserId = Integer.parseInt(userIdStr); } catch (Exception e) {}
+            
+            // 1. Create User account for Customer (Role ID = 5)
+            UserDAO userDAO = new UserDAO();
+            // Using customerName as username, or email prefix
+            String username = email.split("@")[0] + "_" + System.currentTimeMillis() % 1000;
+            userDAO.registerUser(username, email, password, "", 5, null, "Active");
+            
+            // 2. Fetch the newly created User to get user_id
+            User newUser = userDAO.getUserByUsername(username);
+            
+            if (newUser != null) {
+                // 3. Create Customer profile linked to the new user
+                Customer c = new Customer();
+                c.setUserId(newUser.getUserId());
+                c.setCustomerName(name);
+                c.setAddress(address);
+                c.setCreditLimit(creditLimit);
+                c.setKycDocPath(kycDocPath != null ? kycDocPath : "");
+                
+                customerDAO.registerCustomer(c);
             }
-            
-            Customer c = new Customer();
-            c.setUserId(linkedUserId);
-            c.setCustomerName(name);
-            c.setAddress(address);
-            c.setCreditLimit(creditLimit);
-            c.setKycDocPath(kycDocPath != null ? kycDocPath : "");
-            
-            customerDAO.registerCustomer(c);
             request.getSession().setAttribute("successMessage", "Customer added successfully.");
         }
         

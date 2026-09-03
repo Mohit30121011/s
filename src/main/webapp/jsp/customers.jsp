@@ -126,13 +126,12 @@
                   <input type="text" class="form-control" name="address" required placeholder="e.g. 123 Logistics Way, NY">
               </div>
               <div class="mb-3">
-                  <label class="form-label text-muted small fw-medium">Linked User Account</label>
-                  <select class="form-select" name="userId" required>
-                      <option value="">Select a User</option>
-                      <c:forEach var="u" items="${users}">
-                          <option value="${u.userId}">${u.username} (${u.email})</option>
-                      </c:forEach>
-                  </select>
+                  <label class="form-label text-muted small fw-medium">Customer Login Email</label>
+                  <input type="email" class="form-control" name="email" required placeholder="e.g. customer@example.com">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">Customer Login Password</label>
+                  <input type="password" class="form-control" name="password" required placeholder="Enter temporary password">
               </div>
               <div class="mb-3">
                   <label class="form-label text-muted small fw-medium">KYC Document Path</label>
