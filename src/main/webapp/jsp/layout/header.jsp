@@ -1250,6 +1250,7 @@
     </style>
 </head>
 <body>
+    <c:if test="${empty requestScope.hideSidebar and not empty sessionScope.user}">
         <aside class="sidebar">
         <!-- Brand Header -->
         <div class="brand-logo-container d-flex align-items-center justify-content-between">
@@ -1552,11 +1553,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
     </aside>
+    </c:if>
 
     <!-- Main Wrapper -->
-    <main class="main-wrapper" <c:if test="${not empty requestScope.hideSidebar}">style="margin-left: 0;"</c:if>>
+    <main class="main-wrapper" style="<c:if test='${not empty requestScope.hideSidebar or empty sessionScope.user}'>margin-left: 0 !important; width: 100% !important; min-height: 100vh !important;</c:if>">
 
-        <c:if test="${empty requestScope.hideTopHeader}">
+        <c:if test="${empty requestScope.hideTopHeader and empty requestScope.hideSidebar and not empty sessionScope.user}">
         <!-- Top Navbar -->
         <header class="top-header">
             <div class="search-bar">
@@ -1597,4 +1599,4 @@ document.addEventListener('DOMContentLoaded', function() {
         </c:if>
 
         <!-- Form Area / Main Content Area -->
-        <div class="content-area">
+        <div class="content-area" <c:if test="${not empty requestScope.hideSidebar or empty sessionScope.user}">style="padding: 0 !important; width: 100% !important; min-height: 100vh !important;"</c:if>>
