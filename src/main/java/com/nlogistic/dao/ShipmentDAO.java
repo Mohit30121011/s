@@ -236,19 +236,29 @@ public class ShipmentDAO {
         }
     }
     
-    public boolean updateStatus(int shipmentId, String status, int updatedBy) {
+    public boolean updateStatus(int shipmentId, String status, String checkpointLocation, int updatedBy) throws SQLException {
         String sql = "{CALL update_movement_status(?, ?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
             cs.setInt(1, shipmentId);
             cs.setString(2, status);
-            cs.setString(3, "Checkpoint Update"); // Default location
-            cs.setNull(4, Types.DATE); // expected
-            cs.setNull(5, Types.DATE); // actual
+            cs.setString(3, (checkpointLocation != null && !checkpointLocation.trim().isEmpty()) ? checkpointLocation.trim() : "Checkpoint Milestone Recorded");
+            cs.setNull(4, Types.DATE);
+            if ("Arrived".equalsIgnoreCase(status) || "Delivered".equalsIgnoreCase(status)) {
+                cs.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
+            } else {
+                cs.setNull(5, Types.DATE);
+            }
             cs.setInt(6, updatedBy);
             cs.execute();
             return true;
-        } catch (Exception e) {
+        }
+    }
+
+    public boolean updateStatus(int shipmentId, String status, int updatedBy) {
+        try {
+            return updateStatus(shipmentId, status, "Checkpoint Update", updatedBy);
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }

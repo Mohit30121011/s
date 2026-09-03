@@ -146,19 +146,32 @@ public class ShipmentServlet extends HttpServlet {
             }
             response.sendRedirect(request.getContextPath() + "/shipments");
 } else if (pathInfo != null && pathInfo.equals("/updateStatus")) {
-            int shipmentId = Integer.parseInt(request.getParameter("shipmentId"));
+            String shipmentIdStr = request.getParameter("shipmentId");
             String status = request.getParameter("status");
-            shipmentDAO.updateStatus(shipmentId, status, currentUser.getUserId());
-            response.sendRedirect(request.getContextPath() + "/shipments");
+            String remarks = request.getParameter("remarks");
+            String redirectUrl = request.getParameter("redirectUrl");
+            try {
+                int shipmentId = Integer.parseInt(shipmentIdStr);
+                int userId = (currentUser != null) ? currentUser.getUserId() : 1;
+                shipmentDAO.updateStatus(shipmentId, status, remarks, userId);
+                session.setAttribute("successMessage", "Checkpoint recorded: Shipment #SHP-" + shipmentId + " status updated to '" + status + "'!");
+
+                if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+                    response.sendRedirect(redirectUrl);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/shipments/tracking/detail?id=SHP-" + shipmentId);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("errorMessage", "Failed to record checkpoint: " + e.getMessage());
+                if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+                    response.sendRedirect(redirectUrl);
+                } else if (shipmentIdStr != null) {
+                    response.sendRedirect(request.getContextPath() + "/shipments/tracking/detail?id=SHP-" + shipmentIdStr);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/shipments");
+                }
+            }
         }
     }
 }
-
-
-
-
-
-
-
-
-
