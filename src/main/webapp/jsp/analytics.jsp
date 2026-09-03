@@ -169,7 +169,7 @@
         background: var(--primary);
         color: #fff;
     }
-    .filter-btn-apply:hover { background: #EA580C; }
+    .filter-btn-apply:hover { background: #FC8019; }
     .filter-btn-export {
         background: #FFF7ED;
         color: var(--primary);

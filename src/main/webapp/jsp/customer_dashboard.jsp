@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <jsp:include page="/jsp/layout/customer_header.jsp" />
 
 <div class="container-fluid p-0">
@@ -8,21 +8,21 @@
     <div class="row g-4">
         <!-- Book Shipment Card -->
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center" style="transition: transform 0.2s;">
+            <div class="card h-100 text-center" style="transition: transform 0.2s;">
                 <div class="card-body p-5">
                     <div class="rounded-circle bg-orange bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background-color: #FFEDD5;">
-                        <i class="fa-solid fa-ship" style="font-size: 32px; color: #EA580C;"></i>
+                        <i class="fa-solid fa-ship" style="font-size: 32px; color: #FC8019;"></i>
                     </div>
                     <h5 class="fw-bold">Book Shipment</h5>
                     <p class="text-muted mb-4">Create a new shipment request to transport your goods globally.</p>
-                    <a href="#" class="btn text-white w-100 rounded-3" style="background-color: #EA580C;">Start Booking</a>
+                    <a href="#" class="btn text-white w-100 rounded-3" style="background-color: #FC8019;">Start Booking</a>
                 </div>
             </div>
         </div>
         
         <!-- Book Container Card -->
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center" style="transition: transform 0.2s;">
+            <div class="card h-100 text-center" style="transition: transform 0.2s;">
                 <div class="card-body p-5">
                     <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background-color: #E0E7FF;">
                         <i class="fa-solid fa-box" style="font-size: 32px; color: #4F46E5;"></i>

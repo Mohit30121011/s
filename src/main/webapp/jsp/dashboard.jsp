@@ -27,7 +27,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .date-badge { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: var(--text-main); cursor: pointer; }
 .date-badge i { color: var(--text-sub); }
 .btn-new-ship { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; }
-.btn-new-ship:hover { background: #EA580C; color: #fff; }
+.btn-new-ship:hover { background: #FC8019; color: #fff; }
 
 /* KPI Grid */
 .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -405,10 +405,10 @@ var STATUS_COLORS = {
             datasets: [{
                 label: 'Shipments',
                 data: data,
-                borderColor: '#F97316',
+                borderColor: '#FC8019',
                 backgroundColor: 'rgba(249,115,22,0.1)',
                 borderWidth: 2, tension: 0.4, fill: true, pointRadius: 4,
-                pointBackgroundColor: '#F97316', pointBorderColor: '#fff', pointBorderWidth: 2
+                pointBackgroundColor: '#FC8019', pointBorderColor: '#fff', pointBorderWidth: 2
             }]
         },
         options: {
