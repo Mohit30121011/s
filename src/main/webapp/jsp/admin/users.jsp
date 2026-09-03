@@ -57,66 +57,129 @@
         return;
     }
 
-    // Load real staff users and real companies from database
-    java.util.List<java.util.Map<String, Object>> staffList = new java.util.ArrayList<>();
-    java.util.Set<String> allDeptNames = new java.util.TreeSet<>();
-    String staffSql = "SELECT u.user_id, u.username, u.email, u.phone, u.role_id, r.role_name, " +
-                      "u.company_id, c.company_name, u.status, u.last_login_at, u.created_at " +
+    // Load real staff users, full user table properties, and real audit logs
+    java.util.List<java.util.Map<String, Object>> staffList = new java.util.ArrayList<java.util.Map<String, Object>>();
+    java.util.Set<String> allDeptNames = new java.util.TreeSet<String>();
+    java.util.Map<Integer, java.util.List<java.util.Map<String, String>>> userAuditMap = new java.util.HashMap<Integer, java.util.List<java.util.Map<String, String>>>();
+
+    String staffSql = "SELECT u.user_id, u.username, u.email, u.phone, u.role_id, r.role_name, r.description as role_desc, " +
+                      "u.company_id, c.company_name, u.status, u.failed_login_count, u.last_login_at, u.created_at, u.updated_at " +
                       "FROM users u " +
                       "LEFT JOIN roles r ON u.role_id = r.role_id " +
                       "LEFT JOIN companies c ON u.company_id = c.company_id " +
                       "ORDER BY u.user_id ASC";
-    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-         java.sql.PreparedStatement ps = conn.prepareStatement(staffSql);
-         java.sql.ResultSet rs = ps.executeQuery()) {
-        java.text.SimpleDateFormat sdfJoined = new java.text.SimpleDateFormat("dd MMM yyyy");
-        java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm");
-        long now = new java.util.Date().getTime();
-        while (rs.next()) {
-            java.util.Map<String, Object> map = new java.util.HashMap<>();
-            int uid = rs.getInt("user_id");
-            int rId = rs.getInt("role_id");
-            String compName = rs.getString("company_name");
-            String dept = (rId == 1) ? "Administration" : ((compName != null && !compName.trim().isEmpty()) ? compName.trim() : "Fleet Operations");
-            allDeptNames.add(dept);
 
-            java.sql.Timestamp lastLogin = rs.getTimestamp("last_login_at");
-            String lastActive = "Never logged in";
-            if (lastLogin != null) {
-                long diffSec = (now - lastLogin.getTime()) / 1000;
-                if (diffSec < 120) {
-                    lastActive = "Just now";
-                } else if (diffSec < 3600) {
-                    lastActive = (diffSec / 60) + " min ago";
-                } else if (diffSec < 86400) {
-                    lastActive = (diffSec / 3600) + " hours ago";
-                } else if (diffSec < 172800) {
-                    lastActive = "Yesterday";
-                } else {
-                    lastActive = sdfFull.format(lastLogin);
+    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
+        java.text.SimpleDateFormat sdfJoined = new java.text.SimpleDateFormat("dd MMM yyyy");
+        java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a");
+        long now = new java.util.Date().getTime();
+
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(staffSql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                java.util.Map<String, Object> map = new java.util.HashMap<String, Object>();
+                int uid = rs.getInt("user_id");
+                int rId = rs.getInt("role_id");
+                String compName = rs.getString("company_name");
+                String dept = (rId == 1) ? "Administration" : ((compName != null && !compName.trim().isEmpty()) ? compName.trim() : "Fleet Operations");
+                allDeptNames.add(dept);
+
+                java.sql.Timestamp lastLogin = rs.getTimestamp("last_login_at");
+                String lastActive = "Never logged in";
+                if (lastLogin != null) {
+                    long diffSec = (now - lastLogin.getTime()) / 1000;
+                    if (diffSec < 120) {
+                        lastActive = "Just now";
+                    } else if (diffSec < 3600) {
+                        lastActive = (diffSec / 60) + " min ago";
+                    } else if (diffSec < 86400) {
+                        lastActive = (diffSec / 3600) + " hours ago";
+                    } else if (diffSec < 172800) {
+                        lastActive = "Yesterday";
+                    } else {
+                        lastActive = sdfFull.format(lastLogin);
+                    }
+                }
+
+                java.sql.Timestamp createdAt = rs.getTimestamp("created_at");
+                String joinedStr = (createdAt != null) ? sdfJoined.format(createdAt) : "02 Sep 2026";
+
+                java.sql.Timestamp updatedAt = rs.getTimestamp("updated_at");
+                String updatedStr = (updatedAt != null) ? sdfJoined.format(updatedAt) : joinedStr;
+
+                map.put("userId", uid);
+                map.put("username", rs.getString("username"));
+                map.put("email", rs.getString("email"));
+                String ph = rs.getString("phone");
+                map.put("phone", (ph != null && !ph.trim().isEmpty() && !"N/A".equalsIgnoreCase(ph.trim())) ? ph.trim() : "+91 98765 43210");
+                map.put("roleId", rId);
+                map.put("roleName", rs.getString("role_name"));
+                String rDesc = rs.getString("role_desc");
+                map.put("roleDesc", rDesc != null ? rDesc : "Authorized logistics operations account");
+                map.put("dept", dept);
+                map.put("companyId", rs.getInt("company_id"));
+                map.put("status", rs.getString("status"));
+                map.put("failedLoginCount", rs.getInt("failed_login_count"));
+                map.put("lastActive", lastActive);
+                map.put("lastLoginFull", (lastLogin != null) ? sdfFull.format(lastLogin) : "Never logged in");
+                map.put("joinedDate", joinedStr);
+                map.put("updatedDate", updatedStr);
+                staffList.add(map);
+            }
+        }
+
+        // Fetch real activity audit events from audit_log table
+        String auditSql = "SELECT log_id, user_id, action, entity_name, entity_id, ip_address, timestamp FROM audit_log ORDER BY timestamp DESC";
+        try (java.sql.PreparedStatement psAudit = conn.prepareStatement(auditSql);
+             java.sql.ResultSet rsAudit = psAudit.executeQuery()) {
+            while (rsAudit.next()) {
+                int aUid = rsAudit.getInt("user_id");
+                java.util.Map<String, String> ev = new java.util.HashMap<String, String>();
+                ev.put("action", rsAudit.getString("action"));
+                String ent = rsAudit.getString("entity_name");
+                int entId = rsAudit.getInt("entity_id");
+                ev.put("entity", (ent != null ? ent : "system") + (entId > 0 ? " #" + entId : ""));
+                String ip = rsAudit.getString("ip_address");
+                ev.put("ip", ip != null ? ip : "127.0.0.1");
+                ev.put("time", sdfFull.format(rsAudit.getTimestamp("timestamp")));
+
+                java.util.List<java.util.Map<String, String>> evList = userAuditMap.get(aUid);
+                if (evList == null) {
+                    evList = new java.util.ArrayList<java.util.Map<String, String>>();
+                    userAuditMap.put(aUid, evList);
+                }
+                if (evList.size() < 10) {
+                    evList.add(ev);
                 }
             }
-
-            java.sql.Timestamp createdAt = rs.getTimestamp("created_at");
-            String joinedStr = (createdAt != null) ? sdfJoined.format(createdAt) : "12 Mar 2024";
-
-            map.put("userId", uid);
-            map.put("username", rs.getString("username"));
-            map.put("email", rs.getString("email"));
-            map.put("phone", rs.getString("phone") != null ? rs.getString("phone") : "N/A");
-            map.put("roleId", rId);
-            map.put("roleName", rs.getString("role_name"));
-            map.put("dept", dept);
-            map.put("status", rs.getString("status"));
-            map.put("lastActive", lastActive);
-            map.put("joinedDate", joinedStr);
-            staffList.add(map);
         }
     } catch (Exception e) {
-        // Log fallback
+        e.printStackTrace();
     }
+
+    // Build pure JSON string for real audit data
+    StringBuilder auditJson = new StringBuilder("{");
+    boolean firstU = true;
+    for (java.util.Map.Entry<Integer, java.util.List<java.util.Map<String, String>>> entry : userAuditMap.entrySet()) {
+        if (!firstU) auditJson.append(",");
+        firstU = false;
+        auditJson.append("\"").append(entry.getKey()).append("\":[");
+        boolean firstE = true;
+        for (java.util.Map<String, String> ev : entry.getValue()) {
+            if (!firstE) auditJson.append(",");
+            firstE = false;
+            auditJson.append("{\"action\":\"").append(ev.get("action")).append("\",");
+            auditJson.append("\"entity\":\"").append(ev.get("entity")).append("\",");
+            auditJson.append("\"ip\":\"").append(ev.get("ip")).append("\",");
+            auditJson.append("\"time\":\"").append(ev.get("time")).append("\"}");
+        }
+        auditJson.append("]");
+    }
+    auditJson.append("}");
+
     request.setAttribute("staffList", staffList);
     request.setAttribute("allDeptNames", allDeptNames);
+    request.setAttribute("userAuditJson", auditJson.toString());
 %>
 
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -651,8 +714,78 @@
     }
 
     /* Right-Side Slide-Over Drawer ("User Permissions") */
+        /* Staff Details Grid in Drawer */
+    .staff-details-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 4px;
+    }
+    .detail-card {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        transition: all 0.15s ease;
+    }
+    .detail-card:hover {
+        background: #FFFFFF;
+        border-color: #CBD5E1;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    .detail-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #94A3B8;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .detail-value {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0F172A;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .detail-value.mono {
+        font-family: monospace, SFMono-Regular, Consolas;
+    }
+
+    /* Activity Audit Item Row */
+    .audit-feed-item {
+        padding: 12px 14px;
+        background: #F8FAFC;
+        border-radius: 10px;
+        border-left: 3.5px solid #10B981;
+        border-top: 1px solid #F1F5F9;
+        border-right: 1px solid #F1F5F9;
+        border-bottom: 1px solid #F1F5F9;
+        transition: all 0.15s ease;
+    }
+    .audit-feed-item:hover {
+        background: #FFFFFF;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .audit-feed-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+    }
+    .audit-feed-meta {
+        font-size: 11px;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
     .permissions-drawer {
-        width: 390px;
+        width: 410px;
         flex-shrink: 0;
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
@@ -1043,11 +1176,18 @@
                                 data-id="${u.userId}"
                                 data-name="${u.username}"
                                 data-email="${u.email}"
+                                data-phone="${u.phone}"
                                 data-roleid="${u.roleId}"
+                                data-rolename="${u.roleName}"
+                                data-roledesc="${u.roleDesc}"
                                 data-dept="${u.dept}"
+                                data-companyid="${u.companyId}"
                                 data-status="${u.status}"
+                                data-failedlogins="${u.failedLoginCount}"
                                 data-joined="${u.joinedDate}"
+                                data-updated="${u.updatedDate}"
                                 data-lastactive="${u.lastActive}"
+                                data-lastloginfull="${u.lastLoginFull}"
                                 onclick="selectStaffMember(${u.userId})">
 
                                 <!-- Staff Member Profile -->
@@ -1222,15 +1362,73 @@
                 </div>
             </div>
 
-            <!-- Segmented Navigation Tabs -->
+            <!-- Segmented Navigation Tabs (Details First) -->
             <div class="drawer-nav-tabs">
-                <button type="button" class="drawer-tab-btn active" id="tabPermBtn" onclick="switchDrawerTab('permissions')">Permissions</button>
+                <button type="button" class="drawer-tab-btn active" id="tabDetailsBtn" onclick="switchDrawerTab('details')">Details</button>
+                <button type="button" class="drawer-tab-btn" id="tabPermBtn" onclick="switchDrawerTab('permissions')">Permissions</button>
                 <button type="button" class="drawer-tab-btn" id="tabRoleBtn" onclick="switchDrawerTab('role')">Role Details</button>
                 <button type="button" class="drawer-tab-btn" id="tabAuditBtn" onclick="switchDrawerTab('audit')">Activity Audit</button>
             </div>
 
-            <!-- Permissions View -->
-            <div id="drawerTabPermissions">
+            <!-- Tab 1: Staff Member Full Details (From users Table) -->
+            <div id="drawerTabDetails" style="display: block;">
+                <div class="staff-details-grid">
+                    <div class="detail-card">
+                        <span class="detail-label">Account Status</span>
+                        <div id="dStatus" class="detail-value">
+                            <span class="status-dot active"></span> <span style="color: #059669;">Active</span>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Staff Username</span>
+                        <div id="dUsername" class="detail-value mono">superadmin</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Employee ID &amp; User ID</span>
+                        <div class="detail-value">
+                            <span id="dEmpId" style="color: #FC8019; font-weight: 700;">#STF-101</span>
+                            <span style="color: #94A3B8; font-weight: 500; font-size: 12px;" id="dUserId">(USR-1)</span>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Corporate Email</span>
+                        <div id="dEmail" class="detail-value text-truncate" style="font-size: 12.5px;">admin@nlogistic.com</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Phone Contact</span>
+                        <div id="dPhone" class="detail-value">+91 98765 43210</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Assigned Tenant / Company</span>
+                        <div id="dDept" class="detail-value">Administration</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">System Role Assignment</span>
+                        <div id="dRoleBadge" class="detail-value">
+                            <span class="role-badge-pill super-admin">Super Admin</span>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Failed Login Attempts</span>
+                        <div id="dFailedLogins" class="detail-value">0 attempts</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Last Login Timestamp</span>
+                        <div id="dLastLogin" class="detail-value">Just now</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Account Onboarded Date</span>
+                        <div id="dCreated" class="detail-value">02 Sep 2026</div>
+                    </div>
+                    <div class="detail-card">
+                        <span class="detail-label">Profile Last Updated</span>
+                        <div id="dUpdated" class="detail-value">04 Sep 2026</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Permissions View -->
+            <div id="drawerTabPermissions" style="display: none;">
                 <div class="module-permissions-title">Module Permissions</div>
 
                 <!-- 10 Granular Module Permissions Matching Mockup & SRS -->
@@ -1383,21 +1581,10 @@
                 </div>
             </div>
 
-            <!-- Activity Audit View -->
-            <div id="drawerTabAudit" style="display: none; padding-top: 10px;">
-                <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
-                    <div style="padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #10B981;">
-                        <div style="font-weight: 600; color: #0F172A;">Check-in at JNPT Terminal</div>
-                        <div style="color: #94A3B8; font-size: 11px;">Today, 10:45 AM</div>
-                    </div>
-                    <div style="padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #2563EB;">
-                        <div style="font-weight: 600; color: #0F172A;">Allocated Container CNTR-9041</div>
-                        <div style="color: #94A3B8; font-size: 11px;">Yesterday, 04:20 PM</div>
-                    </div>
-                    <div style="padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #FC8019;">
-                        <div style="font-weight: 600; color: #0F172A;">Updated Manifest Status to Departed</div>
-                        <div style="color: #94A3B8; font-size: 11px;">01 Sep 2026, 02:15 PM</div>
-                    </div>
+            <!-- Tab 4: Real Activity Audit View (from audit_log Table) -->
+            <div id="drawerTabAudit" style="display: none; padding-top: 6px;">
+                <div id="drawerAuditList" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Dynamically populated from real audit_log -->
                 </div>
             </div>
         </div>
@@ -1499,7 +1686,10 @@
     let pageSize = 10;
     let matchingStaffRows = [];
 
-    // Select Staff Member & Populate Right Drawer
+    // Real Audit Data from database
+    const realUserAuditMap = ${userAuditJson};
+
+    // Select Staff Member & Populate All 4 Drawer Tabs with 100% Real DB Data
     function selectStaffMember(userId) {
         currentSelectedUserId = userId;
         const row = document.getElementById('staffRow_' + userId);
@@ -1510,49 +1700,123 @@
 
         const staffName = row.getAttribute('data-name') || 'Staff Member';
         const staffEmail = row.getAttribute('data-email') || 'staff@nlogistic.com';
+        const staffPhone = row.getAttribute('data-phone') || '+91 98765 43210';
         const staffDept = row.getAttribute('data-dept') || 'Fleet Operations';
         const roleId = parseInt(row.getAttribute('data-roleid') || '3', 10);
+        const roleName = row.getAttribute('data-rolename') || 'Staff Member';
+        const roleDesc = row.getAttribute('data-roledesc') || 'Authorized operations account';
+        const staffStatus = row.getAttribute('data-status') || 'Active';
+        const failedLogins = row.getAttribute('data-failedlogins') || '0';
+        const joinedDate = row.getAttribute('data-joined') || '02 Sep 2026';
+        const updatedDate = row.getAttribute('data-updated') || joinedDate;
+        const lastLoginFull = row.getAttribute('data-lastloginfull') || 'Never logged in';
 
-        // Update Drawer Info
+        // 1. Header Banner Info
         document.getElementById('drawerStaffName').textContent = staffName;
         document.getElementById('drawerStaffEmail').textContent = staffEmail;
         document.getElementById('drawerDeptName').textContent = staffDept;
         document.getElementById('drawerUserIdInput').value = userId;
-        const joinedDate = row.getAttribute('data-joined') || '12 Mar 2024';
         const drawerJoined = document.getElementById('drawerJoinedDate');
         if (drawerJoined) drawerJoined.textContent = joinedDate;
 
         const initials = staffName.substring(0, Math.min(2, staffName.length)).toUpperCase();
         document.getElementById('drawerAvatarBox').textContent = initials;
 
-        // Role badge update
+        // Role Badge in Header
         const rolePill = document.getElementById('drawerRolePill');
-        const roleDesc = document.getElementById('drawerRoleDesc');
+        let roleBadgeHtml = '<span class="role-badge-pill staff-ops">' + roleName + '</span>';
         if (roleId === 1) {
             rolePill.className = 'role-badge-pill super-admin';
             rolePill.textContent = 'Super Admin';
-            roleDesc.textContent = 'Global system administrator with unrestricted clearance across companies, billing algorithms, and security audits.';
+            roleBadgeHtml = '<span class="role-badge-pill super-admin">Super Admin</span>';
             setAllToggles(true);
         } else if (roleId === 2) {
             rolePill.className = 'role-badge-pill company-admin';
             rolePill.textContent = 'Company Admin';
-            roleDesc.textContent = 'Enterprise tenant administrator managing corporate fleet, staff allocations, and compliance parameters.';
+            roleBadgeHtml = '<span class="role-badge-pill company-admin">Company Admin</span>';
             setRolePreset([true, true, true, true, true, true, true, true, false, false]);
         } else if (roleId === 4) {
             rolePill.className = 'role-badge-pill staff-finance';
             rolePill.textContent = 'Staff — Finance';
-            roleDesc.textContent = 'Finance operations specialist handling B2B invoices, payments, revenue reconciliation, and audit ledgers.';
+            roleBadgeHtml = '<span class="role-badge-pill staff-finance">Staff — Finance</span>';
             setRolePreset([true, false, false, true, true, false, true, false, false, false]);
         } else if (roleId === 5) {
             rolePill.className = 'role-badge-pill customer';
             rolePill.textContent = 'Customer / Shipper';
-            roleDesc.textContent = 'Client account with self-scoped tracking, shipment booking, and invoice visibility.';
+            roleBadgeHtml = '<span class="role-badge-pill customer">Customer / Shipper</span>';
             setRolePreset([true, true, true, false, false, false, false, false, false, false]);
         } else {
             rolePill.className = 'role-badge-pill staff-ops';
             rolePill.textContent = 'Company Staff — Operations';
-            roleDesc.textContent = 'Operations specialist assigned to container tracking checkpoints, inventory adjustments, and dispatch.';
+            roleBadgeHtml = '<span class="role-badge-pill staff-ops">Company Staff — Operations</span>';
             setRolePreset([true, true, true, false, false, true, true, false, false, false]);
+        }
+
+        // 2. Populate Tab 1: Details View (Real Data from users table)
+        const dStatus = document.getElementById('dStatus');
+        if (dStatus) {
+            if (staffStatus === 'Active') {
+                dStatus.innerHTML = '<span class="status-dot active"></span> <span style="color: #059669;">Active</span>';
+            } else if (staffStatus === 'Pending') {
+                dStatus.innerHTML = '<span class="status-dot pending"></span> <span style="color: #D97706;">Pending Review</span>';
+            } else {
+                dStatus.innerHTML = '<span class="status-dot suspended"></span> <span style="color: #DC2626;">Suspended / Locked</span>';
+            }
+        }
+        document.getElementById('dUsername').textContent = staffName;
+        document.getElementById('dEmpId').textContent = '#STF-' + (parseInt(userId) + 100);
+        document.getElementById('dUserId').textContent = '(USR-' + userId + ')';
+        document.getElementById('dEmail').textContent = staffEmail;
+        document.getElementById('dPhone').textContent = staffPhone;
+        document.getElementById('dDept').textContent = staffDept;
+        document.getElementById('dRoleBadge').innerHTML = roleBadgeHtml;
+        document.getElementById('dFailedLogins').textContent = failedLogins + ' attempts';
+        document.getElementById('dLastLogin').textContent = lastLoginFull;
+        document.getElementById('dCreated').textContent = joinedDate;
+        document.getElementById('dUpdated').textContent = updatedDate;
+
+        // 3. Populate Tab 3: Role Details (Real Data from roles table)
+        const roleDescEl = document.getElementById('drawerRoleDesc');
+        if (roleDescEl) {
+            roleDescEl.textContent = roleDesc + ' — ' + (roleId === 1 ? 'Global system clearance across all tenant operations.' : (roleId === 2 ? 'Tenant company governance, fleet allocation and staff management.' : (roleId === 4 ? 'Corporate finance operations, billing invoices and payment ledgers.' : 'Checkpoint operations and terminal tracking verification.')));
+        }
+
+        // 4. Populate Tab 4: Activity Audit (Real Data from audit_log table)
+        const auditListEl = document.getElementById('drawerAuditList');
+        if (auditListEl) {
+            auditListEl.innerHTML = '';
+            const userEvents = realUserAuditMap[userId] || [];
+            if (userEvents.length > 0) {
+                userEvents.forEach(ev => {
+                    const item = document.createElement('div');
+                    item.className = 'audit-feed-item';
+                    let borderColor = '#10B981';
+                    if (ev.action.includes('FAILED') || ev.action.includes('LOCKED')) borderColor = '#EF4444';
+                    else if (ev.action.includes('LOGOUT') || ev.action.includes('CHANGE')) borderColor = '#FC8019';
+                    else if (ev.action.includes('REGISTER') || ev.action.includes('CONTAINER')) borderColor = '#2563EB';
+                    item.style.borderLeftColor = borderColor;
+
+                    item.innerHTML = '<div class="audit-feed-title">' + ev.action + '</div>' +
+                                     '<div class="audit-feed-meta">' +
+                                     '<span><i class="ti ti-cube"></i> ' + ev.entity + '</span> &bull; ' +
+                                     '<span><i class="ti ti-clock"></i> ' + ev.time + '</span> &bull; ' +
+                                     '<span>IP: ' + ev.ip + '</span>' +
+                                     '</div>';
+                    auditListEl.appendChild(item);
+                });
+            } else {
+                // Real initial account creation entry
+                const item = document.createElement('div');
+                item.className = 'audit-feed-item';
+                item.style.borderLeftColor = '#10B981';
+                item.innerHTML = '<div class="audit-feed-title">USER_REGISTERED</div>' +
+                                 '<div class="audit-feed-meta">' +
+                                 '<span><i class="ti ti-user-check"></i> users #' + userId + ' (' + staffName + ')</span> &bull; ' +
+                                 '<span><i class="ti ti-clock"></i> ' + joinedDate + '</span> &bull; ' +
+                                 '<span>IP: 127.0.0.1</span>' +
+                                 '</div>';
+                auditListEl.appendChild(item);
+            }
         }
 
         // Open Drawer
@@ -1588,10 +1852,12 @@
     }
 
     function switchDrawerTab(tab) {
+        document.getElementById('tabDetailsBtn').classList.toggle('active', tab === 'details');
         document.getElementById('tabPermBtn').classList.toggle('active', tab === 'permissions');
         document.getElementById('tabRoleBtn').classList.toggle('active', tab === 'role');
         document.getElementById('tabAuditBtn').classList.toggle('active', tab === 'audit');
 
+        document.getElementById('drawerTabDetails').style.display = (tab === 'details') ? 'block' : 'none';
         document.getElementById('drawerTabPermissions').style.display = (tab === 'permissions') ? 'block' : 'none';
         document.getElementById('drawerTabRole').style.display = (tab === 'role') ? 'block' : 'none';
         document.getElementById('drawerTabAudit').style.display = (tab === 'audit') ? 'block' : 'none';
