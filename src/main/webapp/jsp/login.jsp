@@ -740,7 +740,7 @@
                     </div>
                     <div>
                         <div class="nl-feature-title">AI Dynamic Pricing &amp; Demand Engine</div>
-                        <div class="nl-feature-text">Seasonal multipliers and predictive route demand forecasting algorithms (FR3.5).</div>
+                        <div class="nl-feature-text">Seasonal multipliers and predictive route demand forecasting algorithms.</div>
                     </div>
                 </div>
             </div>

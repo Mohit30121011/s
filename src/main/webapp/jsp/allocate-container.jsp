@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -67,7 +67,7 @@
 
                     <div class="alert bg-light border-0 p-3" style="border-radius: 8px; font-size: 13px;">
                         <i class="fa-solid fa-circle-info text-primary me-2"></i> 
-                        Allocation will be blocked if cargo weight or volume exceeds these limits (Contract Precondition FR3.4).
+                        Allocation will be blocked if cargo weight or volume exceeds these limits.
                     </div>
                 </div>
             </div>

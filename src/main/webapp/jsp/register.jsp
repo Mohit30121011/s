@@ -389,7 +389,7 @@
         color: #FC8019;
     }
 
-    /* Super Admin Approval Notice Callout (FR1.2) */
+    /* Super Admin Approval Notice Callout  */
     .nl-approval-notice {
         margin-top: 24px;
         padding: 14px 18px;
@@ -557,7 +557,7 @@
             <!-- Header -->
             <div class="nl-reg-header">
                 <div class="nl-eyebrow-tag">
-                    <i class="ti ti-user-plus"></i> Organization Onboarding &bull; FR1.2
+                    <i class="ti ti-user-plus"></i> Organization Onboarding
                 </div>
                 <h1 class="nl-reg-heading">Create Your Enterprise Account</h1>
                 <p class="nl-reg-subheading">Select your profile below. All company accounts are verified and approved by the Super Admin before activation.</p>
@@ -571,14 +571,14 @@
                 </div>
             </c:if>
 
-            <!-- Account Type Selector Cards (FR1.1) -->
+            <!-- Account Type Selector Cards  -->
             <div class="nl-type-grid">
                 <div class="nl-type-card active" id="companyCard" onclick="switchAccountType('company')">
                     <div class="nl-type-icon company">
                         <i class="ti ti-building-warehouse"></i>
                     </div>
                     <div class="nl-type-info">
-                        <div class="nl-type-title">Company Account (FR1.2)</div>
+                        <div class="nl-type-title">Company Account</div>
                         <div class="nl-type-desc">For logistics operators, freight forwarders &amp; shipping lines</div>
                     </div>
                     <div class="nl-type-radio"></div>
@@ -589,7 +589,7 @@
                         <i class="ti ti-user-circle"></i>
                     </div>
                     <div class="nl-type-info">
-                        <div class="nl-type-title">Customer Account (FR1.3)</div>
+                        <div class="nl-type-title">Customer Account</div>
                         <div class="nl-type-desc">For cargo owners, commercial shippers &amp; consignees</div>
                     </div>
                     <div class="nl-type-radio"></div>
@@ -605,7 +605,7 @@
                     <div class="nl-section-badge-icon orange" id="sec1Icon">
                         <i class="ti ti-building"></i>
                     </div>
-                    <div class="nl-section-title" id="sec1Title">Company Information (FR1.2)</div>
+                    <div class="nl-section-title" id="sec1Title">Company Information</div>
                 </div>
 
                 <div class="nl-fields-grid">
@@ -618,7 +618,7 @@
                         </div>
                     </div>
 
-                    <!-- Trade License / Reg No (Company Only - FR1.2) -->
+                    <!-- Trade License / Reg No (Company Only - ) -->
                     <div class="nl-field-box company-field">
                         <label for="inputLicense">License / Registration Number <span class="req">*</span></label>
                         <div class="nl-input-wrap">
@@ -627,7 +627,7 @@
                         </div>
                     </div>
 
-                    <!-- GST / Tax ID (Company Only - FR1.2) -->
+                    <!-- GST / Tax ID (Company Only - ) -->
                     <div class="nl-field-box company-field">
                         <label for="inputGst">GST / Tax ID <span class="req">*</span></label>
                         <div class="nl-input-wrap">
@@ -636,7 +636,7 @@
                         </div>
                     </div>
 
-                    <!-- KYC Document Upload (Customer Only - FR1.3) -->
+                    <!-- KYC Document Upload (Customer Only - ) -->
                     <div class="nl-field-box customer-field" style="display: none;">
                         <label for="inputKyc">KYC Document Upload <span class="req">*</span></label>
                         <div class="nl-file-input-wrap">
@@ -647,7 +647,7 @@
                         </div>
                     </div>
 
-                    <!-- Registered Address (FR1.2 & FR1.3) -->
+                    <!-- Registered Address  -->
                     <div class="nl-field-box" id="addressFieldBox">
                         <label id="addressLabel" for="inputAddress">Registered Company Address <span class="req">*</span></label>
                         <div class="nl-input-wrap">
@@ -657,12 +657,12 @@
                     </div>
                 </div>
 
-                <!-- SECTION 2: ADMIN CONTACT & CREDENTIALS (FR1.2) -->
+                <!-- SECTION 2: ADMIN CONTACT & CREDENTIALS  -->
                 <div class="nl-section-header" style="margin-top: 28px;">
                     <div class="nl-section-badge-icon blue">
                         <i class="ti ti-user-check"></i>
                     </div>
-                    <div class="nl-section-title" id="sec2Title">Admin Contact &amp; Account Credentials (FR1.2)</div>
+                    <div class="nl-section-title" id="sec2Title">Admin Contact &amp; Account Credentials</div>
                 </div>
 
                 <div class="nl-fields-grid">
@@ -727,11 +727,11 @@
                     </div>
                 </div>
 
-                <!-- Super Admin Approval Requirement Notice (FR1.2) -->
+                <!-- Super Admin Approval Requirement Notice  -->
                 <div class="nl-approval-notice" id="approvalNotice">
                     <i class="ti ti-shield-alert"></i>
                     <div>
-                        <strong>Super Admin Approval Invariant (FR1.2):</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.
+                        <strong>Super Admin Approval Required:</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.
                     </div>
                 </div>
 
@@ -783,7 +783,7 @@
         }
     }
 
-    // Strict FR1.2 / FR1.3 Account Type Switcher
+    // Strict  /  Account Type Switcher
     function switchAccountType(type) {
         const compCard = document.getElementById('companyCard');
         const custCard = document.getElementById('customerCard');
@@ -826,15 +826,15 @@
             emailLabel.innerHTML = 'Admin Work Email <span class="req">*</span>';
             addressLabel.innerHTML = 'Registered Company Address <span class="req">*</span>';
 
-            sec1Title.textContent = 'Company Information (FR1.2)';
+            sec1Title.textContent = 'Company Information';
             sec1Icon.className = 'nl-section-badge-icon orange';
             sec1Icon.innerHTML = '<i class="ti ti-building"></i>';
-            sec2Title.textContent = 'Admin Contact & Account Credentials (FR1.2)';
+            sec2Title.textContent = 'Admin Contact & Account Credentials';
             submitBtnText.textContent = 'Register Company';
 
             // Show Super Admin Approval Notice
             approvalNotice.style.display = 'flex';
-            approvalNotice.innerHTML = '<i class="ti ti-shield-alert"></i><div><strong>Super Admin Approval Invariant (FR1.2):</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.</div>';
+            approvalNotice.innerHTML = '<i class="ti ti-shield-alert"></i><div><strong>Super Admin Approval Required:</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.</div>';
         } else {
             custCard.classList.add('active');
             compCard.classList.remove('active');
@@ -859,15 +859,15 @@
             emailLabel.innerHTML = 'Personal / Work Email <span class="req">*</span>';
             addressLabel.innerHTML = 'Residential / Delivery Address <span class="req">*</span>';
 
-            sec1Title.textContent = 'Customer Profile & KYC (FR1.3)';
+            sec1Title.textContent = 'Customer Profile & KYC';
             sec1Icon.className = 'nl-section-badge-icon blue';
             sec1Icon.innerHTML = '<i class="ti ti-user-circle"></i>';
-            sec2Title.textContent = 'Login Credentials (FR1.3)';
+            sec2Title.textContent = 'Login Credentials';
             submitBtnText.textContent = 'Register Customer';
 
             // Update notice for customer
             approvalNotice.style.display = 'flex';
-            approvalNotice.innerHTML = '<i class="ti ti-info-circle" style="color: #2563EB;"></i><div style="color: #1E40AF;"><strong>Customer Verification (FR1.3):</strong> KYC documents uploaded will be verified by the compliance department before your customer portal access is activated.</div>';
+            approvalNotice.innerHTML = '<i class="ti ti-info-circle" style="color: #2563EB;"></i><div style="color: #1E40AF;"><strong>Customer Verification:</strong> KYC documents uploaded will be verified by the compliance department before your customer portal access is activated.</div>';
         }
     }
 </script>

@@ -24,10 +24,10 @@
         </div>
     </div>
 
-    <!-- Ledger Table (FR4.5) -->
+    <!-- Ledger Table -->
     <div class="card shadow-sm border-0" style="border-radius: 12px;">
         <div class="card-body p-4">
-            <h5 class="fw-bold mb-4"><i class="fa-solid fa-book-open text-primary me-2"></i> Inventory Movement History (FR4.5)</h5>
+            <h5 class="fw-bold mb-4"><i class="fa-solid fa-book-open text-primary me-2"></i> Inventory Movement History</h5>
             <p class="text-muted small mb-4">This ledger records every single change (IN/OUT) to the inventory, including bulk uploads, manual entries, and write-offs.</p>
             
             <div class="table-responsive">
