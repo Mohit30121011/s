@@ -754,16 +754,15 @@
     }
     .action-dropdown-card {
         display: none;
-        position: absolute;
-        right: 0;
-        top: calc(100% + 4px);
+        position: fixed;
+        width: 185px !important;
+        max-width: 185px !important;
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 14px;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
         padding: 6px;
-        min-width: 175px;
-        z-index: 1000;
+        z-index: 9999999;
         text-align: left;
     }
     .action-dropdown-card.show {
@@ -2157,6 +2156,8 @@
                 target.style.position = 'fixed';
                 target.style.top = top + 'px';
                 target.style.left = left + 'px';
+                target.style.right = 'auto';
+                target.style.width = '185px';
                 target.style.zIndex = '9999999';
             }
         }
@@ -2168,6 +2169,8 @@
             d.style.position = '';
             d.style.top = '';
             d.style.left = '';
+            d.style.right = '';
+            d.style.width = '';
         });
     }
 
