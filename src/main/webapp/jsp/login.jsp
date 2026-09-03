@@ -508,21 +508,25 @@
     }
     .nl-input-lead-icon {
         position: absolute;
-        left: 14px;
+        left: 18px;
         color: #94A3B8;
         font-size: 18px;
         pointer-events: none;
         transition: color 0.2s ease, transform 0.2s ease;
+        z-index: 2;
     }
     .nl-text-input {
         width: 100%;
         height: 48px;
-        padding: 0 44px 0 44px;
+        padding-left: 48px !important;
+        padding-right: 44px !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
         font-size: 14.5px;
         font-weight: 500;
         color: #0F172A;
         background: #F8FAFC;
-        border: 1px solid #E2E8F0;
+        border: 1.5px solid #E2E8F0;
         border-radius: 50px !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         outline: none;

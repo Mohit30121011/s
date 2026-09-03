@@ -247,13 +247,23 @@
         select.form-select {
             border: 1.5px solid #E2E8F0 !important;
             border-radius: 50px !important;
-            padding: 10px 20px !important;
+            padding: 10px 20px;
             font-size: 13.5px !important;
             color: #0F172A !important;
             background-color: #FFFFFF !important;
             transition: all 0.2s ease !important;
             min-height: 44px !important;
             outline: none !important;
+        }
+
+        
+        /* Inputs with lead icons */
+        .nl-text-input,
+        .nl-form-control,
+        .has-lead-icon input,
+        .input-icon-wrap input {
+            padding-left: 46px !important;
+            padding-right: 44px !important;
         }
 
         /* Hover State */
