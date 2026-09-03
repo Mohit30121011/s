@@ -308,7 +308,7 @@
         <input type="text" id="searchInput" placeholder="Search by shipment ID, port, vessel...">
     </div>
     <div class="filter-select">
-        <select id="statusFilter">
+        <select id="statusFilter" class="form-select form-select-custom">
             <option value="" selected>All Statuses</option>
             <option value="Booked">Booked</option>
             <option value="Container Allocated">Container Allocated</option>
@@ -320,7 +320,7 @@
         </select>
     </div>
     <div class="filter-select">
-        <select id="vesselFilter">
+        <select id="vesselFilter" class="form-select form-select-custom">
             <option value="" selected>All Vessels</option>
             <c:forEach var="v" items="${vessels}">
                 <option value="${v.vesselName}">${v.vesselName}</option>

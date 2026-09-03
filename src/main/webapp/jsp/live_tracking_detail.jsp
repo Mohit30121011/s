@@ -343,7 +343,7 @@
             <div class="row g-3">
                 <div class="col-md-5">
                     <label class="form-label" style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">Next Checkpoint Status <span style="color: #FC8019;">*</span></label>
-                    <select name="status" class="form-select" required style="padding: 10px 14px; border-radius: 8px; font-size: 13.5px; border: 1px solid #E2E8F0;">
+                    <select name="status" class="form-select form-select-custom" required style="padding: 10px 14px; border-radius: 8px; font-size: 13.5px; border: 1px solid #E2E8F0;">
                         <option value="" disabled>Select next status</option>
                         <option value="Container Allocated" <c:if test="${shipment.status == 'Booked'}">selected</c:if>>Container Allocated</option>
                         <option value="Departed" <c:if test="${shipment.status == 'Container Allocated'}">selected</c:if>>Departed</option>
