@@ -1938,7 +1938,7 @@
                 </a>
                 <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/jsp/admin/companies.jsp">Company</a></li>
-                    <li><a href="${pageContext.request.contextPath}/jsp/admin/users.jsp">Users &amp; Roles</a></li>
+                    <li><a href="${pageContext.request.contextPath}/jsp/admin/customers.jsp">Customer</a></li>
                 </ul>
             </div>
             </c:if>
