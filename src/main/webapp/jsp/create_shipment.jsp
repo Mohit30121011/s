@@ -1,6 +1,66 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:include page="/jsp/layout/header.jsp" />
+<style>
+    /* Bulletproof Dropdown Chevron Arrows */
+    .select-wrapper {
+        position: relative !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    .select-wrapper::after {
+        content: "" !important;
+        position: absolute !important;
+        right: 20px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 12px !important;
+        height: 8px !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-size: contain !important;
+        pointer-events: none !important;
+        z-index: 99 !important;
+    }
+    .select-wrapper:focus-within::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+    .select-wrapper .ts-wrapper,
+    .select-wrapper .ts-wrapper.single {
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    .select-wrapper .ts-control,
+    .select-wrapper .ts-wrapper.single .ts-control,
+    .select-wrapper .form-select-custom {
+        width: 100% !important;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 50px !important;
+        padding: 11px 44px 11px 20px !important;
+        font-size: 14px !important;
+        color: #0F172A !important;
+        background-color: #FFFFFF !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        cursor: pointer !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    .select-wrapper .ts-control.focus,
+    .select-wrapper .ts-wrapper.single.focus .ts-control,
+    .select-wrapper .form-select-custom:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+    }
+    .select-wrapper .ts-wrapper.single .ts-control:after {
+        display: none !important;
+    }
+</style>
+
 
 <style>
     /* Hide up/down arrows (number spinners) on number inputs */
