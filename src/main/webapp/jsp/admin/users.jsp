@@ -35,21 +35,41 @@
             } catch (Exception e) {
                 session.setAttribute("errorMessage", "Error processing staff action: " + e.getMessage());
             }
-        } else if ("inviteStaff".equals(action)) {
-            String invName = request.getParameter("inviteName");
-            String invEmail = request.getParameter("inviteEmail");
-            String invPhone = request.getParameter("invitePhone");
-            String invRole = request.getParameter("inviteRoleId");
-            if (invName != null && invEmail != null && !invName.trim().isEmpty()) {
+        } else if ("addStaff".equals(action) || "inviteStaff".equals(action)) {
+            String uName = request.getParameter("staffUsername");
+            if (uName == null || uName.trim().isEmpty()) uName = request.getParameter("inviteName");
+            String uEmail = request.getParameter("staffEmail");
+            if (uEmail == null || uEmail.trim().isEmpty()) uEmail = request.getParameter("inviteEmail");
+            String uPass = request.getParameter("staffPassword");
+            if (uPass == null || uPass.trim().isEmpty()) uPass = "Staff@12345";
+            String uPhone = request.getParameter("staffPhone");
+            if (uPhone == null || uPhone.trim().isEmpty()) uPhone = request.getParameter("invitePhone");
+            if (uPhone == null || uPhone.trim().isEmpty()) uPhone = "+91 98765 43210";
+            String uRoleStr = request.getParameter("staffRoleId");
+            if (uRoleStr == null) uRoleStr = request.getParameter("inviteRoleId");
+            int rId = 3;
+            if (uRoleStr != null) {
+                try { rId = Integer.parseInt(uRoleStr.trim()); } catch(Exception ignored) {}
+            }
+            String compIdStr = request.getParameter("staffCompanyId");
+            Integer compId = null;
+            if (compIdStr != null && !compIdStr.trim().isEmpty()) {
+                try { compId = Integer.parseInt(compIdStr.trim()); } catch(Exception ignored) {}
+            }
+            String uStatus = request.getParameter("staffStatus");
+            if (uStatus == null || uStatus.trim().isEmpty()) uStatus = "Active";
+
+            if (uName != null && uEmail != null && !uName.trim().isEmpty() && !uEmail.trim().isEmpty()) {
                 try {
-                    int rId = 3; // Default Operations
-                    if (invRole != null) rId = Integer.parseInt(invRole);
-                    String uName = invName.trim().toLowerCase().replaceAll("\\s+", "_");
-                    String uPhone = (invPhone != null && !invPhone.trim().isEmpty()) ? invPhone.trim() : "N/A";
-                    uDao.createUser(uName, invEmail.trim(), "Welcome@123", uPhone, rId, 1, "Active");
-                    session.setAttribute("successMessage", "Invitation dispatched! New staff account created for " + invName + ".");
+                    int newUserId = uDao.createUser(uName.trim(), uEmail.trim(), uPass.trim(), uPhone.trim(), rId, compId, uStatus.trim());
+                    if (newUserId > 0) {
+                        uDao.logAuditEvent(newUserId, "USER_REGISTERED", uName.trim(), request.getRemoteAddr());
+                        session.setAttribute("successMessage", "New staff account #" + newUserId + " (" + uName + ") added successfully!");
+                    } else {
+                        session.setAttribute("errorMessage", "Could not create staff account. Username or email may already exist.");
+                    }
                 } catch (Exception e) {
-                    session.setAttribute("errorMessage", "Error inviting staff member: " + e.getMessage());
+                    session.setAttribute("errorMessage", "Error adding staff member: " + e.getMessage());
                 }
             }
         }
@@ -177,6 +197,8 @@
     }
     auditJson.append("}");
 
+    java.util.List<com.nlogistic.model.Company> allCompanies = compDao.getAllCompanies();
+    request.setAttribute("allCompanies", allCompanies);
     request.setAttribute("staffList", staffList);
     request.setAttribute("allDeptNames", allDeptNames);
     request.setAttribute("userAuditJson", auditJson.toString());
@@ -1170,8 +1192,8 @@
         </div>
 
         <div class="toolbar-right-group">
-            <button type="button" class="btn-invite-staff" onclick="openInviteModal()">
-                <i class="ti ti-plus"></i> Invite New Staff
+            <button type="button" class="btn-invite-staff" onclick="openAddStaffModal()">
+                <i class="ti ti-plus"></i> Add New Staff
             </button>
         </div>
     </div>
@@ -1620,68 +1642,95 @@
     </div>
 </div>
 
-<!-- Modal: Invite New Staff Member -->
-<div id="inviteStaffModal" class="nl-modal-backdrop" style="display: none;">
-    <div class="nl-modal-dialog">
+<!-- Modal: Add New Staff Member -->
+<div id="addStaffModal" class="nl-modal-backdrop" style="display: none;">
+    <div class="nl-modal-dialog" style="max-width: 530px; border-radius: 18px; padding: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFF3EA; color: #FC8019; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFF3EA; color: #FC8019; display: flex; align-items: center; justify-content: center; font-size: 22px;">
                     <i class="ti ti-user-plus"></i>
                 </div>
                 <div>
-                    <h5 style="font-size: 17px; font-weight: 800; color: #0F172A; margin: 0;">Invite New Staff Member</h5>
-                    <p style="font-size: 12.5px; color: #64748B; margin: 0;">Deploy access credentials and assign operational role</p>
+                    <h5 style="font-size: 17px; font-weight: 800; color: #0F172A; margin: 0;">Add New Staff Member</h5>
+                    <p style="font-size: 12px; color: #64748B; margin: 0;">Provision user record and configure access credentials</p>
                 </div>
             </div>
-            <button type="button" class="drawer-close-btn" onclick="closeInviteModal()" aria-label="Close">
+            <button type="button" class="drawer-close-btn" onclick="closeAddStaffModal()" aria-label="Close">
                 <i class="ti ti-x"></i>
             </button>
         </div>
 
-        <form method="POST">
-            <input type="hidden" name="action" value="inviteStaff">
-            
-            <div style="margin-bottom: 14px;">
-                <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Full Name</label>
-                <input type="text" name="inviteName" required class="form-control" placeholder="e.g. Arjun Mehta" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 16px;">
-            </div>
+        <form method="POST" id="addStaffForm">
+            <input type="hidden" name="action" value="addStaff">
 
-            <div style="margin-bottom: 14px;">
-                <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Corporate Email Address</label>
-                <input type="email" name="inviteEmail" required class="form-control" placeholder="e.g. arjun.mehta@nlogistic.com" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 16px;">
-            </div>
-
-            <div style="margin-bottom: 14px;">
-                <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Phone Number</label>
-                <input type="text" name="invitePhone" class="form-control" placeholder="e.g. +91 98765 43210" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 16px;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                 <div>
-                    <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Role Assignment</label>
-                    <select name="inviteRoleId" class="form-control no-custom-select" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
-                        <option value="3">Staff — Operations</option>
-                        <option value="4">Staff — Finance</option>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Username <span style="color: #EF4444;">*</span></label>
+                    <input type="text" name="staffUsername" required class="form-control" placeholder="e.g. arjun_ops" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 12px;">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Corporate Email <span style="color: #EF4444;">*</span></label>
+                    <input type="email" name="staffEmail" required class="form-control" placeholder="e.g. arjun@nlogistic.com" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 12px;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Password <span style="color: #EF4444;">*</span></label>
+                    <div style="position: relative;">
+                        <input type="password" id="staffPasswordInput" name="staffPassword" required class="form-control" placeholder="Enter password" value="Staff@12345" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 34px 0 12px;">
+                        <button type="button" onclick="toggleStaffPasswordVisibility()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94A3B8; cursor: pointer;">
+                            <i class="ti ti-eye" id="togglePassIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Phone Number</label>
+                    <input type="text" name="staffPhone" class="form-control" placeholder="+91 98765 43210" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 12px;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Role Assignment <span style="color: #EF4444;">*</span></label>
+                    <select name="staffRoleId" required class="form-control no-custom-select" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 10px; cursor: pointer; background: #fff;">
+                        <option value="3" selected>Company Staff (Ops)</option>
+                        <option value="4">Company Staff (Finance)</option>
                         <option value="2">Company Admin</option>
                         <option value="1">Super Admin</option>
                         <option value="5">Customer / Client</option>
                     </select>
                 </div>
                 <div>
-                    <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Department</label>
-                    <select name="inviteDept" class="form-control no-custom-select" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
-                        <option value="Fleet Operations">Fleet Operations</option>
-                        <option value="Invoicing & Billing">Invoicing &amp; Billing</option>
-                        <option value="Administration">Administration</option>
-                        <option value="Port Warehouse">Port Warehouse</option>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Tenant / Company</label>
+                    <select name="staffCompanyId" class="form-control no-custom-select" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 10px; cursor: pointer; background: #fff;">
+                        <option value="">Administration (System-Wide)</option>
+                        <c:forEach var="cp" items="${allCompanies}">
+                            <option value="${cp.companyId}">${cp.companyName}</option>
+                        </c:forEach>
                     </select>
                 </div>
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
-                <button type="button" class="btn-drawer-cancel" onclick="closeInviteModal()">Cancel</button>
-                <button type="submit" class="btn-drawer-save">
-                    <i class="ti ti-mail-forward"></i> Send Invitation
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; display: block; text-transform: uppercase;">Account Status</label>
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #059669; cursor: pointer;">
+                        <input type="radio" name="staffStatus" value="Active" checked style="accent-color: #059669;"> Active
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #DC2626; cursor: pointer;">
+                        <input type="radio" name="staffStatus" value="Locked" style="accent-color: #DC2626;"> Locked / Suspended
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #64748B; cursor: pointer;">
+                        <input type="radio" name="staffStatus" value="Inactive" style="accent-color: #64748B;"> Inactive
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
+                <button type="button" class="btn-drawer-cancel" onclick="closeAddStaffModal()">Cancel</button>
+                <button type="submit" class="btn-drawer-save" style="display: flex; align-items: center; gap: 6px;">
+                    <i class="ti ti-check"></i> Save Staff Member
                 </button>
             </div>
         </form>
@@ -1983,15 +2032,34 @@
     }
 
     // Modal helpers
-    function openInviteModal() {
-        const m = document.getElementById('inviteStaffModal');
-        m.style.display = 'flex';
-        requestAnimationFrame(() => m.classList.add('show'));
+    function openAddStaffModal() {
+        const m = document.getElementById('addStaffModal');
+        if (m) {
+            m.style.display = 'flex';
+            requestAnimationFrame(() => m.classList.add('show'));
+        }
     }
-    function closeInviteModal() {
-        const m = document.getElementById('inviteStaffModal');
-        m.classList.remove('show');
-        setTimeout(() => m.style.display = 'none', 200);
+    function closeAddStaffModal() {
+        const m = document.getElementById('addStaffModal');
+        if (m) {
+            m.classList.remove('show');
+            setTimeout(() => m.style.display = 'none', 200);
+        }
+    }
+    function openInviteModal() { openAddStaffModal(); }
+    function closeInviteModal() { closeAddStaffModal(); }
+
+    function toggleStaffPasswordVisibility() {
+        const inp = document.getElementById('staffPasswordInput');
+        const icon = document.getElementById('togglePassIcon');
+        if (!inp) return;
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            if (icon) icon.className = 'ti ti-eye-off';
+        } else {
+            inp.type = 'password';
+            if (icon) icon.className = 'ti ti-eye';
+        }
     }
 
     function showCustomConfirmModal(opts) {
