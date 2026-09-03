@@ -794,7 +794,32 @@
         padding: 24px;
         display: none;
         flex-direction: column;
+        position: sticky;
+        top: 85px;
+        max-height: calc(100vh - 105px);
+        overflow: hidden;
         animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .drawer-content-body {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 6px;
+        margin-right: -4px;
+        max-height: calc(100vh - 300px);
+    }
+    .drawer-content-body::-webkit-scrollbar {
+        width: 5px;
+    }
+    .drawer-content-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .drawer-content-body::-webkit-scrollbar-thumb {
+        background: #E2E8F0;
+        border-radius: 10px;
+    }
+    .drawer-content-body::-webkit-scrollbar-thumb:hover {
+        background: #CBD5E1;
     }
     .permissions-drawer.open {
         display: flex;
@@ -1370,6 +1395,8 @@
                 <button type="button" class="drawer-tab-btn" id="tabAuditBtn" onclick="switchDrawerTab('audit')">Activity Audit</button>
             </div>
 
+            <!-- Scrollable Tab Content Container -->
+            <div class="drawer-content-body">
             <!-- Tab 1: Staff Member Full Details (From users Table) -->
             <div id="drawerTabDetails" style="display: block;">
                 <div class="staff-details-grid">
@@ -1587,6 +1614,7 @@
                     <!-- Dynamically populated from real audit_log -->
                 </div>
             </div>
+            </div> <!-- end .drawer-content-body -->
         </div>
 
     </div>
