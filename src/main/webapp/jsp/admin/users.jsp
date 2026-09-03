@@ -35,6 +35,42 @@
             } catch (Exception e) {
                 session.setAttribute("errorMessage", "Error processing staff action: " + e.getMessage());
             }
+        } else if ("updateStaffProfile".equals(action)) {
+            String editUidStr = request.getParameter("userId");
+            String uName = request.getParameter("staffUsername");
+            String uEmail = request.getParameter("staffEmail");
+            String uPhone = request.getParameter("staffPhone");
+            String uRoleStr = request.getParameter("staffRoleId");
+            String compIdStr = request.getParameter("staffCompanyId");
+            String uStatus = request.getParameter("staffStatus");
+
+            if (editUidStr != null && !editUidStr.trim().isEmpty() && uName != null && uEmail != null) {
+                try {
+                    int uid = Integer.parseInt(editUidStr.trim());
+                    int rId = (uRoleStr != null) ? Integer.parseInt(uRoleStr.trim()) : 3;
+                    Integer compId = (compIdStr != null && !compIdStr.trim().isEmpty()) ? Integer.parseInt(compIdStr.trim()) : null;
+                    if (uPhone == null || uPhone.trim().isEmpty()) uPhone = "+91 98765 43210";
+                    if (uStatus == null || uStatus.trim().isEmpty()) uStatus = "Active";
+
+                    String updSql = "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, company_id = ?, status = ? WHERE user_id = ?";
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement(updSql)) {
+                        ps.setString(1, uName.trim());
+                        ps.setString(2, uEmail.trim());
+                        ps.setString(3, uPhone.trim());
+                        ps.setInt(4, rId);
+                        if (compId != null) ps.setInt(5, compId); else ps.setNull(5, java.sql.Types.INTEGER);
+                        ps.setString(6, uStatus.trim());
+                        ps.setInt(7, uid);
+                        ps.executeUpdate();
+                    }
+
+                    uDao.logAuditEvent(uid, "USER_PROFILE_UPDATED", uName.trim(), request.getRemoteAddr());
+                    session.setAttribute("successMessage", "Staff profile for " + uName + " (#USR-" + uid + ") updated successfully!");
+                } catch (Exception e) {
+                    session.setAttribute("errorMessage", "Error updating staff profile: " + e.getMessage());
+                }
+            }
         } else if ("addStaff".equals(action) || "inviteStaff".equals(action)) {
             String uName = request.getParameter("staffUsername");
             if (uName == null || uName.trim().isEmpty()) uName = request.getParameter("inviteName");
@@ -1122,11 +1158,13 @@
     .custom-alert.danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
 
     /* Modal Backdrop and Glassmorphic Dialog */
-        /* Add Staff Modal TomSelect Styling */
+        /* Edit & Add Staff Modal TomSelect Styling */
+    #editStaffModal .ts-wrapper.form-select-custom,
     #addStaffModal .ts-wrapper.form-select-custom {
         width: 100% !important;
         margin: 0 !important;
     }
+    #editStaffModal .ts-wrapper.form-select-custom .ts-control,
     #addStaffModal .ts-wrapper.form-select-custom .ts-control {
         height: 38px !important;
         min-height: 38px !important;
@@ -1140,6 +1178,7 @@
         box-shadow: none !important;
         cursor: pointer !important;
     }
+    #editStaffModal .ts-wrapper.form-select-custom.focus .ts-control,
     #addStaffModal .ts-wrapper.form-select-custom.focus .ts-control {
         border-color: #FC8019 !important;
         box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
@@ -1392,6 +1431,9 @@
                                         <div class="action-dropdown-card" id="actionDropdown_${u.userId}">
                                             <button type="button" class="dropdown-item-btn" onclick="openStaffProfileModal(${u.userId})">
                                                 <i class="ti ti-user"></i> View Profile
+                                            </button>
+                                            <button type="button" class="dropdown-item-btn" onclick="openEditStaffProfileModal(${u.userId})">
+                                                <i class="ti ti-user-edit"></i> Edit Profile
                                             </button>
                                             <button type="button" class="dropdown-item-btn highlight" onclick="openEditPermissions(${u.userId})">
                                                 <i class="ti ti-pencil"></i> Edit Permissions
@@ -1798,6 +1840,86 @@
     </div>
 </div>
 
+<!-- Modal: Edit Staff Profile -->
+<div id="editStaffModal" class="nl-modal-backdrop" style="display: none;">
+    <div class="nl-modal-dialog" style="max-width: 530px; border-radius: 18px; padding: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFF3EA; color: #FC8019; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                    <i class="ti ti-user-edit"></i>
+                </div>
+                <div>
+                    <h5 style="font-size: 17px; font-weight: 800; color: #0F172A; margin: 0;">Edit Staff Profile</h5>
+                    <p style="font-size: 12px; color: #64748B; margin: 0;">Update account credentials, tenant allocation &amp; status</p>
+                </div>
+            </div>
+            <button type="button" class="drawer-close-btn" onclick="closeEditStaffModal()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+
+        <form method="POST" id="editStaffForm">
+            <input type="hidden" name="action" value="updateStaffProfile">
+            <input type="hidden" name="userId" id="editStaffUserId">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Username <span style="color: #EF4444;">*</span></label>
+                    <input type="text" name="staffUsername" id="editStaffUsername" required class="form-control" placeholder="e.g. arjun_ops" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 12px;">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Corporate Email <span style="color: #EF4444;">*</span></label>
+                    <input type="email" name="staffEmail" id="editStaffEmail" required class="form-control" placeholder="e.g. arjun@nlogistic.com" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 12px;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Phone Number</label>
+                    <input type="text" name="staffPhone" id="editStaffPhone" class="form-control" placeholder="+91 98765 43210" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 12px;">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Account Status <span style="color: #EF4444;">*</span></label>
+                    <select name="staffStatus" id="editStaffStatus" required class="form-select-custom">
+                        <option value="Active">Active</option>
+                        <option value="Locked">Locked / Suspended</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Role Assignment <span style="color: #EF4444;">*</span></label>
+                    <select name="staffRoleId" id="editStaffRoleId" required class="form-select-custom">
+                        <option value="3">Company Staff (Ops)</option>
+                        <option value="4">Company Staff (Finance)</option>
+                        <option value="2">Company Admin</option>
+                        <option value="1">Super Admin</option>
+                        <option value="5">Customer / Client</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Tenant / Company</label>
+                    <select name="staffCompanyId" id="editStaffCompanyId" class="form-select-custom">
+                        <option value="">Administration (System-Wide)</option>
+                        <c:forEach var="cp" items="${allCompanies}">
+                            <option value="${cp.companyId}">${cp.companyName}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
+                <button type="button" class="btn-drawer-cancel" onclick="closeEditStaffModal()">Cancel</button>
+                <button type="submit" class="btn-drawer-save" style="display: flex; align-items: center; gap: 6px;">
+                    <i class="ti ti-check"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Modal: Custom Confirmation Modal -->
 <div id="nlCustomConfirmModal" class="nl-modal-backdrop" style="display: none;">
     <div class="nl-modal-dialog" style="max-width: 420px; text-align: center;">
@@ -2113,6 +2235,75 @@
                 el.tomselect.sync();
             }
         });
+    }
+
+    function openEditStaffProfileModal(userId) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+
+        const row = document.getElementById('staffRow_' + userId);
+        if (!row) return;
+
+        const name = row.getAttribute('data-name') || '';
+        const email = row.getAttribute('data-email') || '';
+        const phone = row.getAttribute('data-phone') || '';
+        const roleId = row.getAttribute('data-roleid') || '3';
+        const companyId = row.getAttribute('data-companyid') || '';
+        const status = row.getAttribute('data-status') || 'Active';
+
+        document.getElementById('editStaffUserId').value = userId;
+        document.getElementById('editStaffUsername').value = name;
+        document.getElementById('editStaffEmail').value = email;
+        document.getElementById('editStaffPhone').value = phone;
+
+        const m = document.getElementById('editStaffModal');
+        if (m) {
+            m.style.display = 'flex';
+            requestAnimationFrame(() => {
+                m.classList.add('show');
+                initEditStaffModalDropdowns(status, roleId, companyId);
+            });
+        }
+    }
+
+    function initEditStaffModalDropdowns(status, roleId, companyId) {
+        ['editStaffStatus', 'editStaffRoleId', 'editStaffCompanyId'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el && !el.tomselect) {
+                try {
+                    const isSearchable = (id === 'editStaffCompanyId');
+                    new TomSelect(el, {
+                        create: false,
+                        dropdownParent: 'body',
+                        allowEmptyOption: true,
+                        controlInput: isSearchable ? undefined : null,
+                        maxOptions: 50
+                    });
+                } catch(e) {
+                    console.warn("TomSelect edit modal error:", e);
+                }
+            }
+        });
+
+        // Pre-fill TomSelect with current staff details
+        const statusEl = document.getElementById('editStaffStatus');
+        if (statusEl && statusEl.tomselect) statusEl.tomselect.setValue(status);
+        else if (statusEl) statusEl.value = status;
+
+        const roleEl = document.getElementById('editStaffRoleId');
+        if (roleEl && roleEl.tomselect) roleEl.tomselect.setValue(roleId);
+        else if (roleEl) roleEl.value = roleId;
+
+        const compEl = document.getElementById('editStaffCompanyId');
+        if (compEl && compEl.tomselect) compEl.tomselect.setValue(companyId ? companyId : '');
+        else if (compEl) compEl.value = companyId;
+    }
+
+    function closeEditStaffModal() {
+        const m = document.getElementById('editStaffModal');
+        if (m) {
+            m.classList.remove('show');
+            setTimeout(() => m.style.display = 'none', 200);
+        }
     }
 
     function openAddStaffModal() {
