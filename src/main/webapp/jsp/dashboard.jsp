@@ -198,6 +198,104 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     font-weight: 600 !important;
     background-position: right 12px center !important;
 }
+
+/* Modern SaaS Bootstrap Dropdowns */
+.btn-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid #E2E5EA;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-dropdown:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+    color: #1F2937;
+}
+.btn-dropdown:focus,
+.btn-dropdown[aria-expanded="true"] {
+    border-color: #FC8019;
+    box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+}
+.btn-dropdown i {
+    font-size: 12px;
+    color: #6B7280;
+    transition: transform 0.2s ease;
+}
+.btn-dropdown[aria-expanded="true"] i {
+    transform: rotate(180deg);
+}
+
+.btn-dropdown-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid #E2E5EA;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-dropdown-pill:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+    color: #111827;
+}
+.btn-dropdown-pill:focus,
+.btn-dropdown-pill[aria-expanded="true"] {
+    border-color: #FC8019;
+    box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+}
+.btn-dropdown-pill i {
+    font-size: 13px;
+    color: #6B7280;
+    transition: transform 0.2s ease;
+}
+.btn-dropdown-pill[aria-expanded="true"] i {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    border: 1px solid #E7E9ED !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04) !important;
+    padding: 6px !important;
+    background: #FFFFFF !important;
+    min-width: 140px !important;
+    margin-top: 6px !important;
+}
+
+.dropdown-item {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    transition: all 120ms ease !important;
+}
+
+.dropdown-item:hover {
+    background-color: #FFF2EB !important;
+    color: #FC8019 !important;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #FC8019 !important;
+    color: #FFFFFF !important;
+}
+
 </style>
 
 <div class="dash-wrap">
@@ -208,14 +306,25 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
             <p>Welcome back! Here's what's happening with your logistics operations.</p>
         </div>
         <div class="dash-header-right">
-            <form action="${pageContext.request.contextPath}/dashboard" method="GET" class="date-badge-form" style="display:inline-block; margin-right: 15px;">
-                <select name="period" onchange="this.form.submit()" class="period-select" style="padding: 8px 12px; border-radius: 20px; font-weight: 600;">
-                    <option value="all" ${currentPeriod == 'all' ? 'selected' : ''}>All Time</option>
-                    <option value="today" ${currentPeriod == 'today' ? 'selected' : ''}>Today</option>
-                    <option value="week" ${currentPeriod == 'week' ? 'selected' : ''}>This Week</option>
-                    <option value="month" ${currentPeriod == 'month' ? 'selected' : ''}>This Month</option>
-                </select>
-            </form>
+            <div class="dropdown d-inline-block me-3">
+                <button class="btn-dropdown-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>
+                        <c:choose>
+                            <c:when test="${currentPeriod == 'today'}">Today</c:when>
+                            <c:when test="${currentPeriod == 'week'}">This Week</c:when>
+                            <c:when test="${currentPeriod == 'month'}">This Month</c:when>
+                            <c:otherwise>All Time</c:otherwise>
+                        </c:choose>
+                    </span>
+                    <i class="ti ti-chevron-down"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li><a class="dropdown-item ${empty currentPeriod || currentPeriod == 'all' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=all&trendPeriod=${currentTrendPeriod}">All Time</a></li>
+                    <li><a class="dropdown-item ${currentPeriod == 'today' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=today&trendPeriod=${currentTrendPeriod}">Today</a></li>
+                    <li><a class="dropdown-item ${currentPeriod == 'week' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=week&trendPeriod=${currentTrendPeriod}">This Week</a></li>
+                    <li><a class="dropdown-item ${currentPeriod == 'month' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=month&trendPeriod=${currentTrendPeriod}">This Month</a></li>
+                </ul>
+            </div>
             
         </div>
     </div>
@@ -270,14 +379,23 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Shipment Overview</h3>
-                <form action="${pageContext.request.contextPath}/dashboard" method="GET" style="margin:0;">
-                <input type="hidden" name="period" value="${currentPeriod}">
-                <select name="trendPeriod" onchange="this.form.submit()" class="period-select">
-                    <option value="week" ${currentTrendPeriod == 'week' ? 'selected' : ''}>This Week</option>
-                    <option value="month" ${currentTrendPeriod == 'month' ? 'selected' : ''}>This Month</option>
-                    <option value="year" ${currentTrendPeriod == 'year' ? 'selected' : ''}>This Year</option>
-                </select>
-            </form>
+                <div class="dropdown">
+                    <button class="btn-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span>
+                            <c:choose>
+                                <c:when test="${currentTrendPeriod == 'month'}">This Month</c:when>
+                                <c:when test="${currentTrendPeriod == 'year'}">This Year</c:when>
+                                <c:otherwise>This Week</c:otherwise>
+                            </c:choose>
+                        </span>
+                        <i class="ti ti-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item ${empty currentTrendPeriod || currentTrendPeriod == 'week' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=week">This Week</a></li>
+                        <li><a class="dropdown-item ${currentTrendPeriod == 'month' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=month">This Month</a></li>
+                        <li><a class="dropdown-item ${currentTrendPeriod == 'year' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=year">This Year</a></li>
+                    </ul>
+                </div>
             </div>
             <div class="card-body">
                 <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
@@ -334,7 +452,17 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Top Shipping Routes</h3>
-                <select class="period-select"><option>All Time</option></select>
+                <div class="dropdown">
+                    <button class="btn-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span>All Time</span>
+                        <i class="ti ti-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item active" href="javascript:void(0);">All Time</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">This Year</a></li>
+                    </ul>
+                </div>
             </div>
             <div class="card-body scrollable-card-body" style="padding-top:12px;">
                 <table class="route-table">
