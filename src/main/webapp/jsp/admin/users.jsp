@@ -1738,20 +1738,7 @@
                 </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; display: block; text-transform: uppercase;">Account Status</label>
-                <div style="display: flex; gap: 16px; align-items: center;">
-                    <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #059669; cursor: pointer;">
-                        <input type="radio" name="staffStatus" value="Active" checked style="accent-color: #059669;"> Active
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #DC2626; cursor: pointer;">
-                        <input type="radio" name="staffStatus" value="Locked" style="accent-color: #DC2626;"> Locked / Suspended
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #64748B; cursor: pointer;">
-                        <input type="radio" name="staffStatus" value="Inactive" style="accent-color: #64748B;"> Inactive
-                    </label>
-                </div>
-            </div>
+            <input type="hidden" name="staffStatus" value="Active">
 
             <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
                 <button type="button" class="btn-drawer-cancel" onclick="closeAddStaffModal()">Cancel</button>
