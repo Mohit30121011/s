@@ -404,7 +404,7 @@
         </div>
 
         <div class="filter-select-wrap">
-            <select id="statusFilter" class="form-select form-select-custom">
+            <select id="statusFilter" class="form-select form-select-custom no-custom-select">
                 <option value="All" selected>All Statuses</option>
                 <option value="Available">Available</option>
                 <option value="Allocated">Allocated</option>
@@ -414,7 +414,7 @@
         </div>
 
         <div class="filter-select-wrap">
-            <select id="typeFilter" class="form-select form-select-custom">
+            <select id="typeFilter" class="form-select form-select-custom no-custom-select">
                 <option value="All" selected>All Types</option>
                 <option value="Dry">Dry</option>
                 <option value="Reefer">Reefer</option>
@@ -607,7 +607,7 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
-                        <select name="status" id="updateStatusSelect" class="form-select form-select-custom" required>
+                        <select name="status" id="updateStatusSelect" class="form-select form-select-custom no-custom-select" required>
                             <option value="Available">Available</option>
                             <option value="In-Transit">In-Transit</option>
                             <option value="Under Maintenance">Under Maintenance</option>
@@ -617,7 +617,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
-                        <select name="portId" id="updatePortSelect" class="form-select form-select-custom" required>
+                        <select name="portId" id="updatePortSelect" class="form-select form-select-custom no-custom-select" required>
                             <c:forEach var="port" items="${ports}">
                                 <option value="${port.portId}">${port.portName} (${port.country})</option>
                             </c:forEach>
@@ -664,8 +664,11 @@
 
                         <!-- Assigned Port / Location -->
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Location (Port) <span style="color: #FC8019;">*</span></label>
-                            <select name="portId" class="form-select form-select-custom" required>
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">
+                                <i class="ti ti-anchor me-1" style="color: #FC8019;"></i> Current Location (Port) <span style="color: #FC8019;">*</span>
+                            </label>
+                            <select name="portId" id="newContainerPort" class="form-select form-select-custom no-custom-select" required>
+                                <option value="" disabled>-- Select Assigned Port --</option>
                                 <c:forEach var="port" items="${ports}" varStatus="pStatus">
                                     <option value="${port.portId}" ${pStatus.first ? 'selected' : ''}>${port.portName} (${port.country})</option>
                                 </c:forEach>
@@ -675,7 +678,7 @@
                         <!-- Type (FR3.1: Dry, Reefer, Open Top, Flat Rack, Tank) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Type <span style="color: #FC8019;">*</span></label>
-                            <select name="type" class="form-select form-select-custom" required>
+                            <select name="type" class="form-select form-select-custom no-custom-select" required>
                                 <option value="Dry" selected>Dry (Dry Van / General Cargo)</option>
                                 <option value="Reefer">Reefer (Refrigerated)</option>
                                 <option value="Open Top">Open Top (Top-Loaded Heavy Cargo)</option>
@@ -687,7 +690,7 @@
                         <!-- Size (FR3.1: 20ft, 40ft, 40ft HC, 45ft) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Standard Size <span style="color: #FC8019;">*</span></label>
-                            <select name="size" id="newContainerSize" class="form-select form-select-custom" required onchange="applyContainerSizePreset(this.value)">
+                            <select name="size" id="newContainerSize" class="form-select form-select-custom no-custom-select" required onchange="applyContainerSizePreset(this.value)">
                                 <option value="20ft">20ft Standard (20' x 8' x 8'6")</option>
                                 <option value="40ft" selected>40ft Standard (40' x 8' x 8'6")</option>
                                 <option value="40ft HC">40ft High Cube (40' x 8' x 9'6")</option>
@@ -739,7 +742,7 @@
                         <!-- Status (FR3.1) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Initial Status <span style="color: #FC8019;">*</span></label>
-                            <select name="status" class="form-select form-select-custom" required>
+                            <select name="status" class="form-select form-select-custom no-custom-select" required>
                                 <option value="Available" selected>Available (Ready for Allocation)</option>
                                 <option value="Under Maintenance">Under Maintenance (Inspection / Repair)</option>
                                 <option value="Allocated">Allocated (Reserved for Shipment)</option>

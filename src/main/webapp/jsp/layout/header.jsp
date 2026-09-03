@@ -1149,6 +1149,34 @@
             box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.12) !important;
         }
 
+        /* Swiggy Orange Custom Theme Select (Zero-Bug, 100% Reliable Native Component) */
+        .form-select-custom,
+        select.form-select.no-custom-select,
+        select.form-select-custom.no-custom-select {
+            height: 40px !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 8px !important;
+            padding: 8px 36px 8px 14px !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            color: #1F2937 !important;
+            background-color: #FFFFFF !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 14px center !important;
+            background-size: 12px 10px !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+            cursor: pointer !important;
+            outline: none !important;
+        }
+        .form-select-custom:focus,
+        select.form-select.no-custom-select:focus,
+        select.form-select-custom.no-custom-select:focus {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+            outline: none !important;
+        }
+
         .nl-pagination-nav {
             display: flex;
             align-items: center;
