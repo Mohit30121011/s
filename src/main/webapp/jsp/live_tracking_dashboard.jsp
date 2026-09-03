@@ -209,6 +209,56 @@
         background: #F8FAFC;
         text-align: left;
     }
+    
+    /* Action Pill Button with Hover Highlight */
+    .btn-tracking-details {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        text-decoration: none;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+    }
+    .btn-tracking-details i {
+        font-size: 11px;
+        color: #94A3B8;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .btn-tracking-details:hover {
+        background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%) !important;
+        border-color: transparent !important;
+        color: #FFFFFF !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.32);
+        text-decoration: none;
+    }
+    .btn-tracking-details:hover i {
+        color: #FFFFFF !important;
+        transform: translateX(2px);
+    }
+    .btn-tracking-details:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(252, 128, 25, 0.2);
+    }
+    .tracking-row:hover .btn-tracking-details {
+        border-color: #CBD5E1;
+        background: #FFFFFF;
+        color: #0F172A;
+    }
+    .tracking-row:hover .btn-tracking-details:hover {
+        background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%) !important;
+        color: #FFFFFF !important;
+        border-color: transparent !important;
+    }
+
     .tracking-table td {
         padding: 14px 20px;
         font-size: 13.5px;
@@ -434,8 +484,11 @@
                                 <c:otherwise><span style="color: #9CA3AF;">N/A</span></c:otherwise>
                             </c:choose>
                         </td>
-                        <td style="padding-right: 24px; text-align: right; color: #9CA3AF;">
-                            <i class="ti ti-chevron-right" style="font-size: 16px;"></i>
+                        <td style="padding-right: 24px; text-align: right;">
+                            <a href="${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-${shipment.shipmentId}" class="btn-tracking-details" onclick="event.stopPropagation();">
+                                <span>Details</span>
+                                <i class="ti ti-arrow-right"></i>
+                            </a>
                         </td>
                     </tr>
                 </c:forEach>
