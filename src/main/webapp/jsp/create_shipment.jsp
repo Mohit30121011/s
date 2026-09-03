@@ -185,81 +185,55 @@
                 align-items: center; justify-content: center; margin: 0 8px;
             }
             .form-actions { margin-top: 40px; display: flex; justify-content: flex-end; gap: 16px; }
-            .btn-cancel {
+                        .btn-cancel {
                 background: #FFFFFF;
-                border: 1.5px solid #E2E8F0;
+                border: 1px solid #E2E8F0;
                 color: #475569;
-                padding: 11px 28px;
+                padding: 10px 24px;
                 border-radius: 50px;
-                font-weight: 600;
-                font-size: 14px;
+                font-weight: 500;
+                font-size: 13.5px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 text-decoration: none;
-                transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+                transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
             }
             .btn-cancel:hover {
                 background: #F8FAFC;
                 border-color: #CBD5E1;
                 color: #0F172A;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
-            }
-            .btn-cancel:active {
-                transform: translateY(0);
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
             }
 
             .btn-confirm {
                 background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%);
-                border: 1.5px solid transparent;
+                border: 1px solid transparent;
                 color: #FFFFFF !important;
-                padding: 11px 32px;
+                padding: 10px 26px;
                 border-radius: 50px;
-                font-weight: 700;
-                font-size: 14px;
+                font-weight: 600;
+                font-size: 13.5px;
                 display: inline-flex;
                 align-items: center;
-                gap: 9px;
+                gap: 8px;
                 cursor: pointer;
-                transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-                box-shadow: 0 4px 14px rgba(252, 128, 25, 0.32);
-                position: relative;
-                overflow: hidden;
-            }
-            .btn-confirm::after {
-                content: '';
-                position: absolute;
-                top: -50%;
-                left: -60%;
-                width: 40%;
-                height: 200%;
-                background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0) 100%);
-                transform: rotate(25deg);
-                transition: none;
-                pointer-events: none;
-            }
-            .btn-confirm:hover::after {
-                left: 140%;
-                transition: left 0.75s ease-in-out;
+                transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+                box-shadow: 0 2px 6px rgba(252, 128, 25, 0.20);
             }
             .btn-confirm:hover {
-                background: linear-gradient(135deg, #E87010 0%, #E65100 100%);
-                transform: translateY(-2px);
-                box-shadow: 0 7px 22px rgba(252, 128, 25, 0.45);
+                background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(252, 128, 25, 0.26);
                 color: #FFFFFF !important;
             }
-            .btn-confirm:active {
-                transform: translateY(0);
-                box-shadow: 0 3px 8px rgba(252, 128, 25, 0.3);
-            }
             .btn-confirm i {
-                transition: transform 0.25s ease;
+                transition: transform 0.18s ease;
             }
             .btn-confirm:hover i {
-                transform: scale(1.15) rotate(-5deg);
+                transform: scale(1.06);
             }
         </style>
 

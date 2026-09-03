@@ -250,8 +250,8 @@
             outline: none !important;
         }
 
-        /* ==========================================================================
-           6. GLOBAL PILL-SHAPED BUTTONS & SUBTLE HOVER ANIMATIONS
+                /* ==========================================================================
+           6. GLOBAL PILL-SHAPED BUTTONS & REFINED SUBTLE HOVER ANIMATIONS
            ========================================================================== */
         .btn,
         button.btn,
@@ -280,15 +280,15 @@
         .btn-nlog,
         .btn-dropdown-pill {
             border-radius: 50px !important;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 8px !important;
+            gap: 7px !important;
             position: relative !important;
         }
 
-        /* Hover Elevation & Lift */
+        /* Subtle Hover Elevation (-1px gentle lift) */
         .btn:hover:not(:disabled),
         button.btn:hover:not(:disabled),
         a.btn:hover,
@@ -311,29 +311,29 @@
         .btn-outline-custom:hover,
         .btn-outline-nlog:hover,
         .btn-nlog:hover:not(:disabled) {
-            transform: translateY(-2px) !important;
+            transform: translateY(-1px) !important;
         }
 
-        /* Active Click Press (Spring feedback) */
+        /* Active Click Press */
         .btn:active:not(:disabled),
         button.btn:active:not(:disabled),
         a.btn:active {
             transform: translateY(0) !important;
         }
 
-        /* Icon micro-animations inside buttons */
+        /* Very subtle icon micro-interaction */
         .btn i,
         button.btn i,
         a.btn i {
-            transition: transform 0.25s ease !important;
+            transition: transform 0.18s ease !important;
         }
-        .btn:hover i,
-        button.btn:hover i,
+        .btn:hover:not(:disabled) i,
+        button.btn:hover:not(:disabled) i,
         a.btn:hover i {
-            transform: scale(1.12);
+            transform: scale(1.05);
         }
 
-        /* Primary / Orange Buttons: Gradient + Ambient Glow */
+        /* Primary / Orange Buttons: Gentle Swiggy Orange with subtle shadow */
         .btn-primary,
         .btn-orange,
         .btn-confirm,
@@ -341,11 +341,10 @@
         .btn-primary-custom,
         .btn-nlog {
             background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%) !important;
-            border: 1.5px solid transparent !important;
+            border: 1px solid transparent !important;
             color: #FFFFFF !important;
-            font-weight: 700 !important;
-            box-shadow: 0 4px 14px rgba(252, 128, 25, 0.30) !important;
-            overflow: hidden !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 6px rgba(252, 128, 25, 0.20) !important;
         }
         .btn-primary:hover:not(:disabled),
         .btn-orange:hover:not(:disabled),
@@ -353,8 +352,8 @@
         .btn-submit:hover:not(:disabled),
         .btn-primary-custom:hover:not(:disabled),
         .btn-nlog:hover:not(:disabled) {
-            background: linear-gradient(135deg, #E87010 0%, #E65100 100%) !important;
-            box-shadow: 0 7px 22px rgba(252, 128, 25, 0.45) !important;
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+            box-shadow: 0 4px 12px rgba(252, 128, 25, 0.26) !important;
             color: #FFFFFF !important;
         }
 
@@ -365,10 +364,10 @@
         .btn-outline-custom,
         .btn-outline-nlog {
             background: #FFFFFF !important;
-            border: 1.5px solid #E2E8F0 !important;
+            border: 1px solid #E2E8F0 !important;
             color: #475569 !important;
-            font-weight: 600 !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+            font-weight: 500 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
         }
         .btn-secondary:hover,
         .btn-outline-secondary:hover,
@@ -378,76 +377,50 @@
             background: #F8FAFC !important;
             border-color: #CBD5E1 !important;
             color: #0F172A !important;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06) !important;
         }
 
         /* Danger Buttons */
         .btn-danger {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
-            border: 1.5px solid transparent !important;
+            background: #EF4444 !important;
+            border: 1px solid transparent !important;
             color: #FFFFFF !important;
             font-weight: 600 !important;
-            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.28) !important;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.20) !important;
         }
         .btn-danger:hover:not(:disabled) {
-            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important;
-            box-shadow: 0 7px 20px rgba(239, 68, 68, 0.40) !important;
+            background: #DC2626 !important;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.26) !important;
             color: #FFFFFF !important;
         }
 
         /* Success Buttons */
         .btn-success {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
-            border: 1.5px solid transparent !important;
+            background: #10B981 !important;
+            border: 1px solid transparent !important;
             color: #FFFFFF !important;
             font-weight: 600 !important;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28) !important;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.20) !important;
         }
         .btn-success:hover:not(:disabled) {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-            box-shadow: 0 7px 20px rgba(16, 185, 129, 0.40) !important;
+            background: #059669 !important;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.26) !important;
             color: #FFFFFF !important;
         }
 
-        /* Shimmer sweep effect on primary buttons */
-        .btn-primary::after,
-        .btn-orange::after,
-        .btn-confirm::after,
-        .btn-submit::after,
-        .btn-primary-custom::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 40%;
-            height: 200%;
-            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0) 100%);
-            transform: rotate(25deg);
-            pointer-events: none;
-        }
-        .btn-primary:hover:not(:disabled)::after,
-        .btn-orange:hover:not(:disabled)::after,
-        .btn-confirm:hover:not(:disabled)::after,
-        .btn-submit:hover:not(:disabled)::after,
-        .btn-primary-custom:hover:not(:disabled)::after {
-            left: 140%;
-            transition: left 0.75s ease-in-out;
-        }
-
-        /* Exceptions for icon-only & close buttons so they remain circular */
+        /* Exceptions for icon-only & close buttons */
         .btn-close {
             border-radius: 50% !important;
-            width: 32px !important;
-            height: 32px !important;
+            width: 30px !important;
+            height: 30px !important;
             padding: 0 !important;
         }
         .btn-icon, .btn-icon-action {
             border-radius: 50% !important;
-            width: 36px !important;
-            height: 36px !important;
+            width: 34px !important;
+            height: 34px !important;
             padding: 0 !important;
         }
-
 
         /* 7. Global Modals */
         .modal-content {
