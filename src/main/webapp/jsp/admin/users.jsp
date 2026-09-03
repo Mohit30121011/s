@@ -1,95 +1,736 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
+    if ("POST".equalsIgnoreCase(request.getMethod())) {
+        String action = request.getParameter("action");
+        String userIdStr = request.getParameter("userId");
+        if (userIdStr != null && action != null) {
+            try {
+                int uid = Integer.parseInt(userIdStr);
+                com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
+                if ("accept".equals(action)) {
+                    uDao.updateUserStatus(uid, "Active");
+                    session.setAttribute("successMessage", "Customer Account Approved & Activated Successfully.");
+                } else if ("reject".equals(action)) {
+                    uDao.updateUserStatus(uid, "Locked");
+                    session.setAttribute("errorMessage", "Customer Account Suspended / Locked.");
+                }
+            } catch(Exception ex) { ex.printStackTrace(); }
+            response.sendRedirect(request.getRequestURI());
+            return;
+        }
+    }
+
+    if (request.getAttribute("allUsers") == null) {
+        com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
+        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
+
+        java.util.List<com.nlogistic.model.User> allUsrs = uDao.getAllUsers();
+        java.util.List<com.nlogistic.model.User> pendUsrs = uDao.getPendingUsers();
+        java.util.List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
+
+        java.util.Map<Integer, String> companyNameMap = new java.util.HashMap<>();
+        if (allComps != null) {
+            for (com.nlogistic.model.Company cp : allComps) {
+                companyNameMap.put(cp.getCompanyId(), cp.getCompanyName());
+            }
+        }
+
+        int pendingCount = 0;
+        int activeCount = 0;
+        int inactiveCount = 0;
+        int totalCount = (allUsrs != null) ? allUsrs.size() : 0;
+
+        if (allUsrs != null) {
+            for (com.nlogistic.model.User u : allUsrs) {
+                if ("Pending".equalsIgnoreCase(u.getStatus())) {
+                    pendingCount++;
+                } else if ("Active".equalsIgnoreCase(u.getStatus())) {
+                    activeCount++;
+                } else {
+                    inactiveCount++;
+                }
+            }
+        }
+
+        request.setAttribute("allUsers", allUsrs);
+        request.setAttribute("pendingUsers", pendUsrs);
+        request.setAttribute("companyNameMap", companyNameMap);
+        request.setAttribute("pendingCount", pendingCount);
+        request.setAttribute("activeCount", activeCount);
+        request.setAttribute("inactiveCount", inactiveCount);
+        request.setAttribute("totalCount", totalCount);
+    }
+%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 fw-bold">User Approvals</h4>
-    <div class="custom-breadcrumb mb-0">
+<style>
+    /* ==========================================================================
+       CUSTOMER APPROVALS & CLIENT GOVERNANCE THEME (SWIGGY ORANGE ENTERPRISE)
+       ========================================================================== */
+    .approvals-page-container {
+        padding: 0 4px 40px;
+    }
+
+    /* Top Breadcrumb */
+    .custom-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #64748B;
+        margin-bottom: 16px;
+    }
+    .custom-breadcrumb a {
+        color: #64748B;
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+    .custom-breadcrumb a:hover {
+        color: #FC8019;
+    }
+    .custom-breadcrumb i {
+        font-size: 11px;
+        color: #94A3B8;
+    }
+    .custom-breadcrumb .current {
+        color: #FC8019;
+        font-weight: 600;
+    }
+
+    /* Telemetry Header Panel */
+    .telemetry-header-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 24px 28px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .telemetry-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .telemetry-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #FFF0E5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FC8019;
+        font-size: 26px;
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.15);
+        flex-shrink: 0;
+    }
+    .telemetry-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0F172A;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.3px;
+    }
+    .telemetry-subtitle {
+        font-size: 13.5px;
+        color: #64748B;
+        margin: 0;
+    }
+
+    /* 4-Column KPI Stats Cards */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        cursor: pointer;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        border-color: #CBD5E1;
+    }
+    .kpi-label {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #64748B;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .kpi-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1;
+    }
+    .kpi-icon-pill {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .kpi-icon-pill.amber  { background: #FFFBEB; color: #D97706; }
+    .kpi-icon-pill.green  { background: #ECFDF5; color: #059669; }
+    .kpi-icon-pill.red    { background: #FEF2F2; color: #DC2626; }
+    .kpi-icon-pill.blue   { background: #EFF6FF; color: #2563EB; }
+
+    /* Filter Tabs & Search Toolbar */
+    .approvals-toolbar {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px 14px 0 0;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .nav-tabs-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #F8FAFC;
+        padding: 4px;
+        border-radius: 50px;
+        border: 1px solid #E2E8F0;
+    }
+    .tab-pill-btn {
+        background: transparent;
+        border: none;
+        padding: 7px 18px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .tab-pill-btn:hover { color: #0F172A; }
+    .tab-pill-btn.active {
+        background: #FFFFFF;
+        color: #FC8019;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .tab-counter {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 50px;
+        background: #F1F5F9;
+        color: #475569;
+    }
+    .tab-pill-btn.active .tab-counter {
+        background: #FFF0E5;
+        color: #FC8019;
+    }
+
+    /* Live Search Input Box */
+    .table-search-wrap { position: relative; width: 300px; }
+    .table-search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; }
+    .table-search-input {
+        width: 100%; height: 40px; padding-left: 42px !important; padding-right: 18px !important;
+        border-radius: 50px !important; font-size: 13px !important; border: 1.5px solid #E2E8F0 !important;
+        background: #F8FAFC !important;
+    }
+    .table-search-input:focus {
+        background: #FFFFFF !important; border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+    }
+
+    /* Main Table Container */
+    .approvals-table-panel {
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-top: none;
+        border-radius: 0 0 16px 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); overflow: hidden;
+    }
+    .approvals-table { width: 100%; border-collapse: collapse; margin: 0; }
+    .approvals-table th {
+        background: #F8FAFC; padding: 14px 20px; font-size: 11.5px; font-weight: 700;
+        color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; text-align: left;
+    }
+    .approvals-table th i { margin-right: 4px; color: #94A3B8; font-size: 13px; }
+    .approvals-table td {
+        padding: 16px 20px; border-bottom: 1px solid #F1F5F9; vertical-align: middle;
+        font-size: 13.5px; color: #1E293B; transition: background-color 0.12s ease;
+    }
+    .customer-row:hover td { background-color: #FAFAFA; }
+
+    /* Customer Name & Avatar Cell */
+    .customer-cell { display: flex; align-items: center; gap: 14px; }
+    .customer-avatar {
+        width: 42px; height: 42px; border-radius: 12px; background: #FC8019;
+        color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); flex-shrink: 0; letter-spacing: 0.5px;
+    }
+    .customer-info-wrap { min-width: 0; }
+    .customer-name-title { font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 2px; }
+    .customer-meta-badge { font-size: 11px; color: #64748B; display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Role and Tenant Badges */
+    .role-tenant-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .role-badge {
+        font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 50px;
+        background: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; display: inline-flex;
+        align-items: center; gap: 5px; width: fit-content;
+    }
+    .company-name-chip {
+        font-size: 12px; color: #64748B; display: inline-flex; align-items: center; gap: 5px;
+    }
+
+    /* Contact Details Chips */
+    .contact-cell { display: flex; flex-direction: column; gap: 4px; }
+    .contact-link { display: inline-flex; align-items: center; gap: 6px; color: #475569; font-size: 12.5px; text-decoration: none; transition: color 0.15s ease; }
+    .contact-link:hover { color: #FC8019; }
+    .contact-link i { font-size: 13px; color: #94A3B8; }
+
+    /* Status Badges */
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+    .status-pill.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .status-pill.active { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .status-pill.suspended { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+
+    /* Action Buttons (Pill-Shaped Flat, NO Gradient) */
+    .actions-flex { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+    .btn-approval-accept {
+        background: #10B981 !important; border: 1px solid #10B981 !important; color: #FFFFFF !important;
+        padding: 7px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;
+        cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.22);
+    }
+    .btn-approval-accept:hover {
+        background: #059669 !important; border-color: #059669 !important; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(16, 185, 129, 0.35);
+    }
+    .btn-approval-accept:active { transform: translateY(0); }
+    .btn-approval-accept i { font-size: 13px; transition: transform 0.2s ease; }
+    .btn-approval-accept:hover i { transform: scale(1.15); }
+
+    .btn-approval-reject {
+        background: #FFFFFF; border: 1.5px solid #FCA5A5; color: #DC2626 !important; padding: 7px 18px; border-radius: 50px;
+        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+    }
+    .btn-approval-reject:hover {
+        background: #FEF2F2; border-color: #EF4444; color: #B91C1C !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.18);
+    }
+    .btn-approval-reject:active { transform: translateY(0); }
+    .btn-approval-reject i { font-size: 13px; transition: transform 0.2s ease; }
+    .btn-approval-reject:hover i { transform: scale(1.15); }
+
+    /* Empty State */
+    .empty-caught-up-card { padding: 60px 24px; text-align: center; background: #FFFFFF; }
+    .empty-shield-icon-box {
+        width: 68px; height: 68px; border-radius: 20px; background: #ECFDF5; border: 1px solid #A7F3D0;
+        color: #059669; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+    .empty-caught-up-title { font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+    .empty-caught-up-desc { font-size: 13.5px; color: #64748B; max-width: 440px; margin: 0 auto 20px; line-height: 1.5; }
+    .btn-view-all-tenants {
+        background: #FFFFFF; border: 1.5px solid #E2E8F0; color: #475569; padding: 9px 24px; border-radius: 50px;
+        font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+    }
+    .btn-view-all-tenants:hover { background: #F8FAFC; border-color: #CBD5E1; color: #0F172A; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
+
+    /* Alerts */
+    .custom-alert { border-radius: 12px; padding: 14px 18px; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .custom-alert.success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+    .custom-alert.danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+</style>
+
+<div class="approvals-page-container">
+
+    <!-- Breadcrumb -->
+    <div class="custom-breadcrumb">
         <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-        <i class="fa-solid fa-chevron-right custom-breadcrumb-separator mx-2"></i>
-        <span class="active">User Approvals</span>
+        <i class="ti ti-chevron-right"></i>
+        <span>Management</span>
+        <i class="ti ti-chevron-right"></i>
+        <span class="current">Customer Approvals</span>
     </div>
-</div>
 
-<c:if test="${not empty sessionScope.successMessage}">
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.successMessage}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <c:remove var="successMessage" scope="session"/>
-</c:if>
-<c:if test="${not empty sessionScope.errorMessage}">
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fa-solid fa-circle-exclamation me-2"></i>${sessionScope.errorMessage}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <c:remove var="errorMessage" scope="session"/>
-</c:if>
+    <!-- Alert Notifications -->
+    <c:if test="${not empty sessionScope.successMessage}">
+        <div class="custom-alert success">
+            <i class="ti ti-circle-check" style="font-size: 18px;"></i>
+            <span>${sessionScope.successMessage}</span>
+        </div>
+        <c:remove var="successMessage" scope="session"/>
+    </c:if>
+    <c:if test="${not empty sessionScope.errorMessage}">
+        <div class="custom-alert danger">
+            <i class="ti ti-circle-x" style="font-size: 18px;"></i>
+            <span>${sessionScope.errorMessage}</span>
+        </div>
+        <c:remove var="errorMessage" scope="session"/>
+    </c:if>
 
-<div class="card">
-    <div class="card-body p-0">
+    <!-- Top Telemetry Header -->
+    <div class="telemetry-header-card">
+        <div class="telemetry-header-left">
+            <div class="telemetry-icon-box">
+                <i class="ti ti-user-check"></i>
+            </div>
+            <div>
+                <h4 class="telemetry-title">Customer Approvals &amp; Client Governance</h4>
+                <p class="telemetry-subtitle">Super Admin regulatory verification portal for B2B portal customers, shipper accounts, and access clearance</p>
+            </div>
+        </div>
+        <div>
+            <span class="badge" style="background: #FFF0E5; color: #FC8019; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 50px; border: 1px solid #FED7AA;">
+                <i class="ti ti-lock-access me-1"></i> Super Admin Clearance Required
+            </span>
+        </div>
+    </div>
+
+    <!-- 4 KPI Summary Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card" onclick="filterByTab('Pending')" style="cursor: pointer;" title="Click to view Pending Customer Approvals">
+            <div>
+                <div class="kpi-label">Pending Approval</div>
+                <div class="kpi-value" style="color: #D97706;">${not empty pendingCount ? pendingCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill amber">
+                <i class="ti ti-clock-hour-4"></i>
+            </div>
+        </div>
+        <div class="kpi-card" onclick="filterByTab('Active')" style="cursor: pointer;" title="Click to view Active Customers">
+            <div>
+                <div class="kpi-label">Active Customers</div>
+                <div class="kpi-value" style="color: #059669;">${not empty activeCount ? activeCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill green">
+                <i class="ti ti-circle-check"></i>
+            </div>
+        </div>
+        <div class="kpi-card" onclick="filterByTab('Suspended')" style="cursor: pointer;" title="Click to view Suspended &amp; Inactive Customers">
+            <div>
+                <div class="kpi-label">Suspended / Inactive</div>
+                <div class="kpi-value" style="color: #DC2626;">${not empty inactiveCount ? inactiveCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill red">
+                <i class="ti ti-ban"></i>
+            </div>
+        </div>
+        <div class="kpi-card" onclick="filterByTab('All')" style="cursor: pointer;" title="Click to view All Accounts">
+            <div>
+                <div class="kpi-label">Total Registered Accounts</div>
+                <div class="kpi-value" style="color: #2563EB;">${not empty totalCount ? totalCount : 0}</div>
+            </div>
+            <div class="kpi-icon-pill blue">
+                <i class="ti ti-users"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar: Filter Tabs & Real-Time Search -->
+    <div class="approvals-toolbar">
+        <div class="nav-tabs-pill">
+            <button type="button" class="tab-pill-btn active" id="tabPendingBtn" onclick="filterByTab('Pending')">
+                <i class="ti ti-clock"></i> Pending Review
+                <span class="tab-counter">${not empty pendingCount ? pendingCount : 0}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" id="tabActiveBtn" onclick="filterByTab('Active')">
+                <i class="ti ti-circle-check"></i> Active Customers
+                <span class="tab-counter">${not empty activeCount ? activeCount : 0}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" id="tabSuspendedBtn" onclick="filterByTab('Suspended')">
+                <i class="ti ti-ban"></i> Suspended &amp; Inactive
+                <span class="tab-counter" style="color: #DC2626; background: #FEF2F2;">${not empty inactiveCount ? inactiveCount : 0}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" id="tabAllBtn" onclick="filterByTab('All')">
+                <i class="ti ti-list"></i> All Accounts
+                <span class="tab-counter">${not empty totalCount ? totalCount : 0}</span>
+            </button>
+        </div>
+
+        <div class="table-search-wrap">
+            <i class="ti ti-search"></i>
+            <input type="text" id="customerSearchInput" class="table-search-input form-control" placeholder="Search customer, email, phone, company..." oninput="handleCustomerSearch()">
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="approvals-table-panel">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted" style="font-size: 13px; text-transform: uppercase;">
+            <table class="approvals-table" id="customersTable">
+                <thead>
                     <tr>
-                        <th class="py-3 ps-4 border-0 rounded-start">Username / Name</th>
-                        <th class="py-3 border-0">Email</th>
-                        <th class="py-3 border-0">Phone</th>
-                        <th class="py-3 border-0">Role</th>
-                        <th class="py-3 border-0 text-end pe-4 rounded-end">Actions</th>
+                        <th style="padding-left: 24px;"><i class="ti ti-user"></i> Customer / User</th>
+                        <th><i class="ti ti-briefcase"></i> Role &amp; Tenant</th>
+                        <th><i class="ti ti-address-book"></i> Contact Info</th>
+                        <th><i class="ti ti-calendar"></i> Registered Date</th>
+                        <th><i class="ti ti-activity"></i> Status</th>
+                        <th style="padding-right: 24px; text-align: right;"><i class="ti ti-settings"></i> Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${empty pendingUsers}">
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="fa-solid fa-inbox fs-2 mb-3 text-light-gray"></i>
-                                    <p class="mb-0">No pending user approvals.</p>
-                                </td>
-                            </tr>
-                        </c:when>
-                        <c:otherwise>
-                            <c:forEach var="u" items="${pendingUsers}">
-                                <tr>
-                                    <td class="ps-4 fw-medium text-dark">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="avatar shadow-sm" style="width: 32px; height: 32px; font-size: 12px;">
-                                                ${u.username.substring(0, 2).toUpperCase()}
-                                            </div>
-                                            ${u.username}
+                <tbody id="customersTableBody">
+                    <c:forEach var="u" items="${allUsers}">
+                        <tr class="customer-row"
+                            data-status="${u.status}"
+                            data-search="${u.username.toLowerCase()} ${u.email.toLowerCase()} ${u.phone} ${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId].toLowerCase() : ''}">
+                            
+                            <!-- Customer Name + Avatar -->
+                            <td style="padding-left: 24px;">
+                                <div class="customer-cell">
+                                    <div class="customer-avatar">
+                                        <c:set var="uInitials" value="${u.username.substring(0, u.username.length() >= 2 ? 2 : 1).toUpperCase()}" />
+                                        ${uInitials}
+                                    </div>
+                                    <div class="customer-info-wrap">
+                                        <div class="customer-name-title">${u.username}</div>
+                                        <div class="customer-meta-badge">
+                                            <i class="ti ti-hash"></i> USR-${u.userId}
                                         </div>
-                                    </td>
-                                    <td>${u.email}</td>
-                                    <td>${u.phone}</td>
-                                    <td>
-                                        <span class="badge bg-secondary opacity-75 fw-normal rounded-pill px-3">
-                                            <c:choose>
-                                                <c:when test="${u.roleId == 2}">Company Admin</c:when>
-                                                <c:when test="${u.roleId == 5}">Customer</c:when>
-                                                <c:otherwise>Role ${u.roleId}</c:otherwise>
-                                            </c:choose>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Role & Tenant -->
+                            <td>
+                                <div class="role-tenant-wrap">
+                                    <span class="role-badge">
+                                        <c:choose>
+                                            <c:when test="${u.roleId == 1}">
+                                                <i class="ti ti-shield"></i> Super Admin
+                                            </c:when>
+                                            <c:when test="${u.roleId == 2}">
+                                                <i class="ti ti-building"></i> Company Admin
+                                            </c:when>
+                                            <c:when test="${u.roleId == 5}">
+                                                <i class="ti ti-user-check"></i> Customer / Client
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="ti ti-user"></i> Staff (Role ${u.roleId})
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                    <c:if test="${not empty u.companyId && u.companyId > 0}">
+                                        <span class="company-name-chip">
+                                            <i class="ti ti-building" style="color: #94A3B8; font-size: 13px;"></i>
+                                            <span>${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId] : 'Tenant CMP-'.concat(u.companyId)}</span>
                                         </span>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <form action="${pageContext.request.contextPath}/admin/users" method="POST" class="d-inline">
+                                    </c:if>
+                                </div>
+                            </td>
+
+                            <!-- Contact Details -->
+                            <td>
+                                <div class="contact-cell">
+                                    <a href="mailto:${u.email}" class="contact-link" title="Send Email">
+                                        <i class="ti ti-mail"></i>
+                                        <span>${u.email}</span>
+                                    </a>
+                                    <a href="tel:${u.phone}" class="contact-link" title="Call Phone">
+                                        <i class="ti ti-phone"></i>
+                                        <span>${not empty u.phone ? u.phone : 'N/A'}</span>
+                                    </a>
+                                </div>
+                            </td>
+
+                            <!-- Registered Date -->
+                            <td style="color: #475569; font-size: 13px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="ti ti-calendar" style="color: #94A3B8; font-size: 14px;"></i>
+                                    <span>
+                                        <c:choose>
+                                            <c:when test="${not empty u.createdAt}">
+                                                <fmt:formatDate value="${u.createdAt}" pattern="MMM dd, yyyy" />
+                                            </c:when>
+                                            <c:otherwise>Active Member</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                <c:choose>
+                                    <c:when test="${u.status == 'Pending'}">
+                                        <span class="status-pill pending">
+                                            <i class="ti ti-clock"></i> Pending Review
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${u.status == 'Active'}">
+                                        <span class="status-pill active">
+                                            <i class="ti ti-circle-check"></i> Approved
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="status-pill suspended">
+                                            <i class="ti ti-ban"></i> Suspended
+                                        </span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+
+                            <!-- Actions -->
+                            <td style="padding-right: 24px; text-align: right;">
+                                <c:choose>
+                                    <c:when test="${u.status == 'Pending'}">
+                                        <div class="actions-flex">
+                                            <form method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="userId" value="${u.userId}">
+                                                <input type="hidden" name="action" value="accept">
+                                                <button type="submit" class="btn-approval-accept" title="Approve Customer Account">
+                                                    <i class="ti ti-check"></i> Approve
+                                                </button>
+                                            </form>
+                                            <form method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="userId" value="${u.userId}">
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="submit" class="btn-approval-reject" title="Reject Customer Account" onclick="return confirm('Reject this customer account?');">
+                                                    <i class="ti ti-x"></i> Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </c:when>
+                                    <c:when test="${u.status == 'Active'}">
+                                        <form method="POST" class="d-inline m-0">
                                             <input type="hidden" name="userId" value="${u.userId}">
-                                            <button type="submit" name="action" value="accept" class="btn btn-sm btn-success rounded-circle me-1" title="Accept" style="width: 32px; height: 32px;">
-                                                <i class="fa-solid fa-check"></i>
-                                            </button>
-                                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger rounded-circle" title="Reject" style="width: 32px; height: 32px;">
-                                                <i class="fa-solid fa-xmark"></i>
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="btn-approval-reject" title="Suspend customer account" onclick="return confirm('Suspend this customer account?');" style="padding: 5px 14px; font-size: 11.5px;">
+                                                <i class="ti ti-ban"></i> Suspend
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <form method="POST" class="d-inline m-0">
+                                            <input type="hidden" name="userId" value="${u.userId}">
+                                            <input type="hidden" name="action" value="accept">
+                                            <button type="submit" class="btn-approval-accept" title="Reactivate customer account" onclick="return confirm('Reactivate this customer account?');" style="padding: 5px 14px; font-size: 11.5px;">
+                                                <i class="ti ti-reload"></i> Reactivate
+                                            </button>
+                                        </form>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                        </tr>
+                    </c:forEach>
                 </tbody>
             </table>
         </div>
+
+        <!-- Modern Empty State -->
+        <div id="emptyStateBox" class="empty-caught-up-card" style="display: none;">
+            <div class="empty-shield-icon-box">
+                <i class="ti ti-user-check"></i>
+            </div>
+            <div class="empty-caught-up-title" id="emptyStateTitle">All Caught Up!</div>
+            <p class="empty-caught-up-desc" id="emptyStateDesc">
+                There are currently no pending customer registration requests requiring Super Admin verification. All client onboarding is up to date.
+            </p>
+            <button type="button" class="btn-view-all-tenants" onclick="filterByTab('All')">
+                <i class="ti ti-list"></i> View All Registered Customers
+            </button>
+        </div>
     </div>
 </div>
+
+<script>
+    let currentTab = 'Pending';
+
+    function filterByTab(tab) {
+        currentTab = tab;
+
+        document.getElementById('tabPendingBtn').classList.toggle('active', tab === 'Pending');
+        document.getElementById('tabActiveBtn').classList.toggle('active', tab === 'Active');
+        if (document.getElementById('tabSuspendedBtn')) {
+            document.getElementById('tabSuspendedBtn').classList.toggle('active', tab === 'Suspended');
+        }
+        document.getElementById('tabAllBtn').classList.toggle('active', tab === 'All');
+
+        applyFilters();
+    }
+
+    function handleCustomerSearch() {
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const query = document.getElementById('customerSearchInput').value.trim().toLowerCase();
+        const rows = document.querySelectorAll('.customer-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            const searchData = row.getAttribute('data-search') || '';
+
+            const matchesTab = (currentTab === 'All') || 
+                               (currentTab === 'Suspended' ? (status === 'Locked' || status === 'Suspended' || status === 'Inactive') : (status === currentTab));
+            const matchesQuery = !query || searchData.includes(query);
+
+            if (matchesTab && matchesQuery) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const table = document.getElementById('customersTable');
+        const emptyState = document.getElementById('emptyStateBox');
+        const emptyTitle = document.getElementById('emptyStateTitle');
+        const emptyDesc = document.getElementById('emptyStateDesc');
+
+        if (visibleCount === 0) {
+            table.style.display = 'none';
+            emptyState.style.display = 'block';
+
+            if (query) {
+                emptyTitle.textContent = 'No Customers Found';
+                emptyDesc.textContent = 'No customer records matched your search query "' + query + '". Try adjusting your search term.';
+            } else if (currentTab === 'Pending') {
+                emptyTitle.textContent = 'All Caught Up!';
+                emptyDesc.textContent = 'There are currently no pending customer registrations requiring Super Admin verification. All client accounts are up to date.';
+            } else if (currentTab === 'Active') {
+                emptyTitle.textContent = 'No Active Customers';
+                emptyDesc.textContent = 'There are currently no active customer accounts found in the database.';
+            } else if (currentTab === 'Suspended') {
+                emptyTitle.textContent = 'No Suspended Customers';
+                emptyDesc.textContent = 'Good news! There are currently no suspended or inactive customer accounts in the system.';
+            } else {
+                emptyTitle.textContent = 'No Customer Records';
+                emptyDesc.textContent = 'No registered customers or portal users found.';
+            }
+        } else {
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        filterByTab('Pending');
+    });
+</script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />

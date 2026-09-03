@@ -1858,7 +1858,7 @@
                 </a>
                 <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/jsp/admin/companies.jsp">Company</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/users">Users</a></li>
+                    <li><a href="${pageContext.request.contextPath}/jsp/admin/users.jsp">Customer</a></li>
                 </ul>
             </div>
             </c:if>
@@ -2250,6 +2250,16 @@ document.addEventListener('DOMContentLoaded', function() {
             keywords: "approvals approve company pending verification activate super admin app comp",
             icon: "ti ti-shield-check",
             color: "green",
+            badge: "Super Admin"
+        },
+        {
+            title: "Customer Approvals",
+            url: ctx + "/jsp/admin/users.jsp",
+            category: "Administration",
+            subtitle: "Super Admin customer account clearance & KYC verification portal",
+            keywords: "customer approvals customer verify activate approve user client onboarding kyc super admin cus",
+            icon: "ti ti-user-check",
+            color: "orange",
             badge: "Super Admin"
         },
         {

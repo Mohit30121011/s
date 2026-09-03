@@ -29,7 +29,42 @@ public class AdminUserServlet extends HttpServlet {
         }
 
         List<User> pendingUsers = userDAO.getPendingUsers();
+        List<User> allUsers = userDAO.getAllUsers();
+        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
+        List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
+
+        java.util.Map<Integer, String> companyNameMap = new java.util.HashMap<>();
+        if (allComps != null) {
+            for (com.nlogistic.model.Company cp : allComps) {
+                companyNameMap.put(cp.getCompanyId(), cp.getCompanyName());
+            }
+        }
+
+        int pendingCount = 0;
+        int activeCount = 0;
+        int inactiveCount = 0;
+        int totalCount = (allUsers != null) ? allUsers.size() : 0;
+
+        if (allUsers != null) {
+            for (User u : allUsers) {
+                if ("Pending".equalsIgnoreCase(u.getStatus())) {
+                    pendingCount++;
+                } else if ("Active".equalsIgnoreCase(u.getStatus())) {
+                    activeCount++;
+                } else {
+                    inactiveCount++;
+                }
+            }
+        }
+
+        request.setAttribute("allUsers", allUsers);
         request.setAttribute("pendingUsers", pendingUsers);
+        request.setAttribute("companyNameMap", companyNameMap);
+        request.setAttribute("pendingCount", pendingCount);
+        request.setAttribute("activeCount", activeCount);
+        request.setAttribute("inactiveCount", inactiveCount);
+        request.setAttribute("totalCount", totalCount);
+
         request.getRequestDispatcher("/jsp/admin/users.jsp").forward(request, response);
     }
 
