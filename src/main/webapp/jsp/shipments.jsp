@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
@@ -125,7 +125,7 @@
     </div>
 
     <!-- Table Card -->
-    <div class="card-panel" style="padding: 0; overflow: hidden;">
+    <div class="card" style="padding: 0; overflow: hidden;">
         <table class="tracking-table">
             <thead>
                 <tr>

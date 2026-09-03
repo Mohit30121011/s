@@ -14,6 +14,323 @@
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+
+        /* ==========================================
+           N LOGISTIC — ENTERPRISE DESIGN SYSTEM TOKENS
+           ========================================== */
+        :root {
+            /* Primary Brand Palette */
+            --nl-primary: #FC8019;
+            --nl-primary-hover: #E66F0F;
+            --nl-primary-subtle: #FFF2EB;
+            --nl-primary-soft: #FFF9F5;
+            --nl-primary-border: #FFD4C2;
+
+            /* Backgrounds & Surfaces */
+            --nl-bg: #F8F9FB;
+            --nl-surface: #FFFFFF;
+            --nl-surface-hover: #FAFAFA;
+            --nl-surface-subtle: #F9FAFB;
+
+            /* Subtle Borders (Enterprise Standard) */
+            --nl-border: #E7E9ED;
+            --nl-border-subtle: #F0F2F5;
+            --nl-border-hover: #D8DCE3;
+            --nl-border-focus: #FC8019;
+
+            /* Typography Hierarchy */
+            --nl-text: #1F2937;
+            --nl-text-secondary: #4B5563;
+            --nl-text-muted: #64748B;
+            --nl-text-light: #94A3B8;
+
+            /* Status Colors */
+            --nl-success: #10B981;
+            --nl-success-bg: #ECFDF5;
+            --nl-success-border: #A7F3D0;
+            --nl-warning: #F59E0B;
+            --nl-warning-bg: #FFFBEB;
+            --nl-warning-border: #FDE68A;
+            --nl-danger: #EF4444;
+            --nl-danger-bg: #FEF2F2;
+            --nl-danger-border: #FECACA;
+            --nl-info: #3B82F6;
+            --nl-info-bg: #EFF6FF;
+            --nl-info-border: #BFDBFE;
+
+            /* Elevation & Soft Shadows */
+            --nl-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.03);
+            --nl-shadow-card: 0 2px 8px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+            --nl-shadow-hover: 0 6px 16px rgba(15, 23, 42, 0.07), 0 2px 4px rgba(15, 23, 42, 0.03);
+            --nl-shadow-modal: 0 16px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
+
+            /* Radii Scale */
+            --nl-radius-xs: 6px;
+            --nl-radius-sm: 8px;
+            --nl-radius-md: 12px;
+            --nl-radius-lg: 16px;
+            --nl-radius-pill: 9999px;
+
+            /* Spacing Scale */
+            --nl-pad-card: 20px 24px;
+            --nl-pad-card-compact: 16px 20px;
+            --nl-pad-header: 16px 24px;
+        }
+
+        body {
+            background-color: var(--nl-bg) !important;
+            color: var(--nl-text) !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. Global Cards & Panels */
+        .card,
+        .nl-card,
+        .card-panel,
+        .table-card,
+        .chart-card,
+        .filter-card {
+            background-color: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            box-shadow: var(--nl-shadow-card) !important;
+            border-radius: var(--nl-radius-md) !important;
+            transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+        }
+
+        .card.border-0 {
+            border: 1px solid var(--nl-border) !important;
+        }
+        .card.shadow-sm,
+        .card.shadow {
+            box-shadow: var(--nl-shadow-card) !important;
+        }
+        .card.rounded-4 {
+            border-radius: var(--nl-radius-md) !important;
+        }
+
+        /* Interactive Card Hover */
+        .card.interactive-card:hover,
+        .nl-card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--nl-shadow-hover) !important;
+            border-color: var(--nl-border-hover) !important;
+        }
+
+        /* 2. Standardized Card Headers */
+        .card-header,
+        .nl-card-header {
+            background-color: transparent !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+            padding: var(--nl-pad-header) !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title,
+        .nl-card-title {
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            color: var(--nl-text) !important;
+            margin: 0 !important;
+            letter-spacing: -0.2px;
+        }
+
+        .card-body,
+        .nl-card-body {
+            padding: var(--nl-pad-card) !important;
+        }
+
+        /* 3. Global KPI Cards */
+        .kpi-card {
+            background: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            box-shadow: var(--nl-shadow-card) !important;
+            border-radius: var(--nl-radius-md) !important;
+            padding: 20px 22px !important;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 100%;
+            transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--nl-shadow-hover) !important;
+            border-color: var(--nl-border-hover) !important;
+        }
+
+        .kpi-icon-wrap {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .kpi-icon-wrap.orange { background: var(--nl-primary-subtle); color: var(--nl-primary); }
+        .kpi-icon-wrap.blue   { background: var(--nl-info-bg); color: var(--nl-info); }
+        .kpi-icon-wrap.green  { background: var(--nl-success-bg); color: var(--nl-success); }
+        .kpi-icon-wrap.yellow { background: var(--nl-warning-bg); color: var(--nl-warning); }
+        .kpi-icon-wrap.red    { background: var(--nl-danger-bg); color: var(--nl-danger); }
+
+        .kpi-label {
+            font-size: 12.5px !important;
+            color: var(--nl-text-muted) !important;
+            font-weight: 500 !important;
+            margin-bottom: 4px;
+        }
+        .kpi-val {
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            color: var(--nl-text) !important;
+            line-height: 1.1;
+        }
+
+        /* 4. Global Data Tables */
+        .table {
+            margin-bottom: 0 !important;
+            color: var(--nl-text) !important;
+            vertical-align: middle;
+        }
+
+        .table thead th {
+            background-color: var(--nl-surface-subtle) !important;
+            color: var(--nl-text-muted) !important;
+            font-size: 11.5px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.6px !important;
+            padding: 12px 18px !important;
+            border-bottom: 1px solid var(--nl-border) !important;
+            border-top: none !important;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding: 14px 18px !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+            border-top: none !important;
+            font-size: 13.5px !important;
+            color: var(--nl-text) !important;
+        }
+
+        .table-hover tbody tr:hover td {
+            background-color: #FAFCFE !important;
+        }
+
+        /* 5. Global Form Controls */
+        .form-control,
+        .form-select {
+            border: 1px solid #E2E5EA !important;
+            border-radius: var(--nl-radius-sm) !important;
+            padding: 9px 14px !important;
+            font-size: 13.5px !important;
+            color: var(--nl-text) !important;
+            background-color: var(--nl-surface) !important;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        .form-control:hover,
+        .form-select:hover {
+            border-color: #D5D9DF !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--nl-primary) !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+            outline: none !important;
+        }
+
+        /* 6. Global Buttons */
+        .btn-primary,
+        .btn-orange {
+            background-color: var(--nl-primary) !important;
+            border-color: var(--nl-primary) !important;
+            color: #FFFFFF !important;
+            border-radius: 10px !important;
+            padding: 8px 18px !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 2px rgba(252, 128, 25, 0.15) !important;
+            transition: all 150ms ease !important;
+        }
+
+        .btn-primary:hover,
+        .btn-orange:hover {
+            background-color: var(--nl-primary-hover) !important;
+            border-color: var(--nl-primary-hover) !important;
+            transform: translateY(-0.5px);
+            box-shadow: 0 3px 8px rgba(252, 128, 25, 0.25) !important;
+        }
+
+        .btn-secondary,
+        .btn-outline-secondary {
+            background-color: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            color: var(--nl-text-secondary) !important;
+            border-radius: 10px !important;
+            padding: 8px 16px !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            transition: all 150ms ease !important;
+        }
+
+        .btn-secondary:hover,
+        .btn-outline-secondary:hover {
+            background-color: var(--nl-surface-subtle) !important;
+            border-color: var(--nl-border-hover) !important;
+            color: var(--nl-text) !important;
+        }
+
+        /* 7. Global Modals */
+        .modal-content {
+            background-color: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            border-radius: var(--nl-radius-lg) !important;
+            box-shadow: var(--nl-shadow-modal) !important;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 18px 24px !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+            background-color: var(--nl-surface) !important;
+        }
+
+        .modal-header .modal-title {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            color: var(--nl-text) !important;
+        }
+
+        .modal-body {
+            padding: 24px !important;
+        }
+
+        .modal-footer {
+            padding: 16px 24px !important;
+            border-top: 1px solid var(--nl-border-subtle) !important;
+            background-color: var(--nl-surface-subtle) !important;
+        }
+
+        /* 8. Top Header Standard */
+        .top-header {
+            height: 70px !important;
+            background: #FFFFFF !important;
+            border-bottom: 1px solid var(--nl-border) !important;
+            box-shadow: var(--nl-shadow-xs) !important;
+            padding: 0 32px !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 999 !important;
+        }
+
         :root {
             --brand-orange: #FC8019;
             --brand-orange-light: #FFF0E5;
@@ -718,6 +1035,323 @@
 
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <style>
+
+        /* ==========================================
+           N LOGISTIC — ENTERPRISE DESIGN SYSTEM TOKENS
+           ========================================== */
+        :root {
+            /* Primary Brand Palette */
+            --nl-primary: #FC8019;
+            --nl-primary-hover: #E66F0F;
+            --nl-primary-subtle: #FFF2EB;
+            --nl-primary-soft: #FFF9F5;
+            --nl-primary-border: #FFD4C2;
+
+            /* Backgrounds & Surfaces */
+            --nl-bg: #F8F9FB;
+            --nl-surface: #FFFFFF;
+            --nl-surface-hover: #FAFAFA;
+            --nl-surface-subtle: #F9FAFB;
+
+            /* Subtle Borders (Enterprise Standard) */
+            --nl-border: #E7E9ED;
+            --nl-border-subtle: #F0F2F5;
+            --nl-border-hover: #D8DCE3;
+            --nl-border-focus: #FC8019;
+
+            /* Typography Hierarchy */
+            --nl-text: #1F2937;
+            --nl-text-secondary: #4B5563;
+            --nl-text-muted: #64748B;
+            --nl-text-light: #94A3B8;
+
+            /* Status Colors */
+            --nl-success: #10B981;
+            --nl-success-bg: #ECFDF5;
+            --nl-success-border: #A7F3D0;
+            --nl-warning: #F59E0B;
+            --nl-warning-bg: #FFFBEB;
+            --nl-warning-border: #FDE68A;
+            --nl-danger: #EF4444;
+            --nl-danger-bg: #FEF2F2;
+            --nl-danger-border: #FECACA;
+            --nl-info: #3B82F6;
+            --nl-info-bg: #EFF6FF;
+            --nl-info-border: #BFDBFE;
+
+            /* Elevation & Soft Shadows */
+            --nl-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.03);
+            --nl-shadow-card: 0 2px 8px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+            --nl-shadow-hover: 0 6px 16px rgba(15, 23, 42, 0.07), 0 2px 4px rgba(15, 23, 42, 0.03);
+            --nl-shadow-modal: 0 16px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
+
+            /* Radii Scale */
+            --nl-radius-xs: 6px;
+            --nl-radius-sm: 8px;
+            --nl-radius-md: 12px;
+            --nl-radius-lg: 16px;
+            --nl-radius-pill: 9999px;
+
+            /* Spacing Scale */
+            --nl-pad-card: 20px 24px;
+            --nl-pad-card-compact: 16px 20px;
+            --nl-pad-header: 16px 24px;
+        }
+
+        body {
+            background-color: var(--nl-bg) !important;
+            color: var(--nl-text) !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. Global Cards & Panels */
+        .card,
+        .nl-card,
+        .card-panel,
+        .table-card,
+        .chart-card,
+        .filter-card {
+            background-color: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            box-shadow: var(--nl-shadow-card) !important;
+            border-radius: var(--nl-radius-md) !important;
+            transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+        }
+
+        .card.border-0 {
+            border: 1px solid var(--nl-border) !important;
+        }
+        .card.shadow-sm,
+        .card.shadow {
+            box-shadow: var(--nl-shadow-card) !important;
+        }
+        .card.rounded-4 {
+            border-radius: var(--nl-radius-md) !important;
+        }
+
+        /* Interactive Card Hover */
+        .card.interactive-card:hover,
+        .nl-card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--nl-shadow-hover) !important;
+            border-color: var(--nl-border-hover) !important;
+        }
+
+        /* 2. Standardized Card Headers */
+        .card-header,
+        .nl-card-header {
+            background-color: transparent !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+            padding: var(--nl-pad-header) !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title,
+        .nl-card-title {
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            color: var(--nl-text) !important;
+            margin: 0 !important;
+            letter-spacing: -0.2px;
+        }
+
+        .card-body,
+        .nl-card-body {
+            padding: var(--nl-pad-card) !important;
+        }
+
+        /* 3. Global KPI Cards */
+        .kpi-card {
+            background: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            box-shadow: var(--nl-shadow-card) !important;
+            border-radius: var(--nl-radius-md) !important;
+            padding: 20px 22px !important;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 100%;
+            transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--nl-shadow-hover) !important;
+            border-color: var(--nl-border-hover) !important;
+        }
+
+        .kpi-icon-wrap {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .kpi-icon-wrap.orange { background: var(--nl-primary-subtle); color: var(--nl-primary); }
+        .kpi-icon-wrap.blue   { background: var(--nl-info-bg); color: var(--nl-info); }
+        .kpi-icon-wrap.green  { background: var(--nl-success-bg); color: var(--nl-success); }
+        .kpi-icon-wrap.yellow { background: var(--nl-warning-bg); color: var(--nl-warning); }
+        .kpi-icon-wrap.red    { background: var(--nl-danger-bg); color: var(--nl-danger); }
+
+        .kpi-label {
+            font-size: 12.5px !important;
+            color: var(--nl-text-muted) !important;
+            font-weight: 500 !important;
+            margin-bottom: 4px;
+        }
+        .kpi-val {
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            color: var(--nl-text) !important;
+            line-height: 1.1;
+        }
+
+        /* 4. Global Data Tables */
+        .table {
+            margin-bottom: 0 !important;
+            color: var(--nl-text) !important;
+            vertical-align: middle;
+        }
+
+        .table thead th {
+            background-color: var(--nl-surface-subtle) !important;
+            color: var(--nl-text-muted) !important;
+            font-size: 11.5px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.6px !important;
+            padding: 12px 18px !important;
+            border-bottom: 1px solid var(--nl-border) !important;
+            border-top: none !important;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding: 14px 18px !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+            border-top: none !important;
+            font-size: 13.5px !important;
+            color: var(--nl-text) !important;
+        }
+
+        .table-hover tbody tr:hover td {
+            background-color: #FAFCFE !important;
+        }
+
+        /* 5. Global Form Controls */
+        .form-control,
+        .form-select {
+            border: 1px solid #E2E5EA !important;
+            border-radius: var(--nl-radius-sm) !important;
+            padding: 9px 14px !important;
+            font-size: 13.5px !important;
+            color: var(--nl-text) !important;
+            background-color: var(--nl-surface) !important;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        .form-control:hover,
+        .form-select:hover {
+            border-color: #D5D9DF !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--nl-primary) !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+            outline: none !important;
+        }
+
+        /* 6. Global Buttons */
+        .btn-primary,
+        .btn-orange {
+            background-color: var(--nl-primary) !important;
+            border-color: var(--nl-primary) !important;
+            color: #FFFFFF !important;
+            border-radius: 10px !important;
+            padding: 8px 18px !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 2px rgba(252, 128, 25, 0.15) !important;
+            transition: all 150ms ease !important;
+        }
+
+        .btn-primary:hover,
+        .btn-orange:hover {
+            background-color: var(--nl-primary-hover) !important;
+            border-color: var(--nl-primary-hover) !important;
+            transform: translateY(-0.5px);
+            box-shadow: 0 3px 8px rgba(252, 128, 25, 0.25) !important;
+        }
+
+        .btn-secondary,
+        .btn-outline-secondary {
+            background-color: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            color: var(--nl-text-secondary) !important;
+            border-radius: 10px !important;
+            padding: 8px 16px !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            transition: all 150ms ease !important;
+        }
+
+        .btn-secondary:hover,
+        .btn-outline-secondary:hover {
+            background-color: var(--nl-surface-subtle) !important;
+            border-color: var(--nl-border-hover) !important;
+            color: var(--nl-text) !important;
+        }
+
+        /* 7. Global Modals */
+        .modal-content {
+            background-color: var(--nl-surface) !important;
+            border: 1px solid var(--nl-border) !important;
+            border-radius: var(--nl-radius-lg) !important;
+            box-shadow: var(--nl-shadow-modal) !important;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 18px 24px !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+            background-color: var(--nl-surface) !important;
+        }
+
+        .modal-header .modal-title {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            color: var(--nl-text) !important;
+        }
+
+        .modal-body {
+            padding: 24px !important;
+        }
+
+        .modal-footer {
+            padding: 16px 24px !important;
+            border-top: 1px solid var(--nl-border-subtle) !important;
+            background-color: var(--nl-surface-subtle) !important;
+        }
+
+        /* 8. Top Header Standard */
+        .top-header {
+            height: 70px !important;
+            background: #FFFFFF !important;
+            border-bottom: 1px solid var(--nl-border) !important;
+            box-shadow: var(--nl-shadow-xs) !important;
+            padding: 0 32px !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 999 !important;
+        }
+
     /* Custom Tom Select Styling */
     .ts-control {
         border: 1px solid var(--border-color) !important;

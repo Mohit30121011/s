@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -34,7 +34,7 @@
     <div class="row g-4">
         <c:forEach var="container" items="${containers}">
             <div class="col-12 col-md-6 col-lg-4 col-xl-3">
-                <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; transition: transform 0.2s;">
+                <div class="card h-100" style="border-radius: 12px; transition: transform 0.2s;">
                     <!-- Container Image Placeholder -->
                     <div style="height: 180px; background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #e2e8f0; position: relative;">
                         <c:choose>

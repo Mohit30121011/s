@@ -7,14 +7,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
-    --primary: #F97316; --primary-light: #FFF7ED; --primary-mid: #FFEDD5;
+    --primary: #FC8019; --primary-light: #FFF2EB; --primary-mid: #FFD4C2;
     --success: #10B981; --success-light: #ECFDF5;
     --danger: #EF4444; --danger-light: #FEF2F2;
     --warning: #F59E0B; --warning-light: #FFFBEB;
     --info: #3B82F6; --info-light: #EFF6FF;
     --purple: #8B5CF6; --purple-light: #F5F3FF;
-    --text-main: #111827; --text-sub: #6B7280; --border: #E5E7EB;
-    --bg: #F9FAFB; --card: #fff;
+    --text-main: #1F2937; --text-sub: #64748B; --border: #E7E9ED;
+    --bg: #F8F9FB; --card: #FFFFFF;
 }
 body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .dash-wrap { padding: 24px; max-width: 1400px; margin: 0 auto; }
@@ -31,7 +31,8 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 
 /* KPI Grid */
 .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
-.kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; }
+.kpi-card { background: var(--card); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.kpi-card:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(15, 23, 42, 0.07); border-color: #D8DCE3; }
 .kpi-icon-wrap { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
 .kpi-icon-wrap.orange { background: #FFF7ED; color: var(--primary); }
 .kpi-icon-wrap.blue   { background: #EFF6FF; color: var(--info); }
@@ -52,12 +53,12 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .grid-3col-side { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 16px; margin-bottom: 16px; }
 
 /* Cards */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 0; }
-.card-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin: 0; }
-.card-action { font-size: 12px; color: var(--primary); font-weight: 500; text-decoration: none; cursor: pointer; }
-.card-action:hover { text-decoration: underline; }
-.card-body { padding: 16px 20px; }
+.card { background: var(--card); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); border-radius: 12px; overflow: hidden; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F0F2F5; background: transparent; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 0; letter-spacing: -0.2px; }
+.card-action { font-size: 12.5px; color: var(--primary); font-weight: 500; text-decoration: none; cursor: pointer; }
+.card-action:hover { color: #E66F0F; text-decoration: underline; }
+.card-body { padding: 18px 20px; }
 
 /* Period Select */
 .period-select { font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text-sub); background: #fff; cursor: pointer; outline: none; }
@@ -132,6 +133,20 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .scrollable-card-body { max-height: 310px; overflow-y: auto; padding-right: 8px; }
 
 
+
+
+/* Responsive Grid Enhancements */
+@media (max-width: 1200px) {
+    .kpi-row { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 992px) {
+    .grid-3col, .grid-2col, .grid-3col-side { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 640px) {
+    .kpi-row { grid-template-columns: 1fr !important; }
+    .dash-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .dash-header-right { width: 100%; justify-content: space-between; }
+}
 
 </style>
 

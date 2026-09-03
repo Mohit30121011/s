@@ -1,4 +1,4 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+﻿<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -9,11 +9,11 @@
 <style>
     :root {
         --bg-surface: #ffffff;
-        --border-color: #E5E7EB;
+        --border-color: #E7E9ED;
         --text-main: #111827;
         --text-sub: #6B7280;
-        --primary: #F97316;
-        --primary-light: #FFEDD5;
+        --primary: #FC8019;
+        --primary-light: #FFF2EB;
         --success: #10B981;
         --success-light: #D1FAE5;
         --danger: #EF4444;
@@ -537,13 +537,13 @@
                 <div style="display:flex; font-size:11px; color:var(--text-sub); gap:16px; margin-bottom:8px; justify-content:center;">
                     <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#10B981;"></span> 0 - 30 Days</span>
                     <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#FBBF24;"></span> 31 - 60 Days</span>
-                    <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#F97316;"></span> 61 - 90 Days</span>
+                    <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#FC8019;"></span> 61 - 90 Days</span>
                     <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#EF4444;"></span> > 90 Days</span>
                 </div>
                 <div style="height:24px; border-radius:4px; display:flex; overflow:hidden; margin-bottom:12px;">
                     <div style="width:55%; background:#10B981; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">55%</div>
                     <div style="width:20%; background:#FBBF24; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">20%</div>
-                    <div style="width:15%; background:#F97316; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">15%</div>
+                    <div style="width:15%; background:#FC8019; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">15%</div>
                     <div style="width:10%; background:#EF4444; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">10%</div>
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:12px;">
@@ -618,7 +618,7 @@
             labels: ['Delay', 'Traffic in Sea', 'Weather', 'Dock Allocation', 'Regulatory Hold', 'Ship Issue', 'War / Disruption'],
             datasets: [{
                 data: [215600, 178500, 132000, 115300, 96800, 58900, 47100],
-                backgroundColor: ['#EF4444', '#F97316', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6'],
+                backgroundColor: ['#EF4444', '#FC8019', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6'],
                 borderWidth: 0,
                 cutout: '70%'
             }]
@@ -681,7 +681,7 @@
         data: {
             datasets: [{
                 data: [utilPct, 100 - utilPct],
-                backgroundColor: ['#F97316', '#F3F4F6'],
+                backgroundColor: ['#FC8019', '#F3F4F6'],
                 borderWidth: 0,
                 circumference: 180,
                 rotation: 270,
@@ -795,7 +795,7 @@
                     label: 'Forecasted Demand',
                     data: [null, null, null, null, null, 1700, 1650, 1800],
                     backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                    borderColor: '#F97316',
+                    borderColor: '#FC8019',
                     borderWidth: {top: 2, right: 2, bottom: 2, left: 2},
                     borderSkipped: false,
                     barThickness: 32,

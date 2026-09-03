@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -10,11 +10,11 @@
   <style>
     :root {
         --bg-surface: #ffffff;
-        --border-color: #E5E7EB;
+        --border-color: #E7E9ED;
         --text-main: #111827;
         --text-sub: #6B7280;
-        --primary: #F97316;
-        --primary-light: #FFEDD5;
+        --primary: #FC8019;
+        --primary-light: #FFF2EB;
         --success: #10B981;
         --success-light: #D1FAE5;
         --danger: #EF4444;
@@ -68,7 +68,7 @@
         color: white;
     }
     .btn-primary-custom:hover {
-        background-color: #EA580C;
+        background-color: #FC8019;
     }
     .btn-outline {
         background-color: white;
@@ -420,7 +420,7 @@
     </div>
 
     
-    <div class="table-card" style="padding: 16px;">
+    <div class="card" style="padding: 16px;">
         
     <div class="section-title-wrap">
         <div>

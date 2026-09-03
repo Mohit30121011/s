@@ -3,8 +3,8 @@
 
 <style>
 .custom-breadcrumb a { color: #6c757d; text-decoration: none; font-size: 14px; }
-.custom-breadcrumb a:hover { color: #EA580C; }
-.custom-breadcrumb .active { color: #EA580C; font-weight: 500; font-size: 14px; }
+.custom-breadcrumb a:hover { color: #FC8019; }
+.custom-breadcrumb .active { color: #FC8019; font-weight: 500; font-size: 14px; }
 .custom-breadcrumb-separator { color: #dee2e6; font-size: 10px; }
 </style>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -17,7 +17,7 @@
             <i class="fa-solid fa-chevron-right custom-breadcrumb-separator mx-2"></i>
             <span class="active">Vessels</span>
         </div>
-        <button class="btn btn-sm text-white px-3" style="background-color: #EA580C; border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#addVesselModal">
+        <button class="btn btn-sm text-white px-3" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVesselModal">
             <i class="fa-solid fa-plus me-2"></i> Add Vessel
         </button>
     </div>
@@ -31,7 +31,7 @@
     <c:remove var="successMessage" scope="session"/>
 </c:if>
 
-<div class="card border-0 shadow-sm rounded-4">
+<div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">

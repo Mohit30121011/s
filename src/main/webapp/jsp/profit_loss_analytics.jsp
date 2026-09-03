@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="en_US" scope="session"/>
@@ -16,7 +16,7 @@
         --green-brand: #10b981;
         --red-brand: #ef4444;
         --blue-brand: #3b82f6;
-        --border-color: #E5E7EB;
+        --border-color: #E7E9ED;
         --bg-surface: #FFFFFF;
         --text-main: #111827;
         --text-sub: #6B7280;
