@@ -511,6 +511,36 @@
         border-collapse: collapse;
         margin: 0;
     }
+        /* Sortable Table Headers */
+    .staff-table th.sortable-th {
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.15s ease, background-color 0.15s ease;
+    }
+    .staff-table th.sortable-th:hover {
+        color: #FC8019 !important;
+        background-color: #FFF7ED;
+    }
+    .staff-table th.sortable-th .sort-icon {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 6px;
+        font-size: 13px;
+        color: #94A3B8;
+        transition: all 0.15s ease;
+        vertical-align: middle;
+    }
+    .staff-table th.sortable-th:hover .sort-icon {
+        color: #FC8019;
+    }
+    .staff-table th.sortable-th.active-sort {
+        color: #FC8019 !important;
+        background-color: #FFF3EA;
+    }
+    .staff-table th.sortable-th.active-sort .sort-icon {
+        color: #FC8019 !important;
+    }
+
     .staff-table th {
         background: #F8FAFC;
         padding: 14px 20px;
@@ -1233,12 +1263,30 @@
                 <table class="staff-table" id="staffTable">
                     <thead>
                         <tr>
-                            <th style="padding-left: 24px;">Staff Member</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Last Active</th>
+                            <th class="sortable-th" id="th_name" style="padding-left: 24px;" onclick="sortStaffTable('name')" title="Sort by Name">
+                                <span>Staff Member</span>
+                                <i class="sort-icon ti ti-arrows-sort" id="sortIcon_name"></i>
+                            </th>
+                            <th class="sortable-th" id="th_email" onclick="sortStaffTable('email')" title="Sort by Email">
+                                <span>Email</span>
+                                <i class="sort-icon ti ti-arrows-sort" id="sortIcon_email"></i>
+                            </th>
+                            <th class="sortable-th" id="th_role" onclick="sortStaffTable('role')" title="Sort by Role">
+                                <span>Role</span>
+                                <i class="sort-icon ti ti-arrows-sort" id="sortIcon_role"></i>
+                            </th>
+                            <th class="sortable-th" id="th_dept" onclick="sortStaffTable('dept')" title="Sort by Department">
+                                <span>Department</span>
+                                <i class="sort-icon ti ti-arrows-sort" id="sortIcon_dept"></i>
+                            </th>
+                            <th class="sortable-th" id="th_status" onclick="sortStaffTable('status')" title="Sort by Status">
+                                <span>Status</span>
+                                <i class="sort-icon ti ti-arrows-sort" id="sortIcon_status"></i>
+                            </th>
+                            <th class="sortable-th" id="th_lastactive" onclick="sortStaffTable('lastactive')" title="Sort by Last Active">
+                                <span>Last Active</span>
+                                <i class="sort-icon ti ti-arrows-sort" id="sortIcon_lastactive"></i>
+                            </th>
                             <th style="padding-right: 24px; text-align: right;">Actions</th>
                         </tr>
                     </thead>
@@ -2146,6 +2194,35 @@
         updateStaffPagination();
     }
 
+    let currentSortColumn = null;
+    let currentSortDirection = 'asc';
+
+    function sortStaffTable(column) {
+        if (currentSortColumn === column) {
+            currentSortDirection = (currentSortDirection === 'asc') ? 'desc' : 'asc';
+        } else {
+            currentSortColumn = column;
+            currentSortDirection = 'asc';
+        }
+
+        const columns = ['name', 'email', 'role', 'dept', 'status', 'lastactive'];
+        columns.forEach(col => {
+            const th = document.getElementById('th_' + col);
+            const icon = document.getElementById('sortIcon_' + col);
+            if (th) th.classList.remove('active-sort');
+            if (icon) icon.className = 'sort-icon ti ti-arrows-sort';
+        });
+
+        const activeTh = document.getElementById('th_' + currentSortColumn);
+        const activeIcon = document.getElementById('sortIcon_' + currentSortColumn);
+        if (activeTh) activeTh.classList.add('active-sort');
+        if (activeIcon) {
+            activeIcon.className = 'sort-icon ti ' + (currentSortDirection === 'asc' ? 'ti-sort-ascending' : 'ti-sort-descending');
+        }
+
+        applyStaffFilters();
+    }
+
     function applyStaffFilters() {
         const query = document.getElementById('staffSearchInput').value.trim().toLowerCase();
         const roleVal = document.getElementById('roleFilter').value;
@@ -2169,6 +2246,42 @@
                 matchingStaffRows.push(row);
             }
         });
+
+        if (currentSortColumn) {
+            matchingStaffRows.sort((a, b) => {
+                let valA = '';
+                let valB = '';
+
+                if (currentSortColumn === 'name') {
+                    valA = (a.getAttribute('data-name') || '').toLowerCase();
+                    valB = (b.getAttribute('data-name') || '').toLowerCase();
+                } else if (currentSortColumn === 'email') {
+                    valA = (a.getAttribute('data-email') || '').toLowerCase();
+                    valB = (b.getAttribute('data-email') || '').toLowerCase();
+                } else if (currentSortColumn === 'role') {
+                    valA = (a.getAttribute('data-rolename') || '').toLowerCase();
+                    valB = (b.getAttribute('data-rolename') || '').toLowerCase();
+                } else if (currentSortColumn === 'dept') {
+                    valA = (a.getAttribute('data-dept') || '').toLowerCase();
+                    valB = (b.getAttribute('data-dept') || '').toLowerCase();
+                } else if (currentSortColumn === 'status') {
+                    valA = (a.getAttribute('data-status') || '').toLowerCase();
+                    valB = (b.getAttribute('data-status') || '').toLowerCase();
+                } else if (currentSortColumn === 'lastactive') {
+                    valA = (a.getAttribute('data-lastactive') || '').toLowerCase();
+                    valB = (b.getAttribute('data-lastactive') || '').toLowerCase();
+                }
+
+                if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            const tbody = document.getElementById('staffTableBody');
+            if (tbody) {
+                matchingStaffRows.forEach(row => tbody.appendChild(row));
+            }
+        }
 
         updateStaffPagination();
     }
