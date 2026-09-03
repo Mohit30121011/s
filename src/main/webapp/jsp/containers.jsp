@@ -416,10 +416,11 @@
         <div class="filter-select-wrap">
             <select id="typeFilter" class="form-select form-select-custom">
                 <option value="" selected>All Types</option>
-                <option value="Dry Van">Dry Van</option>
+                <option value="Dry">Dry</option>
                 <option value="Reefer">Reefer</option>
                 <option value="Open Top">Open Top</option>
                 <option value="Flat Rack">Flat Rack</option>
+                <option value="Tank">Tank</option>
             </select>
         </div>
 
@@ -636,7 +637,7 @@
     <input type="hidden" name="id" id="deleteContainerId" value="">
 </form>
 
-<!-- Add Container Modal -->
+<!-- Add Container Modal (FR3.1 Full Container Master Catalog) -->
 <div class="modal fade" id="addContainerModal" tabindex="-1" aria-labelledby="addContainerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content modal-content-custom">
@@ -646,7 +647,8 @@
                         <i class="ti ti-box"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title fw-bold mb-0" id="addContainerModalLabel">Add New Shipping Container</h5>
+                        <h5 class="modal-title fw-bold mb-0" id="addContainerModalLabel">Add New Shipping Container (FR3.1)</h5>
+                        <small class="text-muted" style="font-size: 12px;">Enter standard ISO container specifications, capacities, and port assignment</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -654,63 +656,138 @@
             <form action="<c:url value='/containers/add'/>" method="POST">
                 <div class="modal-body p-4">
                     <div class="row g-3">
+                        <!-- Container Number -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Number <span style="color: #FC8019;">*</span></label>
-                            <input type="text" name="containerNumber" class="form-control" required placeholder="e.g. CONT0000301" style="border-radius: 8px; font-size: 13.5px;">
+                            <input type="text" name="containerNumber" id="newContainerNumber" class="form-control" required placeholder="e.g. CONT0000301" style="border-radius: 8px; font-size: 13.5px; text-transform: uppercase;">
                         </div>
+
+                        <!-- Assigned Port / Location -->
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Location (Port) <span style="color: #FC8019;">*</span></label>
                             <select name="portId" class="form-select form-select-custom" required>
                                 <c:forEach var="port" items="${ports}">
                                     <option value="${port.portId}">${port.portName} (${port.country})</option>
                                 </c:forEach>
                             </select>
                         </div>
+
+                        <!-- Type (FR3.1: Dry, Reefer, Open Top, Flat Rack, Tank) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Type <span style="color: #FC8019;">*</span></label>
                             <select name="type" class="form-select form-select-custom" required>
-                                <option value="Dry Van">Dry Van</option>
-                                <option value="Reefer">Reefer</option>
-                                <option value="Open Top">Open Top</option>
-                                <option value="Flat Rack">Flat Rack</option>
+                                <option value="Dry" selected>Dry (Dry Van / General Cargo)</option>
+                                <option value="Reefer">Reefer (Refrigerated)</option>
+                                <option value="Open Top">Open Top (Top-Loaded Heavy Cargo)</option>
+                                <option value="Flat Rack">Flat Rack (Heavy / Out-of-Gauge)</option>
+                                <option value="Tank">Tank (Liquid Bulk / Chemicals)</option>
                             </select>
                         </div>
+
+                        <!-- Size (FR3.1: 20ft, 40ft, 40ft HC, 45ft) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Standard Size <span style="color: #FC8019;">*</span></label>
-                            <select name="size" class="form-select form-select-custom" required>
-                                <option value="20ft">20ft</option>
-                                <option value="40ft" selected>40ft</option>
-                                <option value="45ft">45ft</option>
+                            <select name="size" id="newContainerSize" class="form-select form-select-custom" required onchange="applyContainerSizePreset(this.value)">
+                                <option value="20ft">20ft Standard (20' x 8' x 8'6")</option>
+                                <option value="40ft" selected>40ft Standard (40' x 8' x 8'6")</option>
+                                <option value="40ft HC">40ft High Cube (40' x 8' x 9'6")</option>
+                                <option value="45ft">45ft High Cube (45' x 8' x 9'6")</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Tare Weight (kg)</label>
-                            <input type="number" step="0.1" name="tareWeightKg" class="form-control" required value="2200" style="border-radius: 8px; font-size: 13.5px;">
+
+                        <!-- Image URL (FR3.1) -->
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Image URL <span class="text-muted fw-normal">(Optional)</span></label>
+                            <input type="url" name="imageUrl" class="form-control" placeholder="https://... (or leave blank for illustration)" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Max Gross (kg)</label>
-                            <input type="number" step="0.1" name="maxGrossWeightKg" class="form-control" required value="24000" style="border-radius: 8px; font-size: 13.5px;">
+
+                        <!-- Status (FR3.1) -->
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Initial Status <span style="color: #FC8019;">*</span></label>
+                            <select name="status" class="form-select form-select-custom" required>
+                                <option value="Available" selected>Available (Ready for Allocation)</option>
+                                <option value="Under Maintenance">Under Maintenance (Inspection / Repair)</option>
+                                <option value="Allocated">Allocated (Reserved for Shipment)</option>
+                                <option value="In-Transit">In-Transit (Currently Sailing / Moving)</option>
+                            </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Payload Capacity (kg)</label>
-                            <input type="number" step="0.1" name="goodsCapacityKg" class="form-control" required value="21800" style="border-radius: 8px; font-size: 13.5px;">
+
+                        <!-- Specs Section Header -->
+                        <div class="col-12 pt-1">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span style="font-weight: 700; font-size: 12.5px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <i class="ti ti-scale me-1" style="color: #FC8019;"></i> ISO Weight & Capacity Specifications
+                                </span>
+                                <span class="badge" style="background: #FFF2EB; color: #FC8019; font-size: 11px;">Auto-calculated via Size Preset</span>
+                            </div>
+                            <hr class="mt-1 mb-2" style="border-color: #E2E8F0;">
                         </div>
+
+                        <!-- Tare Weight -->
                         <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Volume (CBM)</label>
-                            <input type="number" step="0.1" name="goodsCapacityCbm" class="form-control" required value="33.2" style="border-radius: 8px; font-size: 13.5px;">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Tare Weight (kg) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.1" name="tareWeightKg" id="newTareWeight" class="form-control" required value="3750" style="border-radius: 8px; font-size: 13.5px;">
+                        </div>
+
+                        <!-- Max Gross Weight -->
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Max Gross (kg) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.1" name="maxGrossWeightKg" id="newMaxGrossWeight" class="form-control" required value="30480" style="border-radius: 8px; font-size: 13.5px;">
+                        </div>
+
+                        <!-- Goods Capacity (kg) -->
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Payload Cap. (kg) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.1" name="goodsCapacityKg" id="newGoodsCapacityKg" class="form-control" required value="26730" style="border-radius: 8px; font-size: 13.5px;">
+                        </div>
+
+                        <!-- Goods Capacity (CBM) -->
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Volume (CBM) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.1" name="goodsCapacityCbm" id="newGoodsCapacityCbm" class="form-control" required value="67.7" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                    <button type="submit" class="modal-btn-submit">Add Container</button>
+                    <button type="submit" class="modal-btn-submit">Add Container to Catalog</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+</div>
 
 <script>
+
+window.applyContainerSizePreset = function(size) {
+    const tare = document.getElementById('newTareWeight');
+    const gross = document.getElementById('newMaxGrossWeight');
+    const capKg = document.getElementById('newGoodsCapacityKg');
+    const capCbm = document.getElementById('newGoodsCapacityCbm');
+
+    if (size === '20ft') {
+        if (tare) tare.value = 2200;
+        if (gross) gross.value = 24000;
+        if (capKg) capKg.value = 21800;
+        if (capCbm) capCbm.value = 33.2;
+    } else if (size === '40ft') {
+        if (tare) tare.value = 3750;
+        if (gross) gross.value = 30480;
+        if (capKg) capKg.value = 26730;
+        if (capCbm) capCbm.value = 67.7;
+    } else if (size === '40ft HC') {
+        if (tare) tare.value = 3900;
+        if (gross) gross.value = 32500;
+        if (capKg) capKg.value = 28600;
+        if (capCbm) capCbm.value = 76.4;
+    } else if (size === '45ft') {
+        if (tare) tare.value = 4800;
+        if (gross) gross.value = 34000;
+        if (capKg) capKg.value = 29200;
+        if (capCbm) capCbm.value = 86.0;
+    }
+};
 
 window.openUpdateModal = function(id, number, status, portId) {
     document.getElementById('updateContainerId').value = id;

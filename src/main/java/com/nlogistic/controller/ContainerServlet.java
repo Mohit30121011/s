@@ -43,13 +43,18 @@ public class ContainerServlet extends HttpServlet {
             String number = request.getParameter("containerNumber");
             String type = request.getParameter("type");
             String size = request.getParameter("size");
+            String imageUrl = request.getParameter("imageUrl");
             double tare = Double.parseDouble(request.getParameter("tareWeightKg"));
             double maxGross = Double.parseDouble(request.getParameter("maxGrossWeightKg"));
             double capKg = Double.parseDouble(request.getParameter("goodsCapacityKg"));
             double capCbm = Double.parseDouble(request.getParameter("goodsCapacityCbm"));
+            String status = request.getParameter("status");
+            if (status == null || status.trim().isEmpty()) {
+                status = "Available";
+            }
             int portId = Integer.parseInt(request.getParameter("portId"));
-            
-            boolean success = containerDAO.addContainer(number, type, size, tare, maxGross, capKg, capCbm, portId, currentUser.getCompanyId());
+
+            boolean success = containerDAO.addContainer(number, type, size, imageUrl, tare, maxGross, capKg, capCbm, status, portId, currentUser.getCompanyId());
             response.sendRedirect(request.getContextPath() + "/containers?add=" + success);
         } else if (pathInfo != null && pathInfo.equals("/delete")) {
 containerDAO.deleteContainer(Integer.parseInt(request.getParameter("id")), currentUser.getUserId());

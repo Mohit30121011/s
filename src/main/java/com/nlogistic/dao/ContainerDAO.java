@@ -124,18 +124,28 @@ public class ContainerDAO {
     }
 
     public boolean addContainer(String number, String type, String size, double tare, double maxGross, double capKg, double capCbm, int portId, int ownerId) {
-        String sql = "INSERT INTO containers (container_number, type, size, tare_weight_kg, max_gross_weight_kg, goods_capacity_kg, goods_capacity_cbm, status, current_port_id, owner_company_id) VALUES (?, ?, ?, ?, ?, ?, ?, 'Available', ?, ?)";
+        return addContainer(number, type, size, null, tare, maxGross, capKg, capCbm, "Available", portId, ownerId);
+    }
+
+    /**
+     * FR3.1: Full container master catalog creation with all specifications:
+     * container number, type, size, image_url, tare weight, max gross, goods capacity (kg & CBM), status, port, owner.
+     */
+    public boolean addContainer(String number, String type, String size, String imageUrl, double tare, double maxGross, double capKg, double capCbm, String status, int portId, int ownerId) {
+        String sql = "INSERT INTO containers (container_number, type, size, image_url, tare_weight_kg, max_gross_weight_kg, goods_capacity_kg, goods_capacity_cbm, status, current_port_id, owner_company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, number);
             ps.setString(2, type);
             ps.setString(3, size);
-            ps.setDouble(4, tare);
-            ps.setDouble(5, maxGross);
-            ps.setDouble(6, capKg);
-            ps.setDouble(7, capCbm);
-            ps.setInt(8, portId);
-            ps.setInt(9, ownerId);
+            ps.setString(4, (imageUrl != null && !imageUrl.trim().isEmpty()) ? imageUrl.trim() : null);
+            ps.setDouble(5, tare);
+            ps.setDouble(6, maxGross);
+            ps.setDouble(7, capKg);
+            ps.setDouble(8, capCbm);
+            ps.setString(9, (status != null && !status.trim().isEmpty()) ? status.trim() : "Available");
+            ps.setInt(10, portId);
+            ps.setInt(11, ownerId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
