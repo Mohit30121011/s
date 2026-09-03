@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -18,8 +18,19 @@
             <i class="fa-solid fa-chevron-right custom-breadcrumb-separator mx-2"></i>
             <span class="active">Customers</span>
         </div>
+        <button class="btn btn-sm text-white px-3" style="background-color: #EA580C; border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+            <i class="fa-solid fa-plus me-2"></i> Add Customer
+        </button>
     </div>
 </div>
+
+<c:if test="${not empty sessionScope.successMessage}">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i> ${sessionScope.successMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="successMessage" scope="session"/>
+</c:if>
 
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-0">
@@ -92,6 +103,40 @@
             </table>
         </div>
     </div>
+</div>
+
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="${pageContext.request.contextPath}/customers" method="POST">
+          <input type="hidden" name="action" value="add">
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">Customer Name</label>
+                  <input type="text" class="form-control" name="customerName" required placeholder="e.g. Acme Corp">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">Address</label>
+                  <input type="text" class="form-control" name="address" required placeholder="e.g. 123 Logistics Way, NY">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">Credit Limit ($)</label>
+                  <input type="number" class="form-control" name="creditLimit" required placeholder="e.g. 50000" step="0.01">
+              </div>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn text-white" style="background-color: #EA580C;">Save Customer</button>
+          </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <jsp:include page="/jsp/layout/footer.jsp" />
