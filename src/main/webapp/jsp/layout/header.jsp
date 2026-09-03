@@ -28,7 +28,7 @@
             --nl-primary-border: #FFD4C2;
 
             /* Backgrounds & Surfaces */
-            --nl-bg: #F1F3F7;
+            --nl-bg: #E5EBF2;
             --nl-surface: #FFFFFF;
             --nl-surface-hover: #FAFAFA;
             --nl-surface-subtle: #F9FAFB;
@@ -78,7 +78,9 @@
             --nl-pad-header: 16px 24px;
         }
 
-        body {
+        body,
+        .main-wrapper,
+        .content-area {
             background-color: var(--nl-bg) !important;
             color: var(--nl-text) !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -337,7 +339,7 @@
             --brand-orange-light: #FFF0E5;
             --text-dark: #282C3F;
             --text-muted: #686B78;
-            --bg-light: #F9FAFB;
+            --bg-light: #E5EBF2;
             --border-color: #E5E7EB;
         }
 
