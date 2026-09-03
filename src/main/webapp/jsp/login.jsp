@@ -794,24 +794,6 @@
                 <p class="nl-form-subtitle">Sign in to your N Logistic enterprise account to manage fleet operations.</p>
             </div>
 
-            <!-- 1-Click Quick Demo Login Bar -->
-            <div class="nl-demo-box">
-                <div class="nl-demo-header">
-                    <span><i class="ti ti-bolt text-warning me-1"></i> 1-Click Quick Demo Login</span>
-                    <span style="font-size: 10px; color: #94A3B8;">Auto-Fill</span>
-                </div>
-                <div class="nl-demo-group">
-                    <button type="button" class="nl-demo-chip" onclick="applyDemoCredentials('superadmin', 'admin123')">
-                        <i class="ti ti-shield-lock" style="color: #FC8019;"></i> Super Admin
-                    </button>
-                    <button type="button" class="nl-demo-chip" onclick="applyDemoCredentials('customer1', 'pass123')">
-                        <i class="ti ti-user" style="color: #2563EB;"></i> Customer
-                    </button>
-                    <button type="button" class="nl-demo-chip" onclick="applyDemoCredentials('staff1', 'pass123')">
-                        <i class="ti ti-briefcase" style="color: #059669;"></i> Staff
-                    </button>
-                </div>
-            </div>
 
             <!-- Alerts -->
             <c:if test="${not empty errorMessage}">
@@ -899,25 +881,6 @@
         }
     }
 
-    // 1-Click Quick Demo Autofill with feedback animation
-    function applyDemoCredentials(u, p) {
-        const uEl = document.getElementById('inputUsername');
-        const pEl = document.getElementById('inputPassword');
-        uEl.value = u;
-        pEl.value = p;
-
-        uEl.style.borderColor = '#FC8019';
-        pEl.style.borderColor = '#FC8019';
-        uEl.style.background = '#FFF9F5';
-        pEl.style.background = '#FFF9F5';
-
-        setTimeout(() => {
-            uEl.style.borderColor = '#E2E8F0';
-            pEl.style.borderColor = '#E2E8F0';
-            uEl.style.background = '#F8FAFC';
-            pEl.style.background = '#F8FAFC';
-        }, 700);
-    }
 </script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />
