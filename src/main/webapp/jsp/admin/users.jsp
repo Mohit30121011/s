@@ -31,6 +31,26 @@
                     session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been removed from active directory.");
                 } else if ("savePermissions".equals(action)) {
                     session.setAttribute("successMessage", "Granular module permissions updated successfully for staff #USR-" + uid + ".");
+                } else if ("sendResetPassword".equals(action)) {
+                    com.nlogistic.model.User targetUser = uDao.getUserById(uid);
+                    if (targetUser != null && targetUser.getEmail() != null && !targetUser.getEmail().trim().isEmpty()) {
+                        String email = targetUser.getEmail().trim();
+                        String token = uDao.generatePasswordResetToken(email);
+                        if (token != null) {
+                            String resetLink = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/reset-password?token=" + token;
+                            boolean sent = com.nlogistic.util.EmailService.sendPasswordResetEmail(email, targetUser.getUsername(), resetLink);
+                            uDao.logAuditEvent(uid, "PASSWORD_RESET_DISPATCHED", targetUser.getUsername(), request.getRemoteAddr());
+                            if (sent) {
+                                session.setAttribute("successMessage", "Password reset email successfully sent to " + email + "!");
+                            } else {
+                                session.setAttribute("successMessage", "Password reset link generated! Direct link: " + resetLink + " (Please set Google App Password in mail.properties for direct inbox dispatch)");
+                            }
+                        } else {
+                            session.setAttribute("errorMessage", "Could not generate reset token for " + email);
+                        }
+                    } else {
+                        session.setAttribute("errorMessage", "Target staff member has no registered email address.");
+                    }
                 }
             } catch (Exception e) {
                 session.setAttribute("errorMessage", "Error processing staff action: " + e.getMessage());
@@ -1778,6 +1798,10 @@
             </button>
         </div>
 
+        <form method="POST" id="resetPasswordDirectForm" style="display: none;">
+    <input type="hidden" name="action" value="sendResetPassword">
+    <input type="hidden" name="userId" id="resetPasswordDirectUserId">
+</form>
         <form method="POST" id="addStaffForm">
             <input type="hidden" name="action" value="addStaff">
 
@@ -2192,14 +2216,23 @@
 
     function resetStaffPassword(userId) {
         document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        const row = document.getElementById('staffRow_' + userId);
+        const name = row ? (row.getAttribute('data-name') || 'staff member') : 'staff member';
+        const email = row ? (row.getAttribute('data-email') || '') : '';
+
         showCustomConfirmModal({
             title: 'Reset Staff Password?',
-            desc: 'A secure temporary one-time password link will be dispatched to the staff member corporate email.',
+            desc: 'A secure temporary password reset link will be dispatched to ' + (email ? email : name) + '.',
             icon: 'ti ti-key',
             color: '#2563EB',
             btnText: 'Send Reset Email',
             onConfirm: function() {
-                alert('Password reset link successfully dispatched to staff corporate email.');
+                const f = document.getElementById('resetPasswordDirectForm');
+                const inp = document.getElementById('resetPasswordDirectUserId');
+                if (f && inp) {
+                    inp.value = userId;
+                    f.submit();
+                }
             }
         });
     }

@@ -32,7 +32,33 @@ public class UserDAO {
     /**
      * After successful loginAttempt, fetch the user object for session.
      */
-    public User getUserByUsername(String username) {
+        public User getUserById(int userId) {
+        String sql = "SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE u.user_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User();
+                    u.setUserId(rs.getInt("user_id"));
+                    u.setUsername(rs.getString("username"));
+                    u.setEmail(rs.getString("email"));
+                    u.setPhone(rs.getString("phone"));
+                    u.setRoleId(rs.getInt("role_id"));
+                                        u.setCompanyId(rs.getInt("company_id"));
+                    u.setStatus(rs.getString("status"));
+                    u.setFailedLoginCount(rs.getInt("failed_login_count"));
+                    u.setLastLoginAt(rs.getTimestamp("last_login_at"));
+                    u.setCreatedAt(rs.getTimestamp("created_at"));
+                    u.setUpdatedAt(rs.getTimestamp("updated_at"));
+                    return u;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+public User getUserByUsername(String username) {
         String sql = "SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE u.username = ? OR u.email = ?";
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
