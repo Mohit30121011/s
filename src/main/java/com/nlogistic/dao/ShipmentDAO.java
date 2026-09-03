@@ -280,7 +280,10 @@ public class ShipmentDAO {
             cs.setInt(1, shipmentId);
             cs.setInt(2, requestingUserId);
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+            deleteShipment(shipmentId);
+        }
     }
     public void deleteShipment(int shipmentId) {
         String deleteMovements = "DELETE FROM container_movements WHERE shipment_id = ?";
