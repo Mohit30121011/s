@@ -149,6 +149,19 @@
             color: var(--brand-orange);
         }
 
+        
+        .sub-nav.collapse {
+            display: none;
+        }
+        .sub-nav.collapse.show {
+            display: block;
+            animation: fadeInSubnav 0.22s ease-in-out;
+        }
+        @keyframes fadeInSubnav {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .sub-nav {
             list-style: none;
             padding-left: 52px;
@@ -389,34 +402,7 @@
             font-size: 10px;
         }
     </style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    let path = window.location.pathname;
-    let links = Array.from(document.querySelectorAll('.sidebar a'));
-    
-    // Find exact match first
-    let activeLink = links.find(link => {
-        let href = link.getAttribute('href');
-        return href && href !== '#' && path === href;
-    });
-    
-    // Fallback: If no exact match (like /save), match startsWith
-    if (!activeLink) {
-        activeLink = links.find(link => {
-            let href = link.getAttribute('href');
-            return href && href !== '#' && href !== '/NLogistic/' && path.startsWith(href);
-        });
-    }
 
-    if (activeLink) {
-        activeLink.classList.add('active');
-        let parentCollapse = activeLink.closest('.collapse');
-        if (parentCollapse) {
-            parentCollapse.classList.add('show');
-        }
-    }
-});
-</script>
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <style>
     /* Custom Tom Select Styling */
@@ -489,11 +475,11 @@ document.addEventListener("DOMContentLoaded", function() {
             </c:if>
             
             <div class="nav-item">
-                <a href="#shipmentsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="nav-link active-group">
+                <a href="#shipmentsSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
                     <i class="fa-solid fa-truck-fast main-icon"></i> Shipments
                     <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav collapse show" id="shipmentsSubmenu">
+                <ul class="sub-nav collapse" id="shipmentsSubmenu">
                     <li><a href="${pageContext.request.contextPath}/shipments">All Shipments</a></li>
                     <li><a href="${pageContext.request.contextPath}/shipments/create" >Create Shipment</a></li>
                     <li><a href="${pageContext.request.contextPath}/shipments/tracking">Live Tracking</a></li>
@@ -610,8 +596,39 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
     
 <script>
-// Sidebar Toggle with Clean Two-Way Open & Close
+// Unified Sidebar Controller (Active Link Detection + Clean Accordion Toggle)
 document.addEventListener('DOMContentLoaded', function() {
+    let path = window.location.pathname;
+    let links = Array.from(document.querySelectorAll('.sidebar a'));
+    
+    // 1. Detect & Highlight Active Page
+    let activeLink = links.find(link => {
+        let href = link.getAttribute('href');
+        return href && href !== '#' && path === href;
+    });
+    
+    if (!activeLink) {
+        activeLink = links.find(link => {
+            let href = link.getAttribute('href');
+            return href && href !== '#' && href !== '/NLogistic/' && path.startsWith(href);
+        });
+    }
+
+    if (activeLink) {
+        activeLink.classList.add('active');
+        let parentCollapse = activeLink.closest('.sub-nav.collapse');
+        if (parentCollapse) {
+            parentCollapse.classList.add('show');
+            let parentToggle = document.querySelector('.sidebar a[href="#' + parentCollapse.id + '"]');
+            if (parentToggle) {
+                parentToggle.classList.remove('collapsed');
+                parentToggle.classList.add('active-group');
+                parentToggle.setAttribute('aria-expanded', 'true');
+            }
+        }
+    }
+
+    // 2. Smooth Accordion & Toggle
     document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(toggle) {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
@@ -621,13 +638,28 @@ document.addEventListener('DOMContentLoaded', function() {
             let href = this.getAttribute('href') || this.getAttribute('data-bs-target') || '';
             let targetId = href.replace('#', '').trim();
             let target = document.getElementById(targetId);
+            
             if (target) {
                 let isOpen = target.classList.contains('show');
+                
                 if (isOpen) {
                     target.classList.remove('show');
                     this.classList.add('collapsed');
                     this.setAttribute('aria-expanded', 'false');
                 } else {
+                    // Close any other open submenu for a clean sidebar
+                    document.querySelectorAll('.sidebar .sub-nav.collapse.show').forEach(function(other) {
+                        if (other.id !== targetId) {
+                            other.classList.remove('show');
+                            let otherToggle = document.querySelector('.sidebar a[href="#' + other.id + '"]');
+                            if (otherToggle) {
+                                otherToggle.classList.add('collapsed');
+                                otherToggle.setAttribute('aria-expanded', 'false');
+                            }
+                        }
+                    });
+                    
+                    // Open target submenu
                     target.classList.add('show');
                     this.classList.remove('collapsed');
                     this.setAttribute('aria-expanded', 'true');
