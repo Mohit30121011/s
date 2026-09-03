@@ -118,12 +118,101 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .view-all-link { display: block; text-align: center; font-size: 13px; color: var(--primary); font-weight: 500; padding: 14px 0 4px; text-decoration: none; }
 .view-all-link:hover { text-decoration: underline; }
 
-/* Container Overview */
-.container-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.cont-card { background: #F9FAFB; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
-.cont-type { font-size: 11px; color: var(--text-sub); font-weight: 500; margin-bottom: 8px; }
-.cont-val { font-size: 22px; font-weight: 700; color: var(--text-main); }
-.cont-delta { font-size: 11px; font-weight: 600; color: var(--success); margin-top: 2px; }
+/* Modern Container Overview Cards (Swiggy Orange Design System) */
+.container-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.cont-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+.cont-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+.cont-card.flat-rack { background: #FFFDFB; border-color: #FED7AA; }
+.cont-card.flat-rack:hover { border-color: #FC8019; }
+.cont-card.dry       { background: #F8FAFF; border-color: #DBEAFE; }
+.cont-card.dry:hover { border-color: #3B82F6; }
+.cont-card.reefer    { background: #F0F9FF; border-color: #BAE6FD; }
+.cont-card.reefer:hover { border-color: #0284C7; }
+.cont-card.open-top  { background: #F0FDF4; border-color: #BBF7D0; }
+.cont-card.open-top:hover { border-color: #10B981; }
+.cont-card.tank      { background: #FAF5FF; border-color: #E9D5FF; }
+.cont-card.tank:hover { border-color: #8B5CF6; }
+
+.cont-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.cont-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+.cont-share-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #4B5563;
+}
+.cont-type-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    margin-bottom: 2px;
+}
+.cont-val-number {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.1;
+}
+.cont-prog-track {
+    height: 5px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+.cont-prog-bar {
+    height: 100%;
+    border-radius: 99px;
+}
+.cont-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #64748B;
+}
+.cont-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #10B981;
+    font-weight: 600;
+}
 
 /* Alerts */
 .alert-list { list-style: none; padding: 0; margin: 0; }
@@ -505,25 +594,97 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
             </div>
         </div>
 
-        <!-- Containers Overview -->
+        <!-- Containers Overview (Revamped Visual Design) -->
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Containers Overview</h3>
-                <span class="card-action">Total: ${totalContainers}</span>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 32px; height: 32px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 17px;">
+                        <i class="ti ti-boxes"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title" style="margin: 0; font-size: 14.5px; font-weight: 700;">Containers Overview</h3>
+                        <div style="font-size: 11.5px; color: var(--text-sub);">Active fleet inventory by container type</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="background: #FFF2EB; color: #FC8019; font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 1px solid #FFD4C2;">Total: ${totalContainers}</span>
+                    <a href="${pageContext.request.contextPath}/containers" title="View Container Catalog" style="color: #64748B; font-size: 16px; padding: 4px; display: inline-flex; align-items: center; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='#FC8019'" onmouseout="this.style.color='#64748B'">
+                        <i class="ti ti-arrow-right"></i>
+                    </a>
+                </div>
             </div>
-            <div class="card-body scrollable-card-body" style="padding-top:12px;">
+            <div class="card-body scrollable-card-body" style="padding-top: 14px;">
                 <div class="container-grid">
                     <c:forEach var="ct" items="${containerTypes}">
-                    <div class="cont-card">
-                        <div class="cont-type">${ct.key}</div>
-                        <div class="cont-val">${ct.value}</div>
-                        <div class="cont-delta"><i class="fi fi-rr-arrow-trend-up"></i> Active</div>
-                    </div>
+                        <c:set var="cardTheme" value="dry" />
+                        <c:set var="iconClass" value="ti ti-box" />
+                        <c:set var="themeColor" value="#3B82F6" />
+                        <c:set var="iconBg" value="#EFF6FF" />
+
+                        <c:if test="${ct.key == 'Flat Rack'}">
+                            <c:set var="cardTheme" value="flat-rack" />
+                            <c:set var="iconClass" value="ti ti-truck-loading" />
+                            <c:set var="themeColor" value="#FC8019" />
+                            <c:set var="iconBg" value="#FFF2EB" />
+                        </c:if>
+                        <c:if test="${ct.key == 'Reefer'}">
+                            <c:set var="cardTheme" value="reefer" />
+                            <c:set var="iconClass" value="ti ti-snowflake" />
+                            <c:set var="themeColor" value="#0284C7" />
+                            <c:set var="iconBg" value="#E0F2FE" />
+                        </c:if>
+                        <c:if test="${ct.key == 'Open Top'}">
+                            <c:set var="cardTheme" value="open-top" />
+                            <c:set var="iconClass" value="ti ti-package-export" />
+                            <c:set var="themeColor" value="#059669" />
+                            <c:set var="iconBg" value="#DCFCE7" />
+                        </c:if>
+                        <c:if test="${ct.key == 'Tank'}">
+                            <c:set var="cardTheme" value="tank" />
+                            <c:set var="iconClass" value="ti ti-cylinder" />
+                            <c:set var="themeColor" value="#7C3AED" />
+                            <c:set var="iconBg" value="#F3E8FF" />
+                        </c:if>
+
+                        <c:set var="sharePct" value="${totalContainers > 0 ? (ct.value * 100.0 / totalContainers) : 0}" />
+
+                        <div class="cont-card ${cardTheme}">
+                            <div class="cont-card-top">
+                                <div class="cont-icon-wrap" style="background: ${iconBg}; color: ${themeColor};">
+                                    <i class="${iconClass}"></i>
+                                </div>
+                                <span class="cont-share-badge"><fmt:formatNumber value="${sharePct}" maxFractionDigits="1" />%</span>
+                            </div>
+
+                            <div>
+                                <div class="cont-type-title">${ct.key}</div>
+                                <div class="cont-val-number">${ct.value}</div>
+                            </div>
+
+                            <div>
+                                <div class="cont-prog-track">
+                                    <div class="cont-prog-bar" style="width: ${sharePct}%; background: ${themeColor};"></div>
+                                </div>
+                                <div class="cont-status-row">
+                                    <span class="cont-status-pill"><i class="ti ti-circle-check"></i> Active</span>
+                                    <span style="font-weight: 600; color: #1F2937;">${ct.value} units</span>
+                                </div>
+                            </div>
+                        </div>
                     </c:forEach>
                 </div>
-                
+
+                <div style="margin-top: 14px; padding: 10px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="font-size: 12px; color: #64748B;">
+                        <i class="ti ti-info-circle" style="color: #FC8019; margin-right: 4px;"></i> Monitored across all <strong>30</strong> ports
+                    </div>
+                    <a href="${pageContext.request.contextPath}/containers" style="font-size: 12px; color: #FC8019; font-weight: 600; text-decoration: none;">
+                        Manage Catalog &rarr;
+                    </a>
+                </div>
             </div>
         </div>
+
 
         <!-- Alerts & Notifications -->
         <div class="card">
