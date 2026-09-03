@@ -3,146 +3,597 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    /* Container Catalog Header */
+    .catalog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    /* Filter & Search Bar */
+    .filter-bar-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        border: 1px solid var(--nl-border);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+        padding: 14px 18px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .filter-search-box {
+        position: relative;
+        flex: 1;
+        min-width: 240px;
+    }
+    .filter-search-box i.search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--nl-text-muted);
+        font-size: 15px;
+        pointer-events: none;
+    }
+    .filter-search-box input {
+        width: 100%;
+        padding: 9px 36px 9px 38px;
+        border: 1px solid #E2E5EA;
+        border-radius: 8px;
+        font-size: 13.5px;
+        outline: none;
+        background: #FFFFFF;
+        color: var(--nl-text);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .filter-search-box input:focus {
+        border-color: #FC8019;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+    .filter-search-clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94A3B8;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 0;
+    }
+    .filter-search-clear:hover {
+        color: #1F2937;
+    }
+    .filter-select-wrap {
+        min-width: 160px;
+    }
+
+    .btn-add-container {
+        background: #FC8019;
+        color: #FFFFFF !important;
+        border: none;
+        padding: 9px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
+        transition: all 0.18s ease;
+        text-decoration: none;
+    }
+    .btn-add-container:hover {
+        background: #E66F0F;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.35);
+    }
+
+    .btn-reset-filters {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        border: 1px solid #E2E5EA;
+        background: #FFFFFF;
+        color: var(--nl-text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-reset-filters:hover {
+        background: #F8FAFC;
+        color: #FC8019;
+        border-color: #CBD5E1;
+    }
+
+    /* Container Card */
+    .container-card {
+        background: #FFFFFF;
+        border-radius: 14px;
+        border: 1px solid var(--nl-border);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .container-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        border-color: #CBD5E1;
+    }
+
+    /* Image Banner & Fallback */
+    .container-banner {
+        height: 165px;
+        position: relative;
+        background: #0F172A;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .container-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .container-card:hover .container-banner img {
+        transform: scale(1.03);
+    }
+    .container-fallback-banner {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        padding: 16px;
+        text-align: center;
+    }
+
+    /* Card Floating Badges */
+    .badge-status-pill {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 11.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        z-index: 2;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        white-space: nowrap;
+    }
+    .badge-status-available {
+        background: #ECFDF5;
+        color: #059669;
+        border: 1px solid #A7F3D0;
+    }
+    .badge-status-allocated {
+        background: #FFF2EB;
+        color: #FC8019;
+        border: 1px solid #FFD4C2;
+    }
+    .badge-status-intransit {
+        background: #EFF6FF;
+        color: #2563EB;
+        border: 1px solid #BFDBFE;
+    }
+    .badge-status-maintenance {
+        background: #FFFBEB;
+        color: #D97706;
+        border: 1px solid #FDE68A;
+    }
+
+    .badge-size-pill {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(15, 23, 42, 0.75);
+        color: #FFFFFF;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-weight: 700;
+        font-size: 11.5px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        z-index: 2;
+    }
+
+    /* Card Content */
+    .container-card-body {
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .container-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .container-number {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.2px;
+        font-family: 'Inter', monospace;
+    }
+    .container-type-pill {
+        background: #F1F5F9;
+        color: #475569;
+        border: 1px solid #E2E8F0;
+        font-weight: 600;
+        font-size: 11.5px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Specs List */
+    .specs-list {
+        list-style: none;
+        padding: 0;
+        margin: 14px 0 18px 0;
+        font-size: 13px;
+        color: #64748B;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        border-top: 1px dashed #E2E8F0;
+        border-bottom: 1px dashed #E2E8F0;
+        padding: 12px 0;
+    }
+    .specs-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .specs-item-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #64748B;
+        font-size: 12.5px;
+    }
+    .specs-item-label i {
+        font-size: 14px;
+        color: #94A3B8;
+    }
+    .specs-item-value {
+        font-weight: 600;
+        color: #1F2937;
+        font-size: 13px;
+    }
+
+    /* Action Buttons */
+    .card-actions-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: auto;
+    }
+    .btn-allocate {
+        flex: 1;
+        background: #FC8019;
+        color: #FFFFFF !important;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-decoration: none;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
+        transition: all 0.18s ease;
+    }
+    .btn-allocate:hover {
+        background: #E66F0F;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(252, 128, 25, 0.35);
+    }
+
+    .btn-not-available {
+        flex: 1;
+        background: #F8FAFC;
+        color: #94A3B8;
+        border: 1px solid #E2E8F0;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: not-allowed;
+        text-align: center;
+    }
+
+    .btn-more-actions {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-more-actions:hover {
+        background: #F8FAFC;
+        color: #FC8019;
+        border-color: #CBD5E1;
+    }
+
+    /* Modal Form Customization */
+    .modal-content-custom {
+        border-radius: 14px;
+        border: 1px solid var(--nl-border);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+    }
+    .modal-header-custom {
+        padding: 20px 24px;
+        border-bottom: 1px solid #F1F3F6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .modal-btn-submit {
+        background: #FC8019;
+        color: #FFFFFF;
+        border: none;
+        padding: 9px 22px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13.5px;
+        transition: background-color 0.15s ease;
+    }
+    .modal-btn-submit:hover {
+        background: #E66F0F;
+    }
+</style>
+<div class="container-fluid py-2">
+    <!-- Catalog Header -->
+    <div class="catalog-header">
         <div>
-            <h2 class="mb-1" style="font-weight: 700; color: #1a1a1a;">Container Master Catalog</h2>
-            <p class="text-muted mb-0">Browse and allocate shipping containers</p>
+            <h2 style="font-weight: 700; color: #1F2937; margin-bottom: 4px; font-size: 24px;">Container Master Catalog</h2>
+            <p style="color: var(--nl-text-muted); margin-bottom: 0; font-size: 13px;">Browse, monitor, and allocate shipping container inventory</p>
         </div>
-        
-        <!-- Filter Form & Actions -->
-        <div class="d-flex align-items-center">
-            <form action="<c:url value='/containers'/>" method="GET" class="d-flex me-3">
-                <select name="status" class="form-select me-2" onchange="this.form.submit()" style="width: 200px; border-radius: 8px;">
-                    <option value="All" ${statusFilter == 'All' ? 'selected' : ''}>All Statuses</option>
-                    <option value="Available" ${statusFilter == 'Available' ? 'selected' : ''}>Available</option>
-                    <option value="Allocated" ${statusFilter == 'Allocated' ? 'selected' : ''}>Allocated</option>
-                    <option value="In-Transit" ${statusFilter == 'In-Transit' ? 'selected' : ''}>In-Transit</option>
-                    <option value="Under Maintenance" ${statusFilter == 'Under Maintenance' ? 'selected' : ''}>Under Maintenance</option>
-                </select>
-                <button class="btn btn-primary" type="button" style="border-radius: 8px;"><i class="fa-solid fa-filter"></i></button>
-            </form>
-            <c:if test="${sessionScope.user.roleId <= 3}">
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addContainerModal" style="border-radius: 8px;">
-                    <i class="fa-solid fa-plus me-2"></i>Add Container
-                </button>
-            </c:if>
-        </div>
+
+        <c:if test="${sessionScope.user.roleId <= 3}">
+            <button class="btn-add-container" data-bs-toggle="modal" data-bs-target="#addContainerModal" type="button">
+                <i class="ti ti-plus"></i> Add Container
+            </button>
+        </c:if>
     </div>
 
-    <!-- Container Grid -->
-    <div class="row g-4">
+    <!-- Interactive Filter & Search Bar -->
+    <div class="filter-bar-card">
+        <div class="filter-search-box">
+            <i class="ti ti-search search-icon"></i>
+            <input type="text" id="containerSearchInput" placeholder="Search by container number, type, size...">
+            <button class="filter-search-clear d-none" id="clearContainerSearchBtn" type="button"><i class="ti ti-x"></i></button>
+        </div>
+
+        <div class="filter-select-wrap">
+            <select id="statusFilter" class="form-select form-select-custom">
+                <option value="" selected>All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="Allocated">Allocated</option>
+                <option value="In-Transit">In-Transit</option>
+                <option value="Under Maintenance">Under Maintenance</option>
+            </select>
+        </div>
+
+        <div class="filter-select-wrap">
+            <select id="typeFilter" class="form-select form-select-custom">
+                <option value="" selected>All Types</option>
+                <option value="Dry Van">Dry Van</option>
+                <option value="Reefer">Reefer</option>
+                <option value="Open Top">Open Top</option>
+                <option value="Flat Rack">Flat Rack</option>
+            </select>
+        </div>
+
+        <button class="btn-reset-filters" id="resetContainerFiltersBtn" title="Reset Filters" type="button">
+            <i class="ti ti-rotate"></i>
+        </button>
+    </div>
+
+    <!-- Container Cards Grid -->
+    <div class="row g-4" id="containerGrid">
         <c:forEach var="container" items="${containers}">
-            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
-                <div class="card h-100" style="border-radius: 12px; transition: transform 0.2s;">
-                    <!-- Container Image Placeholder -->
-                    <div style="height: 180px; background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #e2e8f0; position: relative;">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 container-col"
+                 data-number="${container.containerNumber}"
+                 data-type="${container.type}"
+                 data-size="${container.size}"
+                 data-status="${container.status}">
+                <div class="container-card">
+                    <!-- Image Banner with Fallback Handlers -->
+                    <div class="container-banner">
+                        <span class="badge-size-pill">${container.size}</span>
+
                         <c:choose>
-                            <c:when test="${not empty container.imageUrl}">
-                                <img src="${container.imageUrl}" alt="Container" style="width: 100%; height: 100%; object-fit: cover;">
+                            <c:when test="${container.status == 'Available'}">
+                                <span class="badge-status-pill badge-status-available">
+                                    <i class="ti ti-circle-check"></i> Available
+                                </span>
+                            </c:when>
+                            <c:when test="${container.status == 'Allocated'}">
+                                <span class="badge-status-pill badge-status-allocated">
+                                    <i class="ti ti-box"></i> Allocated
+                                </span>
+                            </c:when>
+                            <c:when test="${container.status == 'In-Transit'}">
+                                <span class="badge-status-pill badge-status-intransit">
+                                    <i class="ti ti-ship"></i> In-Transit
+                                </span>
                             </c:when>
                             <c:otherwise>
-                                <i class="fa-solid fa-box-open" style="font-size: 64px; color: #94a3b8;"></i>
+                                <span class="badge-status-pill badge-status-maintenance">
+                                    <i class="ti ti-tool"></i> ${container.status}
+                                </span>
                             </c:otherwise>
                         </c:choose>
-                        
-                        <!-- Status Badge -->
-                        <span class="badge ${container.status == 'Available' ? 'bg-success' : (container.status == 'Allocated' ? 'bg-primary' : (container.status == 'In-Transit' ? 'bg-info text-dark' : 'bg-secondary'))}" 
-                              style="position: absolute; top: 12px; right: 12px; font-size: 12px; padding: 6px 10px; border-radius: 6px;">
-                            ${container.status}
-                        </span>
+
+                        <c:choose>
+                            <c:when test="${not empty container.imageUrl}">
+                                <img src="${container.imageUrl}" 
+                                     alt="Container ${container.containerNumber}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="container-fallback-banner" style="display: none;">
+                                    <div style="width: 52px; height: 52px; background: rgba(252, 128, 25, 0.15); border: 1px solid rgba(252, 128, 25, 0.35); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 26px; margin-bottom: 6px;">
+                                        <i class="ti ti-box"></i>
+                                    </div>
+                                    <div style="font-weight: 700; font-size: 13px; font-family: monospace; color: #F8FAFC;">#${container.containerNumber}</div>
+                                    <div style="font-size: 11px; color: #94A3B8;">${container.type} &bull; ${container.size}</div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="container-fallback-banner">
+                                    <div style="width: 52px; height: 52px; background: rgba(252, 128, 25, 0.15); border: 1px solid rgba(252, 128, 25, 0.35); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 26px; margin-bottom: 6px;">
+                                        <i class="ti ti-box"></i>
+                                    </div>
+                                    <div style="font-weight: 700; font-size: 13px; font-family: monospace; color: #F8FAFC;">#${container.containerNumber}</div>
+                                    <div style="font-size: 11px; color: #94A3B8;">${container.type} &bull; ${container.size}</div>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                    
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title mb-0" style="font-weight: 700; color: #0f172a;">${container.containerNumber}</h5>
-                            <span class="badge bg-light text-dark border border-secondary" style="font-size: 13px;">${container.size}</span>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <span class="badge" style="background-color: #e0e7ff; color: #4338ca; font-weight: 600; padding: 6px 10px;">
-                                <i class="fa-solid fa-truck-container me-1"></i> ${container.type}
+
+                    <!-- Card Body -->
+                    <div class="container-card-body">
+                        <div class="container-title-row">
+                            <span class="container-number">#${container.containerNumber}</span>
+                            <span class="container-type-pill">
+                                <i class="ti ti-truck-delivery"></i> ${container.type}
                             </span>
                         </div>
 
-                        <ul class="list-unstyled mb-4" style="font-size: 14px; color: #475569;">
-                            <li class="mb-2 d-flex justify-content-between">
-                                <span><i class="fa-solid fa-weight-hanging me-2 text-muted"></i>Tare Weight</span>
-                                <span style="font-weight: 600;"><fmt:formatNumber value="${container.tareWeightKg}" maxFractionDigits="0"/> kg</span>
+                        <!-- Specs List -->
+                        <ul class="specs-list">
+                            <li class="specs-item">
+                                <span class="specs-item-label"><i class="ti ti-weight"></i> Tare Weight</span>
+                                <span class="specs-item-value"><fmt:formatNumber value="${container.tareWeightKg}" maxFractionDigits="0"/> kg</span>
                             </li>
-                            <li class="mb-2 d-flex justify-content-between">
-                                <span><i class="fa-solid fa-boxes-stacked me-2 text-muted"></i>Goods Capacity</span>
-                                <span style="font-weight: 600;"><fmt:formatNumber value="${container.goodsCapacityKg}" maxFractionDigits="0"/> kg</span>
+                            <li class="specs-item">
+                                <span class="specs-item-label"><i class="ti ti-packages"></i> Goods Capacity</span>
+                                <span class="specs-item-value"><fmt:formatNumber value="${container.goodsCapacityKg}" maxFractionDigits="0"/> kg</span>
                             </li>
-                            <li class="d-flex justify-content-between">
-                                <span><i class="fa-solid fa-cube me-2 text-muted"></i>Volume</span>
-                                <span style="font-weight: 600;"><fmt:formatNumber value="${container.goodsCapacityCbm}" maxFractionDigits="2"/> CBM</span>
+                            <li class="specs-item">
+                                <span class="specs-item-label"><i class="ti ti-cube"></i> Cargo Volume</span>
+                                <span class="specs-item-value"><fmt:formatNumber value="${container.goodsCapacityCbm}" maxFractionDigits="1"/> CBM</span>
                             </li>
                         </ul>
-                        
-                        <!-- Action Button (FR3.3 / FR3.4 Booking entry point) -->
-                        <div class="d-flex justify-content-between gap-2 mt-3">
+
+                        <!-- Bottom Actions -->
+                        <div class="card-actions-row">
                             <c:choose>
                                 <c:when test="${container.status == 'Available'}">
-                                    <a href="<c:url value='/allocate?containerId=${container.containerId}'/>" class="btn btn-outline-primary w-100" style="border-radius: 8px; font-weight: 600;">
-                                        Allocate
+                                    <a href="${pageContext.request.contextPath}/shipments/create?containerId=${container.containerId}" class="btn-allocate">
+                                        <span>Allocate</span>
+                                        <i class="ti ti-arrow-right"></i>
                                     </a>
                                 </c:when>
                                 <c:otherwise>
-                                    <button class="btn btn-light w-100 text-muted" style="border-radius: 8px; font-weight: 600;" disabled>
+                                    <button class="btn-not-available" disabled type="button">
                                         Not Available
                                     </button>
                                 </c:otherwise>
                             </c:choose>
+
                             <c:if test="${sessionScope.user.roleId <= 3}">
                                 <div class="dropdown">
-                                    <button class="btn btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 8px;">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    <button class="btn-more-actions" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Container Options">
+                                        <i class="ti ti-dots-vertical"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#updateContainerModal${container.containerId}"><i class="ti ti-pencil me-2 text-primary"></i>Update</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="if(confirm('Delete Container?')) { document.getElementById('deleteForm${container.containerId}').submit(); }"><i class="ti ti-trash me-2"></i>Delete</a></li>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius: 10px; padding: 6px; border: 1px solid #E2E8F0;">
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#updateContainerModal${container.containerId}" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
+                                                <i class="ti ti-pencil" style="color: #FC8019;"></i> Update Status & Port
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:void(0)" onclick="if(confirm('Are you sure you want to delete container #${container.containerNumber}?')) { document.getElementById('deleteForm${container.containerId}').submit(); }" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
+                                                <i class="ti ti-trash"></i> Delete Container
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
+
                                 <form id="deleteForm${container.containerId}" action="<c:url value='/containers/delete'/>" method="POST" style="display:none;">
                                     <input type="hidden" name="id" value="${container.containerId}">
                                 </form>
-                                
+
                                 <!-- Update Container Modal -->
                                 <div class="modal fade" id="updateContainerModal${container.containerId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content" style="border-radius: 12px; border: none;">
-                                            <div class="modal-header border-bottom-0">
-                                                <h5 class="modal-title fw-bold">Update ${container.containerNumber}</h5>
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content modal-content-custom">
+                                            <div class="modal-header modal-header-custom">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div style="width: 36px; height: 36px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 18px;">
+                                                        <i class="ti ti-edit"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="modal-title mb-0" style="font-weight: 700; font-size: 16px;">Update #${container.containerNumber}</h5>
+                                                    </div>
+                                                </div>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <form action="<c:url value='/containers/update'/>" method="POST">
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="containerId" value="${container.containerId}">
-                                                    
+                                                <input type="hidden" name="containerId" value="${container.containerId}">
+                                                <div class="modal-body p-4">
                                                     <div class="mb-3">
-                                                        <label class="form-label text-muted fw-bold">Status</label>
-                                                        <select name="status" class="form-select" required>
+                                                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
+                                                        <select name="status" class="form-select form-select-custom" required>
                                                             <option value="Available" ${container.status == 'Available' ? 'selected' : ''}>Available</option>
-                                                            <option value="Under Maintenance" ${container.status == 'Under Maintenance' ? 'selected' : ''}>Under Maintenance</option>
                                                             <option value="In-Transit" ${container.status == 'In-Transit' ? 'selected' : ''}>In-Transit</option>
+                                                            <option value="Under Maintenance" ${container.status == 'Under Maintenance' ? 'selected' : ''}>Under Maintenance</option>
                                                             <option value="Allocated" ${container.status == 'Allocated' ? 'selected' : ''}>Allocated</option>
                                                         </select>
                                                     </div>
-                                                    
+
                                                     <div class="mb-3">
-                                                        <label class="form-label text-muted fw-bold">Current Port</label>
-                                                        <select name="portId" class="form-select" required>
+                                                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
+                                                        <select name="portId" class="form-select form-select-custom" required>
                                                             <c:forEach var="port" items="${ports}">
                                                                 <option value="${port.portId}" ${container.currentPortId == port.portId ? 'selected' : ''}>${port.portName} (${port.country})</option>
                                                             </c:forEach>
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer border-top-0 pt-0">
-                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-primary" style="background-color: #1434A4;">Update</button>
+                                                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
+                                                    <button type="submit" class="modal-btn-submit">Save Changes</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -155,56 +606,68 @@
             </div>
         </c:forEach>
     </div>
-    
-    <!-- Pagination -->
-    <c:if test="${totalPages > 1}">
-        <nav aria-label="Container pagination" class="mt-5">
-            <ul class="pagination justify-content-center">
-                <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="?page=${currentPage - 1}&status=${statusFilter}">Previous</a>
-                </li>
-                
-                <%-- Simple pagination display --%>
-                <c:forEach begin="1" end="${totalPages > 10 ? 10 : totalPages}" var="i">
-                    <li class="page-item ${currentPage == i ? 'active' : ''}">
-                        <a class="page-link" href="?page=${i}&status=${statusFilter}">${i}</a>
-                    </li>
-                </c:forEach>
-                
-                <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                    <a class="page-link" href="?page=${currentPage + 1}&status=${statusFilter}">Next</a>
-                </li>
-            </ul>
-        </nav>
-    </c:if>
+    <!-- No Results Placeholder -->
+    <div id="noContainerResults" class="text-center py-5 d-none">
+        <div style="width: 64px; height: 64px; background: #F1F5F9; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #94A3B8; font-size: 28px;">
+            <i class="ti ti-box-off"></i>
+        </div>
+        <h5 style="font-weight: 700; color: #1F2937;">No Containers Found</h5>
+        <p style="color: var(--nl-text-muted); font-size: 13.5px;">No containers matching your search and filter criteria.</p>
+    </div>
+
+    <!-- Enterprise Theme Pagination Bar -->
+    <div class="nl-pagination-wrapper mt-4" id="containerPagination" style="border-radius: 12px; border: 1px solid var(--nl-border);">
+        <div class="nl-pagination-info">
+            <span>Showing <strong id="containerPageStart">1</strong> to <strong id="containerPageEnd">12</strong> of <strong id="containerTotalRows">0</strong> containers</span>
+            <div class="d-inline-flex align-items-center gap-2 ms-2">
+                <span style="color: #94A3B8; font-size: 12.5px;">Cards per page:</span>
+                <select id="containerPageSize" class="nl-page-size-select no-custom-select">
+                    <option value="12" selected>12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                    <option value="96">96</option>
+                </select>
+            </div>
+        </div>
+        <div class="nl-pagination-nav" id="containerPageNav">
+            <!-- Dynamically generated page buttons -->
+        </div>
+    </div>
 </div>
 
 <!-- Add Container Modal -->
 <div class="modal fade" id="addContainerModal" tabindex="-1" aria-labelledby="addContainerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius: 12px; border: none;">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="addContainerModalLabel">Add New Container</h5>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-content-custom">
+            <div class="modal-header modal-header-custom">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 36px; height: 36px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 18px;">
+                        <i class="ti ti-box"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="addContainerModalLabel">Add New Shipping Container</h5>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="<c:url value='/containers/add'/>" method="POST">
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Container Number</label>
-                            <input type="text" name="containerNumber" class="form-control" required placeholder="e.g. CONT1234567">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Number <span style="color: #FC8019;">*</span></label>
+                            <input type="text" name="containerNumber" class="form-control" required placeholder="e.g. CONT0000301" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Current Port</label>
-                            <select name="portId" class="form-select" required>
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
+                            <select name="portId" class="form-select form-select-custom" required>
                                 <c:forEach var="port" items="${ports}">
                                     <option value="${port.portId}">${port.portName} (${port.country})</option>
                                 </c:forEach>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Type</label>
-                            <select name="type" class="form-select" required>
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Type <span style="color: #FC8019;">*</span></label>
+                            <select name="type" class="form-select form-select-custom" required>
                                 <option value="Dry Van">Dry Van</option>
                                 <option value="Reefer">Reefer</option>
                                 <option value="Open Top">Open Top</option>
@@ -212,38 +675,245 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Size</label>
-                            <select name="size" class="form-select" required>
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Standard Size <span style="color: #FC8019;">*</span></label>
+                            <select name="size" class="form-select form-select-custom" required>
                                 <option value="20ft">20ft</option>
-                                <option value="40ft">40ft</option>
+                                <option value="40ft" selected>40ft</option>
                                 <option value="45ft">45ft</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Tare Weight (Kg)</label>
-                            <input type="number" step="0.1" name="tareWeightKg" class="form-control" required value="2200">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Tare Weight (kg)</label>
+                            <input type="number" step="0.1" name="tareWeightKg" class="form-control" required value="2200" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Max Gross (Kg)</label>
-                            <input type="number" step="0.1" name="maxGrossWeightKg" class="form-control" required value="24000">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Max Gross (kg)</label>
+                            <input type="number" step="0.1" name="maxGrossWeightKg" class="form-control" required value="24000" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Capacity (Kg)</label>
-                            <input type="number" step="0.1" name="goodsCapacityKg" class="form-control" required value="21800">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Payload Capacity (kg)</label>
+                            <input type="number" step="0.1" name="goodsCapacityKg" class="form-control" required value="21800" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label text-muted fw-bold" style="font-size: 13px;">Capacity (CBM)</label>
-                            <input type="number" step="0.1" name="goodsCapacityCbm" class="form-control" required value="33.2">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Volume (CBM)</label>
+                            <input type="number" step="0.1" name="goodsCapacityCbm" class="form-control" required value="33.2" style="border-radius: 8px; font-size: 13.5px;">
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-nlog">Add Container</button>
+                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
+                    <button type="submit" class="modal-btn-submit">Add Container</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('containerSearchInput');
+    const clearBtn = document.getElementById('clearContainerSearchBtn');
+    const statusFilter = document.getElementById('statusFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const resetBtn = document.getElementById('resetContainerFiltersBtn');
+    const pageSizeSelect = document.getElementById('containerPageSize');
+    const pageNav = document.getElementById('containerPageNav');
+    const pageStartEl = document.getElementById('containerPageStart');
+    const pageEndEl = document.getElementById('containerPageEnd');
+    const totalRowsEl = document.getElementById('containerTotalRows');
+    const noResultsEl = document.getElementById('noContainerResults');
+    const allCards = Array.from(document.querySelectorAll('.container-col'));
+
+    let currentPage = 1;
+    let pageSize = parseInt(pageSizeSelect ? pageSizeSelect.value : 12, 10);
+    let matchingCards = [];
+
+    function updatePagination() {
+        const total = matchingCards.length;
+        const totalPages = Math.ceil(total / pageSize) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, total);
+
+        if (pageStartEl) pageStartEl.textContent = total === 0 ? '0' : (startIndex + 1);
+        if (pageEndEl) pageEndEl.textContent = endIndex;
+        if (totalRowsEl) totalRowsEl.textContent = total;
+
+        allCards.forEach(col => { col.style.display = 'none'; });
+
+        for (let i = startIndex; i < endIndex; i++) {
+            if (matchingCards[i]) {
+                matchingCards[i].style.display = '';
+            }
+        }
+
+        if (noResultsEl) {
+            if (total === 0) {
+                noResultsEl.classList.remove('d-none');
+            } else {
+                noResultsEl.classList.add('d-none');
+            }
+        }
+
+        renderPageButtons(totalPages);
+    }
+
+    function renderPageButtons(totalPages) {
+        if (!pageNav) return;
+        pageNav.innerHTML = '';
+
+        if (totalPages <= 1 && matchingCards.length <= pageSize) {
+            return;
+        }
+
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'nl-page-btn' + (currentPage === 1 ? ' disabled' : '');
+        prevBtn.innerHTML = '<i class=\"ti ti-chevron-left\"></i> Prev';
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+                window.scrollTo({ top: 100, behavior: 'smooth' });
+            }
+        });
+        pageNav.appendChild(prevBtn);
+
+        let pages = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 4) {
+                pages = [1, 2, 3, 4, 5, '...', totalPages];
+            } else if (currentPage >= totalPages - 3) {
+                pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+            } else {
+                pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+            }
+        }
+
+        pages.forEach(p => {
+            if (p === '...') {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'nl-page-ellipsis';
+                ellipsis.textContent = 'â€¦';
+                pageNav.appendChild(ellipsis);
+            } else {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'nl-page-btn' + (p === currentPage ? ' active' : '');
+                btn.textContent = p;
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentPage !== p) {
+                        currentPage = p;
+                        updatePagination();
+                        window.scrollTo({ top: 100, behavior: 'smooth' });
+                    }
+                });
+                pageNav.appendChild(btn);
+            }
+        });
+
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'nl-page-btn' + (currentPage === totalPages ? ' disabled' : '');
+        nextBtn.innerHTML = 'Next <i class=\"ti ti-chevron-right\"></i>';
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+                window.scrollTo({ top: 100, behavior: 'smooth' });
+            }
+        });
+        pageNav.appendChild(nextBtn);
+    }
+
+    function filterCards() {
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const selectedStatus = statusFilter ? statusFilter.value.toLowerCase().trim() : '';
+        const selectedType = typeFilter ? typeFilter.value.toLowerCase().trim() : '';
+        matchingCards = [];
+
+        if (clearBtn) {
+            if (query.length > 0) {
+                clearBtn.classList.remove('d-none');
+            } else {
+                clearBtn.classList.add('d-none');
+            }
+        }
+
+        allCards.forEach(col => {
+            const num = (col.dataset.number || '').toLowerCase();
+            const status = (col.dataset.status || '').toLowerCase();
+            const type = (col.dataset.type || '').toLowerCase();
+            const size = (col.dataset.size || '').toLowerCase();
+            const cardText = col.textContent.toLowerCase();
+
+            const matchesQuery = !query || num.includes(query) || type.includes(query) || size.includes(query) || cardText.includes(query);
+            const matchesStatus = !selectedStatus || status === selectedStatus;
+            const matchesType = !selectedType || type === selectedType;
+
+            if (matchesQuery && matchesStatus && matchesType) {
+                matchingCards.push(col);
+            }
+        });
+
+        currentPage = 1;
+        updatePagination();
+    }
+
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', function() {
+            pageSize = parseInt(this.value, 10);
+            currentPage = 1;
+            updatePagination();
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterCards);
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
+            filterCards();
+        });
+    }
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterCards);
+    }
+    if (typeFilter) {
+        typeFilter.addEventListener('change', filterCards);
+    }
+
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (statusFilter) {
+                statusFilter.value = '';
+                if (statusFilter.tomselect) statusFilter.tomselect.setValue('');
+            }
+            if (typeFilter) {
+                typeFilter.value = '';
+                if (typeFilter.tomselect) typeFilter.tomselect.setValue('');
+            }
+            filterCards();
+        });
+    }
+
+    filterCards();
+});
+</script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />
