@@ -10,7 +10,35 @@
         // Global Enterprise Custom Dropdown Initializer across the entire system
         function initCustomSelects(root) {
             const scope = root || document;
-            scope.querySelectorAll('select.form-select, select.form-select-custom, select:not(.no-custom-select)').forEach(function(el) {
+
+            // 1. Pagination Rows-Per-Page Micro Dropdowns (Global Custom Styling)
+            scope.querySelectorAll('select.nl-page-size-select').forEach(function(el) {
+                if (!el.tomselect && !el.classList.contains('tomselected')) {
+                    try {
+                        const ts = new TomSelect(el, {
+                            create: false,
+                            dropdownParent: 'body',
+                            allowEmptyOption: false,
+                            controlInput: null,
+                            onInitialize: function() {
+                                this.wrapper.classList.add('nl-page-size-ts');
+                            }
+                        });
+                        ts.on('change', function(val) {
+                            if (typeof el.onchange === 'function') {
+                                el.onchange();
+                            } else {
+                                el.dispatchEvent(new Event('change'));
+                            }
+                        });
+                    } catch(err) {
+                        console.warn("TomSelect page size init error:", err);
+                    }
+                }
+            });
+
+            // 2. Standard Form & Filter Dropdowns
+            scope.querySelectorAll('select.form-select, select.form-select-custom, select:not(.no-custom-select):not(.nl-page-size-select)').forEach(function(el) {
                 if (!el.tomselect && !el.classList.contains('tomselected')) {
                     const shouldSort = (el.dataset.sort === 'asc');
                     const firstOption = el.options[0];

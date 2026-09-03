@@ -1642,10 +1642,150 @@
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
+                /* ==========================================================================
+           GLOBAL PAGINATION ROWS-PER-PAGE TOMSELECT DROPDOWN
+           ========================================================================== */
+        .ts-wrapper.nl-page-size-ts {
+            width: 72px !important;
+            min-width: 72px !important;
+            max-width: 76px !important;
+            margin: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-control {
+            height: 30px !important;
+            min-height: 30px !important;
+            padding: 2px 22px 2px 10px !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            border: 1.5px solid #E2E8F0 !important;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease !important;
+        }
+        .ts-wrapper.nl-page-size-ts:hover .ts-control {
+            border-color: #CBD5E1 !important;
+        }
+        .ts-wrapper.nl-page-size-ts.focus .ts-control,
+        .ts-wrapper.nl-page-size-ts.dropdown-active .ts-control {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown {
+            width: 72px !important;
+            min-width: 72px !important;
+            max-width: 76px !important;
+            border-radius: 10px !important;
+            border: 1px solid #E2E8F0 !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+            padding: 4px !important;
+            margin-top: 4px !important;
+            z-index: 99999 !important;
+            background: #FFFFFF !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option {
+            padding: 5px 8px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            border-radius: 6px !important;
+            color: #334155 !important;
+            text-align: center !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option:hover,
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option.active {
+            background: #FFF3EA !important;
+            color: #FC8019 !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option.selected {
+            background: #FC8019 !important;
+            color: #FFFFFF !important;
+        }
+
         .nl-page-size-select:focus {
             border-color: #FC8019 !important;
             box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
         }
+                /* ==========================================================================
+           GLOBAL PAGINATION ROWS-PER-PAGE TOMSELECT DROPDOWN
+           ========================================================================== */
+        .ts-wrapper.nl-page-size-ts {
+            width: 72px !important;
+            min-width: 72px !important;
+            max-width: 76px !important;
+            margin: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-control {
+            height: 30px !important;
+            min-height: 30px !important;
+            padding: 2px 22px 2px 10px !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            border: 1.5px solid #E2E8F0 !important;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease !important;
+        }
+        .ts-wrapper.nl-page-size-ts:hover .ts-control {
+            border-color: #CBD5E1 !important;
+        }
+        .ts-wrapper.nl-page-size-ts.focus .ts-control,
+        .ts-wrapper.nl-page-size-ts.dropdown-active .ts-control {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown {
+            width: 72px !important;
+            min-width: 72px !important;
+            max-width: 76px !important;
+            border-radius: 10px !important;
+            border: 1px solid #E2E8F0 !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+            padding: 4px !important;
+            margin-top: 4px !important;
+            z-index: 99999 !important;
+            background: #FFFFFF !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option {
+            padding: 5px 8px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            border-radius: 6px !important;
+            color: #334155 !important;
+            text-align: center !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option:hover,
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option.active {
+            background: #FFF3EA !important;
+            color: #FC8019 !important;
+        }
+        .ts-wrapper.nl-page-size-ts .ts-dropdown .option.selected {
+            background: #FC8019 !important;
+            color: #FFFFFF !important;
+        }
+
         .nl-page-size-select:focus {
             border-color: #FC8019 !important;
             box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.12) !important;
