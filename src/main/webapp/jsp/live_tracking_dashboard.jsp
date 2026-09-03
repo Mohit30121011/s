@@ -442,6 +442,25 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Enterprise Theme Pagination Bar -->
+    <div class="nl-pagination-wrapper" id="trackingPagination">
+        <div class="nl-pagination-info">
+            <span>Showing <strong id="trackingPageStart">1</strong> to <strong id="trackingPageEnd">10</strong> of <strong id="trackingTotalRows">0</strong> shipments</span>
+            <div class="d-inline-flex align-items-center gap-2 ms-2">
+                <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
+                <select id="trackingPageSize" class="nl-page-size-select no-custom-select">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+        <div class="nl-pagination-nav" id="trackingPageNav">
+            <!-- Dynamically generated buttons -->
+        </div>
+    </div>
 </div>
 
 <div style="font-size: 12.5px; color: var(--nl-text-muted); margin-bottom: 40px; display: flex; align-items: center; gap: 6px;">
@@ -454,14 +473,120 @@ document.addEventListener("DOMContentLoaded", function() {
     const statusFilter = document.getElementById('statusFilter');
     const vesselFilter = document.getElementById('vesselFilter');
     const resetBtn = document.getElementById('resetFiltersBtn');
-    const rows = document.querySelectorAll('.tracking-row');
+    const allRows = Array.from(document.querySelectorAll('.tracking-row'));
+    const pageSizeSelect = document.getElementById('trackingPageSize');
+    const pageNav = document.getElementById('trackingPageNav');
+    const pageStartEl = document.getElementById('trackingPageStart');
+    const pageEndEl = document.getElementById('trackingPageEnd');
+    const totalRowsEl = document.getElementById('trackingTotalRows');
+    const tableBody = document.querySelector('#trackingTable tbody');
+
+    let currentPage = 1;
+    let pageSize = parseInt(pageSizeSelect ? pageSizeSelect.value : 10, 10);
+    let matchingRows = [];
+
+    function updatePagination() {
+        const total = matchingRows.length;
+        const totalPages = Math.ceil(total / pageSize) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, total);
+
+        if (pageStartEl) pageStartEl.textContent = total === 0 ? '0' : (startIndex + 1);
+        if (pageEndEl) pageEndEl.textContent = endIndex;
+        if (totalRowsEl) totalRowsEl.textContent = total;
+
+        allRows.forEach(row => { row.style.display = 'none'; });
+
+        for (let i = startIndex; i < endIndex; i++) {
+            if (matchingRows[i]) {
+                matchingRows[i].style.display = '';
+            }
+        }
+
+        renderPageButtons(totalPages);
+    }
+
+    function renderPageButtons(totalPages) {
+        if (!pageNav) return;
+        pageNav.innerHTML = '';
+
+        if (totalPages <= 1 && matchingRows.length <= pageSize) {
+            return;
+        }
+
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'nl-page-btn' + (currentPage === 1 ? ' disabled' : '');
+        prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+            }
+        });
+        pageNav.appendChild(prevBtn);
+
+        let pages = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 4) {
+                pages = [1, 2, 3, 4, 5, '...', totalPages];
+            } else if (currentPage >= totalPages - 3) {
+                pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+            } else {
+                pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+            }
+        }
+
+        pages.forEach(p => {
+            if (p === '...') {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'nl-page-ellipsis';
+                ellipsis.textContent = '…';
+                pageNav.appendChild(ellipsis);
+            } else {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'nl-page-btn' + (p === currentPage ? ' active' : '');
+                btn.textContent = p;
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentPage !== p) {
+                        currentPage = p;
+                        updatePagination();
+                    }
+                });
+                pageNav.appendChild(btn);
+            }
+        });
+
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'nl-page-btn' + (currentPage === totalPages ? ' disabled' : '');
+        nextBtn.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+            }
+        });
+        pageNav.appendChild(nextBtn);
+    }
 
     function filterRows() {
-        const query = searchInput.value.toLowerCase().trim();
-        const selectedStatus = statusFilter.value.toLowerCase().trim();
-        const selectedVessel = vesselFilter.value.toLowerCase().trim();
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const selectedStatus = statusFilter ? statusFilter.value.toLowerCase().trim() : '';
+        const selectedVessel = vesselFilter ? vesselFilter.value.toLowerCase().trim() : '';
+        matchingRows = [];
 
-        rows.forEach(row => {
+        allRows.forEach(row => {
             const rowText = row.textContent.toLowerCase();
             const rowStatus = (row.dataset.status || '').toLowerCase();
             const rowVessel = (row.dataset.vessel || '').toLowerCase();
@@ -471,23 +596,64 @@ document.addEventListener("DOMContentLoaded", function() {
             const matchesVessel = !selectedVessel || rowVessel === selectedVessel;
 
             if (matchesQuery && matchesStatus && matchesVessel) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+                matchingRows.push(row);
             }
+        });
+
+        let noResults = document.getElementById('trackingNoResultsRow');
+        if (matchingRows.length === 0 && allRows.length > 0) {
+            if (!noResults && tableBody) {
+                noResults = document.createElement('tr');
+                noResults.id = 'trackingNoResultsRow';
+                noResults.innerHTML = '<td colspan="8" style="text-align: center; padding: 48px; color: var(--nl-text-muted);">' +
+                    '<i class="ti ti-radar" style="font-size: 28px; color: #D1D5DB; margin-bottom: 12px; display: block;"></i>' +
+                    'No tracking shipments found matching current filters</td>';
+                tableBody.appendChild(noResults);
+            } else if (noResults) {
+                noResults.style.display = '';
+            }
+        } else if (noResults) {
+            noResults.style.display = 'none';
+        }
+
+        currentPage = 1;
+        updatePagination();
+    }
+
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', function() {
+            pageSize = parseInt(this.value, 10);
+            currentPage = 1;
+            updatePagination();
         });
     }
 
-    searchInput.addEventListener('input', filterRows);
-    statusFilter.addEventListener('change', filterRows);
-    vesselFilter.addEventListener('change', filterRows);
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterRows);
+    }
+    if (vesselFilter) {
+        vesselFilter.addEventListener('change', filterRows);
+    }
 
-    resetBtn.addEventListener('click', function() {
-        searchInput.value = '';
-        statusFilter.value = '';
-        vesselFilter.value = '';
-        filterRows();
-    });
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (statusFilter) {
+                statusFilter.value = '';
+                if (statusFilter.tomselect) statusFilter.tomselect.setValue('');
+            }
+            if (vesselFilter) {
+                vesselFilter.value = '';
+                if (vesselFilter.tomselect) vesselFilter.tomselect.setValue('');
+            }
+            filterRows();
+        });
+    }
+
+    filterRows();
 });
 </script>
 

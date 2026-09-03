@@ -1103,6 +1103,115 @@
             font-weight: 600 !important;
         }
 
+        /* ==========================================
+           ENTERPRISE PAGINATION (SWIGGY ORANGE THEME)
+           ========================================== */
+        .nl-pagination-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px 24px;
+            background: #FFFFFF;
+            border-top: 1px solid #F1F3F6;
+        }
+
+        .nl-pagination-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .nl-pagination-info strong {
+            color: #1F2937;
+            font-weight: 700;
+        }
+
+        .nl-page-size-select {
+            padding: 4px 10px !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            border-radius: 6px !important;
+            border: 1px solid #E2E8F0 !important;
+            background-color: #FFFFFF !important;
+            color: #374151 !important;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .nl-page-size-select:focus {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.12) !important;
+        }
+
+        .nl-pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nl-page-btn {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: #FFFFFF;
+            color: #4B5563;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            user-select: none;
+            text-decoration: none;
+        }
+
+        .nl-page-btn:hover:not(.disabled):not(.active) {
+            background: #FFF9F5;
+            color: #FC8019;
+            border-color: #FFD4C2;
+            transform: translateY(-1px);
+        }
+
+        .nl-page-btn.active {
+            background: #FC8019 !important;
+            color: #FFFFFF !important;
+            border-color: #FC8019 !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(252, 128, 25, 0.3) !important;
+            cursor: default;
+        }
+
+        .nl-page-btn.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #F8FAFC;
+            color: #94A3B8;
+            border-color: #E2E8F0;
+        }
+
+        .nl-page-ellipsis {
+            min-width: 28px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #94A3B8;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
         .ts-wrapper.single .ts-control:after {
             border-color: #6B7280 transparent transparent transparent !important;
             right: 14px !important;
