@@ -8,6 +8,29 @@ import java.util.List;
 
 public class CompanyDAO {
 
+    public Company getCompanyById(int companyId) {
+        String sql = "SELECT * FROM companies WHERE company_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, companyId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Company c = new Company();
+                    c.setCompanyId(rs.getInt("company_id"));
+                    c.setCompanyName(rs.getString("company_name"));
+                    c.setLicenseNo(rs.getString("license_no"));
+                    c.setGstNo(rs.getString("gst_no"));
+                    c.setAddress(rs.getString("address"));
+                    c.setContactEmail(rs.getString("contact_email"));
+                    c.setContactPhone(rs.getString("contact_phone"));
+                    c.setApprovalStatus(rs.getString("approval_status"));
+                    return c;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
     public List<Company> getAllCompanies() {
         List<Company> list = new ArrayList<>();
         String sql = "SELECT * FROM companies ORDER BY company_id DESC";

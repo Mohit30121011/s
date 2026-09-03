@@ -64,10 +64,10 @@
                                     <td class="text-end pe-4">
                                         <form action="${pageContext.request.contextPath}/admin/companies" method="POST" class="d-inline">
                                             <input type="hidden" name="companyId" value="${company.companyId}">
-                                            <button type="button" onclick="handleAction(event, this.form, \'accept\')"  class="btn btn-sm btn-success rounded-circle me-1" title="Accept" style="width: 32px; height: 32px;">
+                                            <button type="submit" name="action" value="accept"  class="btn btn-sm btn-success rounded-circle me-1" title="Accept" style="width: 32px; height: 32px;">
                                                 <i class="fa-solid fa-check"></i>
                                             </button>
-                                            <button type="button" onclick="handleAction(event, this.form, \'reject\')"  class="btn btn-sm btn-danger rounded-circle" title="Reject" style="width: 32px; height: 32px;">
+                                            <button type="submit" name="action" value="reject"  class="btn btn-sm btn-danger rounded-circle" title="Reject" style="width: 32px; height: 32px;">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         </form>
@@ -83,43 +83,6 @@
 </div>
 
 
-<script>
-function handleAction(event, form, actionValue) {
-    event.preventDefault();
-    let row = form.closest('tr');
-    
-    // Create FormData
-    let formData = new URLSearchParams();
-    formData.append('companyId', form.companyId.value);
-    formData.append('action', actionValue);
 
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-    }).then(response => {
-        if (response.ok) {
-            // Remove the row instantly
-            row.style.transition = "opacity 0.3s ease";
-            row.style.opacity = 0;
-            setTimeout(() => {
-                row.remove();
-                // Check if table is empty
-                let tbody = document.querySelector('tbody');
-                if (tbody.children.length === 0) {
-                    tbody.innerHTML = `<tr>
-<td colspan="6" class="text-center py-5 text-muted">
-<i class="fa-solid fa-inbox fs-2 mb-3 text-light-gray"></i>
-<p class="mb-0">No pending company approvals.</p>
-</td>
-</tr>`;
-                }
-            }, 300);
-        }
-    }).catch(err => console.error('Error:', err));
-}
-</script>
 <jsp:include page="/jsp/layout/footer.jsp" />
 

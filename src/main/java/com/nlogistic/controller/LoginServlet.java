@@ -34,6 +34,24 @@ public class LoginServlet extends HttpServlet {
         if ("SUCCESS".equals(result)) {      
             User user = userDAO.getUserByUsername(username);
             if (user != null) {
+                // Check if user belongs to a company and if company is approved
+                if (user.getCompanyId() > 0) {
+                    com.nlogistic.dao.CompanyDAO companyDAO = new com.nlogistic.dao.CompanyDAO();
+                    com.nlogistic.model.Company comp = companyDAO.getCompanyById(user.getCompanyId());
+                    if (comp != null && !"Active".equalsIgnoreCase(comp.getApprovalStatus())) {
+                        request.setAttribute("errorMessage", "Your company registration is " + comp.getApprovalStatus() + ". Please wait for Super Admin approval before logging in.");
+                        request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
+                        return;
+                    }
+                }
+
+                // Check if user account itself is Active
+                if (!"Active".equalsIgnoreCase(user.getStatus())) {
+                    request.setAttribute("errorMessage", "Your account is pending approval by the administrator.");
+                    request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
+                    return;
+                }
+
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
                 session.setAttribute("username", user.getUsername());
@@ -50,7 +68,7 @@ public class LoginServlet extends HttpServlet {
             case "USER_NOT_FOUND":      errorMsg = "User not found. Please check your username."; break;
             case "INVALID_PASSWORD":    errorMsg = "Invalid password. Please try again."; break;
             case "ACCOUNT_LOCKED":      errorMsg = "Account is locked due to too many failed attempts. Please wait 15 minutes."; break;
-            case "ACCOUNT_INACTIVE":    errorMsg = "Account is inactive. Please contact administrator."; break;
+            case "ACCOUNT_INACTIVE":    errorMsg = "Your account is pending approval by the administrator."; break;
             default:
                 if (result != null && result.startsWith("DB_ERROR:")) {
                     errorMsg = "Database Connection Failed: " + result.substring(10) + ". Please check DBConnectionManager.java for correct MySQL password or ensure stored procedure exists.";

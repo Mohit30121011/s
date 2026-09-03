@@ -109,21 +109,13 @@ public class UserDAO {
     }
 
     /**
-     * DB signature: register_user(p_username, p_email, p_password_hash, p_phone, p_role_id, p_company_id, p_status)
+     * Direct persistent registration with SHA-256 password hashing and audit logging
      */
     public void registerUser(String username, String email, String password, String phone, int roleId, Integer companyId, String status) {
-        String sql = "{CALL register_user(?, ?, ?, ?, ?, ?, ?)}";
-        try (Connection conn = DBConnectionManager.getConnection();
-             CallableStatement cs = conn.prepareCall(sql)) {
-            cs.setString(1, username);
-            cs.setString(2, email);
-            cs.setString(3, password); // SP does SHA2 internally
-            cs.setString(4, phone);
-            cs.setInt(5, roleId);
-            if (companyId != null) cs.setInt(6, companyId); else cs.setNull(6, Types.INTEGER);
-            cs.setString(7, status);
-            cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+        int newId = createUser(username, email, password, phone, roleId, companyId, status != null ? status : "Inactive");
+        if (newId > 0) {
+            logAuditEvent(newId, "USER_REGISTERED", username, "127.0.0.1");
+        }
     }
 
     /**
