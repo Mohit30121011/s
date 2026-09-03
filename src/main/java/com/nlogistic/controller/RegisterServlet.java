@@ -80,7 +80,7 @@ public class RegisterServlet extends HttpServlet {
                 userDAO.registerUser(username, email, password, phone, 5, null, status);
             }
             
-            request.setAttribute("successMessage", "Registration successful! You can now sign in.");
+            request.setAttribute("successMessage", "Registration successful. Waiting for the superadmin approval.");
             request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();

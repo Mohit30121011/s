@@ -50,14 +50,14 @@ public class ShipmentServlet extends HttpServlet {
             request.setAttribute("shipment", shipmentDAO.getFullShipmentById(shipmentId));
             request.setAttribute("ports", portDAO.getAllPorts());
             request.setAttribute("vessels", vesselDAO.getAllVessels());
-            request.setAttribute("containers", containerDAO.getAllContainers());
+            request.setAttribute("containers", containerDAO.getContainers("All", 1000, 0));
             request.setAttribute("customers", customerDAO.getAllCustomers());
             request.getRequestDispatcher("/jsp/edit_shipment.jsp").forward(request, response);
         } else if (pathInfo.equals("/create")) {
             // Show Form
             request.setAttribute("ports", portDAO.getAllPorts());       
             request.setAttribute("vessels", vesselDAO.getAllVessels());
-            request.setAttribute("containers", containerDAO.getAvailableContainers());
+            request.setAttribute("containers", containerDAO.getContainers("Available", 1000, 0));
             request.setAttribute("customers", customerDAO.getAllCustomers());
             request.getRequestDispatcher("/jsp/create_shipment.jsp").forward(request, response);
         }
