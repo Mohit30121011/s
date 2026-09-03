@@ -169,24 +169,90 @@
         gap: 6px;
     }
 
-    /* Filter & Search Toolbar */
+    /* Filter & Search Toolbar (All 4 Side-by-Side in One Row) */
     .staff-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 14px;
         margin-bottom: 20px;
+        width: 100%;
     }
     .toolbar-left-group {
         display: flex;
         align-items: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 12px;
+        flex: 1;
+        min-width: 0;
     }
     .staff-search-box {
         position: relative;
-        width: 280px;
+        width: 270px;
+        min-width: 200px;
+        flex-shrink: 0;
+    }
+    .toolbar-right-group {
+        flex-shrink: 0;
+    }
+
+    /* Global Dropdown TomSelect Integration in Toolbar */
+    .staff-toolbar .ts-wrapper {
+        width: auto !important;
+        min-width: 165px !important;
+        max-width: 220px !important;
+        flex-shrink: 0 !important;
+    }
+    .staff-toolbar .ts-wrapper.single .ts-control {
+        border-radius: 50px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding-left: 18px !important;
+        padding-right: 36px !important;
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #E2E8F0 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        display: flex !important;
+        align-items: center !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    }
+    .staff-toolbar .ts-wrapper.single .ts-control:after {
+        border-color: #64748B transparent transparent transparent !important;
+        right: 16px !important;
+        top: 50% !important;
+        margin-top: -3px !important;
+    }
+    .staff-toolbar .ts-wrapper.single.dropdown-active .ts-control:after {
+        border-color: transparent transparent #FC8019 transparent !important;
+        margin-top: -6px !important;
+    }
+    .staff-toolbar .ts-wrapper.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+    }
+    .staff-toolbar .ts-dropdown {
+        border-radius: 14px !important;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1) !important;
+        border: 1px solid #E2E8F0 !important;
+        padding: 6px !important;
+        margin-top: 6px !important;
+        min-width: 200px !important;
+    }
+    .staff-toolbar .ts-dropdown .option {
+        padding: 9px 14px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
+        color: #334155 !important;
+        transition: all 0.15s ease !important;
+    }
+    .staff-toolbar .ts-dropdown .option:hover,
+    .staff-toolbar .ts-dropdown .option.active {
+        background-color: #FFF2EB !important;
+        color: #FC8019 !important;
+        font-weight: 600 !important;
     }
     .staff-search-box i {
         position: absolute;
@@ -859,7 +925,7 @@
                 <input type="text" id="staffSearchInput" class="staff-search-input" placeholder="Search staff by name, email, employee ID..." oninput="handleStaffFilter()">
                 <i class="ti ti-search"></i>
             </div>
-            <select id="roleFilter" class="filter-dropdown-pill no-custom-select" onchange="handleStaffFilter()">
+            <select id="roleFilter" class="form-select-custom" onchange="handleStaffFilter()">
                 <option value="ALL">Role: All Roles</option>
                 <option value="1">Super Admin</option>
                 <option value="2">Company Admin</option>
@@ -867,7 +933,7 @@
                 <option value="4">Staff — Finance</option>
                 <option value="5">Customer / Shipper</option>
             </select>
-            <select id="departmentFilter" class="filter-dropdown-pill no-custom-select" onchange="handleStaffFilter()">
+            <select id="departmentFilter" class="form-select-custom" onchange="handleStaffFilter()">
                 <option value="ALL">Department: All Departments</option>
                 <option value="Administration">Administration</option>
                 <option value="Fleet Operations">Fleet Operations</option>
@@ -877,7 +943,7 @@
             </select>
         </div>
 
-        <div>
+        <div class="toolbar-right-group">
             <button type="button" class="btn-invite-staff" onclick="openInviteModal()">
                 <i class="ti ti-plus"></i> Invite New Staff
             </button>
