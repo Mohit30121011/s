@@ -17,14 +17,14 @@ public class ShipmentServlet extends HttpServlet {
       															  
     private ShipmentDAO shipmentDAO = new ShipmentDAO();
     private PortDAO portDAO = new PortDAO();      				        
-    private VesselDAO vesselDAO = new VesselDAO();   
+    private VesselDAO vesselDAO = new VesselDAO();         
     private ContainerDAO containerDAO = new ContainerDAO();       
     private CustomerDAO customerDAO = new CustomerDAO(); // Need to fetch customers
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         
-        if (pathInfo == null || pathInfo.equals("/")) {
+        if (pathInfo == null || pathInfo.equals("/")) {    
             // List Shipments
             request.setAttribute("shipments", shipmentDAO.getAllShipments());
             request.getRequestDispatcher("/jsp/shipments.jsp").forward(request, response);

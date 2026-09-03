@@ -130,7 +130,7 @@
             <a href="${pageContext.request.contextPath}/assets/templates/stock_template.csv" class="btn btn-outline-nlog" download="stock_template.csv">
                 <i class="fa-solid fa-download me-2"></i>Download Template
             </a>
-            <button class="btn btn-nlog" onclick="switchTab('bulk')">
+            <button class="btn btn-nlog" onclick="switchTab('bulk'); document.getElementById('csvFile').click();">
                 <i class="fa-solid fa-cloud-arrow-up me-2"></i>Upload Stock
             </button>
         </div>
@@ -238,7 +238,7 @@
                 <!-- Manual Entry Content (Hidden initially) -->
                 <div class="card-body p-4 p-lg-5 d-none" id="content-manual">
                     <h5 class="fw-bold mb-1">Manual Stock Entry</h5>
-                    <p class="text-muted small mb-4">Add new stock details manually (FR4.1)</p>
+                    <p class="text-muted small mb-4">Add new stock details manually</p>
                     
                     <form action="${pageContext.request.contextPath}/manual-stock" method="POST">
                         <div class="row g-3">
@@ -284,7 +284,7 @@
                 <!-- Upload History Content (FR4.4) -->
                 <div class="card-body p-4 p-lg-5 d-none" id="content-history">
                     <h5 class="fw-bold mb-1">Upload History</h5>
-                    <p class="text-muted small mb-4">View the detailed log of all bulk stock uploads (FR4.4).</p>
+                    <p class="text-muted small mb-4">View the detailed log of all bulk stock uploads</p>
                     
                     <div class="table-responsive">
                         <table class="table align-middle text-nowrap mb-0" style="font-size: 14px;">
@@ -323,7 +323,7 @@
                 <!-- Stock Overview Content (FR4.6) -->
                 <div class="card-body p-4 p-lg-5 d-none" id="content-overview">
                     <h5 class="fw-bold mb-1">Stock Overview & Adjustments</h5>
-                    <p class="text-muted small mb-4">View current stock and manually adjust for damages or write-offs (FR4.6).</p>
+                    <p class="text-muted small mb-4">View current stock and manually adjust for damages or write-offs</p>
                     
                     <div class="table-responsive">
                         <table class="table align-middle text-nowrap mb-0" style="font-size: 14px;">

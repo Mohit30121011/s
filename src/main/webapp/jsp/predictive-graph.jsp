@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1" style="font-weight: 800; color: #1a1a1a;">Advance Predictive Graph</h2>
-            <p class="text-muted">Demand Forecasting & Price Trends (FR3.6)</p>
+            <p class="text-muted">Demand Forecasting & Price Trends</p>
         </div>
         
         <!-- Filter Form -->
@@ -37,7 +37,7 @@
                     <h5 class="fw-bold mb-4">Forecasted Demand & Price Trend (Next 6 Periods)</h5>
                     <div style="height: 400px;">
                         <canvas id="predictiveChart"></canvas>
-                    </div>
+                    </div>   
                 </div>
             </div>
         </div>
@@ -46,7 +46,7 @@
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4">Update Base Price</h5>
-                    <p class="text-muted small mb-4">FR3.7: Every price change shall be logged with old value, new value, reason, timestamp and responsible user.</p>
+                    <p class="text-muted small mb-4">Every price change shall be logged with old value, new value, reason, timestamp and responsible user.</p>
                     
                     <form action="<c:url value='/predictive-graph'/>" method="POST">
                         <input type="hidden" name="pricingId" value="${pricingId}">
