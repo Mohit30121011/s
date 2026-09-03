@@ -1641,23 +1641,7 @@
                     <input type="hidden" name="action" value="savePermissions">
                     <input type="hidden" name="userId" id="drawerUserIdInput" value="3">
 
-                      <div style="margin-bottom: 16px; padding: 12px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
-                          <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
-                              <i class="ti ti-shield-lock" style="color: #FC8019; margin-right: 4px;"></i> Assigned Role (RBAC Tier)
-                          </label>
-                          <select name="assignedRoleId" id="drawerAssignedRoleSelect" class="form-select form-select-sm" style="border-radius: 8px; font-size: 13px; font-weight: 600; color: #0F172A; border-color: #CBD5E1;" onchange="onDrawerRoleChanged(this.value)">
-                              <option value="1">Super Admin (All 10 Modules Full Access)</option>
-                              <option value="2">Company Admin (Tenant &amp; Fleet Operations - 8 Modules)</option>
-                              <option value="3">Company Staff - Operations (Terminal &amp; Logistics - 6 Modules)</option>
-                              <option value="4">Company Staff - Finance (Billing, Invoicing &amp; PLG - 4 Modules)</option>
-                              <option value="5">Customer / Shipper (Tracking &amp; Bookings - 3 Modules)</option>
-                          </select>
-                          <p style="font-size: 11.5px; color: #64748B; margin: 6px 0 0 0; line-height: 1.35;">
-                              Module access permissions automatically synchronize with this user's assigned RBAC role.
-                          </p>
-                      </div>
-
-                    <!-- Module 1 -->
+                      <!-- Module 1 -->
                     <div class="permission-item-row">
                         <div class="permission-item-left">
                             <i class="ti ti-chart-bar"></i>
@@ -2036,17 +2020,7 @@
         document.getElementById('drawerStaffEmail').textContent = staffEmail;
         document.getElementById('drawerDeptName').textContent = staffDept;
         document.getElementById('drawerUserIdInput').value = userId;
-          window.currentSelectedRoleId = roleId;
-          const assignedRoleSelect = document.getElementById('drawerAssignedRoleSelect');
-          if (assignedRoleSelect) {
-              assignedRoleSelect.value = String(roleId);
-              for (let i = 0; i < assignedRoleSelect.options.length; i++) {
-                  if (parseInt(assignedRoleSelect.options[i].value, 10) === roleId) {
-                      assignedRoleSelect.selectedIndex = i;
-                      break;
-                  }
-              }
-          }
+          
         const drawerJoined = document.getElementById('drawerJoinedDate');
         if (drawerJoined) drawerJoined.textContent = joinedDate;
 
@@ -2065,7 +2039,7 @@
             rolePill.className = 'role-badge-pill company-admin';
             rolePill.textContent = 'Company Admin';
             roleBadgeHtml = '<span class="role-badge-pill company-admin">Company Admin</span>';
-            setRolePreset([true, true, true, true, true, true, true, true, false, false]);
+            setRolePreset([true, true, true, true, true, true, true, true, true, false]);
         } else if (roleId === 4) {
             rolePill.className = 'role-badge-pill staff-finance';
             rolePill.textContent = 'Staff — Finance';
@@ -2080,7 +2054,7 @@
             rolePill.className = 'role-badge-pill staff-ops';
             rolePill.textContent = 'Company Staff — Operations';
             roleBadgeHtml = '<span class="role-badge-pill staff-ops">Company Staff — Operations</span>';
-            setRolePreset([true, true, true, false, false, true, true, false, false, false]);
+            setRolePreset([true, true, true, false, false, true, true, true, false, false]);
         }
 
         // 2. Populate Tab 1: Details View (Real Data from users table)
@@ -2205,18 +2179,7 @@
 
         document.getElementById('drawerTabDetails').style.display = (tab === 'details') ? 'block' : 'none';
         document.getElementById('drawerTabPermissions').style.display = (tab === 'permissions') ? 'block' : 'none';
-        if (tab === 'permissions' && window.currentSelectedRoleId) {
-            const sel = document.getElementById('drawerAssignedRoleSelect');
-            if (sel) {
-                sel.value = String(window.currentSelectedRoleId);
-                for (let i = 0; i < sel.options.length; i++) {
-                    if (parseInt(sel.options[i].value, 10) === window.currentSelectedRoleId) {
-                        sel.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
-        }
+        
         document.getElementById('drawerTabRole').style.display = (tab === 'role') ? 'block' : 'none';
         document.getElementById('drawerTabAudit').style.display = (tab === 'audit') ? 'block' : 'none';
     }
