@@ -36,7 +36,7 @@
     }
     .nl-reg-shell {
         width: 100%;
-        max-width: 1100px;
+        max-width: 1080px;
         animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
@@ -152,7 +152,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px;
-        margin-bottom: 32px;
+        margin-bottom: 30px;
     }
     .nl-type-card {
         border: 2px solid #E2E8F0;
@@ -238,38 +238,47 @@
         background: #FC8019;
     }
 
-    /* Section Divider */
-    .nl-form-divider {
+    /* Section Subheadings */
+    .nl-section-header {
         display: flex;
         align-items: center;
-        gap: 16px;
-        margin: 10px 0 28px;
+        gap: 10px;
+        margin: 22px 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #F1F5F9;
     }
-    .nl-divider-line {
-        flex: 1;
-        height: 1px;
-        background: #E2E8F0;
+    .nl-section-badge-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
     }
-    .nl-divider-title {
-        font-size: 13px;
+    .nl-section-badge-icon.orange { background: #FFF2EB; color: #FC8019; }
+    .nl-section-badge-icon.blue   { background: #EFF6FF; color: #2563EB; }
+    .nl-section-title {
+        font-size: 14px;
         font-weight: 700;
-        color: #475569;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        color: #1E293B;
     }
 
     /* Form Fields Grid */
     .nl-fields-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px 24px;
+    }
+    .nl-fields-grid.full-width {
+        grid-column: span 2;
     }
     .nl-field-box {
         display: flex;
         flex-direction: column;
+    }
+    .nl-field-box.span-2 {
+        grid-column: span 2;
     }
     .nl-field-box label {
         font-size: 12.5px;
@@ -297,7 +306,7 @@
     }
     .nl-form-control {
         width: 100%;
-        height: 44px;
+        height: 46px;
         padding-left: 44px !important;
         padding-right: 14px;
         font-size: 13.5px;
@@ -325,8 +334,8 @@
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
         border-radius: 9px;
-        height: 44px;
-        padding: 4px 10px 4px 44px;
+        height: 46px;
+        padding: 4px 12px 4px 44px;
         position: relative;
         cursor: pointer;
         transition: all 0.15s ease;
@@ -357,8 +366,8 @@
         color: #FC8019;
         font-size: 11px;
         font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 5px;
+        padding: 4px 10px;
+        border-radius: 6px;
         margin-left: 8px;
         flex-shrink: 0;
     }
@@ -380,13 +389,34 @@
         color: #FC8019;
     }
 
+    /* Super Admin Approval Notice Callout (FR1.2) */
+    .nl-approval-notice {
+        margin-top: 24px;
+        padding: 14px 18px;
+        background: #FFFBEB;
+        border: 1px solid #FDE68A;
+        border-radius: 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 13px;
+        color: #92400E;
+        line-height: 1.5;
+    }
+    .nl-approval-notice i {
+        font-size: 18px;
+        color: #D97706;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
     /* Bottom Action Bar */
     .nl-reg-footer {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-top: 32px;
-        padding-top: 24px;
+        margin-top: 28px;
+        padding-top: 22px;
         border-top: 1px solid #F1F5F9;
         flex-wrap: wrap;
         gap: 16px;
@@ -443,7 +473,7 @@
         color: #FFFFFF;
         font-size: 14px;
         font-weight: 700;
-        padding: 10px 26px;
+        padding: 10px 28px;
         border-radius: 9px;
         cursor: pointer;
         display: inline-flex;
@@ -475,23 +505,21 @@
     }
 
     /* Responsive */
-    @media (max-width: 992px) {
-        .nl-fields-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
     @media (max-width: 768px) {
         .nl-reg-canvas {
             padding: 24px 16px;
         }
         .nl-reg-card {
-            padding: 26px 20px;
+            padding: 24px 18px;
         }
         .nl-type-grid {
             grid-template-columns: 1fr;
         }
         .nl-fields-grid {
             grid-template-columns: 1fr;
+        }
+        .nl-field-box.span-2 {
+            grid-column: span 1;
         }
         .nl-reg-footer {
             flex-direction: column;
@@ -529,40 +557,40 @@
             <!-- Header -->
             <div class="nl-reg-header">
                 <div class="nl-eyebrow-tag">
-                    <i class="ti ti-user-plus"></i> Organization Onboarding
+                    <i class="ti ti-user-plus"></i> Organization Onboarding &bull; FR1.2
                 </div>
                 <h1 class="nl-reg-heading">Create Your Enterprise Account</h1>
-                <p class="nl-reg-subheading">Choose your account type and fill in the verified registration credentials to get started.</p>
+                <p class="nl-reg-subheading">Select your profile below. All company accounts are verified and approved by the Super Admin before activation.</p>
             </div>
 
             <!-- Error Notification -->
             <c:if test="${not empty errorMessage}">
                 <div class="nl-reg-alert danger">
-                    <i class="ti ti-alert-circle fs-5" style="color: #DC2626;"></i>
+                    <i class="ti ti-alert-circle fs-5" style="color: #DC2626; flex-shrink: 0; margin-top: 1px;"></i>
                     <div>${errorMessage}</div>
                 </div>
             </c:if>
 
-            <!-- Account Type Selector Cards -->
+            <!-- Account Type Selector Cards (FR1.1) -->
             <div class="nl-type-grid">
-                <div class="nl-type-card active" onclick="switchAccountType('company', this)">
+                <div class="nl-type-card active" id="companyCard" onclick="switchAccountType('company')">
                     <div class="nl-type-icon company">
                         <i class="ti ti-building-warehouse"></i>
                     </div>
                     <div class="nl-type-info">
-                        <div class="nl-type-title">Company Account</div>
-                        <div class="nl-type-desc">For logistics companies, freight forwarders &amp; fleet operators</div>
+                        <div class="nl-type-title">Company Account (FR1.2)</div>
+                        <div class="nl-type-desc">For logistics operators, freight forwarders &amp; shipping lines</div>
                     </div>
                     <div class="nl-type-radio"></div>
                 </div>
 
-                <div class="nl-type-card" onclick="switchAccountType('customer', this)">
+                <div class="nl-type-card" id="customerCard" onclick="switchAccountType('customer')">
                     <div class="nl-type-icon customer">
                         <i class="ti ti-user-circle"></i>
                     </div>
                     <div class="nl-type-info">
-                        <div class="nl-type-title">Customer Account</div>
-                        <div class="nl-type-desc">For commercial shippers, consignees &amp; individual businesses</div>
+                        <div class="nl-type-title">Customer Account (FR1.3)</div>
+                        <div class="nl-type-desc">For cargo owners, commercial shippers &amp; consignees</div>
                     </div>
                     <div class="nl-type-radio"></div>
                 </div>
@@ -572,137 +600,109 @@
             <form action="<c:url value='/register'/>" method="POST" enctype="multipart/form-data" id="registerForm">
                 <input type="hidden" name="type" id="accountTypeInput" value="company">
 
-                <!-- Section Divider -->
-                <div class="nl-form-divider">
-                    <div class="nl-divider-line"></div>
-                    <div class="nl-divider-title" id="formDividerTitle">
-                        <i class="ti ti-building" style="color: #FC8019;"></i> Company Registration Details
+                <!-- SECTION 1: ORGANIZATION / PROFILE DETAILS -->
+                <div class="nl-section-header">
+                    <div class="nl-section-badge-icon orange" id="sec1Icon">
+                        <i class="ti ti-building"></i>
                     </div>
-                    <div class="nl-divider-line"></div>
+                    <div class="nl-section-title" id="sec1Title">Company Information (FR1.2)</div>
                 </div>
 
-                <!-- 3-Column Inputs Grid -->
                 <div class="nl-fields-grid">
-                    <!-- Name Field -->
+                    <!-- Company Name / Full Name -->
                     <div class="nl-field-box">
                         <label id="nameLabel" for="inputName">Company Name <span class="req">*</span></label>
                         <div class="nl-input-wrap">
-                            <i class="ti ti-building lead-icon"></i>
-                            <input type="text" id="inputName" name="companyName" class="nl-form-control" placeholder="Enter registered company name" required>
+                            <i class="ti ti-building lead-icon" id="nameLeadIcon"></i>
+                            <input type="text" id="inputName" name="companyName" class="nl-form-control" placeholder="e.g. Apex Global Logistics Ltd" required>
                         </div>
                     </div>
 
-                    <!-- Email Field -->
-                    <div class="nl-field-box">
-                        <label id="emailLabel" for="inputEmail">Company Email <span class="req">*</span></label>
+                    <!-- Trade License / Reg No (Company Only - FR1.2) -->
+                    <div class="nl-field-box company-field">
+                        <label for="inputLicense">License / Registration Number <span class="req">*</span></label>
                         <div class="nl-input-wrap">
-                            <i class="ti ti-mail lead-icon"></i>
-                            <input type="email" id="inputEmail" name="email" class="nl-form-control" placeholder="corporate@company.com" required>
+                            <i class="ti ti-license lead-icon"></i>
+                            <input type="text" id="inputLicense" name="licenseNo" class="nl-form-control" placeholder="e.g. REG-2026-MUM-8910" required>
                         </div>
                     </div>
 
-                    <!-- Username Field -->
-                    <div class="nl-field-box">
-                        <label for="inputUsername">Admin Username <span class="req">*</span></label>
-                        <div class="nl-input-wrap">
-                            <i class="ti ti-user lead-icon"></i>
-                            <input type="text" id="inputUsername" name="username" class="nl-form-control" placeholder="Choose admin username" required autocomplete="username">
-                        </div>
-                    </div>
-
-                    <!-- Contact Person -->
-                    <div class="nl-field-box">
-                        <label for="inputContact">Contact Person <span class="req">*</span></label>
-                        <div class="nl-input-wrap">
-                            <i class="ti ti-id lead-icon"></i>
-                            <input type="text" id="inputContact" name="contactPerson" class="nl-form-control" placeholder="Full name of representative" required>
-                        </div>
-                    </div>
-
-                    <!-- Phone Number -->
-                    <div class="nl-field-box">
-                        <label for="inputPhone">Phone Number <span class="req">*</span></label>
-                        <div class="nl-input-wrap">
-                            <i class="ti ti-phone lead-icon"></i>
-                            <input type="tel" id="inputPhone" name="phone" class="nl-form-control" placeholder="+1 (555) 000-0000" required>
-                        </div>
-                    </div>
-
-                    <!-- GST / Tax Number (Company Only) -->
-                    <div class="nl-field-box company-only">
-                        <label for="inputGst">GST / Tax Number <span class="req">*</span></label>
+                    <!-- GST / Tax ID (Company Only - FR1.2) -->
+                    <div class="nl-field-box company-field">
+                        <label for="inputGst">GST / Tax ID <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-receipt lead-icon"></i>
                             <input type="text" id="inputGst" name="gstNo" class="nl-form-control" placeholder="e.g. 27AAAAA0000A1Z5" required>
                         </div>
                     </div>
 
-                    <!-- License / Reg Number (Company Only) -->
-                    <div class="nl-field-box company-only">
-                        <label for="inputLicense">Trade License / Reg No <span class="req">*</span></label>
-                        <div class="nl-input-wrap">
-                            <i class="ti ti-license lead-icon"></i>
-                            <input type="text" id="inputLicense" name="licenseNo" class="nl-form-control" placeholder="Official Registration No." required>
-                        </div>
-                    </div>
-
-                    <!-- KYC Document Upload -->
-                    <div class="nl-field-box">
-                        <label for="inputKyc">KYC Document / Certificate <span class="req">*</span></label>
+                    <!-- KYC Document Upload (Customer Only - FR1.3) -->
+                    <div class="nl-field-box customer-field" style="display: none;">
+                        <label for="inputKyc">KYC Document Upload <span class="req">*</span></label>
                         <div class="nl-file-input-wrap">
                             <i class="ti ti-file-upload lead-icon" style="position: absolute; left: 14px;"></i>
-                            <input type="file" id="inputKyc" name="kycDoc" accept=".pdf,.jpg,.png" required onchange="handleKycFileName(this)">
-                            <span class="nl-file-label-text" id="kycFileNameText">Choose PDF, JPG, or PNG</span>
+                            <input type="file" id="inputKyc" name="kycDoc" accept=".pdf,.jpg,.png" onchange="handleKycFileName(this)">
+                            <span class="nl-file-label-text" id="kycFileNameText">Choose PDF, JPG, or PNG (ID / Certificate)</span>
                             <span class="nl-file-badge">Browse</span>
                         </div>
                     </div>
 
-                    <!-- Company Address -->
-                    <div class="nl-field-box">
-                        <label id="addressLabel" for="inputAddress">Company Address <span class="req">*</span></label>
+                    <!-- Registered Address (FR1.2 & FR1.3) -->
+                    <div class="nl-field-box" id="addressFieldBox">
+                        <label id="addressLabel" for="inputAddress">Registered Company Address <span class="req">*</span></label>
                         <div class="nl-input-wrap">
                             <i class="ti ti-map-pin lead-icon"></i>
-                            <input type="text" id="inputAddress" name="address" class="nl-form-control" placeholder="Street address, building, suite" required>
+                            <input type="text" id="inputAddress" name="address" class="nl-form-control" placeholder="Complete address (Street, City, State, Postal Code)" required>
                         </div>
                     </div>
+                </div>
 
-                    <!-- City -->
-                    <div class="nl-field-box">
-                        <label for="inputCity">City <span class="req">*</span></label>
+                <!-- SECTION 2: ADMIN CONTACT & CREDENTIALS (FR1.2) -->
+                <div class="nl-section-header" style="margin-top: 28px;">
+                    <div class="nl-section-badge-icon blue">
+                        <i class="ti ti-user-check"></i>
+                    </div>
+                    <div class="nl-section-title" id="sec2Title">Admin Contact &amp; Account Credentials (FR1.2)</div>
+                </div>
+
+                <div class="nl-fields-grid">
+                    <!-- Contact Person (Company Only) -->
+                    <div class="nl-field-box company-field">
+                        <label for="inputContact">Admin Contact Person <span class="req">*</span></label>
                         <div class="nl-input-wrap">
-                            <i class="ti ti-building-community lead-icon"></i>
-                            <input type="text" id="inputCity" name="city" class="nl-form-control" placeholder="Enter city" required>
+                            <i class="ti ti-id lead-icon"></i>
+                            <input type="text" id="inputContact" name="contactPerson" class="nl-form-control" placeholder="Full name of representative" required>
                         </div>
                     </div>
 
-                    <!-- State Dropdown -->
+                    <!-- Contact Email -->
                     <div class="nl-field-box">
-                        <label for="inputState">State / Province <span class="req">*</span></label>
+                        <label id="emailLabel" for="inputEmail">Admin Work Email <span class="req">*</span></label>
                         <div class="nl-input-wrap">
-                            <i class="ti ti-map lead-icon"></i>
-                            <select id="inputState" name="state" class="form-select form-select-custom no-custom-select nl-form-control" required style="padding-left: 44px !important;">
-                                <option value="" disabled selected>Select state / province</option>
-                                <option value="MH">Maharashtra</option>
-                                <option value="KA">Karnataka</option>
-                                <option value="DL">Delhi</option>
-                                <option value="TN">Tamil Nadu</option>
-                                <option value="GJ">Gujarat</option>
-                                <option value="WB">West Bengal</option>
-                                <option value="OTHER">Other / International</option>
-                            </select>
+                            <i class="ti ti-mail lead-icon"></i>
+                            <input type="email" id="inputEmail" name="email" class="nl-form-control" placeholder="admin@company.com" required>
                         </div>
                     </div>
 
-                    <!-- PIN / Postal Code -->
+                    <!-- Contact Phone -->
                     <div class="nl-field-box">
-                        <label for="inputPin">PIN / Postal Code <span class="req">*</span></label>
+                        <label for="inputPhone">Admin Contact Phone <span class="req">*</span></label>
                         <div class="nl-input-wrap">
-                            <i class="ti ti-hash lead-icon"></i>
-                            <input type="text" id="inputPin" name="pinCode" class="nl-form-control" placeholder="e.g. 400001" required>
+                            <i class="ti ti-phone lead-icon"></i>
+                            <input type="tel" id="inputPhone" name="phone" class="nl-form-control" placeholder="+91 98201 12345" required>
                         </div>
                     </div>
 
-                    <!-- Password -->
+                    <!-- Username -->
+                    <div class="nl-field-box">
+                        <label for="inputUsername">Admin Username <span class="req">*</span></label>
+                        <div class="nl-input-wrap">
+                            <i class="ti ti-user lead-icon"></i>
+                            <input type="text" id="inputUsername" name="username" class="nl-form-control" placeholder="Choose login username" required autocomplete="username">
+                        </div>
+                    </div>
+
+                    <!-- Create Password -->
                     <div class="nl-field-box">
                         <label for="inputPassword">Create Password <span class="req">*</span></label>
                         <div class="nl-input-wrap">
@@ -724,6 +724,14 @@
                                 <i class="ti ti-eye-off"></i>
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Super Admin Approval Requirement Notice (FR1.2) -->
+                <div class="nl-approval-notice" id="approvalNotice">
+                    <i class="ti ti-shield-alert"></i>
+                    <div>
+                        <strong>Super Admin Approval Invariant (FR1.2):</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.
                     </div>
                 </div>
 
@@ -769,56 +777,97 @@
             textSpan.style.color = '#0F172A';
             textSpan.style.fontWeight = '600';
         } else {
-            textSpan.textContent = 'Choose PDF, JPG, or PNG';
+            textSpan.textContent = 'Choose PDF, JPG, or PNG (ID / Certificate)';
             textSpan.style.color = '#64748B';
             textSpan.style.fontWeight = 'normal';
         }
     }
 
-    // Switch between Company Account and Customer Account
-    function switchAccountType(type, cardEl) {
-        document.querySelectorAll('.nl-type-card').forEach(c => c.classList.remove('active'));
-        if (cardEl) {
-            cardEl.classList.add('active');
-        }
-        document.getElementById('accountTypeInput').value = type;
-
-        const title = document.getElementById('formDividerTitle');
-        const submitText = document.getElementById('submitBtnText');
-        const companyOnlyFields = document.querySelectorAll('.company-only');
+    // Strict FR1.2 / FR1.3 Account Type Switcher
+    function switchAccountType(type) {
+        const compCard = document.getElementById('companyCard');
+        const custCard = document.getElementById('customerCard');
+        const accountTypeInput = document.getElementById('accountTypeInput');
+        const companyFields = document.querySelectorAll('.company-field');
+        const customerFields = document.querySelectorAll('.customer-field');
         const nameLabel = document.getElementById('nameLabel');
+        const nameLeadIcon = document.getElementById('nameLeadIcon');
+        const nameInput = document.getElementById('inputName');
         const emailLabel = document.getElementById('emailLabel');
         const addressLabel = document.getElementById('addressLabel');
-        const nameInput = document.getElementById('inputName');
+        const sec1Title = document.getElementById('sec1Title');
+        const sec1Icon = document.getElementById('sec1Icon');
+        const sec2Title = document.getElementById('sec2Title');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const approvalNotice = document.getElementById('approvalNotice');
+        const kycInput = document.getElementById('inputKyc');
 
         if (type === 'company') {
-            title.innerHTML = '<i class="ti ti-building" style="color: #FC8019;"></i> Company Registration Details';
-            submitText.textContent = 'Register Company';
+            compCard.classList.add('active');
+            custCard.classList.remove('active');
+            accountTypeInput.value = 'company';
 
-            companyOnlyFields.forEach(el => {
-                el.style.display = 'flex';
-                const inp = el.querySelector('input');
+            // Show company-only fields (license, gst, contact person) and require them
+            companyFields.forEach(f => {
+                f.style.display = 'flex';
+                const inp = f.querySelector('input');
                 if (inp) inp.required = true;
             });
 
-            nameLabel.innerHTML = 'Company Name <span class="req">*</span>';
-            emailLabel.innerHTML = 'Company Email <span class="req">*</span>';
-            addressLabel.innerHTML = 'Company Address <span class="req">*</span>';
-            nameInput.placeholder = 'Enter registered company name';
-        } else {
-            title.innerHTML = '<i class="ti ti-user" style="color: #2563EB;"></i> Customer Profile Details';
-            submitText.textContent = 'Register Customer';
+            // Hide customer-only fields (kyc upload)
+            customerFields.forEach(f => {
+                f.style.display = 'none';
+            });
+            if (kycInput) kycInput.required = false;
 
-            companyOnlyFields.forEach(el => {
-                el.style.display = 'none';
-                const inp = el.querySelector('input');
+            nameLabel.innerHTML = 'Company Name <span class="req">*</span>';
+            nameLeadIcon.className = 'ti ti-building lead-icon';
+            nameInput.placeholder = 'e.g. Apex Global Logistics Ltd';
+            emailLabel.innerHTML = 'Admin Work Email <span class="req">*</span>';
+            addressLabel.innerHTML = 'Registered Company Address <span class="req">*</span>';
+
+            sec1Title.textContent = 'Company Information (FR1.2)';
+            sec1Icon.className = 'nl-section-badge-icon orange';
+            sec1Icon.innerHTML = '<i class="ti ti-building"></i>';
+            sec2Title.textContent = 'Admin Contact & Account Credentials (FR1.2)';
+            submitBtnText.textContent = 'Register Company';
+
+            // Show Super Admin Approval Notice
+            approvalNotice.style.display = 'flex';
+            approvalNotice.innerHTML = '<i class="ti ti-shield-alert"></i><div><strong>Super Admin Approval Invariant (FR1.2):</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.</div>';
+        } else {
+            custCard.classList.add('active');
+            compCard.classList.remove('active');
+            accountTypeInput.value = 'customer';
+
+            // Hide company-only fields (license, gst, contact person)
+            companyFields.forEach(f => {
+                f.style.display = 'none';
+                const inp = f.querySelector('input');
                 if (inp) inp.required = false;
             });
 
+            // Show customer-only fields (kyc upload) and require them
+            customerFields.forEach(f => {
+                f.style.display = 'flex';
+            });
+            if (kycInput) kycInput.required = true;
+
             nameLabel.innerHTML = 'Full Legal Name <span class="req">*</span>';
+            nameLeadIcon.className = 'ti ti-user lead-icon';
+            nameInput.placeholder = 'e.g. Rahul Sharma';
             emailLabel.innerHTML = 'Personal / Work Email <span class="req">*</span>';
-            addressLabel.innerHTML = 'Billing / Residential Address <span class="req">*</span>';
-            nameInput.placeholder = 'Enter full legal name';
+            addressLabel.innerHTML = 'Residential / Delivery Address <span class="req">*</span>';
+
+            sec1Title.textContent = 'Customer Profile & KYC (FR1.3)';
+            sec1Icon.className = 'nl-section-badge-icon blue';
+            sec1Icon.innerHTML = '<i class="ti ti-user-circle"></i>';
+            sec2Title.textContent = 'Login Credentials (FR1.3)';
+            submitBtnText.textContent = 'Register Customer';
+
+            // Update notice for customer
+            approvalNotice.style.display = 'flex';
+            approvalNotice.innerHTML = '<i class="ti ti-info-circle" style="color: #2563EB;"></i><div style="color: #1E40AF;"><strong>Customer Verification (FR1.3):</strong> KYC documents uploaded will be verified by the compliance department before your customer portal access is activated.</div>';
         }
     }
 </script>
