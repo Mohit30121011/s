@@ -266,10 +266,7 @@
         <div class="kpi-card" onclick="filterByTab('Suspended')" style="cursor: pointer;" title="Click to view Suspended &amp; Rejected Companies">
             <div>
                 <div class="kpi-label">Suspended / Rejected</div>
-                <div style="display: flex; align-items: baseline; gap: 8px;">
-                    <div class="kpi-value" style="color: #DC2626;">${not empty suspendedCount ? suspendedCount : 0}</div>
-                    <span style="font-size: 11px; font-weight: 700; color: #DC2626; background: #FEF2F2; border: 1px solid #FECACA; padding: 2px 8px; border-radius: 50px;">View Table &rarr;</span>
-                </div>
+                <div class="kpi-value" style="color: #DC2626;">${not empty suspendedCount ? suspendedCount : 0}</div>
             </div>
             <div class="kpi-icon-pill red">
                 <i class="ti ti-ban"></i>
