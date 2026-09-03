@@ -537,8 +537,15 @@
         border: 1px solid #E2E8F0;
         border-radius: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-        overflow: hidden;
+        overflow: visible;
         transition: all 0.3s ease;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+    .staff-table-card .table-responsive {
+        overflow: visible !important;
+        flex: 1;
     }
 
     /* Table Styling */
@@ -2123,25 +2130,54 @@
         document.getElementById('drawerTabAudit').style.display = (tab === 'audit') ? 'block' : 'none';
     }
 
-    // 3-Dots Action Dropdown Toggle
+    // 3-Dots Action Dropdown Toggle with Viewport Floating Positioning (Zero Clipping)
     function toggleActionDropdown(userId, event) {
-        event.stopPropagation();
-        const allDropdowns = document.querySelectorAll('.action-dropdown-card');
-        allDropdowns.forEach(d => {
-            if (d.id !== 'actionDropdown_' + userId) d.classList.remove('show');
-        });
-
+        if (event) event.stopPropagation();
         const target = document.getElementById('actionDropdown_' + userId);
-        if (target) {
-            target.classList.toggle('show');
+        const triggerBtn = event ? (event.currentTarget || event.target.closest('.btn-action-trigger')) : null;
+        if (!target) return;
+
+        const isShown = target.classList.contains('show');
+        closeAllActionDropdowns();
+
+        if (!isShown) {
+            target.classList.add('show');
+            if (triggerBtn) {
+                const rect = triggerBtn.getBoundingClientRect();
+                const dropdownWidth = 185;
+                let left = rect.right - dropdownWidth;
+                let top = rect.bottom + 6;
+
+                // Flip upwards if clipping viewport bottom
+                const dropdownHeight = 220;
+                if (top + dropdownHeight > window.innerHeight) {
+                    top = rect.top - dropdownHeight - 6;
+                }
+
+                target.style.position = 'fixed';
+                target.style.top = top + 'px';
+                target.style.left = left + 'px';
+                target.style.zIndex = '9999999';
+            }
         }
     }
 
+    function closeAllActionDropdowns() {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => {
+            d.classList.remove('show');
+            d.style.position = '';
+            d.style.top = '';
+            d.style.left = '';
+        });
+    }
+
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('.action-menu-wrap')) {
-            document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        if (!e.target.closest('.action-menu-wrap') && !e.target.closest('.action-dropdown-card')) {
+            closeAllActionDropdowns();
         }
     });
+    window.addEventListener('scroll', closeAllActionDropdowns, true);
+    window.addEventListener('resize', closeAllActionDropdowns);
 
     function openEditPermissions(userId) {
         document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
