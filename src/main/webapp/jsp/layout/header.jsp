@@ -8,6 +8,7 @@
     <title>N Logistic</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Inter -->
@@ -451,15 +452,15 @@
         <div class="nav-section">
             <div class="nav-item">
                 <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">
-                    <i class="fa-solid fa-house main-icon"></i> Dashboard
+                    <i class="ti ti-smart-home main-icon"></i> Dashboard
                 </a>
             </div>
             
             <c:if test="${sessionScope.user.roleId == 1}">
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="approvalsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-check-to-slot main-icon"></i> Approvals
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-clipboard-check main-icon"></i> Approvals
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/admin/companies">Company</a></li>
@@ -470,8 +471,8 @@
             
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="shipmentsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-truck-fast main-icon"></i> Shipments
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-truck main-icon"></i> Shipments
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="shipmentsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/shipments">All Shipments</a></li>
@@ -482,8 +483,8 @@
             
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="containersSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-box main-icon"></i> Containers
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-box main-icon"></i> Containers
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="containersSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/containers">All Containers</a></li>
@@ -492,8 +493,8 @@
             
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="vesselsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-ship main-icon"></i> Vessels
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-ship main-icon"></i> Vessels
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="vesselsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/vessels">All Vessels</a></li>
@@ -502,26 +503,26 @@
             
             <div class="nav-item">
                 <a href="${pageContext.request.contextPath}/customers" class="nav-link">
-                        <i class="fa-solid fa-user-group main-icon"></i> Customers
+                        <i class="ti ti-users main-icon"></i> Customers
                     </a>
             </div>
             
             <div class="nav-item">
                 <a href="${pageContext.request.contextPath}/ports" class="nav-link">
-                    <i class="fa-solid fa-anchor main-icon"></i> Ports
+                    <i class="ti ti-anchor main-icon"></i> Ports
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-location-dot main-icon"></i> Tracking
+                    <i class="ti ti-map-pin main-icon"></i> Tracking
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="complianceSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-shield-check main-icon"></i> Compliance & Billing
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-shield-check main-icon"></i> Compliance & Billing
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="complianceSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/compliance">Government Compliance</a></li>
@@ -531,15 +532,15 @@
             
             <div class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-shield-halved main-icon"></i> Claims Management
+                    <i class="ti ti-shield main-icon"></i> Claims Management
                 </a>
             </div>
 
             <!-- STOCK & INVENTORY MODULE -->
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="stockSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-boxes-stacked main-icon"></i> Stock & Inventory
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-packages main-icon"></i> Stock & Inventory
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="stockSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/upload-stock">Upload / Manage Stock</a></li>
@@ -552,8 +553,8 @@
             <!-- TRACKING & SCANNING MODULE (FR8) -->
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="barcodeSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
-                    <i class="fa-solid fa-qrcode main-icon"></i> Tracking & Scanning
-                    <i class="fa-solid fa-angle-down caret"></i>
+                    <i class="ti ti-barcode main-icon"></i> Tracking & Scanning
+                    <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="barcodeSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/barcodes">Manage Barcodes (FR8)</a></li>
@@ -563,26 +564,26 @@
 
             <div class="nav-item">
                 <a href="${pageContext.request.contextPath}/analytics" class="nav-link ${pageContext.request.requestURI.contains('/analytics') ? 'active' : ''}">
-                    <i class="fa-solid fa-chart-pie main-icon"></i> Analytics
+                    <i class="ti ti-chart-pie main-icon"></i> Analytics
                 </a>
             </div>
 
             <div class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fa-regular fa-bell main-icon"></i> Alerts <span style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; margin-left: 8px;">12</span>
+                    <i class="ti ti-bell main-icon"></i> Alerts <span style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; margin-left: 8px;">12</span>
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-gear main-icon"></i> Settings
+                    <i class="ti ti-settings main-icon"></i> Settings
                 </a>
             </div>
         </div>
 
         <div class="help-card">
             <div class="help-header">
-                <div class="icon"><i class="fa-solid fa-headset"></i></div>
+                <div class="icon"><i class="ti ti-headset"></i></div>
                 <h6>Need Help?</h6>
             </div>
             <p>Our support team is available 24/7</p>
