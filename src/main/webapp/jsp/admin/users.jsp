@@ -198,11 +198,19 @@
     }
 
     /* Global Dropdown TomSelect Integration in Toolbar */
-    .staff-toolbar .ts-wrapper {
+    .staff-toolbar .ts-wrapper,
+    .staff-toolbar .ts-wrapper.form-select-custom,
+    .staff-toolbar .ts-wrapper.form-control {
         width: auto !important;
         min-width: 165px !important;
         max-width: 220px !important;
         flex-shrink: 0 !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        min-height: auto !important;
     }
     .staff-toolbar .ts-wrapper.single .ts-control {
         border-radius: 50px !important;

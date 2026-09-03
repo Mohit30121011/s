@@ -1528,8 +1528,19 @@
             display: none !important;
         }
 
-        .ts-wrapper {
+        .ts-wrapper,
+        .ts-wrapper.form-control,
+        .ts-wrapper.form-select,
+        .ts-wrapper.form-control-custom,
+        .ts-wrapper.form-select-custom,
+        .ts-wrapper.nl-form-control {
             width: 100% !important;
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
+            background-image: none !important;
+            box-shadow: none !important;
+            min-height: auto !important;
         }
 
         .ts-control {
