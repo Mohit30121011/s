@@ -1247,6 +1247,18 @@
             right: 14px !important;
         }
 
+        /* Remove default number input spinner toggle buttons across all browsers */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+            appearance: textfield !important;
+        }
+
+
     </style>
 </head>
 <body>

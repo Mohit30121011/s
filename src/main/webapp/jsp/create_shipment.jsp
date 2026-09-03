@@ -2,6 +2,20 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
+<style>
+    /* Hide up/down arrows (number spinners) on number inputs */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield !important;
+        appearance: textfield !important;
+    }
+</style>
+
+
 <div class="page-title">
     <h2>Create New Shipment</h2>
     <div class="custom-breadcrumb d-flex align-items-center">
