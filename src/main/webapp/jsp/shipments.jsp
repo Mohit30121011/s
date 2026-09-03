@@ -163,7 +163,7 @@
 
     /* Premium Modern Confirmation Modal */
     .modal-dialog-confirm {
-        max-width: 440px;
+        max-width: 480px;
         margin: 1.75rem auto;
     }
     .modal-content-confirm {
@@ -171,56 +171,68 @@
         border: 1px solid #E7E9ED;
         border-radius: 16px;
         box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.18), 0 8px 20px -6px rgba(15, 23, 42, 0.08);
-        padding: 24px 24px 20px 24px;
+        padding: 24px 28px;
         border: none;
         overflow: hidden;
     }
     .confirm-modal-header {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         margin-bottom: 16px;
     }
     .confirm-icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
         background: #FEE2E2;
         color: #DC2626;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
+        font-size: 20px;
         flex-shrink: 0;
     }
     .confirm-title {
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 700;
         color: #111827;
-        margin-bottom: 6px;
+        margin: 0 0 2px 0;
         letter-spacing: -0.2px;
+    }
+    .confirm-subtitle {
+        font-size: 12px;
+        color: #EF4444;
+        font-weight: 600;
     }
     .confirm-text {
         font-size: 13.5px;
-        color: #64748B;
+        color: #475569;
         line-height: 1.55;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
+        background: #F8FAFC;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
     }
     .confirm-btn-row {
         display: flex;
         gap: 12px;
-        margin-top: 8px;
     }
     .btn-modal-cancel {
         flex: 1;
-        padding: 10px 18px;
+        height: 42px;
         border-radius: 10px;
         border: 1px solid #E2E8F0;
         background: #FFFFFF;
         color: #475569;
-        font-size: 14px;
+        font-size: 13.5px;
         font-weight: 600;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap !important;
         transition: all 0.15s ease;
     }
     .btn-modal-cancel:hover {
@@ -230,18 +242,19 @@
     }
     .btn-modal-danger {
         flex: 1;
-        padding: 10px 18px;
+        height: 42px;
         border-radius: 10px;
         border: 1px solid #DC2626;
         background: #DC2626;
         color: #FFFFFF !important;
-        font-size: 14px;
+        font-size: 13.5px;
         font-weight: 600;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
+        white-space: nowrap !important;
         box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
         transition: all 0.15s ease;
     }
@@ -377,12 +390,17 @@
                                     <input type="hidden" name="id" value="${s.shipmentId}">
                                     <input type="hidden" name="shipmentId" value="${s.shipmentId}">
                                     <div class="confirm-modal-header">
-                                        <div class="confirm-icon-box">
-                                            <i class="ti ti-trash"></i>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="confirm-icon-box">
+                                                <i class="ti ti-trash"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="confirm-title">Delete Shipment #${s.shipmentId}?</h5>
+                                                <span class="confirm-subtitle">Permanent action &bull; Cannot be undone</span>
+                                            </div>
                                         </div>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <div class="confirm-title">Delete Shipment #${s.shipmentId}?</div>
                                     <div class="confirm-text">
                                         Are you sure you want to permanently delete shipment <strong>#${s.shipmentId}</strong> for <strong>${s.customerName}</strong>? This action cannot be undone and will erase all tracking records.
                                     </div>
