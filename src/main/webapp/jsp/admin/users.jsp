@@ -214,19 +214,30 @@
     }
 
     .filter-dropdown-pill {
-        height: 42px;
-        padding: 0 16px;
+        height: 42px !important;
+        padding: 0 36px 0 18px !important;
         border-radius: 50px !important;
         border: 1.5px solid #E2E8F0 !important;
         background-color: #FFFFFF !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 14px center !important;
+        background-size: 11px 9px !important;
         font-size: 13px !important;
         font-weight: 600 !important;
         color: #334155 !important;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        outline: none;
-        transition: all 0.15s ease;
+        cursor: pointer !important;
+        outline: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        white-space: nowrap !important;
+        width: auto !important;
+        min-width: 140px !important;
+        max-width: 230px !important;
+        display: inline-block !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
     }
     .filter-dropdown-pill:focus {
         border-color: #FC8019 !important;
@@ -848,7 +859,7 @@
                 <input type="text" id="staffSearchInput" class="staff-search-input" placeholder="Search staff by name, email, employee ID..." oninput="handleStaffFilter()">
                 <i class="ti ti-search"></i>
             </div>
-            <select id="roleFilter" class="filter-dropdown-pill" onchange="handleStaffFilter()">
+            <select id="roleFilter" class="filter-dropdown-pill no-custom-select" onchange="handleStaffFilter()">
                 <option value="ALL">Role: All Roles</option>
                 <option value="1">Super Admin</option>
                 <option value="2">Company Admin</option>
@@ -856,7 +867,7 @@
                 <option value="4">Staff — Finance</option>
                 <option value="5">Customer / Shipper</option>
             </select>
-            <select id="departmentFilter" class="filter-dropdown-pill" onchange="handleStaffFilter()">
+            <select id="departmentFilter" class="filter-dropdown-pill no-custom-select" onchange="handleStaffFilter()">
                 <option value="ALL">Department: All Departments</option>
                 <option value="Administration">Administration</option>
                 <option value="Fleet Operations">Fleet Operations</option>
@@ -1319,7 +1330,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
                 <div>
                     <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Role Assignment</label>
-                    <select name="inviteRoleId" class="form-control" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
+                    <select name="inviteRoleId" class="form-control no-custom-select" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
                         <option value="3">Staff — Operations</option>
                         <option value="4">Staff — Finance</option>
                         <option value="2">Company Admin</option>
@@ -1329,7 +1340,7 @@
                 </div>
                 <div>
                     <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Department</label>
-                    <select name="inviteDept" class="form-control" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
+                    <select name="inviteDept" class="form-control no-custom-select" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
                         <option value="Fleet Operations">Fleet Operations</option>
                         <option value="Invoicing & Billing">Invoicing &amp; Billing</option>
                         <option value="Administration">Administration</option>
