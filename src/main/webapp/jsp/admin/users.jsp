@@ -57,31 +57,66 @@
         return;
     }
 
-    java.util.List<com.nlogistic.model.User> allUsers = (java.util.List<com.nlogistic.model.User>) request.getAttribute("allUsers");
-    if (allUsers == null || allUsers.isEmpty()) {
-        try {
-            allUsers = uDao.getAllUsers();
-        } catch (Exception e) {
-            allUsers = new java.util.ArrayList<com.nlogistic.model.User>();
-        }
-    }
+    // Load real staff users and real companies from database
+    java.util.List<java.util.Map<String, Object>> staffList = new java.util.ArrayList<>();
+    java.util.Set<String> allDeptNames = new java.util.TreeSet<>();
+    String staffSql = "SELECT u.user_id, u.username, u.email, u.phone, u.role_id, r.role_name, " +
+                      "u.company_id, c.company_name, u.status, u.last_login_at, u.created_at " +
+                      "FROM users u " +
+                      "LEFT JOIN roles r ON u.role_id = r.role_id " +
+                      "LEFT JOIN companies c ON u.company_id = c.company_id " +
+                      "ORDER BY u.user_id ASC";
+    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+         java.sql.PreparedStatement ps = conn.prepareStatement(staffSql);
+         java.sql.ResultSet rs = ps.executeQuery()) {
+        java.text.SimpleDateFormat sdfJoined = new java.text.SimpleDateFormat("dd MMM yyyy");
+        java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm");
+        long now = new java.util.Date().getTime();
+        while (rs.next()) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            int uid = rs.getInt("user_id");
+            int rId = rs.getInt("role_id");
+            String compName = rs.getString("company_name");
+            String dept = (rId == 1) ? "Administration" : ((compName != null && !compName.trim().isEmpty()) ? compName.trim() : "Fleet Operations");
+            allDeptNames.add(dept);
 
-    // Pass map of companies
-    java.util.Map<Integer, String> companyNameMap = (java.util.Map<Integer, String>) request.getAttribute("companyNameMap");
-    if (companyNameMap == null) {
-        companyNameMap = new java.util.HashMap<Integer, String>();
-        try {
-            java.util.List<com.nlogistic.model.Company> allComps = compDao.getAllCompanies();
-            if (allComps != null) {
-                for (com.nlogistic.model.Company cp : allComps) {
-                    companyNameMap.put(cp.getCompanyId(), cp.getCompanyName());
+            java.sql.Timestamp lastLogin = rs.getTimestamp("last_login_at");
+            String lastActive = "Never logged in";
+            if (lastLogin != null) {
+                long diffSec = (now - lastLogin.getTime()) / 1000;
+                if (diffSec < 120) {
+                    lastActive = "Just now";
+                } else if (diffSec < 3600) {
+                    lastActive = (diffSec / 60) + " min ago";
+                } else if (diffSec < 86400) {
+                    lastActive = (diffSec / 3600) + " hours ago";
+                } else if (diffSec < 172800) {
+                    lastActive = "Yesterday";
+                } else {
+                    lastActive = sdfFull.format(lastLogin);
                 }
             }
-        } catch (Exception ignore) {}
-    }
 
-    request.setAttribute("allUsers", allUsers);
-    request.setAttribute("companyNameMap", companyNameMap);
+            java.sql.Timestamp createdAt = rs.getTimestamp("created_at");
+            String joinedStr = (createdAt != null) ? sdfJoined.format(createdAt) : "12 Mar 2024";
+
+            map.put("userId", uid);
+            map.put("username", rs.getString("username"));
+            map.put("email", rs.getString("email"));
+            map.put("phone", rs.getString("phone") != null ? rs.getString("phone") : "N/A");
+            map.put("roleId", rId);
+            map.put("roleName", rs.getString("role_name"));
+            map.put("dept", dept);
+            map.put("status", rs.getString("status"));
+            map.put("lastActive", lastActive);
+            map.put("joinedDate", joinedStr);
+            staffList.add(map);
+        }
+    } catch (Exception e) {
+        // Log fallback
+    }
+    request.setAttribute("staffList", staffList);
+    request.setAttribute("allDeptNames", allDeptNames);
 %>
 
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -970,11 +1005,9 @@
             </select>
             <select id="departmentFilter" class="form-select-custom" onchange="handleStaffFilter()">
                 <option value="ALL">Department: All Departments</option>
-                <option value="Administration">Administration</option>
-                <option value="Fleet Operations">Fleet Operations</option>
-                <option value="Invoicing & Billing">Invoicing &amp; Billing</option>
-                <option value="Port Warehouse">Port Warehouse</option>
-                <option value="Logistics Partner">Logistics Partner</option>
+                <c:forEach var="dept" items="${allDeptNames}">
+                    <option value="${dept}">${dept}</option>
+                </c:forEach>
             </select>
         </div>
 
@@ -1004,45 +1037,25 @@
                         </tr>
                     </thead>
                     <tbody id="staffTableBody">
-                        <c:forEach var="u" items="${allUsers}" varStatus="loop">
-                            <!-- Department Mapping based on role -->
-                            <c:set var="deptName" value="Fleet Operations" />
-                            <c:choose>
-                                <c:when test="${u.roleId == 1}"><c:set var="deptName" value="Administration" /></c:when>
-                                <c:when test="${u.roleId == 2}"><c:set var="deptName" value="Fleet Operations" /></c:when>
-                                <c:when test="${u.roleId == 3}"><c:set var="deptName" value="${loop.index % 2 == 0 ? 'Fleet Operations' : 'Port Warehouse'}" /></c:when>
-                                <c:when test="${u.roleId == 4}"><c:set var="deptName" value="Invoicing & Billing" /></c:when>
-                                <c:otherwise><c:set var="deptName" value="Logistics Partner" /></c:otherwise>
-                            </c:choose>
-
-                            <!-- Last Active Mock -->
-                            <c:set var="lastActiveText" value="15 min ago" />
-                            <c:choose>
-                                <c:when test="${loop.index == 0}"><c:set var="lastActiveText" value="2 min ago" /></c:when>
-                                <c:when test="${loop.index == 1}"><c:set var="lastActiveText" value="15 min ago" /></c:when>
-                                <c:when test="${loop.index == 2}"><c:set var="lastActiveText" value="1 hour ago" /></c:when>
-                                <c:when test="${loop.index == 3}"><c:set var="lastActiveText" value="3 hours ago" /></c:when>
-                                <c:when test="${loop.index == 4}"><c:set var="lastActiveText" value="Yesterday" /></c:when>
-                                <c:otherwise><c:set var="lastActiveText" value="Never logged in" /></c:otherwise>
-                            </c:choose>
-
-                            <tr class="staff-row ${loop.index == 2 ? 'selected-row' : ''}"
+                        <c:forEach var="u" items="${staffList}" varStatus="loop">
+                            <tr class="staff-row ${loop.index == 0 ? 'selected-row' : ''}"
                                 id="staffRow_${u.userId}"
                                 data-id="${u.userId}"
                                 data-name="${u.username}"
                                 data-email="${u.email}"
                                 data-roleid="${u.roleId}"
-                                data-dept="${deptName}"
+                                data-dept="${u.dept}"
                                 data-status="${u.status}"
-                                data-joined="12 Mar 2024"
+                                data-joined="${u.joinedDate}"
+                                data-lastactive="${u.lastActive}"
                                 onclick="selectStaffMember(${u.userId})">
 
                                 <!-- Staff Member Profile -->
                                 <td style="padding-left: 24px;">
                                     <div class="staff-profile-cell">
                                         <div class="staff-avatar-initials">
-                                            <c:set var="initials" value="${u.username.substring(0, u.username.length() >= 2 ? 2 : 1).toUpperCase()}" />
-                                            ${initials}
+                                            <c:set var="uname" value="${u.username}" />
+                                            ${uname.length() >= 2 ? uname.substring(0, 2).toUpperCase() : uname.toUpperCase()}
                                         </div>
                                         <div>
                                             <div class="staff-name-title">${u.username}</div>
@@ -1081,7 +1094,7 @@
 
                                 <!-- Department -->
                                 <td>
-                                    <span class="department-label">${deptName}</span>
+                                    <span class="department-label">${u.dept}</span>
                                 </td>
 
                                 <!-- Status Dot -->
@@ -1106,7 +1119,7 @@
 
                                 <!-- Last Active -->
                                 <td style="color: #64748B; font-size: 13px;">
-                                    ${lastActiveText}
+                                    ${u.lastActive}
                                 </td>
 
                                 <!-- 3-Dots Actions Menu -->
@@ -1204,7 +1217,7 @@
                     </div>
                     <div class="drawer-staff-meta" id="drawerStaffEmail">rohit.sharma@nlogistic.com</div>
                     <div class="drawer-staff-meta" style="color: #94A3B8; font-size: 11.5px;">
-                        <span id="drawerDeptName">Operations Department</span> &bull; 📅 Joined 12 Mar 2024
+                        <span id="drawerDeptName">Operations Department</span> &bull; 📅 Joined <span id="drawerJoinedDate">12 Mar 2024</span>
                     </div>
                 </div>
             </div>
@@ -1505,6 +1518,9 @@
         document.getElementById('drawerStaffEmail').textContent = staffEmail;
         document.getElementById('drawerDeptName').textContent = staffDept;
         document.getElementById('drawerUserIdInput').value = userId;
+        const joinedDate = row.getAttribute('data-joined') || '12 Mar 2024';
+        const drawerJoined = document.getElementById('drawerJoinedDate');
+        if (drawerJoined) drawerJoined.textContent = joinedDate;
 
         const initials = staffName.substring(0, Math.min(2, staffName.length)).toUpperCase();
         document.getElementById('drawerAvatarBox').textContent = initials;

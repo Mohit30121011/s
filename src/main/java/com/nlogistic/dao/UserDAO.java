@@ -301,7 +301,7 @@ public class UserDAO {
 
     public java.util.List<com.nlogistic.model.User> getAllUsers() {
         java.util.List<com.nlogistic.model.User> list = new java.util.ArrayList<>();
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users ORDER BY user_id ASC";
         try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {
@@ -310,8 +310,13 @@ public class UserDAO {
                 u.setUserId(rs.getInt("user_id"));
                 u.setUsername(rs.getString("username"));
                 u.setEmail(rs.getString("email"));
+                u.setPhone(rs.getString("phone"));
                 u.setRoleId(rs.getInt("role_id"));
+                u.setCompanyId(rs.getInt("company_id"));
                 u.setStatus(rs.getString("status"));
+                u.setLastLoginAt(rs.getTimestamp("last_login_at"));
+                u.setCreatedAt(rs.getTimestamp("created_at"));
+                u.setUpdatedAt(rs.getTimestamp("updated_at"));
                 list.add(u);
             }
         } catch (Exception e) { e.printStackTrace(); }
