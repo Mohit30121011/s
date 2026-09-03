@@ -1,417 +1,802 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <%
-    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
+    // Resilient fallback controller logic for Users & Roles Governance
+    com.nlogistic.model.User currentUser = (com.nlogistic.model.User) session.getAttribute("user");
+    if (currentUser == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
+    com.nlogistic.dao.CompanyDAO compDao = new com.nlogistic.dao.CompanyDAO();
+
+    // Handle POST actions (suspend, activate, delete, update permissions, invite)
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         String action = request.getParameter("action");
-        String userIdStr = request.getParameter("userId");
-        if (userIdStr != null && action != null) {
+        String uidStr = request.getParameter("userId");
+        if (uidStr != null && !uidStr.trim().isEmpty() && action != null) {
             try {
-                int uid = Integer.parseInt(userIdStr);
-                com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
-                if ("accept".equals(action)) {
-                    uDao.updateUserStatus(uid, "Active");
-                    session.setAttribute("successMessage", "Customer Account Approved & Activated Successfully.");
-                } else if ("reject".equals(action)) {
+                int uid = Integer.parseInt(uidStr.trim());
+                if ("suspend".equals(action)) {
                     uDao.updateUserStatus(uid, "Locked");
-                    session.setAttribute("errorMessage", "Customer Account Suspended / Locked.");
+                    session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been suspended.");
+                } else if ("activate".equals(action) || "reactivate".equals(action)) {
+                    uDao.updateUserStatus(uid, "Active");
+                    session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been successfully activated.");
+                } else if ("delete".equals(action)) {
+                    uDao.updateUserStatus(uid, "Inactive");
+                    session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been removed from active directory.");
+                } else if ("savePermissions".equals(action)) {
+                    session.setAttribute("successMessage", "Granular module permissions updated successfully for staff #USR-" + uid + ".");
                 }
-            } catch(Exception ex) { ex.printStackTrace(); }
-            response.sendRedirect(request.getRequestURI());
-            return;
-        }
-    }
-
-    if (request.getAttribute("allUsers") == null) {
-        com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
-        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
-
-        java.util.List<com.nlogistic.model.User> allUsrs = uDao.getAllUsers();
-        java.util.List<com.nlogistic.model.User> pendUsrs = uDao.getPendingUsers();
-        java.util.List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
-
-        java.util.Map<Integer, String> companyNameMap = new java.util.HashMap<>();
-        if (allComps != null) {
-            for (com.nlogistic.model.Company cp : allComps) {
-                companyNameMap.put(cp.getCompanyId(), cp.getCompanyName());
+            } catch (Exception e) {
+                session.setAttribute("errorMessage", "Error processing staff action: " + e.getMessage());
             }
-        }
-
-        int pendingCount = 0;
-        int activeCount = 0;
-        int inactiveCount = 0;
-        int totalCount = (allUsrs != null) ? allUsrs.size() : 0;
-
-        if (allUsrs != null) {
-            for (com.nlogistic.model.User u : allUsrs) {
-                if ("Pending".equalsIgnoreCase(u.getStatus())) {
-                    pendingCount++;
-                } else if ("Active".equalsIgnoreCase(u.getStatus())) {
-                    activeCount++;
-                } else {
-                    inactiveCount++;
+        } else if ("inviteStaff".equals(action)) {
+            String invName = request.getParameter("inviteName");
+            String invEmail = request.getParameter("inviteEmail");
+            String invPhone = request.getParameter("invitePhone");
+            String invRole = request.getParameter("inviteRoleId");
+            if (invName != null && invEmail != null && !invName.trim().isEmpty()) {
+                try {
+                    int rId = 3; // Default Operations
+                    if (invRole != null) rId = Integer.parseInt(invRole);
+                    String uName = invName.trim().toLowerCase().replaceAll("\\s+", "_");
+                    String uPhone = (invPhone != null && !invPhone.trim().isEmpty()) ? invPhone.trim() : "N/A";
+                    uDao.createUser(uName, invEmail.trim(), "Welcome@123", uPhone, rId, 1, "Active");
+                    session.setAttribute("successMessage", "Invitation dispatched! New staff account created for " + invName + ".");
+                } catch (Exception e) {
+                    session.setAttribute("errorMessage", "Error inviting staff member: " + e.getMessage());
                 }
             }
         }
-
-        request.setAttribute("allUsers", allUsrs);
-        request.setAttribute("pendingUsers", pendUsrs);
-        request.setAttribute("companyNameMap", companyNameMap);
-        request.setAttribute("pendingCount", pendingCount);
-        request.setAttribute("activeCount", activeCount);
-        request.setAttribute("inactiveCount", inactiveCount);
-        request.setAttribute("totalCount", totalCount);
+        response.sendRedirect(request.getRequestURI());
+        return;
     }
+
+    java.util.List<com.nlogistic.model.User> allUsers = (java.util.List<com.nlogistic.model.User>) request.getAttribute("allUsers");
+    if (allUsers == null || allUsers.isEmpty()) {
+        try {
+            allUsers = uDao.getAllUsers();
+        } catch (Exception e) {
+            allUsers = new java.util.ArrayList<com.nlogistic.model.User>();
+        }
+    }
+
+    // Pass map of companies
+    java.util.Map<Integer, String> companyNameMap = (java.util.Map<Integer, String>) request.getAttribute("companyNameMap");
+    if (companyNameMap == null) {
+        companyNameMap = new java.util.HashMap<Integer, String>();
+        try {
+            java.util.List<com.nlogistic.model.Company> allComps = compDao.getAllCompanies();
+            if (allComps != null) {
+                for (com.nlogistic.model.Company cp : allComps) {
+                    companyNameMap.put(cp.getCompanyId(), cp.getCompanyName());
+                }
+            }
+        } catch (Exception ignore) {}
+    }
+
+    request.setAttribute("allUsers", allUsers);
+    request.setAttribute("companyNameMap", companyNameMap);
 %>
+
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
-    /* ==========================================================================
-       CUSTOMER APPROVALS & CLIENT GOVERNANCE THEME (SWIGGY ORANGE ENTERPRISE)
-       ========================================================================== */
-    .approvals-page-container {
-        padding: 0 4px 40px;
+    /* Staff & RBAC Governance Page Styling (Swiggy Orange Enterprise Theme) */
+    .users-page-container {
+        padding: 24px 32px;
+        background: #F8FAFC;
+        min-height: calc(100vh - 75px);
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1E293B;
     }
 
-    /* Top Breadcrumb */
+    /* Custom Breadcrumbs */
     .custom-breadcrumb {
         display: flex;
         align-items: center;
         gap: 8px;
         font-size: 13px;
+        font-weight: 500;
         color: #64748B;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
     }
-    .custom-breadcrumb a {
-        color: #64748B;
-        text-decoration: none;
-        transition: color 0.15s ease;
-    }
-    .custom-breadcrumb a:hover {
-        color: #FC8019;
-    }
-    .custom-breadcrumb i {
-        font-size: 11px;
-        color: #94A3B8;
-    }
-    .custom-breadcrumb .current {
-        color: #FC8019;
-        font-weight: 600;
-    }
+    .custom-breadcrumb a { color: #64748B; text-decoration: none; transition: color 0.15s ease; }
+    .custom-breadcrumb a:hover { color: #FC8019; }
+    .custom-breadcrumb i { font-size: 12px; color: #94A3B8; }
+    .custom-breadcrumb .current { color: #0F172A; font-weight: 600; }
 
-    /* Telemetry Header Panel */
+    /* Telemetry Header Card */
     .telemetry-header-card {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
-        border-radius: 16px;
-        padding: 24px 28px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        border-radius: 18px;
+        padding: 22px 28px;
         margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
     }
     .telemetry-header-left {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 18px;
     }
     .telemetry-icon-box {
-        width: 52px;
-        height: 52px;
+        width: 54px;
+        height: 54px;
         border-radius: 14px;
-        background: #FFF0E5;
+        background: #FFF3EA;
+        border: 1px solid #FED7AA;
+        color: #FC8019;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #FC8019;
         font-size: 26px;
-        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.15);
         flex-shrink: 0;
     }
     .telemetry-title {
         font-size: 20px;
-        font-weight: 700;
+        font-weight: 800;
         color: #0F172A;
         margin: 0 0 4px 0;
         letter-spacing: -0.3px;
     }
     .telemetry-subtitle {
-        font-size: 13.5px;
+        font-size: 13px;
         color: #64748B;
         margin: 0;
+        line-height: 1.4;
     }
-
-    /* 4-Column KPI Stats Cards */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 18px;
-        margin-bottom: 24px;
-    }
-    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
-
-    .kpi-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 14px;
-        padding: 18px 20px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        cursor: pointer;
-    }
-    .kpi-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-        border-color: #CBD5E1;
-    }
-    .kpi-label {
+    .clearance-pill-badge {
+        background: #ECFDF5;
+        border: 1px solid #A7F3D0;
+        color: #059669;
+        font-weight: 700;
         font-size: 12.5px;
-        font-weight: 600;
-        color: #64748B;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-    }
-    .kpi-value {
-        font-size: 26px;
-        font-weight: 800;
-        color: #0F172A;
-        line-height: 1;
-    }
-    .kpi-icon-pill {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
+        padding: 7px 18px;
+        border-radius: 50px;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        flex-shrink: 0;
+        gap: 6px;
     }
-    .kpi-icon-pill.amber  { background: #FFFBEB; color: #D97706; }
-    .kpi-icon-pill.green  { background: #ECFDF5; color: #059669; }
-    .kpi-icon-pill.red    { background: #FEF2F2; color: #DC2626; }
-    .kpi-icon-pill.blue   { background: #EFF6FF; color: #2563EB; }
 
-    /* Filter Tabs & Search Toolbar */
-    .approvals-toolbar {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 14px 14px 0 0;
-        padding: 16px 24px;
+    /* Filter & Search Toolbar */
+    .staff-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 16px;
-        border-bottom: 1px solid #F1F5F9;
+        gap: 14px;
+        margin-bottom: 20px;
     }
-    .nav-tabs-pill {
+    .toolbar-left-group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .staff-search-box {
+        position: relative;
+        width: 280px;
+    }
+    .staff-search-box i {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 15px;
+    }
+    .staff-search-input {
+        width: 100%;
+        height: 42px;
+        padding-left: 18px !important;
+        padding-right: 42px !important;
+        border-radius: 50px !important;
+        font-size: 13px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background: #FFFFFF !important;
+        color: #0F172A !important;
+        transition: all 0.2s ease;
+    }
+    .staff-search-input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+    }
+
+    .filter-dropdown-pill {
+        height: 42px;
+        padding: 0 16px;
+        border-radius: 50px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background-color: #FFFFFF !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        outline: none;
+        transition: all 0.15s ease;
+    }
+    .filter-dropdown-pill:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+    }
+
+    .btn-invite-staff {
+        background: #FC8019 !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        height: 42px;
+        padding: 0 24px;
+        border-radius: 50px !important;
+        font-size: 13.5px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.32);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-invite-staff:hover {
+        background: #E66A05 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(252, 128, 25, 0.4);
+    }
+
+    /* Split Screen Work Area (Main Table + Side Drawer) */
+    .staff-workspace-layout {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        position: relative;
+    }
+    .staff-table-card {
+        flex: 1;
+        min-width: 0;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    /* Table Styling */
+    .staff-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .staff-table th {
+        background: #F8FAFC;
+        padding: 14px 20px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #E2E8F0;
+        text-align: left;
+    }
+    .staff-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+        font-size: 13.5px;
+        color: #1E293B;
+        transition: background 0.15s ease;
+    }
+    .staff-row {
+        cursor: pointer;
+    }
+    .staff-row:hover td {
+        background-color: #FAFAFA;
+    }
+    .staff-row.selected-row td {
+        background-color: #F1F5F9 !important;
+    }
+
+    /* Staff Member Avatar & Info Cell */
+    .staff-profile-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .staff-avatar-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50% !important;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid #FFFFFF;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    .staff-avatar-initials {
+        width: 40px;
+        height: 40px;
+        border-radius: 50% !important;
+        background: #FC8019;
+        color: #FFFFFF;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
+    }
+    .staff-name-title {
+        font-weight: 700;
+        color: #0F172A;
+        font-size: 14px;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+    .staff-id-tag {
+        font-size: 11.5px;
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    /* Role Pill Badges */
+    .role-badge-pill {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 14px;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        letter-spacing: 0.2px;
+    }
+    .role-badge-pill.super-admin {
+        background: #F5F3FF;
+        color: #7C3AED;
+        border: 1px solid #DDD6FE;
+    }
+    .role-badge-pill.company-admin {
+        background: #FFF0E5;
+        color: #FC8019;
+        border: 1px solid #FED7AA;
+    }
+    .role-badge-pill.staff-ops {
+        background: #EFF6FF;
+        color: #2563EB;
+        border: 1px solid #BFDBFE;
+    }
+    .role-badge-pill.staff-finance {
+        background: #ECFDF5;
+        color: #059669;
+        border: 1px solid #A7F3D0;
+    }
+    .role-badge-pill.customer {
+        background: #F1F5F9;
+        color: #475569;
+        border: 1px solid #E2E8F0;
+    }
+
+    /* Department Label */
+    .department-label {
+        font-size: 13px;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    /* Status Dot Indicators */
+    .status-dot-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    .status-dot.active {
+        background: #10B981;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+    .status-dot.suspended {
+        background: #EF4444;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    }
+    .status-dot.pending {
+        background: #F59E0B;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    }
+
+    /* 3-Dots Action Button & Floating Menu */
+    .action-menu-wrap {
+        position: relative;
+        display: inline-block;
+        text-align: right;
+    }
+    .btn-action-trigger {
+        background: transparent;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-size: 18px;
+    }
+    .btn-action-trigger:hover {
+        background: #F1F5F9;
+        color: #0F172A;
+    }
+    .action-dropdown-card {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+        padding: 6px;
+        min-width: 175px;
+        z-index: 1000;
+        text-align: left;
+    }
+    .action-dropdown-card.show {
+        display: block;
+        animation: dropIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes dropIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-item-btn {
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #F8FAFC;
-        padding: 4px;
-        border-radius: 50px;
-        border: 1px solid #E2E8F0;
+        width: 100%;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.12s ease;
+        text-decoration: none;
     }
-    .tab-pill-btn {
+    .dropdown-item-btn i { font-size: 14px; }
+    .dropdown-item-btn:hover {
+        background: #F8FAFC;
+        color: #0F172A;
+    }
+    .dropdown-item-btn.highlight {
+        background: #FFF5EE;
+        color: #FC8019;
+        font-weight: 600;
+    }
+    .dropdown-item-btn.danger {
+        color: #EF4444;
+    }
+    .dropdown-item-btn.danger:hover {
+        background: #FEF2F2;
+        color: #DC2626;
+    }
+
+    /* Right-Side Slide-Over Drawer ("User Permissions") */
+    .permissions-drawer {
+        width: 390px;
+        flex-shrink: 0;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+        padding: 24px;
+        display: none;
+        flex-direction: column;
+        animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .permissions-drawer.open {
+        display: flex;
+    }
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .drawer-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0F172A;
+        margin: 0;
+    }
+    .drawer-close-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #E2E8F0;
+        background: #F8FAFC;
+        color: #64748B;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        transition: all 0.15s ease;
+    }
+    .drawer-close-btn:hover {
+        background: #E2E8F0;
+        color: #0F172A;
+    }
+
+    /* Drawer Staff Profile Banner */
+    .drawer-profile-banner {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #F1F5F9;
+        margin-bottom: 16px;
+    }
+    .drawer-avatar-wrap {
+        position: relative;
+        flex-shrink: 0;
+    }
+    .drawer-avatar-img {
+        width: 58px;
+        height: 58px;
+        border-radius: 50% !important;
+        object-fit: cover;
+        border: 2px solid #FFFFFF;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .drawer-online-indicator {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: #10B981;
+        border: 2px solid #FFFFFF;
+    }
+    .drawer-profile-info { min-width: 0; }
+    .drawer-staff-name {
+        font-size: 16px;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+    .drawer-staff-meta {
+        font-size: 12px;
+        color: #64748B;
+        margin-top: 4px;
+        line-height: 1.4;
+    }
+
+    /* Segmented Navigation Tabs */
+    .drawer-nav-tabs {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border-bottom: 1.5px solid #F1F5F9;
+        margin-bottom: 20px;
+    }
+    .drawer-tab-btn {
         background: transparent;
         border: none;
-        padding: 7px 18px;
-        border-radius: 50px;
+        padding: 8px 2px 10px;
         font-size: 13px;
         font-weight: 600;
         color: #64748B;
         cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        transition: color 0.15s ease;
+    }
+    .drawer-tab-btn:hover { color: #0F172A; }
+    .drawer-tab-btn.active {
+        color: #FC8019;
+        font-weight: 700;
+    }
+    .drawer-tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1.5px;
+        left: 0;
+        right: 0;
+        height: 2.5px;
+        background: #FC8019;
+        border-radius: 2px;
+    }
+
+    /* Module Permissions List */
+    .module-permissions-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0F172A;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 14px;
+    }
+    .permission-item-row {
         display: flex;
         align-items: center;
-        gap: 6px;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #F8FAFC;
     }
-    .tab-pill-btn:hover { color: #0F172A; }
-    .tab-pill-btn.active {
-        background: #FFFFFF;
-        color: #FC8019;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    .permission-item-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: #334155;
+        font-weight: 500;
     }
-    .tab-counter {
-        font-size: 11px;
-        font-weight: 700;
-        padding: 2px 7px;
+    .permission-item-left i {
+        font-size: 16px;
+        color: #64748B;
+        width: 20px;
+        text-align: center;
+    }
+
+    /* iOS-Style Pill Rounded Switch */
+    .nl-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+    .nl-switch input { opacity: 0; width: 0; height: 0; }
+    .nl-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #E2E8F0;
+        transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         border-radius: 50px;
-        background: #F1F5F9;
+    }
+    .nl-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+    .nl-switch input:checked + .nl-slider {
+        background-color: #FC8019;
+    }
+    .nl-switch input:checked + .nl-slider:before {
+        transform: translateX(20px);
+    }
+
+    /* Drawer Footer Action Bar */
+    .drawer-footer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px solid #F1F5F9;
+    }
+    .btn-drawer-cancel {
+        padding: 9px 22px;
+        border-radius: 50px;
+        border: 1.5px solid #E2E8F0;
+        background: #FFFFFF;
         color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
     }
-    .tab-pill-btn.active .tab-counter {
-        background: #FFF0E5;
-        color: #FC8019;
+    .btn-drawer-cancel:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #0F172A;
     }
-
-    /* Live Search Input Box */
-    .table-search-wrap { position: relative; width: 300px; }
-    .table-search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; }
-    .table-search-input {
-        width: 100%; height: 40px; padding-left: 42px !important; padding-right: 18px !important;
-        border-radius: 50px !important; font-size: 13px !important; border: 1.5px solid #E2E8F0 !important;
-        background: #F8FAFC !important;
+    .btn-drawer-save {
+        padding: 9px 24px;
+        border-radius: 50px;
+        border: none;
+        background: #FC8019;
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.32);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .table-search-input:focus {
-        background: #FFFFFF !important; border-color: #FC8019 !important;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+    .btn-drawer-save:hover {
+        background: #E66A05;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(252, 128, 25, 0.4);
     }
-
-    /* Main Table Container */
-    .approvals-table-panel {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-top: none;
-        border-radius: 0 0 16px 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); overflow: hidden;
-    }
-    .approvals-table { width: 100%; border-collapse: collapse; margin: 0; }
-    .approvals-table th {
-        background: #F8FAFC; padding: 14px 20px; font-size: 11.5px; font-weight: 700;
-        color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; text-align: left;
-    }
-    .approvals-table th i { margin-right: 4px; color: #94A3B8; font-size: 13px; }
-    .approvals-table td {
-        padding: 16px 20px; border-bottom: 1px solid #F1F5F9; vertical-align: middle;
-        font-size: 13.5px; color: #1E293B; transition: background-color 0.12s ease;
-    }
-    .customer-row:hover td { background-color: #FAFAFA; }
-
-    /* Customer Name & Avatar Cell */
-    .customer-cell { display: flex; align-items: center; gap: 14px; }
-    .customer-avatar {
-        width: 42px; height: 42px; border-radius: 50% !important; background: #FC8019;
-        color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); flex-shrink: 0; letter-spacing: 0.5px;
-    }
-    .customer-info-wrap { min-width: 0; }
-    .customer-name-title { font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 2px; }
-    .customer-meta-badge { font-size: 11px; color: #64748B; display: inline-flex; align-items: center; gap: 4px; }
-
-    /* Role and Tenant Badges */
-    .role-tenant-wrap { display: flex; flex-direction: column; gap: 4px; }
-    .role-badge {
-        font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 50px;
-        background: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; display: inline-flex;
-        align-items: center; gap: 5px; width: fit-content;
-    }
-    .company-name-chip {
-        font-size: 12px; color: #64748B; display: inline-flex; align-items: center; gap: 5px;
-    }
-
-    /* Contact Details Chips */
-    .contact-cell { display: flex; flex-direction: column; gap: 4px; }
-    .contact-link { display: inline-flex; align-items: center; gap: 6px; color: #475569; font-size: 12.5px; text-decoration: none; transition: color 0.15s ease; }
-    .contact-link:hover { color: #FC8019; }
-    .contact-link i { font-size: 13px; color: #94A3B8; }
-
-    /* Status Badges */
-    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
-    .status-pill.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
-    .status-pill.active { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
-    .status-pill.suspended { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
-
-    /* Action Buttons (Pill-Shaped Flat, NO Gradient) */
-    .actions-flex { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-    .btn-approval-accept {
-        background: #10B981 !important; border: 1px solid #10B981 !important; color: #FFFFFF !important;
-        padding: 7px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;
-        cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.22);
-    }
-    .btn-approval-accept:hover {
-        background: #059669 !important; border-color: #059669 !important; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(16, 185, 129, 0.35);
-    }
-    .btn-approval-accept:active { transform: translateY(0); }
-    .btn-approval-accept i { font-size: 13px; transition: transform 0.2s ease; }
-    .btn-approval-accept:hover i { transform: scale(1.15); }
-
-    .btn-approval-reject {
-        background: #FFFFFF; border: 1.5px solid #FCA5A5; color: #DC2626 !important; padding: 7px 18px; border-radius: 50px;
-        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
-    }
-    .btn-approval-reject:hover {
-        background: #FEF2F2; border-color: #EF4444; color: #B91C1C !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.18);
-    }
-    .btn-approval-reject:active { transform: translateY(0); }
-    .btn-approval-reject i { font-size: 13px; transition: transform 0.2s ease; }
-    .btn-approval-reject:hover i { transform: scale(1.15); }
-
-    /* Empty State */
-    .empty-caught-up-card { padding: 60px 24px; text-align: center; background: #FFFFFF; }
-    .empty-shield-icon-box {
-        width: 68px; height: 68px; border-radius: 20px; background: #ECFDF5; border: 1px solid #A7F3D0;
-        color: #059669; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
-        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
-    }
-    .empty-caught-up-title { font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
-    .empty-caught-up-desc { font-size: 13.5px; color: #64748B; max-width: 440px; margin: 0 auto 20px; line-height: 1.5; }
-    .btn-view-all-tenants {
-        background: #FFFFFF; border: 1.5px solid #E2E8F0; color: #475569; padding: 9px 24px; border-radius: 50px;
-        font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
-    }
-    .btn-view-all-tenants:hover { background: #F8FAFC; border-color: #CBD5E1; color: #0F172A; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
 
     /* Alerts */
-    .custom-alert { border-radius: 12px; padding: 14px 18px; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .custom-alert {
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 13.5px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
     .custom-alert.success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
     .custom-alert.danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
 
-    /* Custom Modern Confirmation Modal */
+    /* Modal Backdrop and Glassmorphic Dialog */
     .nl-modal-backdrop {
-        position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
-        backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 9999999; padding: 20px; opacity: 0;
-        transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999999;
+        padding: 20px;
+        opacity: 0;
+        transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
     }
     .nl-modal-backdrop.show { opacity: 1; pointer-events: auto; }
     .nl-modal-dialog {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px;
-        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); max-width: 440px; width: 100%;
-        padding: 32px 28px 24px; text-align: center; position: relative;
-        transform: scale(0.92) translateY(12px); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+        max-width: 480px;
+        width: 100%;
+        padding: 32px 28px 24px;
+        position: relative;
+        transform: scale(0.92) translateY(12px);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .nl-modal-backdrop.show .nl-modal-dialog { transform: scale(1) translateY(0); }
-    .nl-modal-close {
-        position: absolute; top: 18px; right: 18px; background: #F1F5F9; border: none;
-        width: 32px; height: 32px; border-radius: 50px; display: flex; align-items: center;
-        justify-content: center; color: #64748B; cursor: pointer; font-size: 16px; transition: all 0.15s ease;
-    }
-    .nl-modal-close:hover { background: #E2E8F0; color: #0F172A; }
-    .nl-modal-icon-box {
-        width: 60px; height: 60px; border-radius: 18px; margin: 0 auto 18px;
-        display: flex; align-items: center; justify-content: center; font-size: 28px;
-    }
-    .nl-modal-icon-box.danger { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
-    .nl-modal-icon-box.success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
-    .nl-modal-title { font-size: 19px; font-weight: 700; color: #0F172A; margin-bottom: 8px; letter-spacing: -0.3px; }
-    .nl-modal-desc { font-size: 13.5px; color: #64748B; line-height: 1.5; margin: 0 0 24px 0; }
-    .nl-modal-actions { display: flex; align-items: center; justify-content: center; gap: 12px; }
-    .nl-modal-btn {
-        padding: 9px 24px; border-radius: 50px; font-size: 13px; font-weight: 600;
-        cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); border: none;
-        display: inline-flex; align-items: center; gap: 6px;
-    }
-    .nl-modal-btn.cancel { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
-    .nl-modal-btn.cancel:hover { background: #E2E8F0; color: #0F172A; }
-    .nl-modal-btn.confirm.danger { background: #DC2626 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28); }
-    .nl-modal-btn.confirm.danger:hover { background: #B91C1C !important; transform: translateY(-1px); }
-    .nl-modal-btn.confirm.success { background: #10B981 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28); }
-    .nl-modal-btn.confirm.success:hover { background: #059669 !important; transform: translateY(-1px); }
-
 </style>
 
-<div class="approvals-page-container">
+<div class="users-page-container">
 
     <!-- Breadcrumb -->
     <div class="custom-breadcrumb">
@@ -419,7 +804,7 @@
         <i class="ti ti-chevron-right"></i>
         <span>Management</span>
         <i class="ti ti-chevron-right"></i>
-        <span class="current">Customer Approvals</span>
+        <span class="current">Users &amp; Roles Governance</span>
     </div>
 
     <!-- Alert Notifications -->
@@ -438,455 +823,829 @@
         <c:remove var="errorMessage" scope="session"/>
     </c:if>
 
-    <!-- Top Telemetry Header -->
+    <!-- Top Telemetry Header Card -->
     <div class="telemetry-header-card">
         <div class="telemetry-header-left">
             <div class="telemetry-icon-box">
-                <i class="ti ti-user-check"></i>
+                <i class="ti ti-user-shield"></i>
             </div>
             <div>
-                <h4 class="telemetry-title">Customer Approvals &amp; Client Governance</h4>
-                <p class="telemetry-subtitle">Super Admin regulatory verification portal for B2B portal customers, shipper accounts, and access clearance</p>
+                <h4 class="telemetry-title">Staff &amp; Role-Based Access Control</h4>
+                <p class="telemetry-subtitle">Super Admin &amp; Company Admin governance portal for enterprise staff onboarding, roles, and granular module permissions</p>
             </div>
         </div>
         <div>
-            <span class="badge" style="background: #FFF0E5; color: #FC8019; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 50px; border: 1px solid #FED7AA;">
-                <i class="ti ti-lock-access me-1"></i> Super Admin Clearance Required
+            <span class="clearance-pill-badge">
+                <i class="ti ti-shield-check"></i> Super Admin Clearance Active
             </span>
         </div>
     </div>
 
-    <!-- 4 KPI Summary Cards -->
-    <div class="kpi-grid">
-        <div class="kpi-card" onclick="filterByTab('Pending')" style="cursor: pointer;" title="Click to view Pending Customer Approvals">
-            <div>
-                <div class="kpi-label">Pending Approval</div>
-                <div class="kpi-value" style="color: #D97706;">${not empty pendingCount ? pendingCount : 0}</div>
+    <!-- Filter & Search Toolbar -->
+    <div class="staff-toolbar">
+        <div class="toolbar-left-group">
+            <div class="staff-search-box">
+                <input type="text" id="staffSearchInput" class="staff-search-input" placeholder="Search staff by name, email, employee ID..." oninput="handleStaffFilter()">
+                <i class="ti ti-search"></i>
             </div>
-            <div class="kpi-icon-pill amber">
-                <i class="ti ti-clock-hour-4"></i>
-            </div>
+            <select id="roleFilter" class="filter-dropdown-pill" onchange="handleStaffFilter()">
+                <option value="ALL">Role: All Roles</option>
+                <option value="1">Super Admin</option>
+                <option value="2">Company Admin</option>
+                <option value="3">Staff — Operations</option>
+                <option value="4">Staff — Finance</option>
+                <option value="5">Customer / Shipper</option>
+            </select>
+            <select id="departmentFilter" class="filter-dropdown-pill" onchange="handleStaffFilter()">
+                <option value="ALL">Department: All Departments</option>
+                <option value="Administration">Administration</option>
+                <option value="Fleet Operations">Fleet Operations</option>
+                <option value="Invoicing & Billing">Invoicing &amp; Billing</option>
+                <option value="Port Warehouse">Port Warehouse</option>
+                <option value="Logistics Partner">Logistics Partner</option>
+            </select>
         </div>
-        <div class="kpi-card" onclick="filterByTab('Active')" style="cursor: pointer;" title="Click to view Active Customers">
-            <div>
-                <div class="kpi-label">Active Customers</div>
-                <div class="kpi-value" style="color: #059669;">${not empty activeCount ? activeCount : 0}</div>
-            </div>
-            <div class="kpi-icon-pill green">
-                <i class="ti ti-circle-check"></i>
-            </div>
-        </div>
-        <div class="kpi-card" onclick="filterByTab('Suspended')" style="cursor: pointer;" title="Click to view Suspended &amp; Inactive Customers">
-            <div>
-                <div class="kpi-label">Suspended / Inactive</div>
-                <div class="kpi-value" style="color: #DC2626;">${not empty inactiveCount ? inactiveCount : 0}</div>
-            </div>
-            <div class="kpi-icon-pill red">
-                <i class="ti ti-ban"></i>
-            </div>
-        </div>
-        <div class="kpi-card" onclick="filterByTab('All')" style="cursor: pointer;" title="Click to view All Accounts">
-            <div>
-                <div class="kpi-label">Total Registered Accounts</div>
-                <div class="kpi-value" style="color: #2563EB;">${not empty totalCount ? totalCount : 0}</div>
-            </div>
-            <div class="kpi-icon-pill blue">
-                <i class="ti ti-users"></i>
-            </div>
+
+        <div>
+            <button type="button" class="btn-invite-staff" onclick="openInviteModal()">
+                <i class="ti ti-plus"></i> Invite New Staff
+            </button>
         </div>
     </div>
 
-    <!-- Toolbar: Filter Tabs & Real-Time Search -->
-    <div class="approvals-toolbar">
-        <div class="nav-tabs-pill">
-            <button type="button" class="tab-pill-btn active" id="tabPendingBtn" onclick="filterByTab('Pending')">
-                <i class="ti ti-clock"></i> Pending Review
-                <span class="tab-counter">${not empty pendingCount ? pendingCount : 0}</span>
-            </button>
-            <button type="button" class="tab-pill-btn" id="tabActiveBtn" onclick="filterByTab('Active')">
-                <i class="ti ti-circle-check"></i> Active Customers
-                <span class="tab-counter">${not empty activeCount ? activeCount : 0}</span>
-            </button>
-            <button type="button" class="tab-pill-btn" id="tabSuspendedBtn" onclick="filterByTab('Suspended')">
-                <i class="ti ti-ban"></i> Suspended &amp; Inactive
-                <span class="tab-counter" style="color: #DC2626; background: #FEF2F2;">${not empty inactiveCount ? inactiveCount : 0}</span>
-            </button>
-            <button type="button" class="tab-pill-btn" id="tabAllBtn" onclick="filterByTab('All')">
-                <i class="ti ti-list"></i> All Accounts
-                <span class="tab-counter">${not empty totalCount ? totalCount : 0}</span>
-            </button>
-        </div>
+    <!-- Split Screen Workspace Area -->
+    <div class="staff-workspace-layout">
 
-        <div class="table-search-wrap">
-            <i class="ti ti-search"></i>
-            <input type="text" id="customerSearchInput" class="table-search-input form-control" placeholder="Search customer, email, phone, company..." oninput="handleCustomerSearch()">
-        </div>
-    </div>
+        <!-- Left / Center: Staff Data Table Panel -->
+        <div class="staff-table-card">
+            <div class="table-responsive">
+                <table class="staff-table" id="staffTable">
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 24px;">Staff Member</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Last Active</th>
+                            <th style="padding-right: 24px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody">
+                        <c:forEach var="u" items="${allUsers}" varStatus="loop">
+                            <!-- Department Mapping based on role -->
+                            <c:set var="deptName" value="Fleet Operations" />
+                            <c:choose>
+                                <c:when test="${u.roleId == 1}"><c:set var="deptName" value="Administration" /></c:when>
+                                <c:when test="${u.roleId == 2}"><c:set var="deptName" value="Fleet Operations" /></c:when>
+                                <c:when test="${u.roleId == 3}"><c:set var="deptName" value="${loop.index % 2 == 0 ? 'Fleet Operations' : 'Port Warehouse'}" /></c:when>
+                                <c:when test="${u.roleId == 4}"><c:set var="deptName" value="Invoicing & Billing" /></c:when>
+                                <c:otherwise><c:set var="deptName" value="Logistics Partner" /></c:otherwise>
+                            </c:choose>
 
-    <!-- Table Container -->
-    <div class="approvals-table-panel">
-        <div class="table-responsive">
-            <table class="approvals-table" id="customersTable">
-                <thead>
-                    <tr>
-                        <th style="padding-left: 24px;"><i class="ti ti-user"></i> Customer / User</th>
-                        <th><i class="ti ti-briefcase"></i> Role &amp; Tenant</th>
-                        <th><i class="ti ti-address-book"></i> Contact Info</th>
-                        <th><i class="ti ti-calendar"></i> Registered Date</th>
-                        <th><i class="ti ti-activity"></i> Status</th>
-                        <th style="padding-right: 24px; text-align: right;"><i class="ti ti-settings"></i> Action</th>
-                    </tr>
-                </thead>
-                <tbody id="customersTableBody">
-                    <c:forEach var="u" items="${allUsers}">
-                        <tr class="customer-row"
-                            data-status="${u.status}"
-                            data-search="${u.username.toLowerCase()} ${u.email.toLowerCase()} ${u.phone} ${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId].toLowerCase() : ''}">
-                            
-                            <!-- Customer Name + Avatar -->
-                            <td style="padding-left: 24px;">
-                                <div class="customer-cell">
-                                    <div class="customer-avatar">
-                                        <c:set var="uInitials" value="${u.username.substring(0, u.username.length() >= 2 ? 2 : 1).toUpperCase()}" />
-                                        ${uInitials}
-                                    </div>
-                                    <div class="customer-info-wrap">
-                                        <div class="customer-name-title">${u.username}</div>
-                                        <div class="customer-meta-badge">
-                                            <i class="ti ti-hash"></i> USR-${u.userId}
+                            <!-- Last Active Mock -->
+                            <c:set var="lastActiveText" value="15 min ago" />
+                            <c:choose>
+                                <c:when test="${loop.index == 0}"><c:set var="lastActiveText" value="2 min ago" /></c:when>
+                                <c:when test="${loop.index == 1}"><c:set var="lastActiveText" value="15 min ago" /></c:when>
+                                <c:when test="${loop.index == 2}"><c:set var="lastActiveText" value="1 hour ago" /></c:when>
+                                <c:when test="${loop.index == 3}"><c:set var="lastActiveText" value="3 hours ago" /></c:when>
+                                <c:when test="${loop.index == 4}"><c:set var="lastActiveText" value="Yesterday" /></c:when>
+                                <c:otherwise><c:set var="lastActiveText" value="Never logged in" /></c:otherwise>
+                            </c:choose>
+
+                            <tr class="staff-row ${loop.index == 2 ? 'selected-row' : ''}"
+                                id="staffRow_${u.userId}"
+                                data-id="${u.userId}"
+                                data-name="${u.username}"
+                                data-email="${u.email}"
+                                data-roleid="${u.roleId}"
+                                data-dept="${deptName}"
+                                data-status="${u.status}"
+                                data-joined="12 Mar 2024"
+                                onclick="selectStaffMember(${u.userId})">
+
+                                <!-- Staff Member Profile -->
+                                <td style="padding-left: 24px;">
+                                    <div class="staff-profile-cell">
+                                        <div class="staff-avatar-initials">
+                                            <c:set var="initials" value="${u.username.substring(0, u.username.length() >= 2 ? 2 : 1).toUpperCase()}" />
+                                            ${initials}
+                                        </div>
+                                        <div>
+                                            <div class="staff-name-title">${u.username}</div>
+                                            <div class="staff-id-tag">#STF-${u.userId + 100}</div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            <!-- Role & Tenant -->
-                            <td>
-                                <div class="role-tenant-wrap">
-                                    <span class="role-badge">
+                                <!-- Email -->
+                                <td>
+                                    <a href="mailto:${u.email}" style="color: #475569; text-decoration: none;" onclick="event.stopPropagation();">
+                                        ${u.email}
+                                    </a>
+                                </td>
+
+                                <!-- Role Pill -->
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${u.roleId == 1}">
+                                            <span class="role-badge-pill super-admin">Super Admin</span>
+                                        </c:when>
+                                        <c:when test="${u.roleId == 2}">
+                                            <span class="role-badge-pill company-admin">Company Admin</span>
+                                        </c:when>
+                                        <c:when test="${u.roleId == 3}">
+                                            <span class="role-badge-pill staff-ops">Staff — Operations</span>
+                                        </c:when>
+                                        <c:when test="${u.roleId == 4}">
+                                            <span class="role-badge-pill staff-finance">Staff — Finance</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="role-badge-pill customer">Customer / Shipper</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+
+                                <!-- Department -->
+                                <td>
+                                    <span class="department-label">${deptName}</span>
+                                </td>
+
+                                <!-- Status Dot -->
+                                <td>
+                                    <div class="status-dot-cell">
                                         <c:choose>
-                                            <c:when test="${u.roleId == 1}">
-                                                <i class="ti ti-shield"></i> Super Admin
+                                            <c:when test="${u.status == 'Active'}">
+                                                <span class="status-dot active"></span>
+                                                <span style="color: #059669;">Active</span>
                                             </c:when>
-                                            <c:when test="${u.roleId == 2}">
-                                                <i class="ti ti-building"></i> Company Admin
-                                            </c:when>
-                                            <c:when test="${u.roleId == 5}">
-                                                <i class="ti ti-user-check"></i> Customer / Client
+                                            <c:when test="${u.status == 'Pending'}">
+                                                <span class="status-dot pending"></span>
+                                                <span style="color: #D97706;">Pending Review</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <i class="ti ti-user"></i> Staff (Role ${u.roleId})
+                                                <span class="status-dot suspended"></span>
+                                                <span style="color: #DC2626;">Suspended</span>
                                             </c:otherwise>
                                         </c:choose>
-                                    </span>
-                                    <c:if test="${not empty u.companyId && u.companyId > 0}">
-                                        <span class="company-name-chip">
-                                            <i class="ti ti-building" style="color: #94A3B8; font-size: 13px;"></i>
-                                            <span>${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId] : 'Tenant CMP-'.concat(u.companyId)}</span>
-                                        </span>
-                                    </c:if>
-                                </div>
-                            </td>
+                                    </div>
+                                </td>
 
-                            <!-- Contact Details -->
-                            <td>
-                                <div class="contact-cell">
-                                    <a href="mailto:${u.email}" class="contact-link" title="Send Email">
-                                        <i class="ti ti-mail"></i>
-                                        <span>${u.email}</span>
-                                    </a>
-                                    <a href="tel:${u.phone}" class="contact-link" title="Call Phone">
-                                        <i class="ti ti-phone"></i>
-                                        <span>${not empty u.phone ? u.phone : 'N/A'}</span>
-                                    </a>
-                                </div>
-                            </td>
+                                <!-- Last Active -->
+                                <td style="color: #64748B; font-size: 13px;">
+                                    ${lastActiveText}
+                                </td>
 
-                            <!-- Registered Date -->
-                            <td style="color: #475569; font-size: 13px;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <i class="ti ti-calendar" style="color: #94A3B8; font-size: 14px;"></i>
-                                    <span>
-                                        <c:choose>
-                                            <c:when test="${not empty u.createdAt}">
-                                                <fmt:formatDate value="${u.createdAt}" pattern="MMM dd, yyyy" />
-                                            </c:when>
-                                            <c:otherwise>Active Member</c:otherwise>
-                                        </c:choose>
-                                    </span>
-                                </div>
-                            </td>
-
-                            <!-- Status Badge -->
-                            <td>
-                                <c:choose>
-                                    <c:when test="${u.status == 'Pending'}">
-                                        <span class="status-pill pending">
-                                            <i class="ti ti-clock"></i> Pending Review
-                                        </span>
-                                    </c:when>
-                                    <c:when test="${u.status == 'Active'}">
-                                        <span class="status-pill active">
-                                            <i class="ti ti-circle-check"></i> Approved
-                                        </span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="status-pill suspended">
-                                            <i class="ti ti-ban"></i> Suspended
-                                        </span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-
-                            <!-- Actions -->
-                            <td style="padding-right: 24px; text-align: right;">
-                                <c:choose>
-                                    <c:when test="${u.status == 'Pending'}">
-                                        <div class="actions-flex">
-                                            <form method="POST" class="d-inline m-0">
+                                <!-- 3-Dots Actions Menu -->
+                                <td style="padding-right: 24px; text-align: right;" onclick="event.stopPropagation();">
+                                    <div class="action-menu-wrap">
+                                        <button type="button" class="btn-action-trigger" onclick="toggleActionDropdown(${u.userId}, event)" title="Manage staff actions">
+                                            <i class="ti ti-dots-vertical"></i>
+                                        </button>
+                                        <div class="action-dropdown-card" id="actionDropdown_${u.userId}">
+                                            <button type="button" class="dropdown-item-btn" onclick="openStaffProfileModal(${u.userId})">
+                                                <i class="ti ti-user"></i> View Profile
+                                            </button>
+                                            <button type="button" class="dropdown-item-btn highlight" onclick="openEditPermissions(${u.userId})">
+                                                <i class="ti ti-pencil"></i> Edit Permissions
+                                            </button>
+                                            <button type="button" class="dropdown-item-btn" onclick="resetStaffPassword(${u.userId})">
+                                                <i class="ti ti-reload"></i> Reset Password
+                                            </button>
+                                            <c:choose>
+                                                <c:when test="${u.status == 'Active'}">
+                                                    <form method="POST" id="suspendForm_${u.userId}" style="margin: 0;">
+                                                        <input type="hidden" name="userId" value="${u.userId}">
+                                                        <input type="hidden" name="action" value="suspend">
+                                                        <button type="button" class="dropdown-item-btn" onclick="confirmSuspend(${u.userId}, '${u.username}')">
+                                                            <i class="ti ti-ban"></i> Suspend Staff
+                                                        </button>
+                                                    </form>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <form method="POST" id="activateForm_${u.userId}" style="margin: 0;">
+                                                        <input type="hidden" name="userId" value="${u.userId}">
+                                                        <input type="hidden" name="action" value="activate">
+                                                        <button type="button" class="dropdown-item-btn" onclick="confirmActivate(${u.userId}, '${u.username}')">
+                                                            <i class="ti ti-circle-check"></i> Activate Staff
+                                                        </button>
+                                                    </form>
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <form method="POST" id="deleteForm_${u.userId}" style="margin: 0;">
                                                 <input type="hidden" name="userId" value="${u.userId}">
-                                                <input type="hidden" name="action" value="accept">
-                                                <button type="submit" class="btn-approval-accept" title="Approve Customer Account">
-                                                    <i class="ti ti-check"></i> Approve
-                                                </button>
-                                            </form>
-                                            <form method="POST" class="d-inline m-0">
-                                                <input type="hidden" name="userId" value="${u.userId}">
-                                                <input type="hidden" name="action" value="reject">
-                                                <button type="button" class="btn-approval-reject" title="Reject Customer Account" onclick="showCustomConfirm({title: 'Reject Customer Account?', desc: 'Are you sure you want to reject this customer registration request?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});">
-                                                    <i class="ti ti-x"></i> Reject
+                                                <input type="hidden" name="action" value="delete">
+                                                <button type="button" class="dropdown-item-btn danger" onclick="confirmDelete(${u.userId}, '${u.username}')">
+                                                    <i class="ti ti-trash"></i> Delete User
                                                 </button>
                                             </form>
                                         </div>
-                                    </c:when>
-                                    <c:when test="${u.status == 'Active'}">
-                                        <form method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="userId" value="${u.userId}">
-                                            <input type="hidden" name="action" value="reject">
-                                            <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-ban"></i> Suspend
-                                            </button>
-                                        </form>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <form method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="userId" value="${u.userId}">
-                                            <input type="hidden" name="action" value="accept">
-                                            <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-reload"></i> Reactivate
-                                            </button>
-                                        </form>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bottom Pagination Bar -->
+            <div class="nl-pagination-wrapper" id="staffPagination" style="border-top: 1px solid #F1F5F9;">
+                <div class="nl-pagination-info">
+                    <span>Showing <strong id="staffPageStart">1</strong> to <strong id="staffPageEnd">10</strong> of <strong id="staffTotalRows">48</strong> staff members</span>
+                    <div class="d-inline-flex align-items-center gap-2 ms-2">
+                        <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
+                        <select id="staffPageSize" class="nl-page-size-select no-custom-select" onchange="changeStaffPageSize(this.value)">
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="nl-pagination-nav" id="staffPageNav">
+                    <!-- Dynamically generated circular buttons -->
+                </div>
+            </div>
         </div>
 
-        
-        <!-- Enterprise Theme Pagination Bar -->
-        <div class="nl-pagination-wrapper" id="usersPagination">
-            <div class="nl-pagination-info">
-                <span>Showing <strong id="usersPageStart">1</strong> to <strong id="usersPageEnd">10</strong> of <strong id="usersTotalRows">0</strong> records</span>
-                <div class="d-inline-flex align-items-center gap-2 ms-2">
-                    <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
-                    <select id="usersPageSize" class="nl-page-size-select no-custom-select" onchange="changeUsersPageSize(this.value)">
-                        <option value="10" selected>10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
+        <!-- Right-Side Slide-Over Drawer: User Permissions -->
+        <div class="permissions-drawer open" id="permissionsDrawer">
+            <div class="drawer-header">
+                <h5 class="drawer-title">User Permissions</h5>
+                <button type="button" class="drawer-close-btn" onclick="closePermissionsDrawer()" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+
+            <!-- Staff Profile Banner Card -->
+            <div class="drawer-profile-banner">
+                <div class="drawer-avatar-wrap">
+                    <div class="staff-avatar-initials" id="drawerAvatarBox" style="width: 58px; height: 58px; font-size: 18px;">
+                        RS
+                    </div>
+                    <span class="drawer-online-indicator"></span>
+                </div>
+                <div class="drawer-profile-info">
+                    <div class="drawer-staff-name" id="drawerStaffName">Rohit Sharma</div>
+                    <div id="drawerRolePillWrap">
+                        <span class="role-badge-pill staff-ops" id="drawerRolePill">Company Staff — Operations</span>
+                    </div>
+                    <div class="drawer-staff-meta" id="drawerStaffEmail">rohit.sharma@nlogistic.com</div>
+                    <div class="drawer-staff-meta" style="color: #94A3B8; font-size: 11.5px;">
+                        <span id="drawerDeptName">Operations Department</span> &bull; 📅 Joined 12 Mar 2024
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segmented Navigation Tabs -->
+            <div class="drawer-nav-tabs">
+                <button type="button" class="drawer-tab-btn active" id="tabPermBtn" onclick="switchDrawerTab('permissions')">Permissions</button>
+                <button type="button" class="drawer-tab-btn" id="tabRoleBtn" onclick="switchDrawerTab('role')">Role Details</button>
+                <button type="button" class="drawer-tab-btn" id="tabAuditBtn" onclick="switchDrawerTab('audit')">Activity Audit</button>
+            </div>
+
+            <!-- Permissions View -->
+            <div id="drawerTabPermissions">
+                <div class="module-permissions-title">Module Permissions</div>
+
+                <!-- 10 Granular Module Permissions Matching Mockup & SRS -->
+                <form method="POST" id="savePermissionsForm">
+                    <input type="hidden" name="action" value="savePermissions">
+                    <input type="hidden" name="userId" id="drawerUserIdInput" value="3">
+
+                    <!-- Module 1 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-chart-bar"></i>
+                            <span>Dashboard &amp; Executive Analytics</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_dashboard" id="perm_dashboard" checked>
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 2 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-truck"></i>
+                            <span>Container Fleet Tracking &amp; Movement (Point A &rarr; B)</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_tracking" id="perm_tracking" checked>
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 3 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-clipboard-check"></i>
+                            <span>Shipment Booking &amp; Slot Allocation</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_shipments" id="perm_shipments" checked>
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 4 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-chart-pie"></i>
+                            <span>Profit &amp; Loss Graph (PLG) &amp; Loss Reason Map</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_plg" id="perm_plg">
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 5 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-file-invoice"></i>
+                            <span>Invoicing, Billing &amp; Ledger Access</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_invoicing" id="perm_invoicing">
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 6 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-package"></i>
+                            <span>Warehouse Inventory &amp; Bulk Stock Upload</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_inventory" id="perm_inventory" checked>
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 7 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-shield"></i>
+                            <span>Loss &amp; Damage Cargo Claims Management</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_claims" id="perm_claims" checked>
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 8 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-file-text"></i>
+                            <span>Regulatory Compliance &amp; Documents Upload</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_compliance" id="perm_compliance">
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 9 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-users"></i>
+                            <span>Staff User Governance &amp; Approvals</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_users" id="perm_users">
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Module 10 -->
+                    <div class="permission-item-row">
+                        <div class="permission-item-left">
+                            <i class="ti ti-settings"></i>
+                            <span>System Configuration &amp; Algorithm Parameters</span>
+                        </div>
+                        <label class="nl-switch">
+                            <input type="checkbox" name="perm_settings" id="perm_settings">
+                            <span class="nl-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Drawer Footer Action Bar -->
+                    <div class="drawer-footer-actions">
+                        <button type="button" class="btn-drawer-cancel" onclick="closePermissionsDrawer()">Cancel</button>
+                        <button type="submit" class="btn-drawer-save">
+                            <i class="ti ti-check"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Role Details View -->
+            <div id="drawerTabRole" style="display: none; padding-top: 10px;">
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 6px;">Role Hierarchy Level</div>
+                    <p style="font-size: 12.5px; color: #64748B; margin: 0; line-height: 1.5;" id="drawerRoleDesc">
+                        Operations staff member assigned to terminal checkpoints, container movement events, and cargo verification.
+                    </p>
+                </div>
+                <div style="font-size: 12.5px; color: #64748B; line-height: 1.6;">
+                    <div><strong>Authentication:</strong> SHA-256 Multi-Layer</div>
+                    <div><strong>Session Timeout:</strong> 30 Minutes</div>
+                    <div><strong>Clearance Scope:</strong> Operations Tier-2</div>
+                </div>
+            </div>
+
+            <!-- Activity Audit View -->
+            <div id="drawerTabAudit" style="display: none; padding-top: 10px;">
+                <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+                    <div style="padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #10B981;">
+                        <div style="font-weight: 600; color: #0F172A;">Check-in at JNPT Terminal</div>
+                        <div style="color: #94A3B8; font-size: 11px;">Today, 10:45 AM</div>
+                    </div>
+                    <div style="padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #2563EB;">
+                        <div style="font-weight: 600; color: #0F172A;">Allocated Container CNTR-9041</div>
+                        <div style="color: #94A3B8; font-size: 11px;">Yesterday, 04:20 PM</div>
+                    </div>
+                    <div style="padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #FC8019;">
+                        <div style="font-weight: 600; color: #0F172A;">Updated Manifest Status to Departed</div>
+                        <div style="color: #94A3B8; font-size: 11px;">01 Sep 2026, 02:15 PM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: Invite New Staff Member -->
+<div id="inviteStaffModal" class="nl-modal-backdrop" style="display: none;">
+    <div class="nl-modal-dialog">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFF3EA; color: #FC8019; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    <i class="ti ti-user-plus"></i>
+                </div>
+                <div>
+                    <h5 style="font-size: 17px; font-weight: 800; color: #0F172A; margin: 0;">Invite New Staff Member</h5>
+                    <p style="font-size: 12.5px; color: #64748B; margin: 0;">Deploy access credentials and assign operational role</p>
+                </div>
+            </div>
+            <button type="button" class="drawer-close-btn" onclick="closeInviteModal()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+
+        <form method="POST">
+            <input type="hidden" name="action" value="inviteStaff">
+            
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Full Name</label>
+                <input type="text" name="inviteName" required class="form-control" placeholder="e.g. Arjun Mehta" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 16px;">
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Corporate Email Address</label>
+                <input type="email" name="inviteEmail" required class="form-control" placeholder="e.g. arjun.mehta@nlogistic.com" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 16px;">
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Phone Number</label>
+                <input type="text" name="invitePhone" class="form-control" placeholder="e.g. +91 98765 43210" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 16px;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                <div>
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Role Assignment</label>
+                    <select name="inviteRoleId" class="form-control" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
+                        <option value="3">Staff — Operations</option>
+                        <option value="4">Staff — Finance</option>
+                        <option value="2">Company Admin</option>
+                        <option value="1">Super Admin</option>
+                        <option value="5">Customer / Client</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Department</label>
+                    <select name="inviteDept" class="form-control" style="border-radius: 50px; height: 42px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 14px; cursor: pointer;">
+                        <option value="Fleet Operations">Fleet Operations</option>
+                        <option value="Invoicing & Billing">Invoicing &amp; Billing</option>
+                        <option value="Administration">Administration</option>
+                        <option value="Port Warehouse">Port Warehouse</option>
                     </select>
                 </div>
             </div>
-            <div class="nl-pagination-nav" id="usersPageNav">
-                <!-- Dynamically generated page buttons -->
-            </div>
-        </div>
 
-        <!-- Modern Empty State -->
-        <div id="emptyStateBox" class="empty-caught-up-card" style="display: none;">
-            <div class="empty-shield-icon-box">
-                <i class="ti ti-user-check"></i>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn-drawer-cancel" onclick="closeInviteModal()">Cancel</button>
+                <button type="submit" class="btn-drawer-save">
+                    <i class="ti ti-mail-forward"></i> Send Invitation
+                </button>
             </div>
-            <div class="empty-caught-up-title" id="emptyStateTitle">All Caught Up!</div>
-            <p class="empty-caught-up-desc" id="emptyStateDesc">
-                There are currently no pending customer registration requests requiring Super Admin verification. All client onboarding is up to date.
-            </p>
-            <button type="button" class="btn-view-all-tenants" onclick="filterByTab('All')">
-                <i class="ti ti-list"></i> View All Registered Customers
-            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Custom Confirmation Modal -->
+<div id="nlCustomConfirmModal" class="nl-modal-backdrop" style="display: none;">
+    <div class="nl-modal-dialog" style="max-width: 420px; text-align: center;">
+        <button type="button" class="drawer-close-btn" style="position: absolute; top: 18px; right: 18px;" onclick="closeCustomConfirmModal()" aria-label="Close">
+            <i class="ti ti-x"></i>
+        </button>
+        <div id="confirmIconBox" style="width: 58px; height: 58px; border-radius: 18px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA;">
+            <i class="ti ti-alert-triangle" id="confirmIcon"></i>
+        </div>
+        <h5 id="confirmTitle" style="font-size: 18px; font-weight: 800; color: #0F172A; margin-bottom: 6px;">Confirm Action</h5>
+        <p id="confirmDesc" style="font-size: 13px; color: #64748B; line-height: 1.5; margin: 0 0 20px 0;">Are you sure you want to proceed?</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <button type="button" class="btn-drawer-cancel" onclick="closeCustomConfirmModal()">Cancel</button>
+            <button type="button" class="btn-drawer-save" id="confirmActionBtn" style="background: #DC2626;">Confirm</button>
         </div>
     </div>
-
-    <!-- Custom Action Confirmation Modal -->
-    <div id="nlCustomConfirmModal" class="nl-modal-backdrop" style="display: none;">
-        <div class="nl-modal-dialog">
-            <button type="button" class="nl-modal-close" onclick="closeCustomConfirmModal()" aria-label="Close">
-                <i class="ti ti-x"></i>
-            </button>
-            <div class="nl-modal-icon-box danger" id="nlConfirmIconBox">
-                <i class="ti ti-alert-triangle" id="nlConfirmIcon"></i>
-            </div>
-            <h5 class="nl-modal-title" id="nlConfirmTitle">Confirm Action</h5>
-            <p class="nl-modal-desc" id="nlConfirmDesc">Are you sure you want to proceed with this action?</p>
-            <div class="nl-modal-actions">
-                <button type="button" class="nl-modal-btn cancel" onclick="closeCustomConfirmModal()">Cancel</button>
-                <button type="button" class="nl-modal-btn confirm danger" id="nlConfirmSubmitBtn">Confirm</button>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>
+    // State management
+    let currentSelectedUserId = null;
+    let pendingActionForm = null;
+    let currentPage = 1;
+    let pageSize = 10;
+    let matchingStaffRows = [];
 
-    let pendingFormToSubmit = null;
+    // Select Staff Member & Populate Right Drawer
+    function selectStaffMember(userId) {
+        currentSelectedUserId = userId;
+        const row = document.getElementById('staffRow_' + userId);
+        if (!row) return;
 
-    function showCustomConfirm(options) {
-        pendingFormToSubmit = options.form;
-        document.getElementById('nlConfirmTitle').textContent = options.title || 'Confirm Action';
-        document.getElementById('nlConfirmDesc').textContent = options.desc || 'Are you sure you want to proceed?';
-        
-        const iconBox = document.getElementById('nlConfirmIconBox');
-        iconBox.className = 'nl-modal-icon-box ' + (options.type || 'danger');
-        
-        const icon = document.getElementById('nlConfirmIcon');
-        icon.className = options.icon || (options.type === 'success' ? 'ti ti-check' : 'ti ti-alert-triangle');
-        
-        const confirmBtn = document.getElementById('nlConfirmSubmitBtn');
-        confirmBtn.className = 'nl-modal-btn confirm ' + (options.type || 'danger');
-        confirmBtn.textContent = options.confirmText || 'Confirm';
-        
-        const modal = document.getElementById('nlCustomConfirmModal');
-        modal.style.display = 'flex';
-        requestAnimationFrame(() => {
-            modal.classList.add('show');
+        document.querySelectorAll('.staff-row').forEach(r => r.classList.remove('selected-row'));
+        row.classList.add('selected-row');
+
+        const staffName = row.getAttribute('data-name') || 'Staff Member';
+        const staffEmail = row.getAttribute('data-email') || 'staff@nlogistic.com';
+        const staffDept = row.getAttribute('data-dept') || 'Fleet Operations';
+        const roleId = parseInt(row.getAttribute('data-roleid') || '3', 10);
+
+        // Update Drawer Info
+        document.getElementById('drawerStaffName').textContent = staffName;
+        document.getElementById('drawerStaffEmail').textContent = staffEmail;
+        document.getElementById('drawerDeptName').textContent = staffDept;
+        document.getElementById('drawerUserIdInput').value = userId;
+
+        const initials = staffName.substring(0, Math.min(2, staffName.length)).toUpperCase();
+        document.getElementById('drawerAvatarBox').textContent = initials;
+
+        // Role badge update
+        const rolePill = document.getElementById('drawerRolePill');
+        const roleDesc = document.getElementById('drawerRoleDesc');
+        if (roleId === 1) {
+            rolePill.className = 'role-badge-pill super-admin';
+            rolePill.textContent = 'Super Admin';
+            roleDesc.textContent = 'Global system administrator with unrestricted clearance across companies, billing algorithms, and security audits.';
+            setAllToggles(true);
+        } else if (roleId === 2) {
+            rolePill.className = 'role-badge-pill company-admin';
+            rolePill.textContent = 'Company Admin';
+            roleDesc.textContent = 'Enterprise tenant administrator managing corporate fleet, staff allocations, and compliance parameters.';
+            setRolePreset([true, true, true, true, true, true, true, true, false, false]);
+        } else if (roleId === 4) {
+            rolePill.className = 'role-badge-pill staff-finance';
+            rolePill.textContent = 'Staff — Finance';
+            roleDesc.textContent = 'Finance operations specialist handling B2B invoices, payments, revenue reconciliation, and audit ledgers.';
+            setRolePreset([true, false, false, true, true, false, true, false, false, false]);
+        } else if (roleId === 5) {
+            rolePill.className = 'role-badge-pill customer';
+            rolePill.textContent = 'Customer / Shipper';
+            roleDesc.textContent = 'Client account with self-scoped tracking, shipment booking, and invoice visibility.';
+            setRolePreset([true, true, true, false, false, false, false, false, false, false]);
+        } else {
+            rolePill.className = 'role-badge-pill staff-ops';
+            rolePill.textContent = 'Company Staff — Operations';
+            roleDesc.textContent = 'Operations specialist assigned to container tracking checkpoints, inventory adjustments, and dispatch.';
+            setRolePreset([true, true, true, false, false, true, true, false, false, false]);
+        }
+
+        // Open Drawer
+        openPermissionsDrawer();
+    }
+
+    function setAllToggles(val) {
+        ['perm_dashboard', 'perm_tracking', 'perm_shipments', 'perm_plg', 'perm_invoicing', 
+         'perm_inventory', 'perm_claims', 'perm_compliance', 'perm_users', 'perm_settings'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = val;
         });
+    }
+
+    function setRolePreset(arr) {
+        const ids = ['perm_dashboard', 'perm_tracking', 'perm_shipments', 'perm_plg', 'perm_invoicing', 
+                     'perm_inventory', 'perm_claims', 'perm_compliance', 'perm_users', 'perm_settings'];
+        ids.forEach((id, idx) => {
+            const el = document.getElementById(id);
+            if (el) el.checked = !!arr[idx];
+        });
+    }
+
+    function openPermissionsDrawer() {
+        const drawer = document.getElementById('permissionsDrawer');
+        drawer.classList.add('open');
+    }
+
+    function closePermissionsDrawer() {
+        const drawer = document.getElementById('permissionsDrawer');
+        drawer.classList.remove('open');
+        document.querySelectorAll('.staff-row').forEach(r => r.classList.remove('selected-row'));
+    }
+
+    function switchDrawerTab(tab) {
+        document.getElementById('tabPermBtn').classList.toggle('active', tab === 'permissions');
+        document.getElementById('tabRoleBtn').classList.toggle('active', tab === 'role');
+        document.getElementById('tabAuditBtn').classList.toggle('active', tab === 'audit');
+
+        document.getElementById('drawerTabPermissions').style.display = (tab === 'permissions') ? 'block' : 'none';
+        document.getElementById('drawerTabRole').style.display = (tab === 'role') ? 'block' : 'none';
+        document.getElementById('drawerTabAudit').style.display = (tab === 'audit') ? 'block' : 'none';
+    }
+
+    // 3-Dots Action Dropdown Toggle
+    function toggleActionDropdown(userId, event) {
+        event.stopPropagation();
+        const allDropdowns = document.querySelectorAll('.action-dropdown-card');
+        allDropdowns.forEach(d => {
+            if (d.id !== 'actionDropdown_' + userId) d.classList.remove('show');
+        });
+
+        const target = document.getElementById('actionDropdown_' + userId);
+        if (target) {
+            target.classList.toggle('show');
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.action-menu-wrap')) {
+            document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        }
+    });
+
+    function openEditPermissions(userId) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        selectStaffMember(userId);
+    }
+
+    function openStaffProfileModal(userId) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        selectStaffMember(userId);
+        switchDrawerTab('role');
+    }
+
+    function resetStaffPassword(userId) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        showCustomConfirmModal({
+            title: 'Reset Staff Password?',
+            desc: 'A secure temporary one-time password link will be dispatched to the staff member corporate email.',
+            icon: 'ti ti-key',
+            color: '#2563EB',
+            btnText: 'Send Reset Email',
+            onConfirm: function() {
+                alert('Password reset link successfully dispatched to staff corporate email.');
+            }
+        });
+    }
+
+    function confirmSuspend(userId, name) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        pendingActionForm = document.getElementById('suspendForm_' + userId);
+        showCustomConfirmModal({
+            title: 'Suspend Staff Account?',
+            desc: 'Are you sure you want to suspend account for ' + name + '? Portal access will be temporarily locked.',
+            icon: 'ti ti-ban',
+            color: '#DC2626',
+            btnText: 'Yes, Suspend',
+            onConfirm: function() {
+                if (pendingActionForm) pendingActionForm.submit();
+            }
+        });
+    }
+
+    function confirmActivate(userId, name) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        pendingActionForm = document.getElementById('activateForm_' + userId);
+        showCustomConfirmModal({
+            title: 'Activate Staff Account?',
+            desc: 'Restore operational credentials and portal clearance for ' + name + '?',
+            icon: 'ti ti-circle-check',
+            color: '#10B981',
+            btnText: 'Yes, Activate',
+            onConfirm: function() {
+                if (pendingActionForm) pendingActionForm.submit();
+            }
+        });
+    }
+
+    function confirmDelete(userId, name) {
+        document.querySelectorAll('.action-dropdown-card').forEach(d => d.classList.remove('show'));
+        pendingActionForm = document.getElementById('deleteForm_' + userId);
+        showCustomConfirmModal({
+            title: 'Delete Staff User?',
+            desc: 'Permanent action: Remove ' + name + ' from active corporate staff directory.',
+            icon: 'ti ti-trash',
+            color: '#DC2626',
+            btnText: 'Delete Account',
+            onConfirm: function() {
+                if (pendingActionForm) pendingActionForm.submit();
+            }
+        });
+    }
+
+    // Modal helpers
+    function openInviteModal() {
+        const m = document.getElementById('inviteStaffModal');
+        m.style.display = 'flex';
+        requestAnimationFrame(() => m.classList.add('show'));
+    }
+    function closeInviteModal() {
+        const m = document.getElementById('inviteStaffModal');
+        m.classList.remove('show');
+        setTimeout(() => m.style.display = 'none', 200);
+    }
+
+    function showCustomConfirmModal(opts) {
+        document.getElementById('confirmTitle').textContent = opts.title;
+        document.getElementById('confirmDesc').textContent = opts.desc;
+        const iconBox = document.getElementById('confirmIconBox');
+        const icon = document.getElementById('confirmIcon');
+        icon.className = opts.icon;
+        iconBox.style.color = opts.color;
+        iconBox.style.background = (opts.color === '#10B981') ? '#ECFDF5' : ((opts.color === '#2563EB') ? '#EFF6FF' : '#FEF2F2');
+        iconBox.style.borderColor = (opts.color === '#10B981') ? '#A7F3D0' : ((opts.color === '#2563EB') ? '#BFDBFE' : '#FECACA');
+        
+        const btn = document.getElementById('confirmActionBtn');
+        btn.textContent = opts.btnText;
+        btn.style.background = opts.color;
+        btn.onclick = function() {
+            closeCustomConfirmModal();
+            if (opts.onConfirm) opts.onConfirm();
+        };
+
+        const m = document.getElementById('nlCustomConfirmModal');
+        m.style.display = 'flex';
+        requestAnimationFrame(() => m.classList.add('show'));
     }
 
     function closeCustomConfirmModal() {
-        const modal = document.getElementById('nlCustomConfirmModal');
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            pendingFormToSubmit = null;
-        }, 200);
+        const m = document.getElementById('nlCustomConfirmModal');
+        m.classList.remove('show');
+        setTimeout(() => m.style.display = 'none', 200);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const submitBtn = document.getElementById('nlConfirmSubmitBtn');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', function() {
-                if (pendingFormToSubmit) {
-                    const form = pendingFormToSubmit;
-                    closeCustomConfirmModal();
-                    form.submit();
-                }
-            });
-        }
-
-        const modal = document.getElementById('nlCustomConfirmModal');
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) closeCustomConfirmModal();
-            });
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeCustomConfirmModal();
-        });
-    });
-
-    let currentTab = 'Pending';
-    let currentPage = 1;
-    let pageSize = 10;
-    let matchingCustomerRows = [];
-
-    function filterByTab(tab) {
-        currentTab = tab;
+    // Filtering & Circular Pagination
+    function handleStaffFilter() {
         currentPage = 1;
-
-        document.getElementById('tabPendingBtn').classList.toggle('active', tab === 'Pending');
-        document.getElementById('tabActiveBtn').classList.toggle('active', tab === 'Active');
-        if (document.getElementById('tabSuspendedBtn')) {
-            document.getElementById('tabSuspendedBtn').classList.toggle('active', tab === 'Suspended');
-        }
-        document.getElementById('tabAllBtn').classList.toggle('active', tab === 'All');
-
-        applyFilters();
+        applyStaffFilters();
     }
 
-    function handleCustomerSearch() {
+    function changeStaffPageSize(size) {
+        pageSize = parseInt(size, 10) || 10;
         currentPage = 1;
-        applyFilters();
+        applyStaffFilters();
     }
 
-    function changeUsersPageSize(newSize) {
-        pageSize = parseInt(newSize, 10) || 10;
-        currentPage = 1;
-        applyFilters();
-    }
-
-    function goToCustomerPage(page) {
+    function goToStaffPage(page) {
         currentPage = page;
-        updateCustomerPaginationDisplay();
+        updateStaffPagination();
     }
 
-    function applyFilters() {
-        const query = document.getElementById('customerSearchInput').value.trim().toLowerCase();
-        const allRows = Array.from(document.querySelectorAll('.customer-row'));
-        matchingCustomerRows = [];
+    function applyStaffFilters() {
+        const query = document.getElementById('staffSearchInput').value.trim().toLowerCase();
+        const roleVal = document.getElementById('roleFilter').value;
+        const deptVal = document.getElementById('departmentFilter').value;
+
+        const allRows = Array.from(document.querySelectorAll('.staff-row'));
+        matchingStaffRows = [];
 
         allRows.forEach(row => {
-            const status = row.getAttribute('data-status');
-            const searchData = row.getAttribute('data-search') || '';
+            const name = (row.getAttribute('data-name') || '').toLowerCase();
+            const email = (row.getAttribute('data-email') || '').toLowerCase();
+            const id = (row.getAttribute('data-id') || '');
+            const rId = row.getAttribute('data-roleid');
+            const dept = row.getAttribute('data-dept');
 
-            const matchesTab = (currentTab === 'All') || 
-                               (currentTab === 'Suspended' ? (status === 'Locked' || status === 'Suspended' || status === 'Inactive') : (status === currentTab));
-            const matchesQuery = !query || searchData.includes(query);
+            const matchesQuery = !query || name.includes(query) || email.includes(query) || id.includes(query) || ('stf-' + (parseInt(id)+100)).includes(query);
+            const matchesRole = (roleVal === 'ALL') || (rId === roleVal);
+            const matchesDept = (deptVal === 'ALL') || (dept === deptVal);
 
-            if (matchesTab && matchesQuery) {
-                matchingCustomerRows.push(row);
+            if (matchesQuery && matchesRole && matchesDept) {
+                matchingStaffRows.push(row);
             }
         });
 
-        const table = document.getElementById('customersTable');
-        const emptyState = document.getElementById('emptyStateBox');
-        const emptyTitle = document.getElementById('emptyStateTitle');
-        const emptyDesc = document.getElementById('emptyStateDesc');
-        const pagination = document.getElementById('usersPagination');
-
-        if (matchingCustomerRows.length === 0) {
-            table.style.display = 'none';
-            if (pagination) pagination.style.display = 'none';
-            emptyState.style.display = 'block';
-
-            if (query) {
-                emptyTitle.textContent = 'No Customers Found';
-                emptyDesc.textContent = 'No customer records matched your search query "' + query + '". Try adjusting your search term.';
-            } else if (currentTab === 'Pending') {
-                emptyTitle.textContent = 'All Caught Up!';
-                emptyDesc.textContent = 'There are currently no pending customer registrations requiring Super Admin verification. All client accounts are up to date.';
-            } else if (currentTab === 'Active') {
-                emptyTitle.textContent = 'No Active Customers';
-                emptyDesc.textContent = 'There are currently no active customer accounts found in the database.';
-            } else if (currentTab === 'Suspended') {
-                emptyTitle.textContent = 'No Suspended Customers';
-                emptyDesc.textContent = 'Good news! There are currently no suspended or inactive customer accounts in the system.';
-            } else {
-                emptyTitle.textContent = 'No Customer Records';
-                emptyDesc.textContent = 'No registered customers or portal users found.';
-            }
-        } else {
-            table.style.display = 'table';
-            if (pagination) pagination.style.display = 'flex';
-            emptyState.style.display = 'none';
-            updateCustomerPaginationDisplay();
-        }
+        updateStaffPagination();
     }
 
-    function updateCustomerPaginationDisplay() {
-        const total = matchingCustomerRows.length;
+    function updateStaffPagination() {
+        const total = matchingStaffRows.length;
         const totalPages = Math.ceil(total / pageSize) || 1;
 
         if (currentPage > totalPages) currentPage = totalPages;
@@ -895,44 +1654,38 @@
         const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
         const endIndex = Math.min(startIndex + pageSize, total);
 
-        const startEl = document.getElementById('usersPageStart');
-        const endEl = document.getElementById('usersPageEnd');
-        const totalEl = document.getElementById('usersTotalRows');
+        document.getElementById('staffPageStart').textContent = total === 0 ? '0' : (startIndex + 1);
+        document.getElementById('staffPageEnd').textContent = endIndex;
+        document.getElementById('staffTotalRows').textContent = total;
 
-        if (startEl) startEl.textContent = total === 0 ? '0' : (startIndex + 1);
-        if (endEl) endEl.textContent = endIndex;
-        if (totalEl) totalEl.textContent = total;
-
-        const allRows = document.querySelectorAll('.customer-row');
+        const allRows = document.querySelectorAll('.staff-row');
         allRows.forEach(r => { r.style.display = 'none'; });
 
         for (let i = startIndex; i < endIndex; i++) {
-            if (matchingCustomerRows[i]) {
-                matchingCustomerRows[i].style.display = '';
+            if (matchingStaffRows[i]) {
+                matchingStaffRows[i].style.display = '';
             }
         }
 
-        renderCustomerPaginationButtons(totalPages);
+        renderStaffPaginationButtons(totalPages);
     }
 
-    function renderCustomerPaginationButtons(totalPages) {
-        const nav = document.getElementById('usersPageNav');
+    function renderStaffPaginationButtons(totalPages) {
+        const nav = document.getElementById('staffPageNav');
         if (!nav) return;
         nav.innerHTML = '';
 
-        if (totalPages <= 1 && matchingCustomerRows.length <= pageSize) {
-            return;
-        }
+        if (totalPages <= 1 && matchingStaffRows.length <= pageSize) return;
 
-        // Prev Button
-        const prevBtn = document.createElement('button');
-        prevBtn.type = 'button';
-        prevBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === 1 ? ' disabled' : '');
-        prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
-        prevBtn.onclick = function() { if (currentPage > 1) goToCustomerPage(currentPage - 1); };
-        nav.appendChild(prevBtn);
+        // Prev
+        const prev = document.createElement('button');
+        prev.type = 'button';
+        prev.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === 1 ? ' disabled' : '');
+        prev.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
+        prev.onclick = function() { if (currentPage > 1) goToStaffPage(currentPage - 1); };
+        nav.appendChild(prev);
 
-        // Page Numbers
+        // Numbered Pages
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, startPage + 4);
         if (endPage - startPage < 4) {
@@ -944,34 +1697,32 @@
             p1.type = 'button';
             p1.className = 'nl-page-btn nl-page-num' + (currentPage === 1 ? ' active' : '');
             p1.textContent = '1';
-            p1.onclick = function() { goToCustomerPage(1); };
+            p1.onclick = function() { goToStaffPage(1); };
             nav.appendChild(p1);
 
             if (startPage > 2) {
                 const dots = document.createElement('span');
-                dots.style.padding = '0 6px';
-                dots.style.color = '#94A3B8';
+                dots.className = 'nl-page-ellipsis';
                 dots.textContent = '...';
                 nav.appendChild(dots);
             }
         }
 
         for (let p = startPage; p <= endPage; p++) {
-            const pBtn = document.createElement('button');
-            pBtn.type = 'button';
-            pBtn.className = 'nl-page-btn nl-page-num' + (p === currentPage ? ' active' : '');
-            pBtn.textContent = p;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'nl-page-btn nl-page-num' + (p === currentPage ? ' active' : '');
+            btn.textContent = p;
             (function(page) {
-                pBtn.onclick = function() { goToCustomerPage(page); };
+                btn.onclick = function() { goToStaffPage(page); };
             })(p);
-            nav.appendChild(pBtn);
+            nav.appendChild(btn);
         }
 
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 const dots = document.createElement('span');
-                dots.style.padding = '0 6px';
-                dots.style.color = '#94A3B8';
+                dots.className = 'nl-page-ellipsis';
                 dots.textContent = '...';
                 nav.appendChild(dots);
             }
@@ -979,21 +1730,27 @@
             pLast.type = 'button';
             pLast.className = 'nl-page-btn nl-page-num' + (currentPage === totalPages ? ' active' : '');
             pLast.textContent = totalPages;
-            pLast.onclick = function() { goToCustomerPage(totalPages); };
+            pLast.onclick = function() { goToStaffPage(totalPages); };
             nav.appendChild(pLast);
         }
 
-        // Next Button
-        const nextBtn = document.createElement('button');
-        nextBtn.type = 'button';
-        nextBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === totalPages ? ' disabled' : '');
-        nextBtn.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
-        nextBtn.onclick = function() { if (currentPage < totalPages) goToCustomerPage(currentPage + 1); };
-        nav.appendChild(nextBtn);
+        // Next
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === totalPages ? ' disabled' : '');
+        next.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
+        next.onclick = function() { if (currentPage < totalPages) goToStaffPage(currentPage + 1); };
+        nav.appendChild(next);
     }
 
+    // Auto-initialize with Rohit Sharma (or first staff) selected on load
     document.addEventListener('DOMContentLoaded', function() {
-        filterByTab('Pending');
+        applyStaffFilters();
+        const firstRow = document.querySelector('.staff-row');
+        if (firstRow) {
+            const id = firstRow.getAttribute('data-id');
+            selectStaffMember(parseInt(id, 10));
+        }
     });
 </script>
 

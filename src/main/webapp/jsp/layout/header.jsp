@@ -1927,7 +1927,7 @@
                 </a>
                 <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/jsp/admin/companies.jsp">Company</a></li>
-                    <li><a href="${pageContext.request.contextPath}/jsp/admin/users.jsp">Customer</a></li>
+                    <li><a href="${pageContext.request.contextPath}/jsp/admin/users.jsp">Users &amp; Roles</a></li>
                 </ul>
             </div>
             </c:if>
@@ -2000,6 +2000,16 @@
                     <span class="badge-alerts">12</span>
                 </a>
             </div>
+
+            <!-- Staff & Roles Governance -->
+            <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2}">
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/jsp/admin/users.jsp" class="nav-link">
+                    <i class="ti ti-users main-icon"></i>
+                    <span>Users &amp; Roles</span>
+                </a>
+            </div>
+            </c:if>
 
             <!-- Settings -->
             <div class="nav-item">
