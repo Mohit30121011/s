@@ -1092,6 +1092,32 @@
     .custom-alert.danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
 
     /* Modal Backdrop and Glassmorphic Dialog */
+        /* Add Staff Modal TomSelect Styling */
+    #addStaffModal .ts-wrapper.form-select-custom {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    #addStaffModal .ts-wrapper.form-select-custom .ts-control {
+        height: 38px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        font-size: 13px !important;
+        padding: 0 34px 0 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        background: #FFFFFF !important;
+        box-shadow: none !important;
+        cursor: pointer !important;
+    }
+    #addStaffModal .ts-wrapper.form-select-custom.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
+    }
+    .ts-dropdown {
+        z-index: 99999999 !important;
+    }
+
     .nl-modal-backdrop {
         position: fixed;
         inset: 0;
@@ -1693,7 +1719,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                 <div>
                     <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Role Assignment <span style="color: #EF4444;">*</span></label>
-                    <select name="staffRoleId" required class="form-control no-custom-select" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 10px; cursor: pointer; background: #fff;">
+                    <select name="staffRoleId" id="addStaffRoleId" required class="form-select-custom">
                         <option value="3" selected>Company Staff (Ops)</option>
                         <option value="4">Company Staff (Finance)</option>
                         <option value="2">Company Admin</option>
@@ -1703,7 +1729,7 @@
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase;">Tenant / Company</label>
-                    <select name="staffCompanyId" class="form-control no-custom-select" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1.5px solid #E2E8F0; padding: 0 10px; cursor: pointer; background: #fff;">
+                    <select name="staffCompanyId" id="addStaffCompanyId" class="form-select-custom">
                         <option value="">Administration (System-Wide)</option>
                         <c:forEach var="cp" items="${allCompanies}">
                             <option value="${cp.companyId}">${cp.companyName}</option>
@@ -2032,11 +2058,36 @@
     }
 
     // Modal helpers
+    function initAddStaffModalDropdowns() {
+        ['addStaffRoleId', 'addStaffCompanyId'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el && !el.tomselect) {
+                try {
+                    const isSearchable = (id === 'addStaffCompanyId');
+                    new TomSelect(el, {
+                        create: false,
+                        dropdownParent: 'body',
+                        allowEmptyOption: true,
+                        controlInput: isSearchable ? undefined : null,
+                        maxOptions: 50
+                    });
+                } catch(e) {
+                    console.warn("TomSelect modal error:", e);
+                }
+            } else if (el && el.tomselect) {
+                el.tomselect.sync();
+            }
+        });
+    }
+
     function openAddStaffModal() {
         const m = document.getElementById('addStaffModal');
         if (m) {
             m.style.display = 'flex';
-            requestAnimationFrame(() => m.classList.add('show'));
+            requestAnimationFrame(() => {
+                m.classList.add('show');
+                initAddStaffModalDropdowns();
+            });
         }
     }
     function closeAddStaffModal() {
