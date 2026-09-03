@@ -666,14 +666,6 @@
                 </div>
 
                 <div class="nl-fields-grid">
-                    <!-- Contact Person (Company Only) -->
-                    <div class="nl-field-box company-field">
-                        <label for="inputContact">Admin Contact Person <span class="req">*</span></label>
-                        <div class="nl-input-wrap">
-                            <i class="ti ti-id lead-icon"></i>
-                            <input type="text" id="inputContact" name="contactPerson" class="nl-form-control" placeholder="Full name of representative" required>
-                        </div>
-                    </div>
 
                     <!-- Contact Email -->
                     <div class="nl-field-box">

@@ -42,8 +42,7 @@ public class RegisterServlet extends HttpServlet {
                 String address = request.getParameter("address");
                 
                 // Admin contact fields
-                String contactPerson = request.getParameter("contactPerson");
-                String email = request.getParameter("email");
+                                String email = request.getParameter("email");
                 String phone = request.getParameter("phone");
                 String username = request.getParameter("username");
                 String password = request.getParameter("password");
