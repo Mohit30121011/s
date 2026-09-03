@@ -610,20 +610,27 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
     
 <script>
-// Ultimate Fallback for Sidebar Toggles
+// Sidebar Toggle with Clean Two-Way Open & Close
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(toggle) {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
-            let targetId = this.getAttribute('href').substring(1);
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            let href = this.getAttribute('href') || this.getAttribute('data-bs-target') || '';
+            let targetId = href.replace('#', '').trim();
             let target = document.getElementById(targetId);
-            if(target) {
-                target.classList.toggle('show');
-                this.classList.toggle('collapsed');
-                if (target.classList.contains('show')) {
-                    this.setAttribute('aria-expanded', 'true');
-                } else {
+            if (target) {
+                let isOpen = target.classList.contains('show');
+                if (isOpen) {
+                    target.classList.remove('show');
+                    this.classList.add('collapsed');
                     this.setAttribute('aria-expanded', 'false');
+                } else {
+                    target.classList.add('show');
+                    this.classList.remove('collapsed');
+                    this.setAttribute('aria-expanded', 'true');
                 }
             }
         });
