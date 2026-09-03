@@ -22,10 +22,10 @@ public class AuditDAO {
         public String getUsername() { return username != null ? username : "System / Anonymous"; }
         public void setUsername(String username) { this.username = username; }
 
-        public String getEmail() { return email != null ? email : "-"; }
+        public String getEmail() { return email != null ? email : "—"; }
         public void setEmail(String email) { this.email = email; }
 
-        public String getRoleName() { return roleName != null ? roleName : "External"; }
+        public String getRoleName() { return roleName != null ? roleName : "System"; }
         public void setRoleName(String roleName) { this.roleName = roleName; }
 
         public int getRoleId() { return roleId; }
@@ -33,7 +33,7 @@ public class AuditDAO {
     }
 
     /**
-     * Retrieve security & login audit logs with filtering and user details
+     * Retrieve all real security & authentication audit logs directly from database
      */
     public List<AuditEntry> getAuditLogs(String actionFilter, String searchKeyword, int limit) {
         List<AuditEntry> list = new ArrayList<>();
@@ -49,8 +49,14 @@ public class AuditDAO {
         List<Object> params = new ArrayList<>();
 
         if (actionFilter != null && !actionFilter.trim().isEmpty() && !"ALL".equalsIgnoreCase(actionFilter)) {
-            sql.append("AND a.action = ? ");
-            params.add(actionFilter.trim());
+            if ("FAILED".equalsIgnoreCase(actionFilter)) {
+                sql.append("AND (a.action = 'LOGIN_FAILED' OR a.action = 'LOGIN_BLOCKED_LOCKED') ");
+            } else if ("RESETS".equalsIgnoreCase(actionFilter)) {
+                sql.append("AND a.action LIKE '%RESET%' ");
+            } else {
+                sql.append("AND a.action = ? ");
+                params.add(actionFilter.trim());
+            }
         }
 
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
@@ -89,11 +95,37 @@ public class AuditDAO {
                     entry.setIpAddress(rs.getString("ip_address"));
                     entry.setTimestamp(rs.getTimestamp("timestamp"));
 
-                    entry.setUsername(rs.getString("username"));
-                    entry.setEmail(rs.getString("email"));
-                    entry.setRoleName(rs.getString("role_name"));
-                    entry.setRoleId(rs.getInt("role_id"));
+                    String uname = rs.getString("username");
+                    String entName = rs.getString("entity_name");
+                    if (uname != null && !uname.trim().isEmpty()) {
+                        entry.setUsername(uname);
+                    } else if (entName != null && !entName.trim().isEmpty()) {
+                        entry.setUsername(entName);
+                    } else if (entry.getUserId() > 0) {
+                        entry.setUsername("User #" + entry.getUserId());
+                    } else {
+                        entry.setUsername("Public Client");
+                    }
 
+                    String mail = rs.getString("email");
+                    if (mail != null && !mail.trim().isEmpty()) {
+                        entry.setEmail(mail);
+                    } else if (entry.getOldValue() != null && entry.getOldValue().contains("@")) {
+                        entry.setEmail(entry.getOldValue());
+                    } else {
+                        entry.setEmail("—");
+                    }
+
+                    String rName = rs.getString("role_name");
+                    if (rName != null && !rName.trim().isEmpty()) {
+                        entry.setRoleName(rName);
+                    } else if (entry.getUserId() > 0) {
+                        entry.setRoleName("Registered User");
+                    } else {
+                        entry.setRoleName("Visitor");
+                    }
+
+                    entry.setRoleId(rs.getInt("role_id"));
                     list.add(entry);
                 }
             }
@@ -104,7 +136,7 @@ public class AuditDAO {
     }
 
     /**
-     * Compute real-time telemetry metrics for the KPI dashboard
+     * Compute accurate real-time telemetry metrics directly from database
      */
     public Map<String, Integer> getAuditKPIs() {
         Map<String, Integer> kpis = new HashMap<>();
@@ -129,9 +161,9 @@ public class AuditDAO {
                     kpis.put("totalLogins", kpis.get("totalLogins") + cnt);
                 } else if ("LOGOUT".equalsIgnoreCase(act)) {
                     kpis.put("totalLogouts", kpis.get("totalLogouts") + cnt);
-                } else if ("LOGIN_FAILED".equalsIgnoreCase(act)) {
+                } else if ("LOGIN_FAILED".equalsIgnoreCase(act) || "LOGIN_BLOCKED_LOCKED".equalsIgnoreCase(act)) {
                     kpis.put("failedLogins", kpis.get("failedLogins") + cnt);
-                } else if (act != null && (act.contains("RESET") || act.contains("DENIED") || act.contains("LOCKED"))) {
+                } else {
                     kpis.put("securityAlerts", kpis.get("securityAlerts") + cnt);
                 }
             }
