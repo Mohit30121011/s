@@ -539,13 +539,9 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         overflow: visible;
         transition: all 0.3s ease;
-        min-height: 400px;
-        display: flex;
-        flex-direction: column;
     }
     .staff-table-card .table-responsive {
         overflow: visible !important;
-        flex: 1;
     }
 
     /* Table Styling */
