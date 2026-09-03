@@ -549,41 +549,40 @@ document.addEventListener("DOMContentLoaded", function() {
                 </a>
             </div>
 
-            <div class="nav-item has-submenu">
-                <a href="#" class="nav-link" onclick="this.parentElement.classList.toggle('active')">
-                    <i class="fa-solid fa-file-invoice-dollar main-icon"></i> Finance
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+            <!-- STOCK & INVENTORY MODULE -->
+            <div class="nav-item">
+                <a href="#stockSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                    <i class="fa-solid fa-boxes-stacked main-icon"></i> Stock & Inventory
+                    <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-                <ul class="sub-nav">
-                    <li><a href="#">Overview</a></li>
-                    <li><a href="${pageContext.request.contextPath}/finance/profit-loss" class="active">Profit & Loss</a></li>
-                    <li><a href="#">Invoices</a></li>
-                    <li><a href="#">Cost Analysis</a></li>
+                <ul class="sub-nav collapse" id="stockSubmenu">
+                    <li><a href="${pageContext.request.contextPath}/upload-stock">Upload / Manage Stock</a></li>
+                    <li><a href="${pageContext.request.contextPath}/ledger">Inventory Ledger (FR4.5)</a></li>
+                </ul>
+            </div>
+
+            <!-- FINANCE MODULE -->
+            <div class="nav-item">
+                <a href="#financeSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                    <i class="fa-solid fa-file-invoice-dollar main-icon"></i> Billing & Finance
+                    <i class="fa-solid fa-angle-down caret"></i>
+                </a>
+                <ul class="sub-nav collapse" id="financeSubmenu">
+                    <li><a href="${pageContext.request.contextPath}/finance/profit-loss">Profit & Loss</a></li>
+                    <li><a href="${pageContext.request.contextPath}/invoices">Invoices (FR5)</a></li>
                 </ul>
             </div>
             
+            <!-- TRACKING & SCANNING MODULE (FR8) -->
             <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/containers" class="nav-link">
-                    <i class="fa-solid fa-boxes-stacked main-icon"></i> Containers
+                <a href="#barcodeSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                    <i class="fa-solid fa-qrcode main-icon"></i> Tracking & Scanning
+                    <i class="fa-solid fa-angle-down caret"></i>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/predictive-graph" class="nav-link">
-                    <i class="fa-solid fa-chart-line main-icon"></i> Predictive Graph
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/upload-stock" class="nav-link">
-                    <i class="fa-solid fa-cloud-arrow-up main-icon"></i> Upload Stock
-                </a>
-            </div>
-            
-            <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/ledger" class="nav-link">
-                    <i class="fa-solid fa-book-open main-icon"></i> Inventory Ledger
-                </a>
+                <ul class="sub-nav collapse" id="barcodeSubmenu">
+                    <li><a href="${pageContext.request.contextPath}/barcodes">Manage Barcodes (FR8)</a></li>
+                    <li><a href="${pageContext.request.contextPath}/scan-barcode">Scan Barcodes</a></li>
+                </ul>
             </div>
 
             <div class="nav-item">

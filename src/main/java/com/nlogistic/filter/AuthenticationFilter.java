@@ -67,8 +67,12 @@ public class AuthenticationFilter implements Filter {
         else if (path.startsWith("/executive") || path.startsWith("/company")) {
             allowed = (roleId <= 2); 
         }
-        // Vessels & Containers (Module 3) & Stock Management (Module 4)
-        else if (path.startsWith("/vessel") || path.startsWith("/stock") || path.startsWith("/predictive-graph") || path.startsWith("/upload-stock") || path.startsWith("/download-errors") || path.startsWith("/manual-stock") || path.startsWith("/adjust-stock") || path.startsWith("/ledger")) {
+        // Finance (Module 5)
+        else if (path.startsWith("/invoices") || path.startsWith("/generate-invoice") || path.startsWith("/record-payment") || path.startsWith("/view-invoice")) {
+            allowed = (roleId <= 4); // Super Admin, Company Admin, Operations, Finance
+        }
+        // Vessels & Containers (Module 3) & Stock Management (Module 4) & Barcodes (Module 8)
+        else if (path.startsWith("/vessel") || path.startsWith("/stock") || path.startsWith("/predictive-graph") || path.startsWith("/upload-stock") || path.startsWith("/download-errors") || path.startsWith("/manual-stock") || path.startsWith("/adjust-stock") || path.startsWith("/ledger") || path.startsWith("/barcodes") || path.startsWith("/scan-barcode")) {
             allowed = (roleId <= 3); // Super Admin, Company Admin, Operations
         }
         else if (path.startsWith("/container") || path.startsWith("/containers") || path.startsWith("/allocate") || path.startsWith("/book")) {
