@@ -1803,6 +1803,18 @@
         }
 
 
+    
+        /* Global Circular User Profile & Tenant Avatars */
+        .avatar,
+        .user-avatar,
+        .customer-avatar,
+        .company-avatar,
+        .user-profile .avatar,
+        .top-header .avatar {
+            border-radius: 50% !important;
+            overflow: hidden !important;
+        }
+
     </style>
 </head>
 <body>

@@ -289,7 +289,7 @@
     /* Customer Name & Avatar Cell */
     .customer-cell { display: flex; align-items: center; gap: 14px; }
     .customer-avatar {
-        width: 42px; height: 42px; border-radius: 12px; background: #FC8019;
+        width: 42px; height: 42px; border-radius: 50% !important; background: #FC8019;
         color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
         box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); flex-shrink: 0; letter-spacing: 0.5px;
     }
