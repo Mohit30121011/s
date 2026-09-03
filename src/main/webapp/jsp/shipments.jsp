@@ -160,6 +160,99 @@
         transform: translateY(-1px);
         box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
     }
+
+    /* Premium Modern Confirmation Modal */
+    .modal-dialog-confirm {
+        max-width: 440px;
+        margin: 1.75rem auto;
+    }
+    .modal-content-confirm {
+        background: #FFFFFF;
+        border: 1px solid #E7E9ED;
+        border-radius: 16px;
+        box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.18), 0 8px 20px -6px rgba(15, 23, 42, 0.08);
+        padding: 24px 24px 20px 24px;
+        border: none;
+        overflow: hidden;
+    }
+    .confirm-modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .confirm-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #FEE2E2;
+        color: #DC2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .confirm-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 6px;
+        letter-spacing: -0.2px;
+    }
+    .confirm-text {
+        font-size: 13.5px;
+        color: #64748B;
+        line-height: 1.55;
+        margin-bottom: 24px;
+    }
+    .confirm-btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+    }
+    .btn-modal-cancel {
+        flex: 1;
+        padding: 10px 18px;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-modal-cancel:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #1E293B;
+    }
+    .btn-modal-danger {
+        flex: 1;
+        padding: 10px 18px;
+        border-radius: 10px;
+        border: 1px solid #DC2626;
+        background: #DC2626;
+        color: #FFFFFF !important;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+        transition: all 0.15s ease;
+    }
+    .btn-modal-danger:hover {
+        background: #B91C1C;
+        border-color: #B91C1C;
+        color: #FFFFFF !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+    }
+
 </style>
 
 <div class="main-content">
@@ -277,24 +370,28 @@
                     </div>
 
                     <!-- Delete Modal -->
-                    <div class="modal fade" id="deleteModal${s.shipmentId}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
+                    <div class="modal fade" id="deleteModal${s.shipmentId}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-confirm">
+                            <div class="modal-content modal-content-confirm">
                                 <form action="${pageContext.request.contextPath}/shipments/delete" method="POST">
-                                    <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
-                                        <h5 class="modal-title text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Confirm Deletion</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <input type="hidden" name="id" value="${s.shipmentId}">
+                                    <input type="hidden" name="shipmentId" value="${s.shipmentId}">
+                                    <div class="confirm-modal-header">
+                                        <div class="confirm-icon-box">
+                                            <i class="ti ti-trash"></i>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <div class="modal-body">
-                                        <input type="hidden" name="shipmentId" value="${s.shipmentId}">
-                                        <p style="font-size: 14px; color: var(--text-dark); margin-bottom: 0;">
-                                            Are you sure you want to permanently delete Shipment <strong>#${s.shipmentId}</strong>? 
-                                            This action cannot be undone and will erase all tracking history.
-                                        </p>
+                                    <div class="confirm-title">Delete Shipment #${s.shipmentId}?</div>
+                                    <div class="confirm-text">
+                                        Are you sure you want to permanently delete shipment <strong>#${s.shipmentId}</strong> for <strong>${s.customerName}</strong>? This action cannot be undone and will erase all tracking records.
                                     </div>
-                                    <div class="modal-footer" style="background: #F9FAFB; border-top: none;">
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                                        <button type="submit" class="btn" style="background: var(--red-brand); color: white; border-radius: 8px; font-weight: 600;">Delete Permanently</button>
+                                    <div class="confirm-btn-row">
+                                        <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn-modal-danger">
+                                            <i class="ti ti-trash"></i>
+                                            <span>Delete Permanently</span>
+                                        </button>
                                     </div>
                                 </form>
                             </div>

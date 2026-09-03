@@ -117,7 +117,16 @@ public class ShipmentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/shipments/create?error=true");
             }
         } else if (pathInfo != null && pathInfo.equals("/delete")) {
-shipmentDAO.deleteShipment(Integer.parseInt(request.getParameter("id")), currentUser.getUserId());
+            try {
+                String idParam = request.getParameter("id");
+                if (idParam == null || idParam.isEmpty()) idParam = request.getParameter("shipmentId");
+                int delId = Integer.parseInt(idParam);
+                shipmentDAO.deleteShipment(delId, currentUser.getUserId());
+                session.setAttribute("successMessage", "Shipment #" + delId + " was deleted successfully.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("errorMessage", "Failed to delete shipment: " + e.getMessage());
+            }
             response.sendRedirect(request.getContextPath() + "/shipments");
 } else if (pathInfo != null && pathInfo.equals("/updateStatus")) {
             int shipmentId = Integer.parseInt(request.getParameter("shipmentId"));
