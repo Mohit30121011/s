@@ -684,6 +684,25 @@
             </table>
         </div>
 
+        
+        <!-- Enterprise Theme Pagination Bar -->
+        <div class="nl-pagination-wrapper" id="usersPagination">
+            <div class="nl-pagination-info">
+                <span>Showing <strong id="usersPageStart">1</strong> to <strong id="usersPageEnd">10</strong> of <strong id="usersTotalRows">0</strong> records</span>
+                <div class="d-inline-flex align-items-center gap-2 ms-2">
+                    <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
+                    <select id="usersPageSize" class="nl-page-size-select no-custom-select" onchange="changeUsersPageSize(this.value)">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <div class="nl-pagination-nav" id="usersPageNav">
+                <!-- Dynamically generated page buttons -->
+            </div>
+        </div>
+
         <!-- Modern Empty State -->
         <div id="emptyStateBox" class="empty-caught-up-card" style="display: none;">
             <div class="empty-shield-icon-box">
@@ -779,9 +798,13 @@
     });
 
     let currentTab = 'Pending';
+    let currentPage = 1;
+    let pageSize = 10;
+    let matchingCustomerRows = [];
 
     function filterByTab(tab) {
         currentTab = tab;
+        currentPage = 1;
 
         document.getElementById('tabPendingBtn').classList.toggle('active', tab === 'Pending');
         document.getElementById('tabActiveBtn').classList.toggle('active', tab === 'Active');
@@ -794,15 +817,27 @@
     }
 
     function handleCustomerSearch() {
+        currentPage = 1;
         applyFilters();
+    }
+
+    function changeUsersPageSize(newSize) {
+        pageSize = parseInt(newSize, 10) || 10;
+        currentPage = 1;
+        applyFilters();
+    }
+
+    function goToCustomerPage(page) {
+        currentPage = page;
+        updateCustomerPaginationDisplay();
     }
 
     function applyFilters() {
         const query = document.getElementById('customerSearchInput').value.trim().toLowerCase();
-        const rows = document.querySelectorAll('.customer-row');
-        let visibleCount = 0;
+        const allRows = Array.from(document.querySelectorAll('.customer-row'));
+        matchingCustomerRows = [];
 
-        rows.forEach(row => {
+        allRows.forEach(row => {
             const status = row.getAttribute('data-status');
             const searchData = row.getAttribute('data-search') || '';
 
@@ -811,10 +846,7 @@
             const matchesQuery = !query || searchData.includes(query);
 
             if (matchesTab && matchesQuery) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
+                matchingCustomerRows.push(row);
             }
         });
 
@@ -822,9 +854,11 @@
         const emptyState = document.getElementById('emptyStateBox');
         const emptyTitle = document.getElementById('emptyStateTitle');
         const emptyDesc = document.getElementById('emptyStateDesc');
+        const pagination = document.getElementById('usersPagination');
 
-        if (visibleCount === 0) {
+        if (matchingCustomerRows.length === 0) {
             table.style.display = 'none';
+            if (pagination) pagination.style.display = 'none';
             emptyState.style.display = 'block';
 
             if (query) {
@@ -845,8 +879,117 @@
             }
         } else {
             table.style.display = 'table';
+            if (pagination) pagination.style.display = 'flex';
             emptyState.style.display = 'none';
+            updateCustomerPaginationDisplay();
         }
+    }
+
+    function updateCustomerPaginationDisplay() {
+        const total = matchingCustomerRows.length;
+        const totalPages = Math.ceil(total / pageSize) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, total);
+
+        const startEl = document.getElementById('usersPageStart');
+        const endEl = document.getElementById('usersPageEnd');
+        const totalEl = document.getElementById('usersTotalRows');
+
+        if (startEl) startEl.textContent = total === 0 ? '0' : (startIndex + 1);
+        if (endEl) endEl.textContent = endIndex;
+        if (totalEl) totalEl.textContent = total;
+
+        const allRows = document.querySelectorAll('.customer-row');
+        allRows.forEach(r => { r.style.display = 'none'; });
+
+        for (let i = startIndex; i < endIndex; i++) {
+            if (matchingCustomerRows[i]) {
+                matchingCustomerRows[i].style.display = '';
+            }
+        }
+
+        renderCustomerPaginationButtons(totalPages);
+    }
+
+    function renderCustomerPaginationButtons(totalPages) {
+        const nav = document.getElementById('usersPageNav');
+        if (!nav) return;
+        nav.innerHTML = '';
+
+        if (totalPages <= 1 && matchingCustomerRows.length <= pageSize) {
+            return;
+        }
+
+        // Prev Button
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'nl-page-btn' + (currentPage === 1 ? ' disabled' : '');
+        prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
+        prevBtn.onclick = function() { if (currentPage > 1) goToCustomerPage(currentPage - 1); };
+        nav.appendChild(prevBtn);
+
+        // Page Numbers
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        if (startPage > 1) {
+            const p1 = document.createElement('button');
+            p1.type = 'button';
+            p1.className = 'nl-page-btn' + (currentPage === 1 ? ' active' : '');
+            p1.textContent = '1';
+            p1.onclick = function() { goToCustomerPage(1); };
+            nav.appendChild(p1);
+
+            if (startPage > 2) {
+                const dots = document.createElement('span');
+                dots.style.padding = '0 6px';
+                dots.style.color = '#94A3B8';
+                dots.textContent = '...';
+                nav.appendChild(dots);
+            }
+        }
+
+        for (let p = startPage; p <= endPage; p++) {
+            const pBtn = document.createElement('button');
+            pBtn.type = 'button';
+            pBtn.className = 'nl-page-btn' + (p === currentPage ? ' active' : '');
+            pBtn.textContent = p;
+            (function(page) {
+                pBtn.onclick = function() { goToCustomerPage(page); };
+            })(p);
+            nav.appendChild(pBtn);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const dots = document.createElement('span');
+                dots.style.padding = '0 6px';
+                dots.style.color = '#94A3B8';
+                dots.textContent = '...';
+                nav.appendChild(dots);
+            }
+            const pLast = document.createElement('button');
+            pLast.type = 'button';
+            pLast.className = 'nl-page-btn' + (currentPage === totalPages ? ' active' : '');
+            pLast.textContent = totalPages;
+            pLast.onclick = function() { goToCustomerPage(totalPages); };
+            nav.appendChild(pLast);
+        }
+
+        // Next Button
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'nl-page-btn' + (currentPage === totalPages ? ' disabled' : '');
+        nextBtn.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
+        nextBtn.onclick = function() { if (currentPage < totalPages) goToCustomerPage(currentPage + 1); };
+        nav.appendChild(nextBtn);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
