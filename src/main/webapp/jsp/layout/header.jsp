@@ -488,14 +488,26 @@
         }
 
         .dashboard-link {
-            background: #FFF5EE !important;
-            color: #FC8019 !important;
-            font-weight: 600 !important;
             border-radius: 12px !important;
             padding: 12px 16px !important;
+            color: #374151;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .dashboard-link i.main-icon {
+            color: #4B5563;
+        }
+
+        .dashboard-link:hover,
+        .dashboard-link.active {
+            background: #FFF5EE !important;
+            color: #FC8019 !important;
+            font-weight: 600 !important;
+        }
+
+        .dashboard-link:hover i.main-icon,
+        .dashboard-link.active i.main-icon {
             color: #FC8019 !important;
         }
 
@@ -831,14 +843,26 @@
         }
 
         .dashboard-link {
-            background: #FFF5EE !important;
-            color: #FC8019 !important;
-            font-weight: 600 !important;
             border-radius: 12px !important;
             padding: 12px 16px !important;
+            color: #374151;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .dashboard-link i.main-icon {
+            color: #4B5563;
+        }
+
+        .dashboard-link:hover,
+        .dashboard-link.active {
+            background: #FFF5EE !important;
+            color: #FC8019 !important;
+            font-weight: 600 !important;
+        }
+
+        .dashboard-link:hover i.main-icon,
+        .dashboard-link.active i.main-icon {
             color: #FC8019 !important;
         }
 
@@ -1277,29 +1301,38 @@ document.addEventListener('DOMContentLoaded', function() {
     let path = window.location.pathname;
     let links = Array.from(document.querySelectorAll('.sidebar a'));
     
-    // 1. Highlight active child link and expand its parent
-    let activeLink = links.find(link => {
-        let href = link.getAttribute('href');
-        return href && href !== '#' && href !== 'javascript:void(0);' && path === href;
-    });
+    // 1. Highlight ONLY the active link matching the current URL
+    let isDashboard = (path.endsWith('/dashboard') || path.endsWith('/dashboard.jsp') || path.endsWith('/NLogistic/') || path.endsWith('/NLogistic'));
+    let dashLink = document.querySelector('.sidebar .dashboard-link');
     
-    if (!activeLink) {
-        activeLink = links.find(link => {
+    if (isDashboard && dashLink) {
+        dashLink.classList.add('active');
+    } else {
+        if (dashLink) dashLink.classList.remove('active');
+        
+        let activeLink = links.find(link => {
             let href = link.getAttribute('href');
-            return href && href !== '#' && href !== 'javascript:void(0);' && href !== '/NLogistic/' && path.startsWith(href);
+            return href && href !== '#' && href !== 'javascript:void(0);' && !link.classList.contains('dashboard-link') && path === href;
         });
-    }
+        
+        if (!activeLink) {
+            activeLink = links.find(link => {
+                let href = link.getAttribute('href');
+                return href && href !== '#' && href !== 'javascript:void(0);' && !link.classList.contains('dashboard-link') && href !== '/NLogistic/' && path.startsWith(href);
+            });
+        }
 
-    if (activeLink && !activeLink.classList.contains('dashboard-link')) {
-        activeLink.classList.add('active');
-        let parentSub = activeLink.closest('.sub-nav');
-        if (parentSub) {
-            parentSub.style.display = 'block';
-            let parentToggle = document.querySelector('.sidebar a[data-target="' + parentSub.id + '"]');
-            if (parentToggle) {
-                parentToggle.classList.remove('collapsed');
-                parentToggle.classList.add('active-group');
-                parentToggle.setAttribute('aria-expanded', 'true');
+        if (activeLink) {
+            activeLink.classList.add('active');
+            let parentSub = activeLink.closest('.sub-nav');
+            if (parentSub) {
+                parentSub.style.display = 'block';
+                let parentToggle = document.querySelector('.sidebar a[data-target="' + parentSub.id + '"]');
+                if (parentToggle) {
+                    parentToggle.classList.remove('collapsed');
+                    parentToggle.classList.add('active-group');
+                    parentToggle.setAttribute('aria-expanded', 'true');
+                }
             }
         }
     }
