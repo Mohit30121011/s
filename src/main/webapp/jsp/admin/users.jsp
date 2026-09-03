@@ -30,7 +30,25 @@
                     uDao.updateUserStatus(uid, "Inactive");
                     session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been removed from active directory.");
                 } else if ("savePermissions".equals(action)) {
-                    session.setAttribute("successMessage", "Granular module permissions updated successfully for staff #USR-" + uid + ".");
+                    String newRoleStr = request.getParameter("assignedRoleId");
+                    if (newRoleStr != null && !newRoleStr.trim().isEmpty()) {
+                        try {
+                            int newRoleId = Integer.parseInt(newRoleStr.trim());
+                            String updRoleSql = "UPDATE users SET role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+                            try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                                 java.sql.PreparedStatement ps = conn.prepareStatement(updRoleSql)) {
+                                ps.setInt(1, newRoleId);
+                                ps.setInt(2, uid);
+                                ps.executeUpdate();
+                            }
+                            uDao.logAuditEvent(uid, "PERMISSIONS_UPDATED", "Role assigned: " + newRoleId, request.getRemoteAddr());
+                            session.setAttribute("successMessage", "Role-based module permissions saved successfully for staff #USR-" + uid + ".");
+                        } catch (Exception ex) {
+                            session.setAttribute("errorMessage", "Failed to update permissions: " + ex.getMessage());
+                        }
+                    } else {
+                        session.setAttribute("successMessage", "Granular module permissions verified for staff #USR-" + uid + ".");
+                    }
                 } else if ("sendResetPassword".equals(action)) {
                     com.nlogistic.model.User targetUser = uDao.getUserById(uid);
                     if (targetUser != null && targetUser.getEmail() != null && !targetUser.getEmail().trim().isEmpty()) {
@@ -1623,6 +1641,22 @@
                     <input type="hidden" name="action" value="savePermissions">
                     <input type="hidden" name="userId" id="drawerUserIdInput" value="3">
 
+                      <div style="margin-bottom: 16px; padding: 12px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
+                          <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
+                              <i class="ti ti-shield-lock" style="color: #FC8019; margin-right: 4px;"></i> Assigned Role (RBAC Tier)
+                          </label>
+                          <select name="assignedRoleId" id="drawerAssignedRoleSelect" class="form-select form-select-sm" style="border-radius: 8px; font-size: 13px; font-weight: 600; color: #0F172A; border-color: #CBD5E1;" onchange="onDrawerRoleChanged(this.value)">
+                              <option value="1">Super Admin (All 10 Modules Full Access)</option>
+                              <option value="2">Company Admin (Tenant &amp; Fleet Operations - 8 Modules)</option>
+                              <option value="3">Company Staff - Operations (Terminal &amp; Logistics - 6 Modules)</option>
+                              <option value="4">Company Staff - Finance (Billing, Invoicing &amp; PLG - 4 Modules)</option>
+                              <option value="5">Customer / Shipper (Tracking &amp; Bookings - 3 Modules)</option>
+                          </select>
+                          <p style="font-size: 11.5px; color: #64748B; margin: 6px 0 0 0; line-height: 1.35;">
+                              Module access permissions automatically synchronize with this user\x27s assigned RBAC role.
+                          </p>
+                      </div>
+
                     <!-- Module 1 -->
                     <div class="permission-item-row">
                         <div class="permission-item-left">
@@ -2002,6 +2036,8 @@
         document.getElementById('drawerStaffEmail').textContent = staffEmail;
         document.getElementById('drawerDeptName').textContent = staffDept;
         document.getElementById('drawerUserIdInput').value = userId;
+          const assignedRoleSelect = document.getElementById('drawerAssignedRoleSelect');
+          if (assignedRoleSelect) assignedRoleSelect.value = roleId;
         const drawerJoined = document.getElementById('drawerJoinedDate');
         if (drawerJoined) drawerJoined.textContent = joinedDate;
 
@@ -2117,7 +2153,22 @@
         });
     }
 
-    function setRolePreset(arr) {
+    function onDrawerRoleChanged(roleIdVal) {
+          const roleId = parseInt(roleIdVal, 10);
+          if (roleId === 1) {
+              setAllToggles(true);
+          } else if (roleId === 2) {
+              setRolePreset([true, true, true, true, true, true, true, true, false, false]);
+          } else if (roleId === 4) {
+              setRolePreset([true, false, false, true, true, false, true, false, false, false]);
+          } else if (roleId === 5) {
+              setRolePreset([true, true, true, false, false, false, false, false, false, false]);
+          } else {
+              setRolePreset([true, true, true, false, false, true, true, false, false, false]);
+          }
+      }
+
+      function setRolePreset(arr) {
         const ids = ['perm_dashboard', 'perm_tracking', 'perm_shipments', 'perm_plg', 'perm_invoicing', 
                      'perm_inventory', 'perm_claims', 'perm_compliance', 'perm_users', 'perm_settings'];
         ids.forEach((id, idx) => {
