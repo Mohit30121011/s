@@ -36,7 +36,7 @@
 	</div>         			     
 
 	<c:if test="${not empty sessionScope.successMessage}">
-		<div class="alert alert-success shadow-sm border-0 mb-4"
+		<div class="alert alert-success shadow-sm border-0 mb-4"  
 			style="border-radius: 8px;">
 			<i class="fa-solid fa-circle-check me-2"></i>
 			${sessionScope.successMessage}  
