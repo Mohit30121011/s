@@ -2183,6 +2183,18 @@
                     <span>Users &amp; Roles</span>
                 </a>
             </div>
+
+            <!-- Security & Audit Trail Governance (FR1.9) -->
+            <div class="nav-item">
+                <a href="javascript:void(0);" data-target="auditSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
+                    <i class="ti ti-history main-icon"></i>
+                    <span>Audit Logs</span>
+                    <i class="ti ti-chevron-down caret"></i>
+                </a>
+                <ul class="sub-nav" id="auditSubmenu" style="display: none;">
+                    <li><a href="${pageContext.request.contextPath}/jsp/admin/audit_logins.jsp">Logins &amp; Security</a></li>
+                </ul>
+            </div>
             </c:if>
 
             <!-- Settings -->
@@ -2514,6 +2526,16 @@ document.addEventListener('DOMContentLoaded', function() {
             icon: "ti ti-user-check",
             color: "orange",
             badge: "Super Admin"
+        },
+        {
+            title: "Audit Logs (Logins & Security)",
+            url: ctx + "/jsp/admin/audit_logins.jsp",
+            category: "Administration",
+            subtitle: "Forensic audit trail of all logins, logouts, password resets and security events (FR1.9)",
+            keywords: "audit logs security logins logouts forensic history authentication trail fr1.9",
+            icon: "ti ti-history",
+            color: "orange",
+            badge: "Admin"
         },
         {
             title: "User Management & RBAC",
