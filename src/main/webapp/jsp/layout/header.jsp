@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <!-- TomSelect CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -1028,6 +1030,65 @@
         .form-check-input:checked {
             background-color: #FC8019;
             border-color: #FC8019;
+        }
+
+    
+        /* TomSelect Theme Integration & Glitch Prevention */
+        select.tomselected,
+        .tomselected {
+            display: none !important;
+        }
+
+        .ts-wrapper {
+            width: 100% !important;
+        }
+
+        .ts-control {
+            border: 1px solid #E2E5EA !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            font-size: 13.5px !important;
+            color: #1F2937 !important;
+            background-color: #FFFFFF !important;
+            min-height: 42px !important;
+            box-shadow: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+
+        .ts-control.focus,
+        .ts-wrapper.focus .ts-control {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+        }
+
+        .ts-dropdown {
+            border: 1px solid #E7E9ED !important;
+            border-radius: 10px !important;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04) !important;
+            padding: 6px !important;
+            background: #FFFFFF !important;
+            margin-top: 4px !important;
+            z-index: 1050 !important;
+        }
+
+        .ts-dropdown .option {
+            padding: 8px 12px !important;
+            font-size: 13.5px !important;
+            border-radius: 6px !important;
+            color: #374151 !important;
+            transition: all 0.12s ease !important;
+        }
+
+        .ts-dropdown .option:hover,
+        .ts-dropdown .option.active {
+            background-color: #FFF2EB !important;
+            color: #FC8019 !important;
+            font-weight: 600 !important;
+        }
+
+        .ts-wrapper.single .ts-control:after {
+            border-color: #6B7280 transparent transparent transparent !important;
+            right: 14px !important;
         }
 
     </style>

@@ -383,7 +383,7 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Current Lifecycle Status <span class="required">*</span></label>
-                <select class="form-select-custom form-select" name="status" style="border-color: #E2E5EA;">
+                <select class="form-select" name="status" style="border-color: #E2E5EA; min-height: 42px; border-radius: 8px;">
                     <option value="Booked" <c:if test="${shipment.status == 'Booked'}">selected</c:if>>Booked</option>
                     <option value="Container Allocated" <c:if test="${shipment.status == 'Container Allocated'}">selected</c:if>>Container Allocated</option>
                     <option value="Departed" <c:if test="${shipment.status == 'Departed'}">selected</c:if>>Departed</option>
