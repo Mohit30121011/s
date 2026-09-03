@@ -1653,7 +1653,7 @@
                               <option value="5">Customer / Shipper (Tracking &amp; Bookings - 3 Modules)</option>
                           </select>
                           <p style="font-size: 11.5px; color: #64748B; margin: 6px 0 0 0; line-height: 1.35;">
-                              Module access permissions automatically synchronize with this user\x27s assigned RBAC role.
+                              Module access permissions automatically synchronize with this user's assigned RBAC role.
                           </p>
                       </div>
 
@@ -2036,8 +2036,17 @@
         document.getElementById('drawerStaffEmail').textContent = staffEmail;
         document.getElementById('drawerDeptName').textContent = staffDept;
         document.getElementById('drawerUserIdInput').value = userId;
+          window.currentSelectedRoleId = roleId;
           const assignedRoleSelect = document.getElementById('drawerAssignedRoleSelect');
-          if (assignedRoleSelect) assignedRoleSelect.value = roleId;
+          if (assignedRoleSelect) {
+              assignedRoleSelect.value = String(roleId);
+              for (let i = 0; i < assignedRoleSelect.options.length; i++) {
+                  if (parseInt(assignedRoleSelect.options[i].value, 10) === roleId) {
+                      assignedRoleSelect.selectedIndex = i;
+                      break;
+                  }
+              }
+          }
         const drawerJoined = document.getElementById('drawerJoinedDate');
         if (drawerJoined) drawerJoined.textContent = joinedDate;
 
@@ -2196,6 +2205,18 @@
 
         document.getElementById('drawerTabDetails').style.display = (tab === 'details') ? 'block' : 'none';
         document.getElementById('drawerTabPermissions').style.display = (tab === 'permissions') ? 'block' : 'none';
+        if (tab === 'permissions' && window.currentSelectedRoleId) {
+            const sel = document.getElementById('drawerAssignedRoleSelect');
+            if (sel) {
+                sel.value = String(window.currentSelectedRoleId);
+                for (let i = 0; i < sel.options.length; i++) {
+                    if (parseInt(sel.options[i].value, 10) === window.currentSelectedRoleId) {
+                        sel.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
         document.getElementById('drawerTabRole').style.display = (tab === 'role') ? 'block' : 'none';
         document.getElementById('drawerTabAudit').style.display = (tab === 'audit') ? 'block' : 'none';
     }
