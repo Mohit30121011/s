@@ -50,7 +50,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 /* Grid layouts */
 .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.grid-3col-side { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 16px; margin-bottom: 16px; }
+.grid-3col-side { display: grid; grid-template-columns: 1fr 1.25fr 1.15fr; gap: 16px; margin-bottom: 16px; }
 
 /* Cards */
 .card { background: var(--card); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); border-radius: 12px; overflow: hidden; }
@@ -67,15 +67,23 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .chart-wrap { position: relative; height: 220px; }
 .chart-wrap-sm { position: relative; height: 200px; }
 
-/* Shipments by Status */
-.status-chart-wrap { display: flex; align-items: center; gap: 16px; padding: 8px 0; }
-.status-canvas-wrap { width: 160px; height: 160px; flex-shrink: 0; }
-.status-legend { flex: 1; }
-.status-legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.legend-label { font-size: 12px; color: var(--text-sub); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Shipments by Status Layout Fix */
+.status-chart-wrap { display: flex; align-items: center; gap: 14px; padding: 6px 0; }
+.status-canvas-wrap { width: 135px; height: 135px; flex-shrink: 0; position: relative; }
+.status-legend { flex: 1; min-width: 0; }
+.status-legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 12px; color: var(--text-sub); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legend-cnt-wrap { display: inline-flex; align-items: baseline; gap: 4px; flex-shrink: 0; margin-left: auto; white-space: nowrap; }
 .legend-cnt { font-size: 12px; font-weight: 600; color: var(--text-main); }
-.legend-pct { font-size: 11px; color: var(--text-sub); }
+.legend-pct { font-size: 10.5px; color: var(--text-sub); }
+
+/* Custom Sleek Scrollbar */
+.scrollable-card-body { max-height: 310px; overflow-y: auto; padding-right: 10px; }
+.scrollable-card-body::-webkit-scrollbar { width: 5px; }
+.scrollable-card-body::-webkit-scrollbar-track { background: transparent; }
+.scrollable-card-body::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+.scrollable-card-body::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
 
 /* Recent Shipments */
 .ship-list { list-style: none; padding: 0; margin: 0; }
@@ -453,9 +461,11 @@ var STATUS_COLORS = {
         var item = document.createElement('div');
         item.className = 'status-legend-item';
         item.innerHTML = '<div class="legend-dot" style="background:' + color + '"></div>' +
-            '<span class="legend-label">' + d.status + '</span>' +
-            '<span class="legend-cnt">' + d.cnt + '</span>&nbsp;' +
-            '<span class="legend-pct">(' + pct + '%)</span>';
+            '<span class="legend-label" title="' + d.status + '">' + d.status + '</span>' +
+            '<div class="legend-cnt-wrap">' +
+                '<span class="legend-cnt">' + d.cnt + '</span>' +
+                '<span class="legend-pct">(' + pct + '%)</span>' +
+            '</div>';
         legend.appendChild(item);
     });
 })();
