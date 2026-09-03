@@ -22,14 +22,47 @@
     }
     
     .filter-search {
-        position: relative; width: 400px;
+        position: relative;
+        width: 400px;
     }
-    .filter-search i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+    .filter-search .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 14px;
+        pointer-events: none;
+    }
     .filter-search input {
-        width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-color);
-        border-radius: 8px; font-size: 13px; outline: none; background: #F9FAFB; transition: border-color 0.2s;
+        width: 100%;
+        padding: 10px 36px 10px 38px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 13.5px;
+        outline: none;
+        background: #FFFFFF;
+        color: var(--text-dark);
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .filter-search input:focus { border-color: var(--brand-orange); }
+    .filter-search input:focus {
+        border-color: var(--brand-orange);
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+    .filter-search .clear-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 4px;
+        transition: color 0.15s ease;
+    }
+    .filter-search .clear-icon:hover {
+        color: #1F2937;
+    }
 
     /* Action Button */
     .btn-book {
@@ -115,17 +148,10 @@
 
     <!-- Filter & Action Row -->
     <div class="filter-card">
-        <div class="d-flex align-items-center gap-2">
-            <div class="filter-search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="shipmentSearchInput" placeholder="Search by ID, Customer, Container, or Route...">
-            </div>
-            <button class="btn btn-secondary" id="searchBtn" type="button" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 10px 18px;">
-                <i class="fa-solid fa-magnifying-glass me-1"></i> Search
-            </button>
-            <button class="btn btn-outline-secondary d-none" id="clearSearchBtn" type="button" style="border-radius: 8px; font-size: 13px; padding: 10px 14px;" title="Clear Search">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+        <div class="filter-search">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="shipmentSearchInput" placeholder="Search by ID, Customer, Container, or Route...">
+            <i class="fa-solid fa-xmark clear-icon d-none" id="clearSearchBtn" title="Clear Search"></i>
         </div>
         <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
             <i class="fa-solid fa-plus"></i> Book Shipment
