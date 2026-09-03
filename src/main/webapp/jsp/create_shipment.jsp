@@ -161,8 +161,14 @@
             .form-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
             .required { color: var(--brand-orange); }
             .form-select-custom, .form-control-custom {
-                width: 100%; padding: 12px 16px; border: 1px solid var(--border-color);
-                border-radius: 8px; font-size: 14px; background: #fff;
+                width: 100%; padding: 11px 20px; border: 1.5px solid #E2E8F0;
+                border-radius: 50px !important; font-size: 14px; background: #fff;
+                min-height: 44px; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                outline: none;
+            }
+            .form-select-custom:focus, .form-control-custom:focus {
+                border-color: #FC8019 !important;
+                box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
             }
             .select-wrapper { position: relative; }
             /* Removed the ::after double caret CSS here! */
@@ -250,16 +256,19 @@
 <style>
     /* Custom Tom Select Styling */
     .ts-control {
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 10px 16px;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 50px !important;
+        padding: 11px 20px !important;
         font-size: 14px;
         background: #fff;
-        box-shadow: none !important;
+        min-height: 44px;
+        display: flex !important;
+        align-items: center !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .ts-control.focus {
-        border-color: var(--brand-orange);
-        box-shadow: 0 0 0 0.25rem rgba(252, 128, 25, 0.25) !important;
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
     }
     .ts-dropdown {
         border-radius: 12px;

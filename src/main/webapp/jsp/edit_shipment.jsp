@@ -130,19 +130,20 @@
     .form-control-custom,
     .form-select-custom {
         width: 100%;
-        padding: 10px 14px;
-        border: 1px solid #E2E5EA;
-        border-radius: 8px;
+        padding: 11px 20px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px !important;
         font-size: 13.5px;
         background: #FFFFFF;
-        color: #1F2937;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        color: #0F172A;
+        min-height: 44px;
+        transition: all 0.2s ease;
     }
 
     .form-control-custom:focus,
     .form-select-custom:focus {
         border-color: #FC8019 !important;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
         outline: none;
     }
 

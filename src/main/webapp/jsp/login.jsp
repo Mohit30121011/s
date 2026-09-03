@@ -285,7 +285,7 @@
     .nl-feature-icon {
         width: 40px;
         height: 40px;
-        border-radius: 10px;
+        border-radius: 50px !important;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -523,7 +523,7 @@
         color: #0F172A;
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
-        border-radius: 10px;
+        border-radius: 50px !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         outline: none;
     }
@@ -578,7 +578,7 @@
         background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%);
         background-size: 200% auto;
         border: none;
-        border-radius: 10px;
+        border-radius: 50px !important;
         color: #FFFFFF;
         font-size: 15.5px;
         font-weight: 700;
@@ -614,7 +614,7 @@
         align-items: flex-start;
         gap: 12px;
         padding: 13px 16px;
-        border-radius: 10px;
+        border-radius: 50px !important;
         font-size: 13px;
         margin-bottom: 20px;
         animation: fadeInUp 0.4s ease;

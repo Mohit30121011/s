@@ -226,28 +226,109 @@
             background-color: #FAFCFE !important;
         }
 
-        /* 5. Global Form Controls */
+        /* ==========================================================================
+           5. GLOBAL PILL-SHAPED INPUT BOXES & ORANGE ACTIVE FOCUS
+           ========================================================================== */
         .form-control,
-        .form-select {
-            border: 1px solid #E2E5EA !important;
-            border-radius: var(--nl-radius-sm) !important;
-            padding: 9px 14px !important;
+        .form-select,
+        .form-control-custom,
+        .form-select-custom,
+        .nl-form-control,
+        .ts-control,
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="search"],
+        input[type="date"],
+        input[type="datetime-local"],
+        select.form-control,
+        select.form-select {
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 50px !important;
+            padding: 10px 20px !important;
             font-size: 13.5px !important;
-            color: var(--nl-text) !important;
-            background-color: var(--nl-surface) !important;
-            transition: border-color 150ms ease, box-shadow 150ms ease;
-        }
-
-        .form-control:hover,
-        .form-select:hover {
-            border-color: #D5D9DF !important;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--nl-primary) !important;
-            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+            color: #0F172A !important;
+            background-color: #FFFFFF !important;
+            transition: all 0.2s ease !important;
+            min-height: 44px !important;
             outline: none !important;
+        }
+
+        /* Hover State */
+        .form-control:hover,
+        .form-select:hover,
+        .form-control-custom:hover,
+        .form-select-custom:hover,
+        .nl-form-control:hover,
+        .ts-control:hover,
+        input[type="text"]:hover,
+        input[type="email"]:hover,
+        input[type="password"]:hover,
+        input[type="number"]:hover,
+        input[type="tel"]:hover,
+        input[type="search"]:hover,
+        input[type="date"]:hover {
+            border-color: #CBD5E1 !important;
+        }
+
+        /* Active / Focus State: Vibrant Orange Border + Soft Orange Glow */
+        .form-control:focus,
+        .form-control:active,
+        .form-select:focus,
+        .form-select:active,
+        .form-control-custom:focus,
+        .form-control-custom:active,
+        .form-select-custom:focus,
+        .form-select-custom:active,
+        .nl-form-control:focus,
+        .nl-form-control:active,
+        .ts-control.focus,
+        .ts-wrapper.focus .ts-control,
+        input[type="text"]:focus,
+        input[type="text"]:active,
+        input[type="email"]:focus,
+        input[type="email"]:active,
+        input[type="password"]:focus,
+        input[type="password"]:active,
+        input[type="number"]:focus,
+        input[type="number"]:active,
+        input[type="tel"]:focus,
+        input[type="tel"]:active,
+        input[type="search"]:focus,
+        input[type="search"]:active,
+        input[type="date"]:focus,
+        input[type="date"]:active {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+            outline: none !important;
+            background-color: #FFFFFF !important;
+        }
+
+        /* TomSelect Pill Styling */
+        .ts-wrapper.single .ts-control {
+            border-radius: 50px !important;
+            padding-left: 20px !important;
+            padding-right: 36px !important;
+            min-height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .ts-dropdown {
+            border-radius: 16px !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #E2E8F0 !important;
+            overflow: hidden !important;
+            margin-top: 6px !important;
+        }
+
+        /* Multiline textarea pill-rounded */
+        textarea.form-control,
+        textarea.form-control-custom,
+        textarea.nl-form-control {
+            border-radius: 20px !important;
+            padding: 14px 20px !important;
         }
 
                 /* ==========================================================================
