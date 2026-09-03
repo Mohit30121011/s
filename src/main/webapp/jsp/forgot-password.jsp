@@ -820,7 +820,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="nl-submit-button" style="margin-top: 24px;">
+                <button type="submit" class="nl-submit-cta" style="margin-top: 24px;">
                     <span>Send Reset Link</span>
                     <i class="ti ti-arrow-right"></i>
                 </button>
