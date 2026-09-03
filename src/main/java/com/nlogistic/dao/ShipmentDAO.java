@@ -72,8 +72,8 @@ public class ShipmentDAO {
         List<ShipmentDetail> list = new ArrayList<>();
         String sql = "SELECT s.shipment_id, c.customer_name, cnt.container_number, v.vessel_name, " +
                      "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date, " +
-                     "(SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id) as last_updated, " +
-                     "(SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1) as eta " +
+                     "COALESCE((SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id), s.booking_date) as last_updated, " +
+                     "COALESCE((SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1), DATE_ADD(s.booking_date, INTERVAL 14 DAY)) as eta " +
                      "FROM shipment s " +
                      "JOIN customers c ON s.customer_id = c.customer_id " +
                      "JOIN containers cnt ON s.container_id = cnt.container_id " +
