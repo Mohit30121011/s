@@ -51,7 +51,7 @@ public class AdminCompanyServlet extends HttpServlet {
         int companyId = Integer.parseInt(request.getParameter("companyId"));
 
         if ("accept".equals(action)) {
-            companyDAO.updateCompanyStatus(companyId, "Approved");
+            companyDAO.updateCompanyStatus(companyId, "Active");
             // Find all users tied to this company and activate them
             try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
                  java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE users SET status = 'Active' WHERE company_id = ?")) {
