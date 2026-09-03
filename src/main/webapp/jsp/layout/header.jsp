@@ -1620,16 +1620,20 @@
         }
 
         .nl-page-size-select {
-            padding: 4px 10px !important;
+            padding: 4px 14px !important;
             font-size: 12.5px !important;
-            font-weight: 500 !important;
-            border-radius: 6px !important;
-            border: 1px solid #E2E8F0 !important;
+            font-weight: 600 !important;
+            border-radius: 50px !important;
+            border: 1.5px solid #E2E8F0 !important;
             background-color: #FFFFFF !important;
             color: #374151 !important;
             cursor: pointer;
             outline: none;
-            transition: border-color 0.15s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .nl-page-size-select:focus {
+            border-color: #FC8019 !important;
+            box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.16) !important;
         }
         .nl-page-size-select:focus {
             border-color: #FC8019 !important;
@@ -1673,12 +1677,30 @@
             padding: 0;
         }
 
-        .nl-page-btn {
+        /* ============================================================
+           GLOBAL CIRCULAR & PILL ENTERPRISE PAGINATION
+           ============================================================ */
+        .nl-pagination-nav,
+        .pagination,
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Default Pill-shaped navigation buttons (< Prev, Next >) */
+        .nl-page-btn,
+        .pagination .page-link,
+        .page-item .page-link,
+        .pagination-container button {
             min-width: 36px;
             height: 36px;
-            padding: 0 12px;
-            border-radius: 8px;
-            border: 1px solid #E2E8F0;
+            padding: 0 16px;
+            border-radius: 50px !important;
+            border: 1.5px solid #E2E8F0;
             background: #FFFFFF;
             color: #4B5563;
             font-size: 13px;
@@ -1686,39 +1708,74 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 5px;
             cursor: pointer;
-            transition: all 0.18s ease;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             user-select: none;
             text-decoration: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
         }
 
-        .nl-page-btn:hover:not(.disabled):not(.active) {
-            background: #FFF9F5;
+        /* Pure Circular for Numeric Page Buttons (1, 2, 3, 4, 5, 11...) */
+        .nl-page-btn.nl-page-num,
+        .nl-page-btn:not(:has(i)):not(:has(svg)):not(.nl-page-nav-btn),
+        .pagination .page-item:not(:first-child):not(:last-child) .page-link,
+        .pagination-container button:not(:first-child):not(:last-child) {
+            width: 36px !important;
+            min-width: 36px !important;
+            max-width: 36px !important;
+            height: 36px !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+        }
+
+        /* Explicit Nav Buttons (< Prev, Next >) */
+        .nl-page-btn.nl-page-nav-btn,
+        .nl-page-btn:has(i),
+        .nl-page-btn:has(svg),
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            border-radius: 50px !important;
+            padding: 0 16px !important;
+            width: auto !important;
+            min-width: 36px !important;
+        }
+
+        .nl-page-btn:hover:not(.disabled):not(.active),
+        .pagination .page-link:hover,
+        .pagination-container button:hover:not(:disabled) {
+            background: #FFF0E5;
             color: #FC8019;
-            border-color: #FFD4C2;
+            border-color: #FED7AA;
             transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(252, 128, 25, 0.15);
         }
 
-        .nl-page-btn.active {
+        .nl-page-btn.active,
+        .pagination .page-item.active .page-link,
+        .pagination-container button.active {
             background: #FC8019 !important;
             color: #FFFFFF !important;
             border-color: #FC8019 !important;
             font-weight: 700 !important;
-            box-shadow: 0 2px 8px rgba(252, 128, 25, 0.3) !important;
+            box-shadow: 0 2px 8px rgba(252, 128, 25, 0.35) !important;
             cursor: default;
         }
 
-        .nl-page-btn.disabled {
+        .nl-page-btn.disabled,
+        .pagination .page-item.disabled .page-link,
+        .pagination-container button:disabled {
             opacity: 0.45;
             cursor: not-allowed;
             pointer-events: none;
             background: #F8FAFC;
             color: #94A3B8;
             border-color: #E2E8F0;
+            box-shadow: none;
         }
 
-        .nl-page-ellipsis {
+        .nl-page-ellipsis,
+        .pagination .page-item span.page-link {
             min-width: 28px;
             height: 36px;
             display: inline-flex;
@@ -2528,6 +2585,28 @@ document.addEventListener('DOMContentLoaded', function() {
         initOmnibox();
     }
 })();
+
+    /* Global Auto-Classifier for Circular Page Numbers & Pill Prev/Next */
+    function autoClassifyPagination() {
+        document.querySelectorAll('.nl-page-btn, .pagination .page-link, .page-item .page-link, .pagination-container button').forEach(function(btn) {
+            var text = (btn.textContent || '').trim();
+            if (/^\d+$/.test(text)) {
+                btn.classList.add('nl-page-num');
+                btn.classList.remove('nl-page-nav-btn');
+            } else if (text.toLowerCase().indexOf('prev') !== -1 || text.toLowerCase().indexOf('next') !== -1 || btn.querySelector('i, svg')) {
+                btn.classList.add('nl-page-nav-btn');
+                btn.classList.remove('nl-page-num');
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        autoClassifyPagination();
+        var observer = new MutationObserver(function() {
+            autoClassifyPagination();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+
 </script>
 
 

@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const prevBtn = document.createElement('button');
         prevBtn.type = 'button';
-        prevBtn.className = 'nl-page-btn' + (currentPage === 1 ? ' disabled' : '');
+        prevBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === 1 ? ' disabled' : '');
         prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
         prevBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -606,7 +606,7 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'nl-page-btn' + (p === currentPage ? ' active' : '');
+                btn.className = 'nl-page-btn nl-page-num' + (p === currentPage ? ' active' : '');
                 btn.textContent = p;
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -621,7 +621,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const nextBtn = document.createElement('button');
         nextBtn.type = 'button';
-        nextBtn.className = 'nl-page-btn' + (currentPage === totalPages ? ' disabled' : '');
+        nextBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === totalPages ? ' disabled' : '');
         nextBtn.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
         nextBtn.addEventListener('click', function(e) {
             e.preventDefault();

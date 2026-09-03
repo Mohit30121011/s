@@ -739,7 +739,7 @@
         // Prev Button
         const prevBtn = document.createElement('button');
         prevBtn.type = 'button';
-        prevBtn.className = 'nl-page-btn' + (currentPage === 1 ? ' disabled' : '');
+        prevBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === 1 ? ' disabled' : '');
         prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
         prevBtn.onclick = function() { if (currentPage > 1) goToCompPage(currentPage - 1); };
         nav.appendChild(prevBtn);
@@ -754,7 +754,7 @@
         if (startPage > 1) {
             const p1 = document.createElement('button');
             p1.type = 'button';
-            p1.className = 'nl-page-btn' + (currentPage === 1 ? ' active' : '');
+            p1.className = 'nl-page-btn nl-page-num' + (currentPage === 1 ? ' active' : '');
             p1.textContent = '1';
             p1.onclick = function() { goToCompPage(1); };
             nav.appendChild(p1);
@@ -771,7 +771,7 @@
         for (let p = startPage; p <= endPage; p++) {
             const pBtn = document.createElement('button');
             pBtn.type = 'button';
-            pBtn.className = 'nl-page-btn' + (p === currentPage ? ' active' : '');
+            pBtn.className = 'nl-page-btn nl-page-num' + (p === currentPage ? ' active' : '');
             pBtn.textContent = p;
             (function(page) {
                 pBtn.onclick = function() { goToCompPage(page); };
@@ -789,7 +789,7 @@
             }
             const pLast = document.createElement('button');
             pLast.type = 'button';
-            pLast.className = 'nl-page-btn' + (currentPage === totalPages ? ' active' : '');
+            pLast.className = 'nl-page-btn nl-page-num' + (currentPage === totalPages ? ' active' : '');
             pLast.textContent = totalPages;
             pLast.onclick = function() { goToCompPage(totalPages); };
             nav.appendChild(pLast);
@@ -798,7 +798,7 @@
         // Next Button
         const nextBtn = document.createElement('button');
         nextBtn.type = 'button';
-        nextBtn.className = 'nl-page-btn' + (currentPage === totalPages ? ' disabled' : '');
+        nextBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === totalPages ? ' disabled' : '');
         nextBtn.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
         nextBtn.onclick = function() { if (currentPage < totalPages) goToCompPage(currentPage + 1); };
         nav.appendChild(nextBtn);
