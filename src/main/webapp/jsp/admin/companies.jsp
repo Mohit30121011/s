@@ -81,7 +81,7 @@
     .telemetry-header-left { display: flex; align-items: center; gap: 16px; }
     .telemetry-icon-box {
         width: 52px; height: 52px; border-radius: 14px;
-        background: linear-gradient(135deg, #FFF0E5 0%, #FFE4D6 100%);
+        background: #FFF0E5;
         display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 26px;
         box-shadow: 0 4px 12px rgba(252, 128, 25, 0.15); flex-shrink: 0;
     }
@@ -134,7 +134,7 @@
 
     .company-cell { display: flex; align-items: center; gap: 14px; }
     .company-avatar {
-        width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%);
+        width: 42px; height: 42px; border-radius: 12px; background: #FC8019;
         color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
         box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); flex-shrink: 0; letter-spacing: 0.5px;
     }
@@ -162,11 +162,11 @@
 
     .actions-flex { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
     .btn-approval-accept {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%); border: 1.5px solid transparent; color: #FFFFFF !important;
+        background: #10B981 !important; border: 1px solid #10B981 !important; color: #FFFFFF !important;
         padding: 7px 18px; border-radius: 50px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;
         cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.22);
     }
-    .btn-approval-accept:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(16, 185, 129, 0.35); }
+    .btn-approval-accept:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(16, 185, 129, 0.35); }
     .btn-approval-accept i { font-size: 13px; transition: transform 0.2s ease; }
     .btn-approval-accept:hover i { transform: scale(1.15); }
 

@@ -233,7 +233,7 @@
         transition: transform 0.2s ease, color 0.2s ease;
     }
     .btn-tracking-details:hover {
-        background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%) !important;
+        background: #FC8019 !important;
         border-color: transparent !important;
         color: #FFFFFF !important;
         transform: translateY(-1px);
@@ -254,7 +254,7 @@
         color: #0F172A;
     }
     .tracking-row:hover .btn-tracking-details:hover {
-        background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%) !important;
+        background: #FC8019 !important;
         color: #FFFFFF !important;
         border-color: transparent !important;
     }
