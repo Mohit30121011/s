@@ -1,0 +1,3 @@
+ProductName,Category,HSNCode,UOM,Quantity,UnitCost,UnitPrice,WarehouseLocation,BatchNo,ExpiryDate
+Sample Product 1,Electronics,85423100,PCS,100,50.00,75.00,Warehouse A,BATCH-01,2026-12-31
+Sample Product 2,Metals,76042990,KG,500,120.50,150.00,Warehouse B,BATCH-02,2027-06-30

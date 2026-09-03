@@ -68,8 +68,11 @@ public class AuthenticationFilter implements Filter {
             allowed = (roleId <= 2); 
         }
         // Vessels & Containers (Module 3) & Stock Management (Module 4)
-        else if (path.startsWith("/vessel") || path.startsWith("/container") || path.startsWith("/stock")) {
+        else if (path.startsWith("/vessel") || path.startsWith("/stock") || path.startsWith("/predictive-graph") || path.startsWith("/upload-stock") || path.startsWith("/download-errors") || path.startsWith("/manual-stock") || path.startsWith("/adjust-stock") || path.startsWith("/ledger")) {
             allowed = (roleId <= 3); // Super Admin, Company Admin, Operations
+        }
+        else if (path.startsWith("/container") || path.startsWith("/containers") || path.startsWith("/allocate") || path.startsWith("/book")) {
+            allowed = true; // Customers also need to browse catalog, allocate, and book (FR3.2 / FR2.1)
         }
         // Finance & Billing (Module 5)
         else if (path.startsWith("/billing") || path.startsWith("/invoice") || path.startsWith("/payment")) {

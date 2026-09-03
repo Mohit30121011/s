@@ -563,9 +563,26 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fa-solid fa-chart-line main-icon"></i> Reports
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                <a href="${pageContext.request.contextPath}/containers" class="nav-link">
+                    <i class="fa-solid fa-boxes-stacked main-icon"></i> Containers
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/predictive-graph" class="nav-link">
+                    <i class="fa-solid fa-chart-line main-icon"></i> Predictive Graph
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/upload-stock" class="nav-link">
+                    <i class="fa-solid fa-cloud-arrow-up main-icon"></i> Upload Stock
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/ledger" class="nav-link">
+                    <i class="fa-solid fa-book-open main-icon"></i> Inventory Ledger
                 </a>
             </div>
 

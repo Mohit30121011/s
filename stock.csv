@@ -1,0 +1,5 @@
+ProductName,Category,HSNCode,UOM,Quantity,UnitCost,UnitPrice,WarehouseLocation,BatchNo,ExpiryDate
+Aluminium Rod,Metals,76042990,KG,500,120.50,150.00,Mumbai WH-1,BATCH001,2027-12-31
+Copper Wire,Metals,74081190,KG,300,450.00,520.00,Delhi WH-2,BATCH002,2028-06-15
+Electronic Chips,Electronics,85423100,PCS,1000,50.00,80.00,Bangalore WH-3,BATCH003,2029-01-01
+Test Item Fail,-,0000,KG,-50,-10,-20,Test WH,-,-

@@ -12,14 +12,14 @@ public class DBConnectionManager {
 	static {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");            
-		} catch (ClassNotFoundException e) {    
+		} catch (ClassNotFoundException e) {          			 
 			e.printStackTrace();
 			throw new RuntimeException("MySQL JDBC Driver not found.");
 		}     
-	}
+	}    
 
 	public static Connection getConnection() throws SQLException {
 		return DriverManager.getConnection(URL, USER, PASSWORD);
-	}
+	}   
 }         
                       	        

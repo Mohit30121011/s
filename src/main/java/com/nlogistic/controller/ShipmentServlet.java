@@ -14,11 +14,11 @@ import java.io.IOException;
 
 @WebServlet("/shipments/*")
 public class ShipmentServlet extends HttpServlet {
-
+      															  
     private ShipmentDAO shipmentDAO = new ShipmentDAO();
-    private PortDAO portDAO = new PortDAO();
-    private VesselDAO vesselDAO = new VesselDAO();
-    private ContainerDAO containerDAO = new ContainerDAO();
+    private PortDAO portDAO = new PortDAO();      				        
+    private VesselDAO vesselDAO = new VesselDAO();   
+    private ContainerDAO containerDAO = new ContainerDAO();       
     private CustomerDAO customerDAO = new CustomerDAO(); // Need to fetch customers
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -55,7 +55,7 @@ public class ShipmentServlet extends HttpServlet {
             request.getRequestDispatcher("/jsp/edit_shipment.jsp").forward(request, response);
         } else if (pathInfo.equals("/create")) {
             // Show Form
-            request.setAttribute("ports", portDAO.getAllPorts());
+            request.setAttribute("ports", portDAO.getAllPorts());       
             request.setAttribute("vessels", vesselDAO.getAllVessels());
             request.setAttribute("containers", containerDAO.getAvailableContainers());
             request.setAttribute("customers", customerDAO.getAllCustomers());
