@@ -16,100 +16,39 @@ public class Container {
 
     public Container() {}
 
-    public int getContainerId() {
-        return containerId;
-    }
+    public int getContainerId() { return containerId; }
+    public void setContainerId(int containerId) { this.containerId = containerId; }
 
-    public void setContainerId(int containerId) {
-        this.containerId = containerId;
-    }
+    public String getContainerNumber() { return containerNumber; }
+    public void setContainerNumber(String containerNumber) { this.containerNumber = containerNumber; }
 
-    public String getContainerNumber() {
-        return containerNumber;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public void setContainerNumber(String containerNumber) {
-        this.containerNumber = containerNumber;
-    }
+    public String getSize() { return size; }
+    public void setSize(String size) { this.size = size; }
 
-    public String getType() {
-        return type;
-    }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public double getTareWeightKg() { return tareWeightKg; }
+    public void setTareWeightKg(double tareWeightKg) { this.tareWeightKg = tareWeightKg; }
 
-    public String getSize() {
-        return size;
-    }
+    public double getMaxGrossWeightKg() { return maxGrossWeightKg; }
+    public void setMaxGrossWeightKg(double maxGrossWeightKg) { this.maxGrossWeightKg = maxGrossWeightKg; }
 
-    public void setSize(String size) {
-        this.size = size;
-    }
+    public double getGoodsCapacityKg() { return goodsCapacityKg; }
+    public void setGoodsCapacityKg(double goodsCapacityKg) { this.goodsCapacityKg = goodsCapacityKg; }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
+    public double getGoodsCapacityCbm() { return goodsCapacityCbm; }
+    public void setGoodsCapacityCbm(double goodsCapacityCbm) { this.goodsCapacityCbm = goodsCapacityCbm; }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public double getTareWeightKg() {
-        return tareWeightKg;
-    }
+    public int getCurrentPortId() { return currentPortId; }
+    public void setCurrentPortId(int currentPortId) { this.currentPortId = currentPortId; }
 
-    public void setTareWeightKg(double tareWeightKg) {
-        this.tareWeightKg = tareWeightKg;
-    }
-
-    public double getMaxGrossWeightKg() {
-        return maxGrossWeightKg;
-    }
-
-    public void setMaxGrossWeightKg(double maxGrossWeightKg) {
-        this.maxGrossWeightKg = maxGrossWeightKg;
-    }
-
-    public double getGoodsCapacityKg() {
-        return goodsCapacityKg;
-    }
-
-    public void setGoodsCapacityKg(double goodsCapacityKg) {
-        this.goodsCapacityKg = goodsCapacityKg;
-    }
-
-    public double getGoodsCapacityCbm() {
-        return goodsCapacityCbm;
-    }
-
-    public void setGoodsCapacityCbm(double goodsCapacityCbm) {
-        this.goodsCapacityCbm = goodsCapacityCbm;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public int getCurrentPortId() {
-        return currentPortId;
-    }
-
-    public void setCurrentPortId(int currentPortId) {
-        this.currentPortId = currentPortId;
-    }
-
-    public int getOwnerCompanyId() {
-        return ownerCompanyId;
-    }
-
-    public void setOwnerCompanyId(int ownerCompanyId) {
-        this.ownerCompanyId = ownerCompanyId;
-    }
-
+    public int getOwnerCompanyId() { return ownerCompanyId; }
+    public void setOwnerCompanyId(int ownerCompanyId) { this.ownerCompanyId = ownerCompanyId; }
 }

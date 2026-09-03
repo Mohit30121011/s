@@ -1,88 +1,85 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
-<div class="container-fluid mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-tags me-2 text-success"></i>Dynamic Pricing Rules</h2>
-        <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+<div class="container-fluid py-4">
+    <div class="mb-4 text-center">
+        <h2 style="font-weight: 800; color: #1a1a1a;">Pricing & Booking Summary</h2>
+        <p class="text-muted">Review your cargo allocation and dynamic price breakdown before confirming.</p>
     </div>
-    
-    <c:if test="${param.success == 'true'}">
-        <div class="alert alert-success alert-dismissible fade show">Pricing multipliers updated successfully! <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-    </c:if>
-    <c:if test="${param.error == 'true'}">
-        <div class="alert alert-danger alert-dismissible fade show">Failed to update pricing! <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-    </c:if>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Container Specs</th>
-                            <th>Route ID</th>
-                            <th>Base Price</th>
-                            <th>Seasonal Mult.</th>
-                            <th>Demand Mult.</th>
-                            <th>Final Price</th>
-                            <th>Valid Until</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="r" items="${rules}">
-                            <tr>
-                                <td><strong>${r.containerType}</strong> (${r.containerSize})</td>
-                                <td>#${r.routeId}</td>
-                                <td>$${r.basePrice}</td>
-                                <td><span class="badge bg-info text-dark">x${r.seasonalMultiplier}</span></td>
-                                <td><span class="badge bg-warning text-dark">x${r.demandMultiplier}</span></td>
-                                <td><strong class="text-success">$${r.finalPrice}</strong></td>
-                                <td>${r.validTo}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPriceModal${r.pricingId}">
-                                        <i class="bi bi-sliders"></i> Adjust
-                                    </button>
-                                </td>
-                            </tr>
-                            
-                            <!-- Edit Modal -->
-                            <div class="modal fade" id="editPriceModal${r.pricingId}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form action="${pageContext.request.contextPath}/pricing/update" method="POST">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Adjust Multipliers for ${r.containerType}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <input type="hidden" name="pricingId" value="${r.pricingId}">
-                                                
-                                                <p class="text-muted small mb-4">Base Price: <strong>$${r.basePrice}</strong></p>
-                                                
-                                                <div class="mb-3">
-                                                    <label class="form-label">Seasonal Multiplier (e.g. 1.10 for +10%)</label>
-                                                    <input type="number" step="0.01" class="form-control" name="seasonalMultiplier" value="${r.seasonalMultiplier}" required>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label class="form-label">Demand Multiplier (e.g. 1.25 for +25%)</label>
-                                                    <input type="number" step="0.01" class="form-control" name="demandMultiplier" value="${r.demandMultiplier}" required>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Save changes</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
+                
+                <div class="card-body p-5">
+                    <!-- Allocation Info -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded" style="border-left: 4px solid #4338ca;">
+                        <i class="fa-solid fa-truck-fast fs-3 text-primary me-3"></i>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Cargo: ${cargoDesc}</h5>
+                            <span class="text-muted small">Container: ${container.containerNumber} (${container.size} ${container.type})</span>
+                        </div>
+                        <div class="ms-auto text-end">
+                            <div class="small text-muted">Weight / Vol</div>
+                            <div class="fw-bold">${cargoWeight} kg / ${cargoVolume} CBM</div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+
+                    <!-- Dynamic Pricing (FR3.5) Breakdown -->
+                    <h5 class="fw-bold mb-4"><i class="fa-solid fa-calculator text-muted me-2"></i>Dynamic Price Breakdown</h5>
+                    
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                            <div>
+                                <span class="fw-bold text-dark">Base Price</span>
+                                <div class="small text-muted">Standard rate for ${container.size} ${container.type}</div>
                             </div>
-                        </c:forEach>
-                    </tbody>
-                </table>
+                            <span class="fs-5">$<fmt:formatNumber value="${pricingRule.basePrice}" maxFractionDigits="2"/></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                            <div>
+                                <span class="fw-bold text-dark">Seasonal Multiplier</span>
+                                <div class="small text-muted">Adjustment based on current season/weather trends</div>
+                            </div>
+                            <span class="fs-5 text-warning">x <fmt:formatNumber value="${pricingRule.seasonalMultiplier}" maxFractionDigits="2"/></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                            <div>
+                                <span class="fw-bold text-dark">Demand Multiplier</span>
+                                <div class="small text-muted">Driven by Demand Forecasting Algorithm (Section 5.5)</div>
+                            </div>
+                            <span class="fs-5 text-danger">x <fmt:formatNumber value="${pricingRule.demandMultiplier}" maxFractionDigits="2"/></span>
+                        </li>
+                    </ul>
+
+                    <div class="p-4 rounded mb-4" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-0 text-uppercase" style="letter-spacing: 1px; font-weight: 300;">Final Price</h4>
+                                <div class="small text-white-50">Formula: Base × Seasonal × Demand</div>
+                            </div>
+                            <h2 class="mb-0 fw-bold text-success">$<fmt:formatNumber value="${finalPrice}" maxFractionDigits="2"/></h2>
+                        </div>
+                    </div>
+
+                    <form action="<c:url value='/book'/>" method="POST">
+                        <input type="hidden" name="containerId" value="${container.containerId}">
+                        <input type="hidden" name="cargoWeight" value="${cargoWeight}">
+                        <input type="hidden" name="cargoVolume" value="${cargoVolume}">
+                        <input type="hidden" name="cargoDesc" value="${cargoDesc}">
+                        <input type="hidden" name="finalPrice" value="${finalPrice}">
+                        <input type="hidden" name="origin" value="${origin}">
+                        <input type="hidden" name="destination" value="${destination}">
+                        
+                        <button type="submit" class="btn btn-primary w-100 py-3 shadow" style="border-radius: 12px; font-weight: 700; font-size: 18px;">
+                            <i class="fa-solid fa-check-circle me-2"></i> Confirm Booking
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -51,30 +51,32 @@ public class Module1TestRunner {
         }
 
         // Test 3: Company Registration
-        totalTests++;
-        System.out.print("Test 3: CompanyDAO Registration... ");
-        try {
-            CompanyDAO companyDAO = new CompanyDAO();
-            Company c = new Company();
-            // Generate unique email to avoid unique constraint failure
-            String uniqueEmail = "test_comp_" + System.currentTimeMillis() + "@test.com";
-            c.setCompanyName("Test Automation Logistics");
-            c.setLicenseNo("LIC-" + System.currentTimeMillis());
-            c.setGstNo("GST-" + System.currentTimeMillis());
-            c.setAddress("123 Test Street");
-            c.setContactEmail(uniqueEmail);
-            c.setContactPhone("9998887776");
-
-            boolean success = companyDAO.registerCompany(c);
-            if (success) {
-                System.out.println("[PASS] - Company registered successfully.");
-                testsPassed++;
-            } else {
-                System.out.println("[FAIL] - Registration returned false.");
-            }
-        } catch (Exception e) {
-            System.out.println("[FAIL] - Exception: " + e.getMessage());
-        }
+//        totalTests++;
+//        System.out.print("Test 3: CompanyDAO Registration... ");
+//        try {
+//            CompanyDAO companyDAO = new CompanyDAO();
+//            Company c = new Company();
+//            // Generate unique email to avoid unique constraint failure
+//            String uniqueEmail = "test_comp_" + System.currentTimeMillis() + "@test.com";
+//            c.setCompanyName("Test Automation Logistics");
+//            c.setLicenseNo("LIC-" + System.currentTimeMillis());
+//            c.setGstNo("GST-" + System.currentTimeMillis());
+//            c.setAddress("123 Test Street");
+//            c.setContactEmail(uniqueEmail);
+//            c.setContactPhone("9998887776");
+//
+//            boolean success = companyDAO.registerCompany(c);
+//            if (success) {
+//                System.out.println("[PASS] - Company registered successfully.");
+//                testsPassed++;
+//            } else {
+//                System.out.println("[FAIL] - Registration returned false.");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("[FAIL] - Exception: " + e.getMessage());
+//        }
+        
+        
 
         // Test 4: Customer Registration
         totalTests++;

@@ -15,7 +15,14 @@ public class DashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try (Connection conn = DBConnectionManager.getConnection()) {
+        // Contract Precondition: Verify caller is authenticated with a valid role
+        Integer roleId = (Integer) request.getSession().getAttribute("roleId");
+        if (roleId == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access Denied: Authentication required.");
+            return;
+        }
+
+                try (Connection conn = DBConnectionManager.getConnection()) {
 
             // --- KPI Cards ---
             int totalShipments = 0, activeShipments = 0, deliveredShipments = 0, pendingShipments = 0, overdueShipments = 0;

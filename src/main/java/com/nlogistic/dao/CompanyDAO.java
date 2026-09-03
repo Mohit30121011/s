@@ -109,5 +109,36 @@ public class CompanyDAO {
             cs.execute();
         } catch (Exception e) { e.printStackTrace(); }
     }
+    public java.util.List<com.nlogistic.model.Company> getPendingCompanies() {
+        java.util.List<com.nlogistic.model.Company> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM companies WHERE approval_status = 'Pending'";
+        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                com.nlogistic.model.Company c = new com.nlogistic.model.Company();
+                c.setCompanyId(rs.getInt("company_id"));
+                c.setCompanyName(rs.getString("company_name"));
+                c.setLicenseNo(rs.getString("license_no"));
+                c.setGstNo(rs.getString("gst_no"));
+                c.setAddress(rs.getString("address"));
+                c.setContactEmail(rs.getString("contact_email"));
+                c.setContactPhone(rs.getString("contact_phone"));
+                c.setApprovalStatus(rs.getString("approval_status"));
+                list.add(c);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 
+    public boolean updateCompanyStatus(int companyId, String status) {
+        String sql = "UPDATE companies SET approval_status = ? WHERE company_id = ?";
+        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, companyId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
 }

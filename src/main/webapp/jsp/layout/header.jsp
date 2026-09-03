@@ -456,6 +456,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </head>
 <body>
 
+    <c:if test="${empty requestScope.hideSidebar}">
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand-logo">
@@ -472,6 +473,19 @@ document.addEventListener("DOMContentLoaded", function() {
                     <i class="fa-solid fa-house main-icon"></i> Dashboard
                 </a>
             </div>
+            
+            <c:if test="${sessionScope.user.roleId == 1}">
+            <div class="nav-item">
+                <a href="#approvalsSubmenu" data-bs-toggle="collapse" class="nav-link collapsed">
+                    <i class="fa-solid fa-check-to-slot main-icon"></i> Approvals
+                    <i class="fa-solid fa-angle-down caret"></i>
+                </a>
+                <ul class="sub-nav collapse" id="approvalsSubmenu">
+                    <li><a href="${pageContext.request.contextPath}/admin/companies">Company</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/users">Users</a></li>
+                </ul>
+            </div>
+            </c:if>
             
             <div class="nav-item">
                 <a href="#shipmentsSubmenu" data-bs-toggle="collapse" aria-expanded="true" class="nav-link active-group">
@@ -554,9 +568,26 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fa-solid fa-chart-line main-icon"></i> Reports
-                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                <a href="${pageContext.request.contextPath}/containers" class="nav-link">
+                    <i class="fa-solid fa-boxes-stacked main-icon"></i> Containers
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/predictive-graph" class="nav-link">
+                    <i class="fa-solid fa-chart-line main-icon"></i> Predictive Graph
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/upload-stock" class="nav-link">
+                    <i class="fa-solid fa-cloud-arrow-up main-icon"></i> Upload Stock
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/ledger" class="nav-link">
+                    <i class="fa-solid fa-book-open main-icon"></i> Inventory Ledger
                 </a>
             </div>
 
@@ -588,10 +619,12 @@ document.addEventListener("DOMContentLoaded", function() {
             <a href="#" class="btn-support">Contact Support</a>
         </div>
     </aside>
+    </c:if>
 
     <!-- Main Content -->
-    <main class="main-wrapper">
+    <main class="main-wrapper" <c:if test="${not empty requestScope.hideSidebar}">style="margin-left: 0;"</c:if>>
         
+        <c:if test="${empty requestScope.hideSidebar}">
         <!-- Top Header -->
         <header class="top-header">
             <div class="header-left">
@@ -633,6 +666,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 
             </div>
         </header>
+        </c:if>
 
         <!-- Form Area -->
         <div class="content-area">

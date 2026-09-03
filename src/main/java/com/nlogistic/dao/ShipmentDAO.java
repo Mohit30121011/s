@@ -251,7 +251,7 @@ public class ShipmentDAO {
         String deleteClaims = "DELETE FROM claims WHERE shipment_id = ?";
         String deleteShipment = "DELETE FROM shipment WHERE shipment_id = ?";
         
-        try (Connection conn = DBConnection.getConnection()) {
+        try (Connection conn = DBConnectionManager.getConnection()) {  
             conn.setAutoCommit(false);
             try {
                 // Delete child records first to satisfy foreign key constraints
