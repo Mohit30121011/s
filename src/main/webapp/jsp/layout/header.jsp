@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -453,6 +453,7 @@ document.addEventListener("DOMContentLoaded", function() {
         right: 16px !important;
     }
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 
@@ -618,7 +619,30 @@ document.addEventListener("DOMContentLoaded", function() {
             <p>Our support team is available 24/7</p>
             <a href="#" class="btn-support">Contact Support</a>
         </div>
-    </aside>
+    
+<script>
+// Ultimate Fallback for Sidebar Toggles
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(toggle) {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            let targetId = this.getAttribute('href').substring(1);
+            let target = document.getElementById(targetId);
+            if(target) {
+                target.classList.toggle('show');
+                this.classList.toggle('collapsed');
+                if (target.classList.contains('show')) {
+                    this.setAttribute('aria-expanded', 'true');
+                } else {
+                    this.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    });
+});
+</script>
+</aside>
+
     </c:if>
 
     <!-- Main Content -->

@@ -23,10 +23,27 @@ public class DashboardServlet extends HttpServlet {
         }
 
                 try (Connection conn = DBConnectionManager.getConnection()) {
+            
+            String period = request.getParameter("period");
+            if (period == null) period = "all";
+            request.setAttribute("currentPeriod", period);
+
+            String dateFilter = "";
+            if ("today".equals(period)) {
+                dateFilter = " WHERE DATE(booking_date) = CURDATE() ";
+            } else if ("week".equals(period)) {
+                dateFilter = " WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) ";
+            } else if ("month".equals(period)) {
+                dateFilter = " WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) ";
+            }
+            
+            String wherePrefix = dateFilter.isEmpty() ? "" : dateFilter + " AND ";
+            String whereClause = dateFilter.isEmpty() ? "" : dateFilter;
+
 
             // --- KPI Cards ---
             int totalShipments = 0, activeShipments = 0, deliveredShipments = 0, pendingShipments = 0, overdueShipments = 0;
-            try (PreparedStatement ps = conn.prepareStatement("SELECT status, COUNT(*) as cnt FROM shipment GROUP BY status")) {
+            try (PreparedStatement ps = conn.prepareStatement("SELECT status, COUNT(*) as cnt FROM shipment" + whereClause + " GROUP BY status")) {
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     int cnt = rs.getInt("cnt");
@@ -46,7 +63,7 @@ public class DashboardServlet extends HttpServlet {
 
             // --- Shipments by Status (for doughnut chart) JSON ---
             StringBuilder statusJson = new StringBuilder("[");
-            try (PreparedStatement ps = conn.prepareStatement("SELECT status, COUNT(*) as cnt FROM shipment GROUP BY status ORDER BY cnt DESC")) {
+            try (PreparedStatement ps = conn.prepareStatement("SELECT status, COUNT(*) as cnt FROM shipment" + whereClause + " GROUP BY status ORDER BY cnt DESC")) {
                 ResultSet rs = ps.executeQuery();
                 boolean first = true;
                 while (rs.next()) {
@@ -57,13 +74,29 @@ public class DashboardServlet extends HttpServlet {
             }
             statusJson.append("]");
             request.setAttribute("statusJson", statusJson.toString());
+            String trendPeriod = request.getParameter("trendPeriod");
+            if (trendPeriod == null) trendPeriod = "week";
+            request.setAttribute("currentTrendPeriod", trendPeriod);
+
+            String trendDateFilter = "";
+            String trendLimit = "7";
+            if ("week".equals(trendPeriod)) {
+                trendDateFilter = " WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND booking_date <= CURDATE() ";
+                trendLimit = "7";
+            } else if ("month".equals(trendPeriod)) {
+                trendDateFilter = " WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND booking_date <= CURDATE() ";
+                trendLimit = "30";
+            } else if ("year".equals(trendPeriod)) {
+                trendDateFilter = " WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) AND booking_date <= CURDATE() ";
+                trendLimit = "365"; 
+            }
 
             // --- Weekly Shipment Trend (last 7 days) JSON ---
             StringBuilder trendJson = new StringBuilder("[");
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT DATE_FORMAT(booking_date,'%d %b') as d, COUNT(*) as cnt FROM shipment " +
-                    "WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) " +
-                    "GROUP BY DATE(booking_date) ORDER BY DATE(booking_date) LIMIT 7")) {
+                    trendDateFilter +
+                    "GROUP BY DATE(booking_date) ORDER BY DATE(booking_date) ASC LIMIT " + trendLimit)) {
                 ResultSet rs = ps.executeQuery();
                 boolean first = true;
                 while (rs.next()) {

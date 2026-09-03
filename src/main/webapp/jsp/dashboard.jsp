@@ -127,6 +127,12 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .alert-msg { font-size: 12px; font-weight: 600; color: var(--text-main); }
 .alert-detail { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 .alert-time { font-size: 11px; color: var(--text-sub); flex-shrink: 0; white-space: nowrap; }
+
+/* Scrollable lists */
+.scrollable-card-body { max-height: 310px; overflow-y: auto; padding-right: 8px; }
+
+
+
 </style>
 
 <div class="dash-wrap">
@@ -137,14 +143,15 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
             <p>Welcome back! Here's what's happening with your logistics operations.</p>
         </div>
         <div class="dash-header-right">
-            <div class="date-badge">
-                <i class="fi fi-rr-calendar"></i>
-                <span>Today — All Time</span>
-                <i class="fi fi-rr-angle-small-down"></i>
-            </div>
-            <a href="${pageContext.request.contextPath}/shipments/create" class="btn-new-ship">
-                <i class="fi fi-sr-plus-small"></i> New Shipment
-            </a>
+            <form action="${pageContext.request.contextPath}/dashboard" method="GET" class="date-badge-form" style="display:inline-block; margin-right: 15px;">
+                <select name="period" onchange="this.form.submit()" class="period-select" style="padding: 8px 12px; border-radius: 20px; font-weight: 600;">
+                    <option value="all" ${currentPeriod == 'all' ? 'selected' : ''}>All Time</option>
+                    <option value="today" ${currentPeriod == 'today' ? 'selected' : ''}>Today</option>
+                    <option value="week" ${currentPeriod == 'week' ? 'selected' : ''}>This Week</option>
+                    <option value="month" ${currentPeriod == 'month' ? 'selected' : ''}>This Month</option>
+                </select>
+            </form>
+            
         </div>
     </div>
 
@@ -198,7 +205,14 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Shipment Overview</h3>
-                <select class="period-select"><option>This Week</option><option>This Month</option></select>
+                <form action="${pageContext.request.contextPath}/dashboard" method="GET" style="margin:0;">
+                <input type="hidden" name="period" value="${currentPeriod}">
+                <select name="trendPeriod" onchange="this.form.submit()" class="period-select">
+                    <option value="week" ${currentTrendPeriod == 'week' ? 'selected' : ''}>This Week</option>
+                    <option value="month" ${currentTrendPeriod == 'month' ? 'selected' : ''}>This Month</option>
+                    <option value="year" ${currentTrendPeriod == 'year' ? 'selected' : ''}>This Year</option>
+                </select>
+            </form>
             </div>
             <div class="card-body">
                 <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
@@ -222,9 +236,9 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Recent Shipments</h3>
-                <a href="${pageContext.request.contextPath}/shipments" class="card-action">View All</a>
+                
             </div>
-            <div class="card-body" style="padding-top:8px;">
+            <div class="card-body scrollable-card-body" style="padding-top:8px;">
                 <ul class="ship-list">
                     <c:forEach var="s" items="${recentShipments}">
                     <li class="ship-item">
@@ -257,7 +271,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                 <h3 class="card-title">Top Shipping Routes</h3>
                 <select class="period-select"><option>All Time</option></select>
             </div>
-            <div class="card-body" style="padding-top:12px;">
+            <div class="card-body scrollable-card-body" style="padding-top:12px;">
                 <table class="route-table">
                     <thead>
                         <tr>
@@ -280,7 +294,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                         </c:forEach>
                     </tbody>
                 </table>
-                <a href="${pageContext.request.contextPath}/shipments" class="view-all-link">View All Routes &rarr;</a>
+                
             </div>
         </div>
 
@@ -290,7 +304,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                 <h3 class="card-title">Containers Overview</h3>
                 <span class="card-action">Total: ${totalContainers}</span>
             </div>
-            <div class="card-body" style="padding-top:12px;">
+            <div class="card-body scrollable-card-body" style="padding-top:12px;">
                 <div class="container-grid">
                     <c:forEach var="ct" items="${containerTypes}">
                     <div class="cont-card">
@@ -300,7 +314,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                     </div>
                     </c:forEach>
                 </div>
-                <a href="${pageContext.request.contextPath}/containers" class="view-all-link">View All Containers &rarr;</a>
+                
             </div>
         </div>
 
@@ -308,9 +322,9 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Alerts &amp; Notifications</h3>
-                <a href="#" class="card-action">View All</a>
+                
             </div>
-            <div class="card-body" style="padding-top:8px;">
+            <div class="card-body scrollable-card-body" style="padding-top:8px;">
                 <ul class="alert-list">
                     <c:forEach var="al" items="${alerts}" varStatus="loop">
                     <li class="alert-item">
@@ -431,5 +445,6 @@ var STATUS_COLORS = {
     });
 })();
 </script>
+<jsp:include page="/jsp/layout/footer.jsp" />
 </body>
 </html>

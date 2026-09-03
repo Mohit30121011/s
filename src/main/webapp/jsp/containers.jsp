@@ -1,7 +1,77 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
+
+
+<style>
+:root {
+    --primary: #EA580C;
+    --primary-light: #FFEDD5;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --info: #2563EB;
+    --info-light: #DBEAFE;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --text-main: #0F172A;
+    --text-sub: #64748B;
+}
+.btn-theme {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.btn-theme:hover { background: #c2410c; color: #fff; }
+.btn-outline-theme {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.btn-outline-theme:hover { background: var(--primary); color: #fff; }
+.badge-custom {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 11px;
+}
+.bg-available { background: var(--success-light); color: var(--success); }
+.bg-allocated { background: var(--primary-light); color: var(--primary); }
+.bg-transit { background: var(--info-light); color: var(--info); }
+.bg-maint { background: var(--warning-light); color: var(--warning); }
+.cont-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.cont-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+.img-wrap {
+    height: 180px;
+    background: #F8FAFC;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+}
+</style>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -19,7 +89,7 @@
                 <option value="In-Transit" ${statusFilter == 'In-Transit' ? 'selected' : ''}>In-Transit</option>
                 <option value="Under Maintenance" ${statusFilter == 'Under Maintenance' ? 'selected' : ''}>Under Maintenance</option>
             </select>
-            <button class="btn btn-primary" type="button" style="border-radius: 8px;"><i class="fa-solid fa-filter"></i></button>
+            <button class="btn-theme" type="button" style="border-radius: 8px;"><i class="fi fi-rr-filter"></i></button>
         </form>
     </div>
 
@@ -27,21 +97,21 @@
     <div class="row g-4">
         <c:forEach var="container" items="${containers}">
             <div class="col-12 col-md-6 col-lg-4 col-xl-3">
-                <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; overflow: hidden; transition: transform 0.2s;">
+                <div class="cont-card h-100">
                     <!-- Container Image Placeholder -->
-                    <div style="height: 180px; background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #e2e8f0; position: relative;">
+                    <div class="img-wrap">
                         <c:choose>
                             <c:when test="${not empty container.imageUrl}">
                                 <img src="${container.imageUrl}" alt="Container" style="width: 100%; height: 100%; object-fit: cover;">
                             </c:when>
                             <c:otherwise>
-                                <i class="fa-solid fa-box-open" style="font-size: 64px; color: #94a3b8;"></i>
+                                <i class="fi fi-rr-box-alt" style="font-size: 64px; color: #CBD5E1;"></i>
                             </c:otherwise>
                         </c:choose>
                         
                         <!-- Status Badge -->
-                        <span class="badge ${container.status == 'Available' ? 'bg-success' : (container.status == 'Allocated' ? 'bg-primary' : (container.status == 'In-Transit' ? 'bg-info text-dark' : 'bg-secondary'))}" 
-                              style="position: absolute; top: 12px; right: 12px; font-size: 12px; padding: 6px 10px; border-radius: 6px;">
+                        <span class="badge ${container.status == 'Available' ? 'bg-available' : (container.status == 'Allocated' ? 'bg-allocated' : (container.status == 'In-Transit' ? 'bg-transit' : 'bg-maint'))}" 
+                              class="badge-custom" style="position: absolute; top: 12px; right: 12px;">
                             ${container.status}
                         </span>
                     </div>
@@ -49,26 +119,26 @@
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title mb-0" style="font-weight: 700; color: #0f172a;">${container.containerNumber}</h5>
-                            <span class="badge bg-light text-dark border border-secondary" style="font-size: 13px;">${container.size}</span>
+                            <span class="badge-custom bg-light text-dark border" style="font-size: 13px;">${container.size}</span>
                         </div>
                         
                         <div class="mb-3">
-                            <span class="badge" style="background-color: #e0e7ff; color: #4338ca; font-weight: 600; padding: 6px 10px;">
-                                <i class="fa-solid fa-truck-container me-1"></i> ${container.type}
+                            <span class="badge" class="badge-custom bg-light text-dark border">
+                                <i class="fi fi-rr-truck-side me-1"></i> ${container.type}
                             </span>
                         </div>
 
                         <ul class="list-unstyled mb-4" style="font-size: 14px; color: #475569;">
                             <li class="mb-2 d-flex justify-content-between">
-                                <span><i class="fa-solid fa-weight-hanging me-2 text-muted"></i>Tare Weight</span>
+                                <span><i class="fi fi-rr-scale me-2 text-muted"></i>Tare Weight</span>
                                 <span style="font-weight: 600;"><fmt:formatNumber value="${container.tareWeightKg}" maxFractionDigits="0"/> kg</span>
                             </li>
                             <li class="mb-2 d-flex justify-content-between">
-                                <span><i class="fa-solid fa-boxes-stacked me-2 text-muted"></i>Goods Capacity</span>
+                                <span><i class="fi fi-rr-boxes me-2 text-muted"></i>Goods Capacity</span>
                                 <span style="font-weight: 600;"><fmt:formatNumber value="${container.goodsCapacityKg}" maxFractionDigits="0"/> kg</span>
                             </li>
                             <li class="d-flex justify-content-between">
-                                <span><i class="fa-solid fa-cube me-2 text-muted"></i>Volume</span>
+                                <span><i class="fi fi-rr-box me-2 text-muted"></i>Volume</span>
                                 <span style="font-weight: 600;"><fmt:formatNumber value="${container.goodsCapacityCbm}" maxFractionDigits="2"/> CBM</span>
                             </li>
                         </ul>
@@ -76,7 +146,7 @@
                         <!-- Action Button (FR3.3 / FR3.4 Booking entry point) -->
                         <c:choose>
                             <c:when test="${container.status == 'Available'}">
-                                <a href="<c:url value='/allocate?containerId=${container.containerId}'/>" class="btn btn-outline-primary w-100" style="border-radius: 8px; font-weight: 600;">
+                                <a href="<c:url value='/allocate?containerId=${container.containerId}'/>" class="btn-outline-theme w-100">
                                     Allocate Container
                                 </a>
                             </c:when>
