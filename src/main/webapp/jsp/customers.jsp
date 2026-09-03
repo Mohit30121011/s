@@ -32,6 +32,14 @@
     <c:remove var="successMessage" scope="session"/>
 </c:if>
 
+<c:if test="${not empty sessionScope.errorMessage}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i> ${sessionScope.errorMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
+
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -41,6 +49,7 @@
                         <th class="py-3 ps-4 border-0 rounded-start">Customer ID</th>
                         <th class="py-3 border-0">Name</th>
                         <th class="py-3 border-0">Address</th>
+                        <th class="py-3 border-0">KYC Document</th>
                         <th class="py-3 border-0">Credit Limit</th>
                         <th class="py-3 pe-4 border-0 rounded-end text-end">Registered Date</th>
                     </tr>
@@ -70,6 +79,18 @@
                                         </c:choose>
                                     </td>
                                     <td>
+                                        <c:choose>
+                                            <c:when test="${not empty customer.kycDocPath}">
+                                                <a href="${pageContext.request.contextPath}/${customer.kycDocPath}" target="_blank" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-3 text-decoration-none">
+                                                    <i class="fa-solid fa-file-pdf me-1"></i> View Document
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-light text-muted border px-2 py-1 rounded-3">None</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
                                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-3">
                                             $ <fmt:formatNumber value="${customer.creditLimit}" pattern="#,##0.00" />
                                         </span>
@@ -89,7 +110,7 @@
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                                         <i class="fa-solid fa-users text-secondary fs-3"></i>
                                     </div>
@@ -111,10 +132,10 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
+        <h5 class="modal-title fw-bold" id="addCustomerModalLabel">Add New Customer</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="${pageContext.request.contextPath}/customers" method="POST">
+      <form action="${pageContext.request.contextPath}/customers" method="POST" enctype="multipart/form-data">
           <input type="hidden" name="action" value="add">
           <div class="modal-body">
               <div class="mb-3">
@@ -122,20 +143,21 @@
                   <input type="text" class="form-control" name="customerName" required placeholder="e.g. Acme Corp">
               </div>
               <div class="mb-3">
-                  <label class="form-label text-muted small fw-medium">Address</label>
-                  <input type="text" class="form-control" name="address" required placeholder="e.g. 123 Logistics Way, NY">
-              </div>
-              <div class="mb-3">
                   <label class="form-label text-muted small fw-medium">Customer Login Email</label>
                   <input type="email" class="form-control" name="email" required placeholder="e.g. customer@example.com">
               </div>
               <div class="mb-3">
                   <label class="form-label text-muted small fw-medium">Customer Login Password</label>
-                  <input type="password" class="form-control" name="password" required placeholder="Enter temporary password">
+                  <input type="password" class="form-control" name="password" required placeholder="Enter login password">
               </div>
               <div class="mb-3">
-                  <label class="form-label text-muted small fw-medium">KYC Document Path</label>
-                  <input type="text" class="form-control" name="kycDocPath" placeholder="e.g. /docs/kyc/customer_abc.pdf">
+                  <label class="form-label text-muted small fw-medium">Address</label>
+                  <input type="text" class="form-control" name="address" required placeholder="e.g. 123 Logistics Way, NY">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-medium">KYC Document (Choose File)</label>
+                  <input type="file" class="form-control" name="kycFile" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
+                  <div class="form-text small text-muted">Upload PDF or image (e.g. Registration / ID Proof)</div>
               </div>
               <div class="mb-3">
                   <label class="form-label text-muted small fw-medium">Credit Limit ($)</label>
@@ -144,7 +166,7 @@
           </div>
           <div class="modal-footer border-top-0 pt-0">
             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn text-white" style="background-color: #EA580C;">Save Customer</button>
+            <button type="submit" class="btn text-white px-4" style="background-color: #EA580C;">Save Customer</button>
           </div>
       </form>
     </div>

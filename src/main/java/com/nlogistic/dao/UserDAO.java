@@ -81,6 +81,34 @@ public class UserDAO {
     }
 
     /**
+     * Create user directly and return generated user_id
+     */
+    public int createUser(String username, String email, String password, String phone, int roleId, Integer companyId, String status) {
+        String sql = "INSERT INTO users (username, email, password_hash, phone, role_id, company_id, status) VALUES (?, ?, SHA2(?, 256), ?, ?, ?, ?)";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, username);
+            ps.setString(2, email);
+            ps.setString(3, password);
+            ps.setString(4, phone != null ? phone : "");
+            ps.setInt(5, roleId);
+            if (companyId != null) ps.setInt(6, companyId); else ps.setNull(6, Types.INTEGER);
+            ps.setString(7, status != null ? status : "Active");
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    /**
      * DB signature: register_user(p_username, p_email, p_password_hash, p_phone, p_role_id, p_company_id, p_status)
      */
     public void registerUser(String username, String email, String password, String phone, int roleId, Integer companyId, String status) {
