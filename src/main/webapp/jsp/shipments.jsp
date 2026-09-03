@@ -115,9 +115,17 @@
 
     <!-- Filter & Action Row -->
     <div class="filter-card">
-        <div class="filter-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search by ID, Customer, Container, or Route...">
+        <div class="d-flex align-items-center gap-2">
+            <div class="filter-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="shipmentSearchInput" placeholder="Search by ID, Customer, Container, or Route...">
+            </div>
+            <button class="btn btn-secondary" id="searchBtn" type="button" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 10px 18px;">
+                <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+            </button>
+            <button class="btn btn-outline-secondary d-none" id="clearSearchBtn" type="button" style="border-radius: 8px; font-size: 13px; padding: 10px 14px;" title="Clear Search">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
         <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
             <i class="fa-solid fa-plus"></i> Book Shipment
@@ -238,14 +246,88 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('shipmentSearchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const table = document.querySelector('.tracking-table tbody');
+
+    if (!table) return;
+
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        const rows = table.querySelectorAll('tr:not(.no-results-row)');
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+            const cells = Array.from(row.querySelectorAll('td')).slice(0, 6);
+            const rowText = cells.map(td => td.textContent.toLowerCase()).join(' ');
+            
+            if (!query || rowText.includes(query)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (query.length > 0) {
+            clearBtn.classList.remove('d-none');
+        } else {
+            clearBtn.classList.add('d-none');
+        }
+
+        let noResults = document.getElementById('noSearchResultsRow');
+        if (visibleCount === 0 && rows.length > 0) {
+            if (!noResults) {
+                noResults = document.createElement('tr');
+                noResults.id = 'noSearchResultsRow';
+                noResults.className = 'no-results-row';
+                noResults.innerHTML = '<td colspan="7" style="text-align: center; padding: 48px; color: var(--text-muted);">' +
+                    '<i class="fa-solid fa-magnifying-glass" style="font-size: 28px; color: #D1D5DB; margin-bottom: 12px; display: block;"></i>' +
+                    'No shipments matching "' + searchInput.value + '"</td>';
+                table.appendChild(noResults);
+            } else {
+                noResults.style.display = '';
+                noResults.querySelector('td').innerHTML = '<i class="fa-solid fa-magnifying-glass" style="font-size: 28px; color: #D1D5DB; margin-bottom: 12px; display: block;"></i>No shipments matching "' + searchInput.value + '"';
+            }
+        } else if (noResults) {
+            noResults.style.display = 'none';
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', performSearch);
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+    }
+
+    if (searchBtn) {
+        searchBtn.addEventListener('click', performSearch);
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearch();
+            searchInput.focus();
+        });
+    }
+});
+
 let sortDirections = [true, true, true, true, true];
 
 function sortTable(columnIndex) {
-    const table = document.querySelector(".table tbody");
-    const rows = Array.from(table.querySelectorAll("tr"));
-    
-    // Toggle direction
+    const table = document.querySelector(".tracking-table tbody");
+    if (!table) return;
+    const rows = Array.from(table.querySelectorAll("tr:not(.no-results-row)"));
+
     const isAscending = sortDirections[columnIndex];
     sortDirections[columnIndex] = !isAscending;
 
@@ -253,21 +335,19 @@ function sortTable(columnIndex) {
         let valA = rowA.children[columnIndex].innerText.trim();
         let valB = rowB.children[columnIndex].innerText.trim();
 
-        // Special handling for ID (remove #)
         if (columnIndex === 0) {
             valA = parseInt(valA.replace('#', '')) || 0;
             valB = parseInt(valB.replace('#', '')) || 0;
             return isAscending ? valA - valB : valB - valA;
         }
 
-        // String comparison
         return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
     });
 
-    // Re-append sorted rows
     rows.forEach(row => table.appendChild(row));
 }
 </script>
+
 <jsp:include page="/jsp/layout/footer.jsp" />
 
 
