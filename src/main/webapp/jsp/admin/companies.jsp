@@ -245,7 +245,7 @@
 
     <!-- 4 KPI Summary Cards -->
     <div class="kpi-grid">
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="filterByTab('Pending')" style="cursor: pointer;">
             <div>
                 <div class="kpi-label">Pending Approval</div>
                 <div class="kpi-value" style="color: #D97706;">${not empty pendingCount ? pendingCount : 0}</div>
@@ -254,7 +254,7 @@
                 <i class="ti ti-clock-hour-4"></i>
             </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="filterByTab('Active')" style="cursor: pointer;">
             <div>
                 <div class="kpi-label">Active Verified</div>
                 <div class="kpi-value" style="color: #059669;">${not empty activeCount ? activeCount : 0}</div>
@@ -263,16 +263,19 @@
                 <i class="ti ti-circle-check"></i>
             </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="filterByTab('Suspended')" style="cursor: pointer;" title="Click to view Suspended &amp; Rejected Companies">
             <div>
                 <div class="kpi-label">Suspended / Rejected</div>
-                <div class="kpi-value" style="color: #DC2626;">${not empty suspendedCount ? suspendedCount : 0}</div>
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <div class="kpi-value" style="color: #DC2626;">${not empty suspendedCount ? suspendedCount : 0}</div>
+                    <span style="font-size: 11px; font-weight: 700; color: #DC2626; background: #FEF2F2; border: 1px solid #FECACA; padding: 2px 8px; border-radius: 50px;">View Table &rarr;</span>
+                </div>
             </div>
             <div class="kpi-icon-pill red">
                 <i class="ti ti-ban"></i>
             </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="filterByTab('All')" style="cursor: pointer;">
             <div>
                 <div class="kpi-label">Total Registered Tenants</div>
                 <div class="kpi-value" style="color: #2563EB;">${not empty totalCount ? totalCount : 0}</div>
@@ -293,6 +296,10 @@
             <button type="button" class="tab-pill-btn" id="tabActiveBtn" onclick="filterByTab('Active')">
                 <i class="ti ti-circle-check"></i> Active Companies
                 <span class="tab-counter">${not empty activeCount ? activeCount : 0}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" id="tabSuspendedBtn" onclick="filterByTab('Suspended')">
+                <i class="ti ti-ban"></i> Suspended &amp; Rejected
+                <span class="tab-counter" style="color: #DC2626; background: #FEF2F2;">${not empty suspendedCount ? suspendedCount : 0}</span>
             </button>
             <button type="button" class="tab-pill-btn" id="tabAllBtn" onclick="filterByTab('All')">
                 <i class="ti ti-list"></i> All Tenants
@@ -472,6 +479,9 @@
 
         document.getElementById('tabPendingBtn').classList.toggle('active', tab === 'Pending');
         document.getElementById('tabActiveBtn').classList.toggle('active', tab === 'Active');
+        if (document.getElementById('tabSuspendedBtn')) {
+            document.getElementById('tabSuspendedBtn').classList.toggle('active', tab === 'Suspended');
+        }
         document.getElementById('tabAllBtn').classList.toggle('active', tab === 'All');
 
         applyFilters();
@@ -490,7 +500,7 @@
             const status = row.getAttribute('data-status');
             const searchData = row.getAttribute('data-search') || '';
 
-            const matchesTab = (currentTab === 'All') || (status === currentTab);
+            const matchesTab = (currentTab === 'All') || (currentTab === 'Suspended' ? (status === 'Suspended' || status === 'Rejected') : (status === currentTab));
             const matchesQuery = !query || searchData.includes(query);
 
             if (matchesTab && matchesQuery) {
@@ -519,6 +529,9 @@
             } else if (currentTab === 'Active') {
                 emptyTitle.textContent = 'No Active Companies';
                 emptyDesc.textContent = 'There are currently no companies with Active approval status in the system.';
+            } else if (currentTab === 'Suspended') {
+                emptyTitle.textContent = 'No Suspended or Rejected Companies';
+                emptyDesc.textContent = 'Good news! There are currently no suspended or rejected company accounts in the system.';
             } else {
                 emptyTitle.textContent = 'No Company Records';
                 emptyDesc.textContent = 'No registered companies found in the database.';
