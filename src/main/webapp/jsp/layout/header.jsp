@@ -527,7 +527,7 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             
             <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/master-data" class="nav-link">
+                <a href="${pageContext.request.contextPath}/ports" class="nav-link">
                     <i class="fa-solid fa-anchor main-icon"></i> Ports
                 </a>
             </div>

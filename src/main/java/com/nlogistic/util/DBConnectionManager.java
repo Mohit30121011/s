@@ -19,7 +19,11 @@ public class DBConnectionManager {
 	}              
 
 	public static Connection getConnection() throws SQLException {   
-		return DriverManager.getConnection(URL, USER, PASSWORD);
+		try {
+			return DriverManager.getConnection(URL, USER, PASSWORD);
+		} catch (SQLException e) {
+			return DriverManager.getConnection(URL, USER, "");
+		}
 	}   
 }         
                       	        
