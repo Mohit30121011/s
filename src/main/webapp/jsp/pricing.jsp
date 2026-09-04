@@ -1,4 +1,39 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    // Only calculate governance KPIs if we are not in booking summary quote mode
+    if (request.getAttribute("finalPrice") == null) {
+        if (request.getAttribute("rules") == null || request.getAttribute("auditHistory") == null) {
+            try {
+                com.nlogistic.dao.PricingRuleDAO pDao = new com.nlogistic.dao.PricingRuleDAO();
+                if (request.getAttribute("rules") == null) {
+                    request.setAttribute("rules", pDao.getAllPricingRules());
+                }
+                if (request.getAttribute("auditHistory") == null) {
+                    request.setAttribute("auditHistory", pDao.getAuditHistory());
+                }
+            } catch (Exception ignored) {}
+        }
+
+        java.util.List<com.nlogistic.model.PricingRule> rList = (java.util.List<com.nlogistic.model.PricingRule>) request.getAttribute("rules");
+        java.util.List<com.nlogistic.model.PricingAudit> aList = (java.util.List<com.nlogistic.model.PricingAudit>) request.getAttribute("auditHistory");
+
+        int totalRulesCount = (rList != null) ? rList.size() : 0;
+        double maxBasePrice = 0.0;
+        double sumFinalPrice = 0.0;
+        if (rList != null) {
+            for (com.nlogistic.model.PricingRule r : rList) {
+                if (r.getBasePrice() > maxBasePrice) maxBasePrice = r.getBasePrice();
+                sumFinalPrice += r.getFinalPrice();
+            }
+        }
+        double avgFinalPrice = (totalRulesCount > 0) ? (sumFinalPrice / totalRulesCount) : 0.0;
+        int totalAuditCount = (aList != null) ? aList.size() : 0;
+
+        request.setAttribute("kpiTotalRules", totalRulesCount);
+        request.setAttribute("kpiMaxBasePrice", maxBasePrice);
+        request.setAttribute("kpiAvgFinalPrice", avgFinalPrice);
+        request.setAttribute("kpiTotalAudit", totalAuditCount);
+    }
+%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -559,9 +594,519 @@
         justify-content: flex-end;
         gap: 12px;
     }
+
+    /* ==========================================================================
+       DYNAMIC PRICING BREAKDOWN & BOOKING SUMMARY (FR3.5)
+       ========================================================================== */
+    .booking-summary-wrapper {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding-bottom: 30px;
+    }
+    .booking-header-card {
+        background: #FFFFFF;
+        border: 1px solid var(--nl-border);
+        border-radius: 14px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .booking-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .booking-header-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: #FFF2EB;
+        color: #FC8019;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        flex-shrink: 0;
+    }
+    .booking-header-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.02em;
+        margin-bottom: 4px;
+    }
+    .booking-header-subtitle {
+        font-size: 13.5px;
+        color: #64748B;
+        margin: 0;
+    }
+    .booking-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ECFDF5;
+        border: 1px solid #A7F3D0;
+        color: #065F46;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 7px 14px;
+        border-radius: 20px;
+    }
+    .summary-card {
+        background: #FFFFFF;
+        border: 1px solid var(--nl-border);
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .summary-card-header {
+        padding: 18px 24px;
+        background: #FAFAFA;
+        border-bottom: 1px solid var(--nl-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .summary-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0F172A;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+    .summary-card-title i {
+        color: #FC8019;
+        font-size: 18px;
+    }
+    .summary-card-body {
+        padding: 24px;
+        flex: 1;
+    }
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #F1F5F9;
+        font-size: 13.5px;
+    }
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    .spec-item-label {
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
+    .spec-item-value {
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .spec-utilization-bar {
+        height: 6px;
+        border-radius: 3px;
+        background: #E2E8F0;
+        margin-top: 6px;
+        overflow: hidden;
+    }
+    .spec-utilization-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: #FC8019;
+    }
+    .route-visual-box {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 18px;
+        margin-top: 18px;
+    }
+    .route-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .route-step-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #FFF2EB;
+        color: #FC8019;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 800;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .route-step-circle.dest {
+        background: #EFF6FF;
+        color: #2563EB;
+    }
+    .route-step-line {
+        width: 2px;
+        height: 24px;
+        background: #CBD5E1;
+        margin-left: 14px;
+    }
+    .route-step-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94A3B8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .route-step-port {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    .breakdown-table tr {
+        border-bottom: 1px dashed #E2E8F0;
+    }
+    .breakdown-table tr:last-child {
+        border-bottom: none;
+    }
+    .breakdown-table td {
+        padding: 13px 0;
+        vertical-align: middle;
+    }
+    .breakdown-line-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .breakdown-line-desc {
+        font-size: 12px;
+        color: #64748B;
+        margin-top: 2px;
+    }
+    .breakdown-line-val {
+        text-align: right;
+        font-size: 15px;
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .multiplier-badge-seasonal {
+        background: #FFFBEB;
+        color: #D97706;
+        border: 1px solid #FDE68A;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 13.5px;
+        display: inline-block;
+    }
+    .multiplier-badge-demand {
+        background: #FEF2F2;
+        color: #DC2626;
+        border: 1px solid #FECACA;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 13.5px;
+        display: inline-block;
+    }
+    .surcharge-badge {
+        background: #EFF6FF;
+        color: #2563EB;
+        border: 1px solid #BFDBFE;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 13.5px;
+        display: inline-block;
+    }
+    .hero-price-card {
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        border: 1.5px solid #334155;
+        border-radius: 12px;
+        padding: 22px 24px;
+        color: #FFFFFF;
+        margin-bottom: 22px;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-price-card::after {
+        content: '';
+        position: absolute;
+        right: -20px;
+        bottom: -20px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(252, 128, 25, 0.25) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .hero-price-tag {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94A3B8;
+        margin-bottom: 4px;
+    }
+    .hero-price-formula {
+        font-size: 12px;
+        color: #94A3B8;
+        margin-bottom: 6px;
+    }
+    .hero-price-value {
+        font-size: 34px;
+        font-weight: 800;
+        color: #10B981;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .btn-confirm-booking-cta {
+        width: 100%;
+        background: linear-gradient(135deg, #FC8019 0%, #E66F0F 100%);
+        color: #FFFFFF !important;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 24px;
+        font-size: 16px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 14px rgba(252, 128, 25, 0.35);
+        transition: all 0.18s ease;
+        cursor: pointer;
+    }
+    .btn-confirm-booking-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(252, 128, 25, 0.45);
+    }
+    .btn-back-allocation {
+        width: 100%;
+        background: #FFFFFF;
+        color: #64748B !important;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 11px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 10px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .btn-back-allocation:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #0F172A !important;
+    }
+
 </style>
 
 <div class="pricing-governance-container">
+    <c:choose>
+        <c:when test="${not empty finalPrice}">
+            <!-- PRICING & BOOKING SUMMARY (FR3.5) -->
+            <div class="booking-summary-wrapper">
+                <!-- Breadcrumbs -->
+                <div class="custom-breadcrumb mb-3">
+                    <a href="${pageContext.request.contextPath}/containers"><i class="ti ti-layout-grid"></i> Containers</a>
+                    <span class="sep"><i class="ti ti-chevron-right"></i></span>
+                    <a href="${pageContext.request.contextPath}/allocate?containerId=${container.containerId}">Allocate Cargo</a>
+                    <span class="sep"><i class="ti ti-chevron-right"></i></span>
+                    <span class="current">Pricing &amp; Booking Summary</span>
+                </div>
+
+                <!-- Page Header Card -->
+                <div class="booking-header-card">
+                    <div class="booking-header-left">
+                        <div class="booking-header-icon">
+                            <i class="ti ti-receipt-2"></i>
+                        </div>
+                        <div>
+                            <div class="booking-header-title">Pricing &amp; Booking Summary</div>
+                            <p class="booking-header-subtitle">Review your verified cargo allocation and dynamic rate governance breakdown (FR3.5)</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="booking-status-badge">
+                            <i class="ti ti-shield-check"></i> Capacity Preconditions Passed (FR3.4)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left: Cargo & Routing Specifications -->
+                    <div class="col-lg-5">
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h6 class="summary-card-title">
+                                    <i class="ti ti-box"></i> Cargo &amp; Container Specs
+                                </h6>
+                                <span class="profile-pill">${container.size} ${container.type}</span>
+                            </div>
+                            <div class="summary-card-body">
+                                <div class="spec-item">
+                                    <span class="spec-item-label"><i class="ti ti-hash"></i> Container No.</span>
+                                    <span class="spec-item-value" style="font-family: monospace; font-size: 14px;">#${container.containerNumber}</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-item-label"><i class="ti ti-file-description"></i> Cargo Description</span>
+                                    <span class="spec-item-value">${cargoDesc}</span>
+                                </div>
+                                <div class="spec-item" style="flex-direction: column; align-items: stretch;">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="spec-item-label"><i class="ti ti-weight"></i> Weight Allocation</span>
+                                        <span class="spec-item-value"><fmt:formatNumber value="${cargoWeight}" maxFractionDigits="2"/> / <fmt:formatNumber value="${container.goodsCapacityKg}" maxFractionDigits="2"/> kg</span>
+                                    </div>
+                                    <div class="spec-utilization-bar">
+                                        <div class="spec-utilization-fill" style="width: ${Math.min(100.0, (cargoWeight / (container.goodsCapacityKg > 0 ? container.goodsCapacityKg : 1.0)) * 100.0)}%;"></div>
+                                    </div>
+                                </div>
+                                <div class="spec-item" style="flex-direction: column; align-items: stretch;">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="spec-item-label"><i class="ti ti-cube"></i> Volume Allocation</span>
+                                        <span class="spec-item-value"><fmt:formatNumber value="${cargoVolume}" maxFractionDigits="2"/> / <fmt:formatNumber value="${container.goodsCapacityCbm}" maxFractionDigits="2"/> CBM</span>
+                                    </div>
+                                    <div class="spec-utilization-bar">
+                                        <div class="spec-utilization-fill" style="width: ${Math.min(100.0, (cargoVolume / (container.goodsCapacityCbm > 0 ? container.goodsCapacityCbm : 1.0)) * 100.0)}%; background: #2563EB;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Route Visualization -->
+                                <div class="route-visual-box">
+                                    <div class="route-step">
+                                        <div class="route-step-circle"><i class="ti ti-map-pin"></i></div>
+                                        <div>
+                                            <div class="route-step-label">Origin Port (Point A)</div>
+                                            <div class="route-step-port">
+                                                <c:choose>
+                                                    <c:when test="${not empty originPort}">${originPort.portName} (${originPort.country})</c:when>
+                                                    <c:otherwise>Port #${origin}</c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="route-step-line"></div>
+                                    <div class="route-step">
+                                        <div class="route-step-circle dest"><i class="ti ti-anchor"></i></div>
+                                        <div>
+                                            <div class="route-step-label">Destination Port (Point B)</div>
+                                            <div class="route-step-port">
+                                                <c:choose>
+                                                    <c:when test="${not empty destPort}">${destPort.portName} (${destPort.country})</c:when>
+                                                    <c:otherwise>Port #${destination}</c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Dynamic Pricing Breakdown & Booking Confirmation -->
+                    <div class="col-lg-7">
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h6 class="summary-card-title">
+                                    <i class="ti ti-calculator"></i> Dynamic Rate Calculation (FR3.5)
+                                </h6>
+                                <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 11px;">Algorithm Sec 5.5</span>
+                            </div>
+                            <div class="summary-card-body">
+                                <table class="breakdown-table">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="breakdown-line-name">Commercial Base Rate</div>
+                                                <div class="breakdown-line-desc">Standard tariff for ${container.size} ${container.type} profile</div>
+                                            </td>
+                                            <td class="breakdown-line-val">
+                                                $<fmt:formatNumber value="${pricingRule.basePrice}" minFractionDigits="2" maxFractionDigits="2"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="breakdown-line-name">Seasonal Multiplier</div>
+                                                <div class="breakdown-line-desc">Peak season demand / weather adjustment factor</div>
+                                            </td>
+                                            <td class="breakdown-line-val">
+                                                <span class="multiplier-badge-seasonal">× <fmt:formatNumber value="${pricingRule.seasonalMultiplier}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="breakdown-line-name">Demand Multiplier</div>
+                                                <div class="breakdown-line-desc">Real-time demand surge index (Predictive Engine)</div>
+                                            </td>
+                                            <td class="breakdown-line-val">
+                                                <span class="multiplier-badge-demand">× <fmt:formatNumber value="${pricingRule.demandMultiplier}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="breakdown-line-name">Port &amp; Environmental Surcharges</div>
+                                                <div class="breakdown-line-desc">Terminal handling (THC) &amp; low-sulfur bunker charge</div>
+                                            </td>
+                                            <td class="breakdown-line-val">
+                                                <span class="surcharge-badge">+$<fmt:formatNumber value="${pricingRule.surcharges}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Hero Final Price Card -->
+                                <div class="hero-price-card">
+                                    <div class="hero-price-tag"><i class="ti ti-tag me-1"></i> Total Calculated Freight Rate</div>
+                                    <div class="hero-price-formula">Formula: [Base ($<fmt:formatNumber value="${pricingRule.basePrice}" maxFractionDigits="0"/>) × Seasonal (<fmt:formatNumber value="${pricingRule.seasonalMultiplier}" maxFractionDigits="2"/>) × Demand (<fmt:formatNumber value="${pricingRule.demandMultiplier}" maxFractionDigits="2"/>)] + Surcharges ($<fmt:formatNumber value="${pricingRule.surcharges}" maxFractionDigits="0"/>)</div>
+                                    <div class="hero-price-value">$<fmt:formatNumber value="${finalPrice}" minFractionDigits="2" maxFractionDigits="2"/></div>
+                                </div>
+
+                                <!-- Booking Action Form -->
+                                <form action="<c:url value='/book'/>" method="POST">
+                                    <input type="hidden" name="containerId" value="${container.containerId}">
+                                    <input type="hidden" name="cargoWeight" value="${cargoWeight}">
+                                    <input type="hidden" name="cargoVolume" value="${cargoVolume}">
+                                    <input type="hidden" name="cargoDesc" value="${cargoDesc}">
+                                    <input type="hidden" name="finalPrice" value="${finalPrice}">
+                                    <input type="hidden" name="origin" value="${origin}">
+                                    <input type="hidden" name="destination" value="${destination}">
+                                    
+                                    <button type="submit" class="btn-confirm-booking-cta">
+                                        <i class="ti ti-circle-check"></i> Confirm Booking &amp; Allocate Container
+                                    </button>
+                                </form>
+
+                                <a href="${pageContext.request.contextPath}/allocate?containerId=${container.containerId}" class="btn-back-allocation">
+                                    <i class="ti ti-arrow-left"></i> Modify Cargo Specifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </c:when>
+        <c:otherwise>
+
     <!-- Breadcrumb -->
     <div class="custom-breadcrumb">
         <a href="${pageContext.request.contextPath}/dashboard"><i class="ti ti-smart-home"></i> Dashboard</a>
@@ -868,6 +1413,9 @@
     </div>
 </div>
 
+
+        </c:otherwise>
+    </c:choose>
 <script>
 function makeTablePager(tableId, searchInputId, paginationPrefix) {
     const table = document.getElementById(tableId);
@@ -970,6 +1518,7 @@ function makeTablePager(tableId, searchInputId, paginationPrefix) {
 
 var rulesPager, auditPager;
 document.addEventListener('DOMContentLoaded', function() {
+        if (!document.getElementById('rulesTable')) return;
     rulesPager = makeTablePager('rulesTable', 'rulesSearchInput', 'rules');
     auditPager = makeTablePager('auditTable', 'auditSearchInput', 'audit');
 });

@@ -104,6 +104,16 @@ public class AllocateContainerServlet extends HttpServlet {
         request.setAttribute("pricingRule", rule);
         request.setAttribute("finalPrice", finalPrice);
         
+        // Resolve Origin and Destination port entities for display in pricing.jsp
+        try {
+            if (request.getParameter("origin") != null && !request.getParameter("origin").isEmpty()) {
+                request.setAttribute("originPort", portDAO.getPortById(Integer.parseInt(request.getParameter("origin"))));
+            }
+            if (request.getParameter("destination") != null && !request.getParameter("destination").isEmpty()) {
+                request.setAttribute("destPort", portDAO.getPortById(Integer.parseInt(request.getParameter("destination"))));
+            }
+        } catch (Exception ignored) {}
+        
         // Forward to the detailed pricing breakdown page (FR3.5)
         request.getRequestDispatcher("/jsp/pricing.jsp").forward(request, response);
     }
