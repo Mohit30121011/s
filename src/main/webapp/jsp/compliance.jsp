@@ -594,7 +594,7 @@
                 <div class="form-group">
                     <label>Related Shipment</label>
                     <div class="select-wrapper">
-                        <select name="shipmentId" class="form-control form-select-custom no-custom-select" required>
+                        <select name="shipmentId" class="form-select form-select-custom no-custom-select" required>
                         <option value="">Select Shipment...</option>
                         <c:forEach var="s" items="${shipments}">
                             <option value="${s.shipmentId}">SHP-${s.shipmentId}</option>
@@ -605,7 +605,7 @@
                 <div class="form-group">
                     <label>Document Type</label>
                     <div class="select-wrapper">
-                        <select name="docType" class="form-control form-select-custom no-custom-select" required>
+                        <select name="docType" class="form-select form-select-custom no-custom-select" required>
                         <option value="">Select Type...</option>
                         <option value="Customs Declaration">Customs Declaration</option>
                         <option value="Import License">Import License</option>
@@ -658,7 +658,7 @@
                 <div class="form-group">
                     <label>New Status</label>
                     <div class="select-wrapper">
-                        <select name="status" id="updateDocStatus" class="form-control form-select-custom no-custom-select" style="width:100%;" required>
+                        <select name="status" id="updateDocStatus" class="form-select form-select-custom no-custom-select" style="width:100%;" required>
                         <option value="Under Review">Under Review</option>
                         <option value="Approved">Approved</option>
                         <option value="Rejected">Rejected</option>

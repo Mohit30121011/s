@@ -109,6 +109,7 @@
 
             // 2. Standard Form & Filter Dropdowns
             scope.querySelectorAll('select.form-select, select.form-select-custom, select:not(.no-custom-select):not(.nl-page-size-select)').forEach(function(el) {
+                if (el.classList.contains('no-custom-select')) return;
                 if (!el.tomselect && !el.classList.contains('tomselected')) {
                     const shouldSort = (el.dataset.sort === 'asc');
                     const firstOption = el.options[0];

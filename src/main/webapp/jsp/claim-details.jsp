@@ -346,7 +346,7 @@
                 <div class="modal-form-group">
                     <label class="modal-form-label">Document Type *</label>
                     <div class="select-wrapper">
-                        <select name="docType" class="form-select-custom" required>
+                        <select name="docType" class="form-select form-select-custom no-custom-select" required>
                             <option value="Photo Evidence">Photo Evidence</option>
                             <option value="Inspection Report">Inspection Report</option>
                             <option value="Other">Other</option>
