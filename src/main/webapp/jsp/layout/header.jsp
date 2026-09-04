@@ -2189,13 +2189,6 @@
                 <span>INSIGHTS & CONFIGURATION</span>
             </div>
 
-            <!-- Executive Dashboard -->
-            <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/dashboard/executive" class="nav-link ${pageContext.request.requestURI.contains('/dashboard/executive') ? 'active' : ''}">
-                    <i class="ti ti-report-analytics main-icon"></i>
-                    <span>Executive Dashboard</span>
-                </a>
-            </div>
 
             <!-- Analytics -->
             <div class="nav-item">
