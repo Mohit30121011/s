@@ -95,12 +95,111 @@
     .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94A3B8; cursor: pointer; display: none; font-size: 14px; }
     .search-clear:hover { color: #0F172A; }
 
-    .filter-type-wrap { width: 140px; }
-    .filter-type-select {
-        height: 38px; border-radius: 50px; border: 1.5px solid #E2E8F0; padding: 0 12px; font-size: 12.5px;
-        color: #1E293B; background: #FFFFFF; outline: none; width: 100%; cursor: pointer; transition: all 0.2s ease;
+        /* Type Filter Custom Dropdown (Signature Pill Style) */
+    .claim-type-filter-wrap {
+        min-width: 145px !important;
+        position: relative !important;
     }
-    .filter-type-select:focus { border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12); }
+    .claim-type-filter-wrap .ts-wrapper {
+        min-width: 145px !important;
+        width: 100% !important;
+        position: relative !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+    .claim-type-filter-wrap .ts-control {
+        min-width: 145px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        border-radius: 50px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background-color: #FFFFFF !important;
+        padding: 0 34px 0 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        box-shadow: none !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+    .claim-type-filter-wrap .ts-wrapper:hover .ts-control {
+        border-color: #CBD5E1 !important;
+    }
+    .claim-type-filter-wrap .ts-wrapper.focus .ts-control,
+    .claim-type-filter-wrap .ts-wrapper.dropdown-active .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+    }
+    .claim-type-filter-wrap .ts-control .item {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #1E293B !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .claim-type-filter-wrap .ts-wrapper.single .ts-control:after {
+        content: '' !important;
+        display: block !important;
+        position: absolute !important;
+        right: 14px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 10px !important;
+        height: 6px !important;
+        border: none !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        background-size: contain !important;
+        transition: transform 0.2s ease !important;
+        pointer-events: none !important;
+        margin-top: 0 !important;
+    }
+    .claim-type-filter-wrap .ts-wrapper.single.dropdown-active .ts-control:after {
+        transform: translateY(-50%) rotate(180deg) !important;
+        margin-top: 0 !important;
+    }
+    .ts-dropdown.claim-type-ts,
+    .claim-type-filter-wrap .ts-dropdown {
+        min-width: 155px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.06) !important;
+        border: 1px solid #E2E8F0 !important;
+        padding: 6px !important;
+        margin-top: 6px !important;
+        background: #FFFFFF !important;
+        z-index: 100000000 !important;
+    }
+    .ts-dropdown.claim-type-ts .option,
+    .claim-type-filter-wrap .ts-dropdown .option {
+        padding: 9px 14px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #334155 !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .ts-dropdown.claim-type-ts .option:hover,
+    .ts-dropdown.claim-type-ts .option.active,
+    .claim-type-filter-wrap .ts-dropdown .option:hover,
+    .claim-type-filter-wrap .ts-dropdown .option.active {
+        background-color: #FFF3EA !important;
+        color: #FC8019 !important;
+        font-weight: 600 !important;
+    }
+    .ts-dropdown.claim-type-ts .option.selected,
+    .claim-type-filter-wrap .ts-dropdown .option.selected {
+        background-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
 
     .table-counter-badge {
         font-size: 12px; font-weight: 600; color: #64748B; background: #F8FAFC; border: 1px solid #E2E8F0;
@@ -365,9 +464,9 @@
                 <button type="button" id="searchClearBtn" class="search-clear" onclick="clearSearch()">&times;</button>
             </div>
 
-            <!-- Type Filter Dropdown -->
-            <div class="filter-type-wrap">
-                <select id="claimTypeFilter" class="filter-type-select no-custom-select" onchange="handleFilter()">
+                        <!-- Type Filter Custom Dropdown -->
+            <div class="claim-type-filter-wrap">
+                <select id="claimTypeFilter" class="form-select-custom no-custom-select" onchange="handleFilter()">
                     <option value="ALL">All Types</option>
                     <option value="Damage">Damage</option>
                     <option value="Loss">Loss</option>
@@ -481,7 +580,7 @@
             <div class="page-info-wrap">
                 <div class="page-size-wrap">
                     <span>Rows per page:</span>
-                    <select id="claimsPageSize" class="page-size-select no-custom-select" onchange="changeClaimsPageSize(this.value)">
+                    <select id="claimsPageSize" class="nl-page-size-select" onchange="changeClaimsPageSize(this.value)">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="25">25</option>
@@ -765,6 +864,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         allClaimRows = Array.from(document.querySelectorAll('#claimsTableBody .claim-row'));
 
+        // Initialize custom TomSelect on Claim Type filter
+        initClaimTypeSelect();
+
         // Check if there is a statusFilter from server request
         const urlParams = new URLSearchParams(window.location.search);
         const initialStatus = urlParams.get('statusFilter');
@@ -850,10 +952,13 @@
         });
     }
 
-    function handleFilter() {
+        function handleFilter() {
         const query = (document.getElementById('claimsSearchInput').value || '').trim().toLowerCase();
         const typeSelect = document.getElementById('claimTypeFilter');
-        const selectedType = typeSelect ? typeSelect.value : 'ALL';
+        let selectedType = 'ALL';
+        if (typeSelect) {
+            selectedType = (typeSelect.tomselect ? typeSelect.tomselect.getValue() : typeSelect.value) || 'ALL';
+        }
         const clearBtn = document.getElementById('searchClearBtn');
 
         if (clearBtn) {
@@ -980,16 +1085,51 @@
         renderPage();
     }
 
-    function clearSearch() {
+        function clearSearch() {
         const input = document.getElementById('claimsSearchInput');
         input.value = '';
         handleFilter();
         input.focus();
     }
 
+    function initClaimTypeSelect() {
+        const typeSelect = document.getElementById('claimTypeFilter');
+        if (!typeSelect) return;
+        if (typeof TomSelect !== 'undefined') {
+            if (!typeSelect.tomselect) {
+                new TomSelect(typeSelect, {
+                    create: false,
+                    maxItems: 1,
+                    allowEmptyOption: false,
+                    controlInput: null,
+                    placeholder: 'All Types',
+                    onInitialize: function() {
+                        this.wrapper.classList.add('claim-type-ts-wrap');
+                        this.dropdown.classList.add('claim-type-ts');
+                        if (typeof this.positionDropdown === 'function') {
+                            this.on('dropdown_open', () => this.positionDropdown());
+                        }
+                    },
+                    onChange: function(val) {
+                        handleFilter();
+                    }
+                });
+            }
+        } else {
+            setTimeout(initClaimTypeSelect, 50);
+        }
+    }
+
     function resetFilters() {
         document.getElementById('claimsSearchInput').value = '';
-        document.getElementById('claimTypeFilter').value = 'ALL';
+        const typeSelect = document.getElementById('claimTypeFilter');
+        if (typeSelect) {
+            if (typeSelect.tomselect) {
+                typeSelect.tomselect.setValue('ALL');
+            } else {
+                typeSelect.value = 'ALL';
+            }
+        }
         currentStatusFilter = '';
         updateActiveStatusTab('');
         handleFilter();
