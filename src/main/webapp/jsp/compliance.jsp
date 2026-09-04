@@ -270,17 +270,28 @@
         right: 0;
         bottom: 0;
         background: rgba(0,0,0,0.5);
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         z-index: 99999;
         opacity: 0;
+        visibility: hidden;
         pointer-events: none;
         transition: opacity 0.2s;
     }
     .modal-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    .modal-overlay:not(.active) {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+    .modal-overlay:not(.active) * {
+        pointer-events: none !important;
     }
     .modal-content {
         background: white;
