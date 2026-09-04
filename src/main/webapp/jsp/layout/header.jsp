@@ -2090,6 +2090,7 @@
                 </a>
                 <ul class="sub-nav" id="containersSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/containers">All Containers</a></li>
+                    <li><a href="${pageContext.request.contextPath}/pricing">Pricing &amp; Rate Governance</a></li>
                     <li><a href="${pageContext.request.contextPath}/predictive-graph">Predictive Pricing Graph</a></li>
                 </ul>
             </div>

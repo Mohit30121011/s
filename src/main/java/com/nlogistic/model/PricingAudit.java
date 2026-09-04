@@ -10,6 +10,8 @@ public class PricingAudit {
     private int changedBy;
     private String reason;
     private java.util.Date changedAt;
+    private String changedByName;
+    private String containerProfile;
 
     public PricingAudit() {}
 
@@ -68,5 +70,11 @@ public class PricingAudit {
     public void setChangedAt(java.util.Date changedAt) {
         this.changedAt = changedAt;
     }
+
+    public String getChangedByName() { return changedByName; }
+    public void setChangedByName(String changedByName) { this.changedByName = changedByName; }
+
+    public String getContainerProfile() { return containerProfile; }
+    public void setContainerProfile(String containerProfile) { this.containerProfile = containerProfile; }
 
 }

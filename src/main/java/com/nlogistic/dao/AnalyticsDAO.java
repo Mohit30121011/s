@@ -199,10 +199,149 @@ public class AnalyticsDAO {
                         StockValuation sv = new StockValuation();
                         sv.setProductName(rs.getString("product_name"));
                         sv.setCategory(rs.getString("category"));
+                        try { sv.setWarehouseLocation(rs.getString("warehouse_location")); } catch (Exception ignored) {}
                         sv.setTotalQuantityOnHand(rs.getDouble("total_quantity_on_hand"));
                         sv.setTotalInventoryValuation(rs.getDouble("total_inventory_valuation"));
                         list.add(sv);
                     }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * Full itemized ABC Classification details joined with product names.
+     * (Ported from module 6 draft - supports detail drill-down tables required by FR6.1/5.2.)
+     */
+    public List<AbcClassificationResult> getAbcDetails(String period) {
+        List<AbcClassificationResult> list = new ArrayList<>();
+        String sql = "SELECT a.*, p.product_name, p.category, " +
+                     "(SELECT COALESCE(SUM(sale_amount), 0) FROM sales_transactions st WHERE st.product_id = a.product_id) as annual_rev " +
+                     "FROM abc_classification_result a " +
+                     "JOIN products p ON a.product_id = p.product_id " +
+                     (period != null ? "WHERE a.computed_period = ? " : "") +
+                     "ORDER BY a.cumulative_pct ASC";
+        try (Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (period != null) ps.setString(1, period);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    AbcClassificationResult r = new AbcClassificationResult();
+                    r.setId(rs.getInt("id"));
+                    r.setProductId(rs.getInt("product_id"));
+                    r.setProductName(rs.getString("product_name"));
+                    r.setCategory(rs.getString("category"));
+                    r.setAnnualRevenue(rs.getDouble("annual_rev"));
+                    r.setRevenueContributionPct(rs.getDouble("revenue_contribution_pct"));
+                    r.setCumulativePct(rs.getDouble("cumulative_pct"));
+                    r.setAbcClass(rs.getString("class"));
+                    r.setComputedPeriod(rs.getString("computed_period"));
+                    list.add(r);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * Itemized Inventory Turnover results per product (Section 5.3).
+     */
+    public List<InventoryTurnoverResult> getTurnoverDetails(String period) {
+        List<InventoryTurnoverResult> list = new ArrayList<>();
+        String sql = "SELECT t.*, p.product_name, p.category " +
+                     "FROM inventory_turnover_result t " +
+                     "JOIN products p ON t.product_id = p.product_id " +
+                     (period != null ? "WHERE t.period = ? " : "") +
+                     "ORDER BY t.turnover_ratio DESC";
+        try (Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (period != null) ps.setString(1, period);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    InventoryTurnoverResult r = new InventoryTurnoverResult();
+                    r.setId(rs.getInt("id"));
+                    r.setProductId(rs.getInt("product_id"));
+                    r.setProductName(rs.getString("product_name"));
+                    r.setCategory(rs.getString("category"));
+                    r.setPeriod(rs.getString("period"));
+                    r.setCogsAmount(rs.getDouble("cogs_amount"));
+                    r.setAvgInventoryValue(rs.getDouble("avg_inventory_value"));
+                    r.setTurnoverRatio(rs.getDouble("turnover_ratio"));
+                    r.setDaysInInventory(rs.getDouble("days_in_inventory"));
+                    list.add(r);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * Product Profitability Analysis table (Revenue - Direct COGS - Logistics = Net Profit) (Section 5.4).
+     */
+    public List<ProfitabilityResult> getProductProfitability(String period) {
+        List<ProfitabilityResult> list = new ArrayList<>();
+        String sql = "SELECT pr.*, p.product_name, p.category " +
+                     "FROM profitability_result pr " +
+                     "JOIN products p ON pr.product_id = p.product_id " +
+                     (period != null ? "WHERE pr.period = ? " : "") +
+                     "ORDER BY pr.net_profit DESC";
+        try (Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (period != null) ps.setString(1, period);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProfitabilityResult r = new ProfitabilityResult();
+                    r.setId(rs.getInt("id"));
+                    r.setProductId(rs.getInt("product_id"));
+                    r.setProductName(rs.getString("product_name"));
+                    r.setCategory(rs.getString("category"));
+                    r.setPeriod(rs.getString("period"));
+                    r.setRevenue(rs.getDouble("revenue"));
+                    r.setDirectCogs(rs.getDouble("direct_cogs"));
+                    r.setAllocatedLogisticsCost(rs.getDouble("allocated_logistics_cost"));
+                    r.setNetProfit(rs.getDouble("net_profit"));
+                    r.setProfitMarginPct(rs.getDouble("profit_margin_pct"));
+                    list.add(r);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * Demand Forecasting projections (Section 5.5 / FR3.6 / FR6.1), filterable by container type and route.
+     * Uses PreparedStatement parameters (unlike the module-6 draft, which concatenated containerType into
+     * the SQL string) to avoid SQL injection.
+     */
+    public List<DemandForecast> getDemandForecast(String containerType, Integer routeId) {
+        List<DemandForecast> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM demand_forecast WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+        if (containerType != null && !containerType.trim().isEmpty() && !"All".equalsIgnoreCase(containerType)) {
+            sql.append(" AND container_type = ? ");
+            params.add(containerType);
+        }
+        if (routeId != null && routeId > 0) {
+            sql.append(" AND route_id = ? ");
+            params.add(routeId);
+        }
+        sql.append(" ORDER BY forecast_period ASC, forecasted_demand DESC");
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    DemandForecast df = new DemandForecast();
+                    df.setForecastId(rs.getInt("forecast_id"));
+                    df.setContainerType(rs.getString("container_type"));
+                    df.setRouteId(rs.getInt("route_id"));
+                    df.setForecastPeriod(rs.getString("forecast_period"));
+                    df.setForecastedDemand(rs.getDouble("forecasted_demand"));
+                    df.setForecastedPrice(rs.getDouble("forecasted_price"));
+                    df.setAlgorithmVersion(rs.getString("algorithm_version"));
+                    list.add(df);
                 }
             }
         } catch (Exception e) { e.printStackTrace(); }
@@ -245,6 +384,58 @@ public class AnalyticsDAO {
             CallableStatement cs4 = conn.prepareCall("{CALL compute_sales_trend(?, ?)}");
             cs4.setString(1, period); cs4.setInt(2, computedBy); cs4.execute(); cs4.close();
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    /**
+     * Top Performing Trade Route by revenue (used on the executive dashboard KPI row).
+     * Optionally scoped to a company and/or a date range on profit_loss.record_date.
+     */
+    public static class TopRoute {
+        public String routeName = "N/A";
+        public double totalRevenue = 0.0;
+        public int shipmentCount = 0;
+    }
+
+    public TopRoute getTopTradeRoute(Integer companyId, String dateFrom, String dateTo) {
+        TopRoute tr = new TopRoute();
+        StringBuilder sql = new StringBuilder(
+            "SELECT CONCAT(p1.port_name, ' → ', p2.port_name) as route_name, " +
+            "COUNT(DISTINCT s.shipment_id) as shipment_count, " +
+            "COALESCE(SUM(pl.revenue_amount), 0) as total_revenue " +
+            "FROM shipment s " +
+            "JOIN ports p1 ON s.origin_port_id = p1.port_id " +
+            "JOIN ports p2 ON s.destination_port_id = p2.port_id " +
+            "LEFT JOIN profit_loss pl ON pl.shipment_id = s.shipment_id "
+        );
+        List<Object> params = new ArrayList<>();
+        StringBuilder where = new StringBuilder(" WHERE 1=1 ");
+        if (companyId != null && companyId > 0) {
+            where.append(" AND s.customer_id IN (SELECT customer_id FROM customers c JOIN users u ON c.user_id = u.user_id WHERE u.company_id = ?) ");
+            params.add(companyId);
+        }
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            where.append(" AND (pl.record_date IS NULL OR pl.record_date >= ?) ");
+            params.add(dateFrom);
+        }
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            where.append(" AND (pl.record_date IS NULL OR pl.record_date <= ?) ");
+            params.add(dateTo);
+        }
+        sql.append(where)
+           .append(" GROUP BY p1.port_id, p2.port_id, route_name ORDER BY total_revenue DESC LIMIT 1");
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    tr.routeName = rs.getString("route_name");
+                    tr.totalRevenue = rs.getDouble("total_revenue");
+                    tr.shipmentCount = rs.getInt("shipment_count");
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return tr;
     }
 
     // --- Legacy methods for old AnalyticsServlet ---

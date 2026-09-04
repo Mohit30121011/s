@@ -42,12 +42,23 @@ public class StockAdjustmentServlet extends HttpServlet {
                 double unitCost = 0;
                 
                 // 1. Get current stock and verify ownership
-                String checkSql = "SELECT s.product_id, s.quantity_on_hand, p.unit_cost "
-                                + "FROM stock s JOIN products p ON s.product_id = p.product_id "
-                                + "WHERE s.stock_id = ? AND s.company_id = ?";
+                // Super Admin (roleId 1) has full system access (SRS 2.2) and may adjust stock across all companies
+                boolean isSuperAdmin = (user.getRoleId() == 1);
+                String checkSql;
+                if (isSuperAdmin) {
+                    checkSql = "SELECT s.product_id, s.quantity_on_hand, p.unit_cost "
+                             + "FROM stock s JOIN products p ON s.product_id = p.product_id "
+                             + "WHERE s.stock_id = ?";
+                } else {
+                    checkSql = "SELECT s.product_id, s.quantity_on_hand, p.unit_cost "
+                             + "FROM stock s JOIN products p ON s.product_id = p.product_id "
+                             + "WHERE s.stock_id = ? AND s.company_id = ?";
+                }
                 try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
                     psCheck.setInt(1, stockId);
-                    psCheck.setInt(2, user.getCompanyId());
+                    if (!isSuperAdmin) {
+                        psCheck.setInt(2, user.getCompanyId());
+                    }
                     try (ResultSet rs = psCheck.executeQuery()) {
                         if (rs.next()) {
                             productId = rs.getInt("product_id");

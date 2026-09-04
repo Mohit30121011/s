@@ -475,13 +475,12 @@
                     </td>
                     <td>
                         <div class="action-cell">
-                            <button class="btn-icon btn-view" title="View PDF"><i class="fi fi-rr-eye"></i></button>
+                            <button class="btn-icon btn-view" title="View Invoice" onclick="window.open('${pageContext.request.contextPath}/invoices?id=${inv.invoiceId}&action=view', '_blank')"><i class="fi fi-rr-eye"></i></button>
                             <button class="btn-icon btn-edit" title="Record Payment" onclick="document.getElementById('payInvoiceId').value='${inv.invoiceId}'; openModal('paymentModal');"><i class="fi fi-rr-coins"></i></button>
                             <div class="dropdown-container">
                                 <button class="btn-icon action-dropdown" onclick="toggleDropdown(this)"><i class="fi fi-rr-menu-dots-vertical"></i></button>
                                 <div class="dropdown-menu-custom">
-                                    <a href="#" class="dropdown-item"><i class="fi fi-rr-download"></i> Download PDF</a>
-                                    <a href="#" class="dropdown-item"><i class="fi fi-rr-envelope"></i> Email to Client</a>
+                                    <a href="${pageContext.request.contextPath}/invoices?id=${inv.invoiceId}&action=print" target="_blank" class="dropdown-item"><i class="fi fi-rr-download"></i> Print / Download</a>
                                 </div>
                             </div>
                         </div>

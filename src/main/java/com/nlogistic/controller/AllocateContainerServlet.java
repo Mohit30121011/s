@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.nlogistic.dao.ContainerDAO;
+import com.nlogistic.dao.PortDAO;
 import com.nlogistic.model.Container;
 import com.nlogistic.model.User;
 import com.nlogistic.util.DBConnectionManager;
@@ -20,6 +21,7 @@ import com.nlogistic.util.DBConnectionManager;
 public class AllocateContainerServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ContainerDAO containerDAO = new ContainerDAO();
+    private PortDAO portDAO = new PortDAO();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String containerIdStr = request.getParameter("containerId");
@@ -31,7 +33,7 @@ public class AllocateContainerServlet extends HttpServlet {
         try {
             int containerId = Integer.parseInt(containerIdStr);
             Container container = getContainerById(containerId);
-            
+
             if (container == null) {
                 request.setAttribute("errorMessage", "Container not found.");
                 request.getRequestDispatcher("/jsp/containers.jsp").forward(request, response);
@@ -39,6 +41,10 @@ public class AllocateContainerServlet extends HttpServlet {
             }
 
             request.setAttribute("container", container);
+            // Genuinely missing previously: the origin/destination port dropdowns in
+            // allocate-container.jsp were hardcoded to 5 fixed IDs/names that may not match
+            // the actual seeded `ports` table rows. Drive them from the real data instead.
+            request.setAttribute("ports", portDAO.getAllPorts());
             request.getRequestDispatcher("/jsp/allocate-container.jsp").forward(request, response);
             
         } catch (Exception e) {
@@ -77,7 +83,8 @@ public class AllocateContainerServlet extends HttpServlet {
             request.setAttribute("cargoDesc", request.getParameter("cargoDesc"));
             request.setAttribute("origin", request.getParameter("origin"));
             request.setAttribute("destination", request.getParameter("destination"));
-            
+            request.setAttribute("ports", portDAO.getAllPorts());
+
             request.getRequestDispatcher("/jsp/allocate-container.jsp").forward(request, response);
             return;
         }

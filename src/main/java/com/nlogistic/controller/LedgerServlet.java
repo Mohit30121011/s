@@ -24,27 +24,45 @@ public class LedgerServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
-        if (user == null || user.getRoleId() > 3) {
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        if (user.getRoleId() > 3) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
             return;
         }
 
         List<Map<String, Object>> ledgerList = new ArrayList<>();
-        
-        // Fetch ledger entries for the company's products
-        String sql = "SELECT l.txn_date, p.product_name, p.hsn_code, l.transaction_type, l.quantity, l.unit_cost_at_txn, l.reference_type "
-                   + "FROM inventory_ledger l "
-                   + "JOIN products p ON l.product_id = p.product_id "
-                   + "JOIN stock s ON p.product_id = s.product_id "
-                   + "WHERE s.company_id = ? "
-                   + "GROUP BY l.ledger_id " // Prevent duplicates if multiple stock locations exist for same product
-                   + "ORDER BY l.txn_date DESC LIMIT 100";
+
+        // Super Admin (roleId 1) has full system access (SRS 2.2) and sees ledger entries across all companies
+        boolean isSuperAdmin = (user.getRoleId() == 1);
+
+        // Fetch ledger entries for the company's products (or all companies for Super Admin)
+        String sql;
+        if (isSuperAdmin) {
+            sql = "SELECT l.txn_date, p.product_name, p.hsn_code, l.transaction_type, l.quantity, l.unit_cost_at_txn, l.reference_type "
+                + "FROM inventory_ledger l "
+                + "JOIN products p ON l.product_id = p.product_id "
+                + "GROUP BY l.ledger_id "
+                + "ORDER BY l.txn_date DESC LIMIT 100";
+        } else {
+            sql = "SELECT l.txn_date, p.product_name, p.hsn_code, l.transaction_type, l.quantity, l.unit_cost_at_txn, l.reference_type "
+                + "FROM inventory_ledger l "
+                + "JOIN products p ON l.product_id = p.product_id "
+                + "JOIN stock s ON p.product_id = s.product_id "
+                + "WHERE s.company_id = ? "
+                + "GROUP BY l.ledger_id " // Prevent duplicates if multiple stock locations exist for same product
+                + "ORDER BY l.txn_date DESC LIMIT 100";
+        }
 
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-             
-            ps.setInt(1, user.getCompanyId());
-            
+
+            if (!isSuperAdmin) {
+                ps.setInt(1, user.getCompanyId());
+            }
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();

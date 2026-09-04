@@ -13,6 +13,9 @@ public class Container {
     private String status;
     private int currentPortId;
     private int ownerCompanyId;
+    private String portName;
+    private String portCountry;
+    private String ownerCompanyName;
 
     public Container() {}
 
@@ -51,4 +54,13 @@ public class Container {
 
     public int getOwnerCompanyId() { return ownerCompanyId; }
     public void setOwnerCompanyId(int ownerCompanyId) { this.ownerCompanyId = ownerCompanyId; }
+
+    public String getPortName() { return portName; }
+    public void setPortName(String portName) { this.portName = portName; }
+
+    public String getPortCountry() { return portCountry; }
+    public void setPortCountry(String portCountry) { this.portCountry = portCountry; }
+
+    public String getOwnerCompanyName() { return ownerCompanyName; }
+    public void setOwnerCompanyName(String ownerCompanyName) { this.ownerCompanyName = ownerCompanyName; }
 }

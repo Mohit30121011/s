@@ -80,6 +80,10 @@ public class PredictiveGraphServlet extends HttpServlet {
         request.setAttribute("pricingId", pricingId);
         request.setAttribute("currentBasePrice", currentBasePrice);
 
+                com.nlogistic.dao.PricingRuleDAO pricingRuleDAO = new com.nlogistic.dao.PricingRuleDAO();
+        List<com.nlogistic.model.PricingAudit> auditList = pricingRuleDAO.getAuditHistoryByType(containerType);
+        request.setAttribute("auditHistory", auditList);
+
         request.getRequestDispatcher("/jsp/predictive-graph.jsp").forward(request, response);
     }
 
@@ -95,28 +99,40 @@ public class PredictiveGraphServlet extends HttpServlet {
         double newPrice = Double.parseDouble(request.getParameter("newPrice"));
         String reason = request.getParameter("reason");
         String containerType = request.getParameter("containerType");
-        
+
         double oldPrice = 0.0;
+        double seasonalMultiplier = 1.0;
+        double demandMultiplier = 1.0;
 
         try (Connection conn = DBConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
-            
-            // Get old price
-            try (PreparedStatement ps = conn.prepareStatement("SELECT base_price FROM pricing_rules WHERE pricing_id = ?")) {
+
+            // Get old price + existing multipliers (needed to recompute final_price correctly)
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT base_price, seasonal_multiplier, demand_multiplier FROM pricing_rules WHERE pricing_id = ?")) {
                 ps.setInt(1, pricingId);
                 ResultSet rs = ps.executeQuery();
-                if (rs.next()) oldPrice = rs.getDouble("base_price");
+                if (rs.next()) {
+                    oldPrice = rs.getDouble("base_price");
+                    seasonalMultiplier = rs.getDouble("seasonal_multiplier");
+                    demandMultiplier = rs.getDouble("demand_multiplier");
+                }
             }
-            
-            // Update price
-            try (PreparedStatement ps = conn.prepareStatement("UPDATE pricing_rules SET base_price = ? WHERE pricing_id = ?")) {
+
+            double newFinalPrice = newPrice * seasonalMultiplier * demandMultiplier;
+
+            // Update price - also recompute final_price so it never goes stale (bug: previously
+            // only base_price was updated, leaving final_price out of sync with the new base rate).
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE pricing_rules SET base_price = ?, final_price = ? WHERE pricing_id = ?")) {
                 ps.setDouble(1, newPrice);
-                ps.setInt(2, pricingId);
+                ps.setDouble(2, newFinalPrice);
+                ps.setInt(3, pricingId);
                 ps.executeUpdate();
             }
-            
-            // Insert into audit log
-            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO pricing_audit (pricing_id, old_price, new_price, changed_by, reason) VALUES (?, ?, ?, ?, ?)")) {
+
+            // Insert into audit log (FR3.7: old value, new value, reason, timestamp, responsible user)
+            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO pricing_audit (pricing_id, old_price, new_price, changed_by, reason, changed_at) VALUES (?, ?, ?, ?, ?, NOW())")) {
                 ps.setInt(1, pricingId);
                 ps.setDouble(2, oldPrice);
                 ps.setDouble(3, newPrice);
@@ -124,14 +140,14 @@ public class PredictiveGraphServlet extends HttpServlet {
                 ps.setString(5, reason);
                 ps.executeUpdate();
             }
-            
+
             conn.commit();
             request.getSession().setAttribute("successMessage", "Price updated successfully and logged in Audit Trail.");
         } catch (Exception e) {
             e.printStackTrace();
             request.getSession().setAttribute("errorMessage", "Error updating price.");
         }
-        
+
         response.sendRedirect(request.getContextPath() + "/predictive-graph?type=" + containerType);
     }
 }

@@ -276,8 +276,12 @@ public class ClaimServlet extends HttpServlet {
                     filePart.write(uploadPath + File.separator + sanitized);
                     String dbFilePath = "uploads/claims/" + sanitized;
 
-                    claimDAO.addClaimDocument(claimId, docType, dbFilePath, userId);
-                    session.setAttribute("successMessage", "Document \"" + submittedName + "\" uploaded and added to Claim #" + claimId);
+                    boolean docSaved = claimDAO.addClaimDocument(claimId, docType, dbFilePath, userId);
+                    if (docSaved) {
+                        session.setAttribute("successMessage", "Document \"" + submittedName + "\" uploaded and added to Claim #" + claimId);
+                    } else {
+                        session.setAttribute("errorMessage", "The file was uploaded but could not be recorded against the claim. Please try again.");
+                    }
                     redirectUrl = request.getContextPath() + "/claims?action=view&claimId=" + claimId;
                     break;
                 }

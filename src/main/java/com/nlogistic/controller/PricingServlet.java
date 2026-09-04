@@ -18,6 +18,7 @@ public class PricingServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setAttribute("rules", pricingRuleDAO.getAllPricingRules());
+        request.setAttribute("auditHistory", pricingRuleDAO.getAuditHistory());
         request.getRequestDispatcher("/jsp/pricing.jsp").forward(request, response);
     }
 
@@ -25,18 +26,33 @@ public class PricingServlet extends HttpServlet {
         String pathInfo = request.getPathInfo();
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
-        
+
         if (pathInfo != null && pathInfo.equals("/update")) {
             int pricingId = Integer.parseInt(request.getParameter("pricingId"));
             double seasonal = Double.parseDouble(request.getParameter("seasonalMultiplier"));
             double demand = Double.parseDouble(request.getParameter("demandMultiplier"));
-            
+
             boolean success = pricingRuleDAO.updateMultipliers(pricingId, seasonal, demand, currentUser.getUserId());
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/pricing?success=true");
             } else {
                 response.sendRedirect(request.getContextPath() + "/pricing?error=true");
             }
+        } else if (pathInfo != null && pathInfo.equals("/updatePrice")) {
+            // FR3.7: base-price adjustment with mandatory audit reason — governance table only, Admins only.
+            if (currentUser == null || currentUser.getRoleId() > 2) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only Super Admin or Company Admin can adjust freight rates.");
+                return;
+            }
+            int pricingId = Integer.parseInt(request.getParameter("pricingId"));
+            double newBasePrice = Double.parseDouble(request.getParameter("basePrice"));
+            String reason = request.getParameter("reason");
+            if (reason == null || reason.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/pricing?error=reason_required");
+                return;
+            }
+            boolean success = pricingRuleDAO.updateBasePrice(pricingId, newBasePrice, currentUser.getUserId(), reason.trim());
+            response.sendRedirect(request.getContextPath() + "/pricing?" + (success ? "success=true" : "error=true"));
         }
     }
 }

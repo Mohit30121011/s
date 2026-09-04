@@ -47,26 +47,61 @@ public class InventoryServlet extends HttpServlet {
         User currentUser = (User) session.getAttribute("user");
         
         if (pathInfo != null && pathInfo.equals("/product/add")) {
-            Product p = new Product();
-            p.setProductName(request.getParameter("productName"));
-            p.setCategory(request.getParameter("category"));
-            p.setHsnCode(request.getParameter("hsnCode"));
-            p.setUnitOfMeasure(request.getParameter("unitOfMeasure"));
-            p.setUnitCost(Double.parseDouble(request.getParameter("unitCost")));
-            p.setUnitPrice(Double.parseDouble(request.getParameter("unitPrice")));
-            
-            boolean success = productDAO.addProduct(p);
-            if (success) {
-                response.sendRedirect(request.getContextPath() + "/inventory/products?success=true");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/inventory/products?error=true");
+            try {
+                Product p = new Product();
+                p.setProductName(request.getParameter("productName"));
+                p.setCategory(request.getParameter("category"));
+                p.setHsnCode(request.getParameter("hsnCode"));
+                p.setUnitOfMeasure(request.getParameter("unitOfMeasure"));
+                double cost = Double.parseDouble(request.getParameter("unitCost"));
+                double price = Double.parseDouble(request.getParameter("unitPrice"));
+
+                // FR4.3: quantity/cost/price must not be negative
+                if (cost < 0 || price < 0) {
+                    response.sendRedirect(request.getContextPath() + "/inventory/products?error=negative_values");
+                    return;
+                }
+                p.setUnitCost(cost);
+                p.setUnitPrice(price);
+
+                boolean success = productDAO.addProduct(p);
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/inventory/products?success=true");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/inventory/products?error=true");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect(request.getContextPath() + "/inventory/products?error=invalid_input");
+            }
+        } else if (pathInfo != null && pathInfo.equals("/product/update")) {
+            try {
+                int productId = Integer.parseInt(request.getParameter("productId"));
+                double cost = Double.parseDouble(request.getParameter("unitCost"));
+                double price = Double.parseDouble(request.getParameter("unitPrice"));
+
+                // FR4.3: quantity/cost/price must not be negative
+                if (cost < 0 || price < 0) {
+                    response.sendRedirect(request.getContextPath() + "/inventory/products?error=negative_values");
+                    return;
+                }
+
+                productDAO.updateProduct(productId, currentUser != null ? currentUser.getUserId() : 0,
+                        request.getParameter("productName"), request.getParameter("category"),
+                        request.getParameter("hsnCode"), request.getParameter("unitOfMeasure"), cost, price);
+                response.sendRedirect(request.getContextPath() + "/inventory/products?success=updated");
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect(request.getContextPath() + "/inventory/products?error=invalid_input");
             }
         } else if (pathInfo != null && pathInfo.equals("/stock/upload")) {
             Part filePart = request.getPart("stockCsv");
             if (filePart != null) {
                 String fileName = filePart.getSubmittedFileName();
                 try (InputStream fileContent = filePart.getInputStream()) {
-                    int uploadId = stockDAO.uploadStockCsv(currentUser.getCompanyId(), currentUser.getUserId(), fileName, fileContent);
+                    int companyId = currentUser != null ? currentUser.getCompanyId() : 0;
+                    int userId = currentUser != null ? currentUser.getUserId() : 0;
+                    int uploadId = stockDAO.uploadStockCsv(companyId, userId, fileName, fileContent);
                     if (uploadId != -1) {
                         response.sendRedirect(request.getContextPath() + "/inventory/stock?success=true&uploadId=" + uploadId);
                     } else {
@@ -77,9 +112,19 @@ public class InventoryServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/inventory/stock?error=true");
             }
         } else if (pathInfo != null && pathInfo.equals("/product/delete")) {
-productDAO.deleteProduct(Integer.parseInt(request.getParameter("id")), currentUser.getUserId());
-            response.sendRedirect(request.getContextPath() + "/inventory/products");
-} else if (pathInfo != null && pathInfo.equals("/stock/adjust")) {
+            try {
+                String idStr = request.getParameter("id");
+                if (idStr == null || idStr.isEmpty()) {
+                    idStr = request.getParameter("productId");
+                }
+                int productId = Integer.parseInt(idStr);
+                productDAO.deleteProduct(productId, currentUser != null ? currentUser.getUserId() : 0);
+                response.sendRedirect(request.getContextPath() + "/inventory/products?success=deleted");
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect(request.getContextPath() + "/inventory/products?error=delete_failed");
+            }
+        } else if (pathInfo != null && pathInfo.equals("/stock/adjust")) {
             int stockId = Integer.parseInt(request.getParameter("stockId"));
             int productId = Integer.parseInt(request.getParameter("productId"));
             double newQty = Double.parseDouble(request.getParameter("newQty"));

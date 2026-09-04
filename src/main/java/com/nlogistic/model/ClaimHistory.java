@@ -8,6 +8,9 @@ public class ClaimHistory {
     private int changedBy;
     private String remarks;
     private Date changedAt;
+    private String changerName;
+    public String getChangerName() { return changerName; }
+    public void setChangerName(String changerName) { this.changerName = changerName; }
     // Getters and setters
     public int getHistoryId() { return historyId; }
     public void setHistoryId(int historyId) { this.historyId = historyId; }

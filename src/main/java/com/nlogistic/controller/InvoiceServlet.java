@@ -1,27 +1,28 @@
 package com.nlogistic.controller;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.nlogistic.dao.BillingDAO;
+import com.nlogistic.dao.CustomerDAO;
+import com.nlogistic.dao.ShipmentDAO;
+import com.nlogistic.model.Invoice;
+import com.nlogistic.model.User;
 
+import java.io.IOException;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.nlogistic.model.User;
-import com.nlogistic.util.DBConnectionManager;
-
-@WebServlet("/invoices")
+@WebServlet({"/invoices", "/invoices/*", "/invoice-view"})
 public class InvoiceServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    private BillingDAO billingDAO = new BillingDAO();
+    private CustomerDAO customerDAO = new CustomerDAO();
+    private ShipmentDAO shipmentDAO = new ShipmentDAO();
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null || user.getRoleId() > 4) { // Allow Super Admin, Company Admin, Ops, Finance
@@ -29,64 +30,46 @@ public class InvoiceServlet extends HttpServlet {
             return;
         }
 
-        List<Map<String, Object>> invoices = new ArrayList<>();
-        
-        String sql = "SELECT i.invoice_id, i.invoice_date, i.due_date, i.total_amount, i.paid_amount, i.payment_status, "
-                   + "c.name as customer_name, s.shipment_id, s.cargo_description "
-                   + "FROM billing_invoices i "
-                   + "JOIN customers c ON i.customer_id = c.customer_id "
-                   + "JOIN shipment s ON i.shipment_id = s.shipment_id "
-                   + "ORDER BY i.invoice_date DESC";
+        billingDAO.flagOverdueInvoices();
 
-        try (Connection conn = DBConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-             
-            while (rs.next()) {
-                Map<String, Object> inv = new HashMap<>();
-                inv.put("invoiceId", rs.getInt("invoice_id"));
-                inv.put("invoiceDate", rs.getDate("invoice_date"));
-                inv.put("dueDate", rs.getDate("due_date"));
-                inv.put("totalAmount", rs.getDouble("total_amount"));
-                inv.put("paidAmount", rs.getDouble("paid_amount"));
-                inv.put("paymentStatus", rs.getString("payment_status"));
-                inv.put("customerName", rs.getString("customer_name"));
-                inv.put("shipmentId", rs.getInt("shipment_id"));
-                inv.put("cargoDesc", rs.getString("cargo_description"));
-                invoices.add(inv);
+        String idParam = request.getParameter("id");
+        String actionParam = request.getParameter("action");
+
+        // 1. Single Invoice Printable / Exportable View (FR5.8)
+        if (idParam != null && !idParam.trim().isEmpty() && ("view".equalsIgnoreCase(actionParam) || "print".equalsIgnoreCase(actionParam) || request.getServletPath().equals("/invoice-view"))) {
+            try {
+                int invoiceId = Integer.parseInt(idParam.trim());
+                Invoice inv = billingDAO.getInvoiceById(invoiceId);
+                if (inv != null) {
+                    request.setAttribute("invoice", inv);
+                    request.setAttribute("lineItems", inv.getLineItems());
+                    request.setAttribute("payments", inv.getPayments());
+                    request.getRequestDispatcher("/jsp/invoice-template.jsp").forward(request, response);
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+
+        // 2. Billing History Report per Customer (FR5.8)
+        String customerIdParam = request.getParameter("customerId");
+        List<Invoice> invoices;
+        if (customerIdParam != null && !customerIdParam.trim().isEmpty()) {
+            try {
+                int custId = Integer.parseInt(customerIdParam.trim());
+                invoices = billingDAO.getBillingHistory(custId);
+                request.setAttribute("selectedCustomerId", custId);
+            } catch (Exception e) {
+                invoices = billingDAO.getAllInvoices();
+            }
+        } else {
+            invoices = billingDAO.getAllInvoices();
         }
 
         request.setAttribute("invoices", invoices);
-        
-        // Fetch eligible shipments for new invoice generation
-        List<Map<String, Object>> eligibleShipments = new ArrayList<>();
-        String sqlShipments = "SELECT s.shipment_id, s.cargo_description, s.freight_cost, c.customer_id, c.name "
-                            + "FROM shipment s "
-                            + "JOIN customers c ON s.customer_id = c.customer_id "
-                            + "LEFT JOIN billing_invoices i ON s.shipment_id = i.shipment_id "
-                            + "WHERE i.invoice_id IS NULL";
-        
-        try (Connection conn = DBConnectionManager.getConnection();
-             PreparedStatement ps2 = conn.prepareStatement(sqlShipments);
-             ResultSet rs2 = ps2.executeQuery()) {
-             
-            while (rs2.next()) {
-                Map<String, Object> ship = new HashMap<>();
-                ship.put("shipmentId", rs2.getInt("shipment_id"));
-                ship.put("cargoDesc", rs2.getString("cargo_description"));
-                ship.put("cost", rs2.getDouble("freight_cost"));
-                ship.put("customerId", rs2.getInt("customer_id"));
-                ship.put("customerName", rs2.getString("name"));
-                eligibleShipments.add(ship);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        request.setAttribute("eligibleShipments", eligibleShipments);
+        request.setAttribute("customers", customerDAO.getAllCustomers());
+        request.setAttribute("shipments", shipmentDAO.getAllShipments());
 
         request.getRequestDispatcher("/jsp/invoices.jsp").forward(request, response);
     }

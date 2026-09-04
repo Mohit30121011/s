@@ -465,7 +465,7 @@
             <div class="metric-row">
                 <div class="metric-item">
                     <div class="metric-item-label">Current Value</div>
-                    <div class="metric-item-val">&#8377; 42,15,600</div>
+                    <div class="metric-item-val">&#8377; ${not empty currentStockValue ? String.format("%,.0f", currentStockValue) : "42,15,600"}</div>
                 </div>
                 <div class="metric-item" style="text-align:right">
                     <div class="metric-item-trend"><i class="fi fi-rr-arrow-small-up"></i> 14% vs Apr 2025</div>
@@ -511,7 +511,7 @@
                             <i class="fi fi-rr-refresh"></i>
                         </div>
                         <div>
-                            <div style="font-size:28px; font-weight:700; color:var(--text-main); line-height:1; margin-bottom:4px;">5.42</div>
+                            <div style="font-size:28px; font-weight:700; color:var(--text-main); line-height:1; margin-bottom:4px;">${not empty avgTurnoverRatio ? avgTurnoverRatio : "5.42"}</div>
                             <div style="font-size:12px; color:var(--text-sub);">Times</div>
                         </div>
                     </div>
@@ -612,12 +612,15 @@
     });
 
     // Top Loss Reasons (Doughnut)
+    var lossDataJson = ${not empty lossJson ? lossJson : '[]'};
+    var lossFallback = { labels: ['Delay', 'Traffic in Sea', 'Weather', 'Dock Allocation', 'Regulatory Hold', 'Ship Issue', 'War / Disruption'],
+                          data: [215600, 178500, 132000, 115300, 96800, 58900, 47100] };
     new Chart(document.getElementById('lossChart'), {
         type: 'doughnut',
         data: {
-            labels: ['Delay', 'Traffic in Sea', 'Weather', 'Dock Allocation', 'Regulatory Hold', 'Ship Issue', 'War / Disruption'],
+            labels: lossDataJson.length > 0 ? lossDataJson.map(function(d){return d.reason;}) : lossFallback.labels,
             datasets: [{
-                data: [215600, 178500, 132000, 115300, 96800, 58900, 47100],
+                data: lossDataJson.length > 0 ? lossDataJson.map(function(d){return d.impact;}) : lossFallback.data,
                 backgroundColor: ['#EF4444', '#FC8019', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6'],
                 borderWidth: 0,
                 cutout: '70%'
@@ -668,7 +671,7 @@
                 
                 ctx.font = "700 16px Inter, sans-serif";
                 ctx.fillStyle = "#111827";
-                ctx.fillText("\u20B9 8,45,200", centerX, centerY + 10);
+                ctx.fillText("\u20B9 " + Number('${not empty totalLossImpact ? totalLossImpact : 845200}').toLocaleString('en-IN'), centerX, centerY + 10);
                 ctx.save();
             }
         }]
@@ -696,38 +699,44 @@
         }
     });
 
-    // Stock Valuation (Line)
+    // Stock Valuation by Category (Bar) \u2014 100% DB-driven from AnalyticsDAO.getStockValuation()
+    var stockValJson = ${not empty stockValJson ? stockValJson : '[]'};
     new Chart(document.getElementById('stockChart'), {
-        type: 'line',
+        type: 'bar',
         data: {
-            labels: ['01 May', '05', '11 May', '15', '21 May', '25', '31 May'],
+            labels: stockValJson.map(function(d){return d.category;}),
             datasets: [{
-                data: [12, 18, 22, 28, 35, 42, 45],
-                borderColor: '#10B981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 2,
-                tension: 0.1,
-                fill: true,
-                pointRadius: 0
+                data: stockValJson.map(function(d){return d.value;}),
+                backgroundColor: '#10B981',
+                borderRadius: 6,
+                maxBarThickness: 40
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { ticks: { callback: function(val) { return '\u20B9 ' + val + 'L'; }, font: {size:10} }, grid: { color: '#F3F4F6' }, border: { display: false }, min: 0, max: 50 },
+                y: { ticks: { callback: function(val) { return '\u20B9 ' + val.toLocaleString('en-IN'); }, font: {size:10} }, grid: { color: '#F3F4F6' }, border: { display: false } },
                 x: { grid: { display: false }, ticks: { font: {size:10} }, border: { display: false } }
             }
         }
     });
 
     // ABC Classification Summary (Doughnut)
+    var abcDataJson = ${not empty abcJson ? abcJson : '[]'};
+    var abcClassOrder = ['Class A', 'Class B', 'Class C'];
+    var abcClassLabels = { 'Class A': 'A - High Value', 'Class B': 'B - Medium Value', 'Class C': 'C - Low Value' };
+    var abcCounts = abcClassOrder.map(function(cls) {
+        var found = abcDataJson.find(function(d){ return d.class === cls; });
+        return found ? found.count : 0;
+    });
+    var abcHasData = abcDataJson.length > 0;
     new Chart(document.getElementById('abcChart'), {
         type: 'doughnut',
         data: {
-            labels: ['A - High Value', 'B - Medium Value', 'C - Low Value'],
+            labels: abcHasData ? abcClassOrder.map(function(c){return abcClassLabels[c];}) : ['A - High Value', 'B - Medium Value', 'C - Low Value'],
             datasets: [{
-                data: [212, 415, 620],
+                data: abcHasData ? abcCounts : [212, 415, 620],
                 backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
                 borderWidth: 0,
                 cutout: '75%'
@@ -741,7 +750,7 @@
                         const data = chart.data;
                         return data.labels.map((label, i) => {
                             const val = data.datasets[0].data[i];
-                            const total = 1247;
+                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0) || 1;
                             const percent = ((val / total) * 100).toFixed(1) + '%';
                             return {
                                 text: label + ' (' + percent + ')',
@@ -772,35 +781,29 @@
                 
                 ctx.font = "700 18px Inter, sans-serif";
                 ctx.fillStyle = "#111827";
-                ctx.fillText("1,247", centerX, centerY + 10);
+                var abcTotal = abcHasData ? abcCounts.reduce(function(a,b){return a+b;}, 0) : 1247;
+                ctx.fillText(abcTotal.toLocaleString('en-IN'), centerX, centerY + 10);
                 ctx.save();
             }
         }]
     });
 
-    // Demand Forecast (Bar)
+    // Demand Forecast (Bar) — 100% DB-driven from demand_forecast table (Alg 5.5 / FR3.6)
+    var demandDataJson = ${not empty demandJson ? demandJson : '[]'};
     new Chart(document.getElementById('demandChart'), {
         type: 'bar',
         data: {
-            labels: ['Dec 2024', 'Jan 2025', 'Feb 2025', 'Mar 2025', 'Apr 2025', 'May 2025', 'Jun 2025', 'Jul 2025'],
+            labels: demandDataJson.map(function(d){return d.period;}),
             datasets: [
                 {
-                    label: 'Historical Demand',
-                    data: [1400, 1500, 1300, 1600, 1550, null, null, null],
-                    backgroundColor: '#9CA3AF',
-                    barThickness: 32,
-                    borderRadius: 2
-                },
-                {
                     label: 'Forecasted Demand',
-                    data: [null, null, null, null, null, 1700, 1650, 1800],
-                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    data: demandDataJson.map(function(d){return d.demand;}),
+                    backgroundColor: 'rgba(249, 115, 22, 0.15)',
                     borderColor: '#FC8019',
-                    borderWidth: {top: 2, right: 2, bottom: 2, left: 2},
+                    borderWidth: 2,
                     borderSkipped: false,
                     barThickness: 32,
-                    borderRadius: 2,
-                    borderDash: [4, 4]
+                    borderRadius: 2
                 }
             ]
         },
@@ -808,8 +811,8 @@
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { position: 'top', align: 'start', labels: { usePointStyle: true, boxWidth: 8, font: {size: 11} } } },
             scales: {
-                y: { ticks: { callback: function(val) { return val >= 1000 ? (val/1000) + 'K' : val; }, font: {size:10} }, grid: { color: '#F3F4F6' }, border: { display: false }, min: 0, max: 2000 },
-                x: { stacked: true, grid: { display: false }, ticks: { font: {size:10} }, border: { display: false } }
+                y: { ticks: { callback: function(val) { return val >= 1000 ? (val/1000) + 'K' : val; }, font: {size:10} }, grid: { color: '#F3F4F6' }, border: { display: false }, beginAtZero: true },
+                x: { grid: { display: false }, ticks: { font: {size:10} }, border: { display: false } }
             }
         }
     });

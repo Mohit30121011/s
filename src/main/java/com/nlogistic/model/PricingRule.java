@@ -45,9 +45,15 @@ public class PricingRule {
 
     public Date getValidTo() { return validTo; }
     public void setValidTo(Date validTo) { this.validTo = validTo; }
-    
-    // FR3.5 Formula: Final Price = Base Price * Seasonal Multiplier * Demand Multiplier
+
+    // Not a persisted column - computed surcharges (port/environmental) added on top of
+    // the base commercial rate at booking-quote time. See FR3.5.
+    private double surcharges;
+    public double getSurcharges() { return surcharges; }
+    public void setSurcharges(double surcharges) { this.surcharges = surcharges; }
+
+    // FR3.5 Formula: Final Price = Base Price * Seasonal Multiplier * Demand Multiplier + Surcharges
     public double calculateFinalPrice() {
-        return basePrice * seasonalMultiplier * demandMultiplier;
+        return (basePrice * seasonalMultiplier * demandMultiplier) + surcharges;
     }
 }

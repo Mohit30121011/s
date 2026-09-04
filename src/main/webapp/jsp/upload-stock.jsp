@@ -5,16 +5,16 @@
 
 <style>
     :root {
-        --nlog-orange: #ff6200;
-        --nlog-orange-hover: #e65800;
-        --nlog-light-orange: #fff0e6;
+        --nlog-orange: #FC8019;
+        --nlog-orange-hover: #E67012;
+        --nlog-light-orange: #FFF0E5;
         --nlog-green: #10b981;
         --nlog-purple: #8b5cf6;
         --nlog-yellow: #f59e0b;
         --card-radius: 12px;
     }
 
-    .page-title { font-weight: 700; color: #1e293b; font-size: 24px; }
+    .page-title { font-weight: 700; color: #0F172A; font-size: 24px; }
     .breadcrumb-text { font-size: 13px; color: #64748b; }
 
     .stat-card {
@@ -23,46 +23,42 @@
         padding: 20px;
         display: flex;
         align-items: center;
-        border: 1px solid #f1f5f9;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
-    
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); border-color: #CBD5E1; }
+
     .stat-icon {
         width: 48px;
         height: 48px;
-        border-radius: 10px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 22px;
         margin-right: 16px;
+        flex-shrink: 0;
     }
     .stat-icon.orange { background: var(--nlog-light-orange); color: var(--nlog-orange); }
     .stat-icon.green { background: #ecfdf5; color: var(--nlog-green); }
     .stat-icon.purple { background: #f5f3ff; color: var(--nlog-purple); }
-    .stat-icon.yellow { background: #fef3c7; color: var(--nlog-yellow); }
+    .stat-icon.yellow { background: #fffbeb; color: #D97706; }
 
     .stat-value { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
     .stat-label { font-size: 13px; color: #64748b; }
-    
+
     .nav-tabs-custom {
-        border-bottom: 1px solid #e2e8f0;
-        margin-bottom: 24px;
-        gap: 30px;
-        display: flex;
+        display: flex; align-items: center; gap: 8px; background: #F8FAFC; padding: 4px;
+        border-radius: 50px; border: 1px solid #E2E8F0; margin-bottom: 24px; width: fit-content; flex-wrap: wrap;
     }
     .nav-tabs-custom .nav-link {
-        color: #64748b;
-        font-weight: 600;
-        padding: 12px 0;
-        border: none;
-        background: transparent;
-        border-bottom: 3px solid transparent;
-        cursor: pointer;
+        background: transparent; border: none; padding: 7px 18px; border-radius: 50px; font-size: 13px; font-weight: 600;
+        color: #64748B; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center;
     }
+    .nav-tabs-custom .nav-link:hover { color: #0F172A; }
     .nav-tabs-custom .nav-link.active {
-        color: var(--nlog-orange);
-        border-bottom: 3px solid var(--nlog-orange);
+        background: #FFFFFF; color: var(--nlog-orange); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); border-bottom: none;
     }
 
     .btn-nlog {
@@ -72,10 +68,14 @@
         border: none;
         border-radius: 8px;
         padding: 10px 20px;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
+        transition: all 0.18s ease;
     }
     .btn-nlog:hover {
         background-color: var(--nlog-orange-hover);
         color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.35);
     }
 
     .btn-outline-nlog {
@@ -85,8 +85,9 @@
         font-weight: 600;
         border-radius: 8px;
         padding: 10px 20px;
+        transition: all 0.18s ease;
     }
-    .btn-outline-nlog:hover { background: #f8fafc; }
+    .btn-outline-nlog:hover { background: #f8fafc; border-color: #CBD5E1; }
 
     /* Drag & Drop */
     .upload-dropzone {
@@ -110,13 +111,22 @@
     }
     .form-control:focus, .form-select:focus {
         border-color: var(--nlog-orange);
-        box-shadow: 0 0 0 0.2rem rgba(255, 98, 0, 0.15);
+        box-shadow: 0 0 0 0.2rem rgba(252, 128, 25, 0.15);
     }
     .form-label { font-size: 13px; font-weight: 600; color: #334155; }
     .required-asterisk { color: var(--nlog-orange); }
 
-    .badge-success { background-color: #ecfdf5; color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;}
-    .badge-failed { background-color: #fef2f2; color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;}
+    .badge-success { background-color: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #A7F3D0;}
+    .badge-failed { background-color: #fef2f2; color: #DC2626; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #FECACA;}
+
+    /* Select wrapper (design system) */
+    .select-wrapper { position: relative; width: 100%; }
+    .select-wrapper::after {
+        content: ''; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-size: contain; background-repeat: no-repeat; pointer-events: none;
+    }
+    .select-wrapper select { appearance: none; -webkit-appearance: none; padding-right: 38px; }
 </style>
 
 <div class="container-fluid py-4" style="background-color: #fafafa; min-height: 100vh;">
@@ -128,10 +138,10 @@
         </div>
         <div class="d-flex gap-2">
             <a href="${pageContext.request.contextPath}/assets/templates/stock_template.csv" class="btn btn-outline-nlog" download="stock_template.csv">
-                <i class="fa-solid fa-download me-2"></i>Download Template
+                <i class="ti ti-download me-2"></i>Download Template
             </a>
             <button class="btn btn-nlog" onclick="switchTab('bulk'); document.getElementById('csvFile').click();">
-                <i class="fa-solid fa-cloud-arrow-up me-2"></i>Upload Stock
+                <i class="ti ti-cloud-upload me-2"></i>Upload Stock
             </button>
         </div>
     </div>
@@ -140,7 +150,7 @@
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-icon orange"><i class="fa-solid fa-box-open"></i></div>
+                <div class="stat-icon orange"><i class="ti ti-box"></i></div>
                 <div>
                     <div class="stat-label">Total Products</div>
                     <div class="stat-value">248</div>
@@ -150,7 +160,7 @@
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-icon green"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="stat-icon green"><i class="ti ti-stack-2"></i></div>
                 <div>
                     <div class="stat-label">Total Stock</div>
                     <div class="stat-value">12,850</div>
@@ -160,7 +170,7 @@
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-icon purple"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+                <div class="stat-icon purple"><i class="ti ti-upload"></i></div>
                 <div>
                     <div class="stat-label">Last Upload</div>
                     <div class="stat-value">2,450</div>
@@ -170,7 +180,7 @@
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-icon yellow"><i class="fa-regular fa-clipboard"></i></div>
+                <div class="stat-icon yellow"><i class="ti ti-clipboard"></i></div>
                 <div>
                     <div class="stat-label">Last Updated</div>
                     <div class="stat-value" style="font-size: 18px; margin-top:6px;">Today, 10:30 AM</div>
@@ -182,25 +192,25 @@
 
     <!-- Tabs -->
     <div class="nav-tabs-custom">
-        <div class="nav-link" onclick="switchTab('manual')" id="tab-manual"><i class="fa-solid fa-plus-square me-2"></i>Manual Entry</div>
-        <div class="nav-link active" onclick="switchTab('bulk')" id="tab-bulk"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Bulk Upload</div>
-        <div class="nav-link" onclick="switchTab('history')" id="tab-history"><i class="fa-solid fa-clock-rotate-left me-2"></i>Upload History</div>
-        <div class="nav-link" onclick="switchTab('overview')" id="tab-overview"><i class="fa-solid fa-chart-simple me-2"></i>Stock Overview</div>
+        <div class="nav-link" onclick="switchTab('manual')" id="tab-manual"><i class="ti ti-square-plus me-2"></i>Manual Entry</div>
+        <div class="nav-link active" onclick="switchTab('bulk')" id="tab-bulk"><i class="ti ti-cloud-upload me-2"></i>Bulk Upload</div>
+        <div class="nav-link" onclick="switchTab('history')" id="tab-history"><i class="ti ti-history me-2"></i>Upload History</div>
+        <div class="nav-link" onclick="switchTab('overview')" id="tab-overview"><i class="ti ti-chart-bar me-2"></i>Stock Overview</div>
     </div>
 
     <!-- Alerts -->
     <c:if test="${not empty errorMessage}">
         <div class="alert alert-danger shadow-sm border-0 mb-4" style="border-radius: 8px;">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i> ${errorMessage}
+            <i class="ti ti-alert-triangle me-2"></i> ${errorMessage}
         </div>
     </c:if>
     <c:if test="${not empty successMessage}">
         <div class="alert alert-success shadow-sm border-0 mb-4" style="border-radius: 8px;">
-            <i class="fa-solid fa-circle-check me-2"></i> ${successMessage}
+            <i class="ti ti-circle-check me-2"></i> ${successMessage}
             <c:if test="${not empty errorFilePath}">
                 <hr>
                 <a href="${pageContext.request.contextPath}/download-errors?file=${errorFilePath}" class="btn btn-sm btn-danger mt-2">
-                    <i class="fa-solid fa-download me-1"></i> Download Error Report for Invalid Rows
+                    <i class="ti ti-download me-1"></i> Download Error Report for Invalid Rows
                 </a>
             </c:if>
         </div>
@@ -218,14 +228,14 @@
                     
                     <form action="<c:url value='/upload-stock'/>" method="POST" enctype="multipart/form-data" id="uploadForm">
                         <div class="upload-dropzone mb-4" id="dropzone" onclick="document.getElementById('csvFile').click()">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <i class="ti ti-cloud-upload"></i>
                             <h5 class="fw-bold text-dark">Drag & Drop your CSV file here</h5>
                             <p class="text-muted small mb-0">or click to browse from your computer</p>
                             <input type="file" id="csvFile" name="csvFile" accept=".csv" style="display: none;" onchange="handleFileSelect(event)">
                         </div>
                         
                         <div id="fileDisplay" class="alert alert-info d-none d-flex justify-content-between align-items-center" style="border-radius: 8px;">
-                            <div><i class="fa-solid fa-file-csv me-2 text-primary fs-4 align-middle"></i> <span id="fileName" class="fw-bold align-middle"></span></div>
+                            <div><i class="ti ti-file-type-csv me-2 fs-4 align-middle" style="color:#FC8019;"></i> <span id="fileName" class="fw-bold align-middle"></span></div>
                             <button type="button" class="btn-close" onclick="clearFile()"></button>
                         </div>
                         
@@ -235,48 +245,102 @@
                     </form>
                 </div>
 
-                <!-- Manual Entry Content (Hidden initially) -->
+                <!-- Manual Entry Content (Hidden initially) — FR4.1, FR4.2, FR4.3 -->
                 <div class="card-body p-4 p-lg-5 d-none" id="content-manual">
                     <h5 class="fw-bold mb-1">Manual Stock Entry</h5>
-                    <p class="text-muted small mb-4">Add new stock details manually</p>
-                    
-                    <form action="${pageContext.request.contextPath}/manual-stock" method="POST">
+                    <p class="text-muted small mb-4">Add new stock/inventory item manually. All starred fields are required per SRS FR4.2.</p>
+
+                    <form action="${pageContext.request.contextPath}/manual-stock" method="POST" id="manualStockForm" novalidate>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Select Product <span class="required-asterisk">*</span></label>
-                                <select class="form-select" name="productId" required>
-                                    <option value="">Search and select product</option>
-                                    <c:forEach var="prod" items="${productList}">
-                                        <option value="${prod.id}">${prod.name}</option>
-                                    </c:forEach>
+                                <label class="form-label">Product Name <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" name="productName" placeholder="e.g. Steel Rod" required>
+                                <div class="invalid-feedback">Product name is required.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Category <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" name="category" placeholder="e.g. Raw Materials" required>
+                                <div class="invalid-feedback">Category is required.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">HSN Code <span class="required-asterisk">*</span></label>
+                                <input type="text" class="form-control" name="hsnCode" placeholder="e.g. 72142000" required>
+                                <div class="invalid-feedback">HSN code is required.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Unit of Measure <span class="required-asterisk">*</span></label>
+                                <div class="select-wrapper">
+                                <select class="form-select" name="unitOfMeasure" required>
+                                    <option value="">Select unit</option>
+                                    <option value="kg">kg — Kilogram</option>
+                                    <option value="pcs">pcs — Pieces</option>
+                                    <option value="box">box — Box</option>
+                                    <option value="pallet">pallet — Pallet</option>
+                                    <option value="ltr">ltr — Litre</option>
+                                    <option value="mtr">mtr — Metre</option>
+                                    <option value="ton">ton — Metric Ton</option>
+                                    <option value="cbm">cbm — Cubic Metre</option>
                                 </select>
+                                </div>
+                                <div class="invalid-feedback">Unit of measure is required.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Quantity <span class="required-asterisk">*</span> <span class="text-muted small">(&ge; 0 per FR4.3)</span></label>
+                                <input type="number" class="form-control" name="quantity" min="0" step="0.01" placeholder="0.00" required>
+                                <div class="invalid-feedback">Quantity must be 0 or greater.</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Warehouse / Location <span class="required-asterisk">*</span></label>
+                                <div class="select-wrapper">
                                 <select class="form-select" name="warehouseLocation" required>
                                     <option value="">Select warehouse / location</option>
                                     <option value="Mumbai WH-1">Mumbai WH-1</option>
                                     <option value="Delhi WH-2">Delhi WH-2</option>
                                     <option value="Bangalore WH-3">Bangalore WH-3</option>
+                                    <option value="Chennai WH-4">Chennai WH-4</option>
+                                    <option value="Kolkata WH-5">Kolkata WH-5</option>
                                 </select>
+                                </div>
+                                <div class="invalid-feedback">Warehouse location is required.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Unit Cost (₹) <span class="required-asterisk">*</span> <span class="text-muted small">(&ge; 0)</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" name="unitCost" min="0" step="0.01" placeholder="0.00" required>
+                                </div>
+                                <div class="invalid-feedback">Unit cost must be 0 or greater.</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Quantity <span class="required-asterisk">*</span></label>
-                                <input type="number" class="form-control" name="quantity" min="1" step="0.01" placeholder="Enter quantity" required>
+                                <label class="form-label">Unit Selling Price (₹) <span class="required-asterisk">*</span> <span class="text-muted small">(&ge; 0)</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" name="unitPrice" min="0" step="0.01" placeholder="0.00" required>
+                                </div>
+                                <div class="invalid-feedback">Unit price must be 0 or greater.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Batch / Lot Number <span class="text-muted small">(Optional)</span></label>
+                                <input type="text" class="form-control" name="batchNo" placeholder="e.g. BATCH-2024-001">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Batch No (Optional)</label>
-                                <input type="text" class="form-control" name="batchNo" placeholder="Enter batch number">
+                                <label class="form-label">Expiry Date <span class="text-muted small">(Optional — for perishables)</span></label>
+                                <input type="date" class="form-control" name="expiryDate">
                             </div>
+
                             <div class="col-12">
-                                <label class="form-label">Remarks</label>
+                                <label class="form-label">Remarks / Notes <span class="text-muted small">(Optional)</span></label>
                                 <textarea class="form-control" name="remarks" rows="2" placeholder="Enter any additional remarks (optional)"></textarea>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex justify-content-end gap-3 mt-4">
                             <button type="reset" class="btn btn-outline-nlog px-4">Reset</button>
-                            <button type="submit" class="btn btn-nlog px-4"><i class="fa-solid fa-plus me-2"></i>Add to Stock</button>
+                            <button type="submit" class="btn btn-nlog px-4"><i class="ti ti-plus me-2"></i>Add to Stock</button>
                         </div>
                     </form>
                 </div>
@@ -301,12 +365,12 @@
                                 <c:forEach var="hist" items="${fullHistoryList}">
                                     <tr>
                                         <td><fmt:formatDate value="${hist.date}" pattern="dd MMM yyyy, hh:mm a" /></td>
-                                        <td><i class="fa-solid fa-file-csv text-primary me-2"></i>${hist.fileName}</td>
+                                        <td><i class="ti ti-file-type-csv me-2" style="color:#FC8019;"></i>${hist.fileName}</td>
                                         <td class="text-center">${hist.total}</td>
                                         <td class="text-center">
-                                            <span class="badge-success me-1" title="Success">${hist.success} <i class="fa-solid fa-check"></i></span>
+                                            <span class="badge-success me-1" title="Success">${hist.success} <i class="ti ti-check"></i></span>
                                             <c:if test="${hist.failed > 0}">
-                                                <span class="badge-failed" title="Failed">${hist.failed} <i class="fa-solid fa-xmark"></i></span>
+                                                <span class="badge-failed" title="Failed">${hist.failed} <i class="ti ti-x"></i></span>
                                             </c:if>
                                         </td>
                                         <td class="text-muted">${hist.user}</td>
@@ -342,8 +406,8 @@
                                         <td>${stk.warehouse}</td>
                                         <td class="fw-bold text-end">${stk.quantity}</td>
                                         <td class="text-center">
-                                            <button class="btn btn-sm" style="border: 1px solid #ef4444; color: #ef4444; border-radius: 6px;" onclick="openAdjustModal(${stk.stockId}, '${stk.productName}', ${stk.quantity})">
-                                                <i class="fa-solid fa-minus-circle me-1"></i> Write-off
+                                            <button class="btn btn-sm" style="border: 1px solid #DC2626; color: #DC2626; border-radius: 6px;" onclick="openAdjustModal(${stk.stockId}, '${stk.productName}', ${stk.quantity})">
+                                                <i class="ti ti-circle-minus me-1"></i> Write-off
                                             </button>
                                         </td>
                                     </tr>
@@ -412,7 +476,7 @@
     <!-- Low Stock Alerts -->
     <div class="card shadow-sm border-0 mt-4" style="border-radius: var(--card-radius);">
         <div class="card-body p-4">
-            <h6 class="fw-bold mb-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Low Stock Alerts</h6>
+            <h6 class="fw-bold mb-4 text-danger"><i class="ti ti-alert-triangle me-2"></i>Low Stock Alerts</h6>
             <div class="table-responsive">
                 <table class="table align-middle text-nowrap mb-0">
                     <thead class="text-muted" style="background-color: #f8fafc;">
@@ -431,8 +495,8 @@
                             <td class="text-muted">76042990</td>
                             <td class="fw-bold">45.50</td>
                             <td class="text-muted">50.00</td>
-                            <td><span class="badge-failed" style="background:#fff1f2; color:#be123c;">Low Stock</span></td>
-                            <td><button class="btn btn-sm" style="border: 1px solid var(--nlog-orange); color: var(--nlog-orange); border-radius: 6px;">Add Stock</button></td>
+                            <td><span class="badge-failed">Low Stock</span></td>
+                            <td><button class="btn btn-sm" style="border: 1px solid var(--nlog-orange); color: var(--nlog-orange); border-radius: 6px;"><i class="ti ti-plus"></i> Add Stock</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -446,7 +510,7 @@
   <div class="modal-dialog">
     <div class="modal-content" style="border-radius: var(--card-radius); border: none;">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Stock Write-off</h5>
+        <h5 class="modal-title fw-bold text-danger"><i class="ti ti-alert-triangle me-2"></i> Stock Write-off</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="${pageContext.request.contextPath}/adjust-stock" method="POST">
@@ -467,12 +531,14 @@
               
               <div class="mb-3">
                   <label class="form-label">Reason for Write-off <span class="required-asterisk">*</span></label>
+                  <div class="select-wrapper">
                   <select class="form-select" name="reason" required>
                       <option value="">Select Reason</option>
                       <option value="Damage">Damage</option>
                       <option value="Expiry">Expiry</option>
                       <option value="Lost">Lost</option>
                   </select>
+                  </div>
               </div>
           </div>
           <div class="modal-footer border-0 pt-0">
@@ -560,6 +626,37 @@
         fileDisplay.classList.add('d-none');
         dropzone.classList.remove('d-none');
         btnUpload.disabled = true;
+    }
+
+    // ── FR4.3 Client-side validation for Manual Stock Entry (Bootstrap 5) ──
+    const manualStockForm = document.getElementById('manualStockForm');
+    if (manualStockForm) {
+        manualStockForm.addEventListener('submit', function(e) {
+            if (!manualStockForm.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            manualStockForm.classList.add('was-validated');
+
+            const qty   = parseFloat(document.querySelector('#content-manual [name="quantity"]').value);
+            const cost  = parseFloat(document.querySelector('#content-manual [name="unitCost"]').value);
+            const price = parseFloat(document.querySelector('#content-manual [name="unitPrice"]').value);
+            if (!isNaN(qty) && qty < 0) {
+                e.preventDefault();
+                alert('Quantity must be 0 or greater (FR4.3).');
+                return;
+            }
+            if (!isNaN(cost) && cost < 0) {
+                e.preventDefault();
+                alert('Unit cost must be 0 or greater (FR4.3).');
+                return;
+            }
+            if (!isNaN(price) && price < 0) {
+                e.preventDefault();
+                alert('Unit selling price must be 0 or greater (FR4.3).');
+                return;
+            }
+        }, false);
     }
 </script>
 

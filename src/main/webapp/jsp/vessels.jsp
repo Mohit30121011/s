@@ -16,7 +16,9 @@
                     if (capStr != null && !capStr.trim().isEmpty()) {
                         try { cap = Integer.parseInt(capStr.trim()); } catch(Exception ignored) {}
                     }
-                    vDao.addVessel(name != null ? name.trim() : "", imo != null ? imo.trim() : "", cap);
+                    String status = request.getParameter("status");
+                    if (status == null || status.trim().isEmpty()) status = "In Service";
+                    vDao.addVessel(name != null ? name.trim() : "", imo != null ? imo.trim() : "", cap, status.trim());
                     session.setAttribute("successMessage", "Vessel \"" + (name != null ? name.trim() : "") + "\" registered to maritime fleet successfully.");
                 } else if ("edit".equals(action)) {
                     String vIdStr = request.getParameter("vesselId");
@@ -29,15 +31,18 @@
                         if (capStr != null && !capStr.trim().isEmpty()) {
                             try { cap = Integer.parseInt(capStr.trim()); } catch(Exception ignored) {}
                         }
+                        String status = request.getParameter("status");
+                        if (status == null || status.trim().isEmpty()) status = "In Service";
                         try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
                              java.sql.PreparedStatement ps = conn.prepareStatement(
-                                "UPDATE vessels SET vessel_name = ?, imo_number = ?, capacity_teu = ? WHERE vessel_id = ?")) {
+                                "UPDATE vessels SET vessel_name = ?, imo_number = ?, capacity_teu = ?, status = ? WHERE vessel_id = ?")) {
                             ps.setString(1, name != null ? name.trim() : "");
                             ps.setString(2, imo != null ? imo.trim() : "");
                             ps.setInt(3, cap);
-                            ps.setInt(4, vId);
+                            ps.setString(4, status.trim());
+                            ps.setInt(5, vId);
                             ps.executeUpdate();
-                            session.setAttribute("successMessage", "Vessel #VSL-" + vId + " details updated successfully.");
+                            session.setAttribute("successMessage", "Vessel #VSL-" + vId + " details and status updated successfully.");
                         }
                     }
                 } else if ("delete".equals(action)) {
@@ -264,10 +269,20 @@
     /* Operational Status Pill */
     .status-pill {
         display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
-        padding: 5px 12px; border-radius: 50px;
+        padding: 5px 12px; border-radius: 50px; white-space: nowrap;
     }
     .status-pill.active { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
-    .status-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: #059669; box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2); }
+    .status-pill.maintenance { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .status-pill.drydock { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+    .status-pill.standby { background: #F5F3FF; color: #7C3AED; border: 1px solid #DDD6FE; }
+    .status-pill.decommissioned { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+
+    .status-pill-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .status-pill-dot.active { background: #059669; box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2); }
+    .status-pill-dot.maintenance { background: #D97706; box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2); }
+    .status-pill-dot.drydock { background: #2563EB; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
+    .status-pill-dot.standby { background: #7C3AED; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2); }
+    .status-pill-dot.decommissioned { background: #DC2626; box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2); }
 
     /* Action Buttons */
     .actions-flex { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
@@ -656,16 +671,45 @@
 
                             <!-- Status -->
                             <td>
-                                <span class="status-pill active">
-                                    <span class="status-pill-dot"></span> In Service
-                                </span>
+                                <c:choose>
+                                    <c:when test="${v.status == 'In Service'}">
+                                        <span class="status-pill active">
+                                            <span class="status-pill-dot active"></span> In Service
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${v.status == 'Under Maintenance'}">
+                                        <span class="status-pill maintenance">
+                                            <span class="status-pill-dot maintenance"></span> Under Maintenance
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${v.status == 'Drydock'}">
+                                        <span class="status-pill drydock">
+                                            <span class="status-pill-dot drydock"></span> Drydock
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${v.status == 'Standby'}">
+                                        <span class="status-pill standby">
+                                            <span class="status-pill-dot standby"></span> Standby
+                                        </span>
+                                    </c:when>
+                                    <c:when test="${v.status == 'Decommissioned'}">
+                                        <span class="status-pill decommissioned">
+                                            <span class="status-pill-dot decommissioned"></span> Decommissioned
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="status-pill active">
+                                            <span class="status-pill-dot active"></span> <c:out value="${empty v.status ? 'In Service' : v.status}"/>
+                                        </span>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
 
                             <!-- Actions -->
                             <td style="padding-right: 24px; text-align: right;">
                                 <div class="actions-flex">
                                     <button type="button" class="btn-action-icon edit" title="Edit Vessel Details"
-                                            onclick="openEditVesselModal('${v.vesselId}', '${v.vesselName}', '${v.imoNumber}', '${v.capacityTeu}')">
+                                            onclick="openEditVesselModal('${v.vesselId}', '<c:out value="${v.vesselName}"/>', '${v.imoNumber}', '${v.capacityTeu}', '<c:out value="${empty v.status ? 'In Service' : v.status}"/>')">
                                         <i class="ti ti-edit"></i>
                                     </button>
                                     <button type="button" class="btn-action-icon delete" title="Decommission Vessel"
@@ -765,6 +809,20 @@
                         <span class="preset-chip" onclick="setCapacityPreset('addCapacityTeu', 20000)">ULCV (20,000)</span>
                     </div>
                 </div>
+
+                <!-- Operational Status -->
+                <div class="field-group">
+                    <label class="field-label">Operational Fleet Status <span style="color: #DC2626;">*</span></label>
+                    <div class="field-input-wrap">
+                        <select class="form-select-custom" name="status" id="addVesselStatus" required>
+                            <option value="In Service" selected>In Service</option>
+                            <option value="Under Maintenance">Under Maintenance</option>
+                            <option value="Drydock">Drydock</option>
+                            <option value="Standby">Standby</option>
+                            <option value="Decommissioned">Decommissioned</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="modal-form-footer">
                 <button type="button" class="btn-modal-cancel" onclick="closeAddVesselModal()">Cancel</button>
@@ -828,6 +886,20 @@
                         <span class="preset-chip" onclick="setCapacityPreset('editCapacityTeu', 6500)">Panamax (6,500)</span>
                         <span class="preset-chip" onclick="setCapacityPreset('editCapacityTeu', 12000)">Post-Panamax (12,000)</span>
                         <span class="preset-chip" onclick="setCapacityPreset('editCapacityTeu', 20000)">ULCV (20,000)</span>
+                    </div>
+                </div>
+
+                <!-- Operational Status -->
+                <div class="field-group">
+                    <label class="field-label">Operational Fleet Status <span style="color: #DC2626;">*</span></label>
+                    <div class="field-input-wrap">
+                        <select class="form-select-custom" name="status" id="editVesselStatus" required>
+                            <option value="In Service">In Service</option>
+                            <option value="Under Maintenance">Under Maintenance</option>
+                            <option value="Drydock">Drydock</option>
+                            <option value="Standby">Standby</option>
+                            <option value="Decommissioned">Decommissioned</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -1027,11 +1099,21 @@
         setTimeout(() => modal.style.display = 'none', 200);
     }
 
-    function openEditVesselModal(id, name, imo, capacity) {
+    function openEditVesselModal(id, name, imo, capacity, status) {
         document.getElementById('editVesselId').value = id;
         document.getElementById('editVesselName').value = name;
         document.getElementById('editImoNumber').value = imo;
         document.getElementById('editCapacityTeu').value = capacity;
+
+        const statusSelect = document.getElementById('editVesselStatus');
+        if (statusSelect) {
+            const s = status || 'In Service';
+            if (statusSelect.tomselect) {
+                statusSelect.tomselect.setValue(s);
+            } else {
+                statusSelect.value = s;
+            }
+        }
 
         const modal = document.getElementById('editVesselModal');
         modal.style.display = 'flex';

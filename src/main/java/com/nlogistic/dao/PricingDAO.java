@@ -29,6 +29,11 @@ public class PricingDAO {
                     rule.setSeasonalMultiplier(rs.getDouble("seasonal_multiplier"));
                     rule.setDemandMultiplier(rs.getDouble("demand_multiplier"));
                     rule.setFinalPrice(rs.getDouble("final_price"));
+                    // FR3.5: Final Price = Base * Seasonal * Demand + Surcharges.
+                    // Surcharges (BAF/THC and Reefer power where applicable) are not a persisted
+                    // pricing_rules column - they are computed on top of the stored base commercial
+                    // rate at booking-quote time.
+                    rule.setSurcharges("Reefer".equalsIgnoreCase(rule.getContainerType()) ? 620.0 : 270.0);
                     return rule;
                 }
             }
@@ -38,9 +43,12 @@ public class PricingDAO {
         
         // Return default if not found
         PricingRule defaultRule = new PricingRule();
+        defaultRule.setContainerType(containerType);
+        defaultRule.setContainerSize(containerSize);
         defaultRule.setBasePrice(1200.0);
         defaultRule.setSeasonalMultiplier(1.0);
         defaultRule.setDemandMultiplier(1.0);
+        defaultRule.setSurcharges("Reefer".equalsIgnoreCase(containerType) ? 620.0 : 270.0);
         return defaultRule;
     }
 }

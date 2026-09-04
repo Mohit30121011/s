@@ -1,6 +1,7 @@
 package com.nlogistic.model;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BillingInvoice {
     private int invoiceId;
@@ -13,6 +14,16 @@ public class BillingInvoice {
     private double totalAmount;
     private double paidAmount;
     private String paymentStatus;
+
+    // Joined / enriched fields
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
+    private String cargoDescription;
+    private String originPort;
+    private String destinationPort;
+    private List<InvoiceLineItem> lineItems = new ArrayList<>();
+    private List<Payment> payments = new ArrayList<>();
 
     public BillingInvoice() {}
 
@@ -95,5 +106,33 @@ public class BillingInvoice {
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
+
+    public double getBalanceDue() {
+        return Math.max(0.0, this.totalAmount - this.paidAmount);
+    }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getCustomerEmail() { return customerEmail; }
+    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
+
+    public String getCustomerPhone() { return customerPhone; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+
+    public String getCargoDescription() { return cargoDescription; }
+    public void setCargoDescription(String cargoDescription) { this.cargoDescription = cargoDescription; }
+
+    public String getOriginPort() { return originPort; }
+    public void setOriginPort(String originPort) { this.originPort = originPort; }
+
+    public String getDestinationPort() { return destinationPort; }
+    public void setDestinationPort(String destinationPort) { this.destinationPort = destinationPort; }
+
+    public List<InvoiceLineItem> getLineItems() { return lineItems; }
+    public void setLineItems(List<InvoiceLineItem> lineItems) { this.lineItems = lineItems; }
+
+    public List<Payment> getPayments() { return payments; }
+    public void setPayments(List<Payment> payments) { this.payments = payments; }
 
 }

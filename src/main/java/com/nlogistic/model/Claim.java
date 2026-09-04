@@ -18,6 +18,27 @@ public class Claim {
     private Integer resolvedBy;
     private Date resolvedDate;
 
+    // Joined / enriched display fields (populated by DAO queries that join related tables)
+    private String customerName;
+    private String reasonName;
+    private String filedByName;
+    private String resolvedByName;
+    private String productName;
+    private String containerNumber;
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getReasonName() { return reasonName; }
+    public void setReasonName(String reasonName) { this.reasonName = reasonName; }
+    public String getFiledByName() { return filedByName; }
+    public void setFiledByName(String filedByName) { this.filedByName = filedByName; }
+    public String getResolvedByName() { return resolvedByName; }
+    public void setResolvedByName(String resolvedByName) { this.resolvedByName = resolvedByName; }
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
+    public String getContainerNumber() { return containerNumber; }
+    public void setContainerNumber(String containerNumber) { this.containerNumber = containerNumber; }
+
     public int getClaimId() { return claimId; }
     public void setClaimId(int claimId) { this.claimId = claimId; }
     public int getShipmentId() { return shipmentId; }

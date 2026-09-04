@@ -16,13 +16,16 @@ public class ContainerDAO {
      */
     public List<Container> getContainers(String statusFilter, int limit, int offset) {
         List<Container> containers = new ArrayList<>();
-        String sql = "SELECT * FROM containers";
-        
+        String sql = "SELECT c.*, p.port_name, p.country AS port_country, co.company_name AS owner_company_name " +
+                     "FROM containers c " +
+                     "LEFT JOIN ports p ON c.current_port_id = p.port_id " +
+                     "LEFT JOIN companies co ON c.owner_company_id = co.company_id";
+
         if (statusFilter != null && !statusFilter.isEmpty() && !statusFilter.equals("All")) {
-            sql += " WHERE status = ?";
+            sql += " WHERE c.status = ?";
         }
-        
-        sql += " ORDER BY container_id DESC LIMIT ? OFFSET ?";
+
+        sql += " ORDER BY c.container_id DESC LIMIT ? OFFSET ?";
         
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -90,11 +93,43 @@ public class ContainerDAO {
         c.setStatus(rs.getString("status"));
         c.setCurrentPortId(rs.getInt("current_port_id"));
         c.setOwnerCompanyId(rs.getInt("owner_company_id"));
+        try { c.setPortName(rs.getString("port_name")); } catch (Exception ignored) {}
+        try { c.setPortCountry(rs.getString("port_country")); } catch (Exception ignored) {}
+        try { c.setOwnerCompanyName(rs.getString("owner_company_name")); } catch (Exception ignored) {}
         return c;
     }
 
     public List<Container> getAllContainers() {
         return getContainers("All", 1000, 0); // Alias for backwards compatibility
+    }
+
+    /** FR3.1: full container master-data update — every editable spec, not just status/port. */
+    public boolean updateContainer(int containerId, String type, String size, double tare, double maxGross,
+                                    double capKg, double capCbm, String status, int portId, String imageUrl) {
+        StringBuilder sql = new StringBuilder(
+            "UPDATE containers SET type=?, size=?, tare_weight_kg=?, max_gross_weight_kg=?, " +
+            "goods_capacity_kg=?, goods_capacity_cbm=?, status=?, current_port_id=?");
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) sql.append(", image_url=?");
+        sql.append(" WHERE container_id=?");
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int i = 1;
+            ps.setString(i++, type);
+            ps.setString(i++, size);
+            ps.setDouble(i++, tare);
+            ps.setDouble(i++, maxGross);
+            ps.setDouble(i++, capKg);
+            ps.setDouble(i++, capCbm);
+            ps.setString(i++, status);
+            ps.setInt(i++, portId);
+            if (imageUrl != null && !imageUrl.trim().isEmpty()) ps.setString(i++, imageUrl);
+            ps.setInt(i, containerId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean updateContainerStatus(int containerId, String status, int portId) {

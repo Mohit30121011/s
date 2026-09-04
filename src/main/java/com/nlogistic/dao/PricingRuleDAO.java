@@ -38,32 +38,80 @@ public class PricingRuleDAO {
         return list;
     }
 
+    /** FR3.7: full price-change audit trail, newest first, with the responsible user's name. */
+    public List<com.nlogistic.model.PricingAudit> getAuditHistory() {
+        List<com.nlogistic.model.PricingAudit> list = new ArrayList<>();
+        String sql = "SELECT a.audit_id, a.pricing_id, a.old_price, a.new_price, a.reason, a.changed_at, " +
+                     "u.username AS changed_by_name, " +
+                     "CONCAT(pr.container_size, ' ', pr.container_type) AS container_profile " +
+                     "FROM pricing_audit a " +
+                     "LEFT JOIN users u ON a.changed_by = u.user_id " +
+                     "LEFT JOIN pricing_rules pr ON a.pricing_id = pr.pricing_id " +
+                     "ORDER BY a.changed_at DESC LIMIT 200";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                com.nlogistic.model.PricingAudit a = new com.nlogistic.model.PricingAudit();
+                a.setAuditId(rs.getInt("audit_id"));
+                a.setPricingId(rs.getInt("pricing_id"));
+                a.setOldPrice(rs.getDouble("old_price"));
+                a.setNewPrice(rs.getDouble("new_price"));
+                a.setReason(rs.getString("reason"));
+                a.setChangedAt(rs.getTimestamp("changed_at"));
+                a.setChangedByName(rs.getString("changed_by_name"));
+                a.setContainerProfile(rs.getString("container_profile"));
+                list.add(a);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public boolean updateMultipliers(int pricingId, double seasonal, double demand, int updatedBy) {
         // The spec requires calling update_price which takes (pricing_id, new_base_price, changed_by, reason)
         // But we want to update multipliers. The SP only updates base_price!
         // Wait, looking at update_price:
         // SET v_new_final = COALESCE(p_new_base_price, v_old_price) * v_seasonal * v_demand;
         // UPDATE pricing_rules SET base_price = ... final_price = v_new_final
-        // Ah, the SP doesn't let us update multipliers! 
+        // Ah, the SP doesn't let us update multipliers!
         // We will do it with a raw update query for now, since SP lacks multiplier update logic.
-        String sql = "UPDATE pricing_rules SET seasonal_multiplier = ?, demand_multiplier = ?, final_price = base_price * ? * ? WHERE pricing_id = ?";
-        try (Connection conn = DBConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDouble(1, seasonal);
-            ps.setDouble(2, demand);
-            ps.setDouble(3, seasonal);
-            ps.setDouble(4, demand);
-            ps.setInt(5, pricingId);
-            
-            int rows = ps.executeUpdate();
-            
-            // Log to audit
+        try (Connection conn = DBConnectionManager.getConnection()) {
+            // FR3.7: capture the old final_price before it changes so the audit row is complete.
+            double oldFinalPrice = 0.0;
+            double basePrice = 0.0;
+            try (PreparedStatement fetchPs = conn.prepareStatement(
+                    "SELECT base_price, final_price FROM pricing_rules WHERE pricing_id = ?")) {
+                fetchPs.setInt(1, pricingId);
+                try (ResultSet rs = fetchPs.executeQuery()) {
+                    if (rs.next()) {
+                        basePrice = rs.getDouble("base_price");
+                        oldFinalPrice = rs.getDouble("final_price");
+                    }
+                }
+            }
+
+            double newFinalPrice = basePrice * seasonal * demand;
+            String sql = "UPDATE pricing_rules SET seasonal_multiplier = ?, demand_multiplier = ?, final_price = ? WHERE pricing_id = ?";
+            int rows;
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setDouble(1, seasonal);
+                ps.setDouble(2, demand);
+                ps.setDouble(3, newFinalPrice);
+                ps.setInt(4, pricingId);
+                rows = ps.executeUpdate();
+            }
+
+            // Log to audit (FR3.7: old value, new value, reason, timestamp, responsible user)
             if (rows > 0) {
-                String auditSql = "INSERT INTO pricing_audit (pricing_id, changed_by, reason) VALUES (?, ?, ?)";
+                String auditSql = "INSERT INTO pricing_audit (pricing_id, old_price, new_price, changed_by, reason, changed_at) VALUES (?, ?, ?, ?, ?, NOW())";
                 try (PreparedStatement auditPs = conn.prepareStatement(auditSql)) {
                     auditPs.setInt(1, pricingId);
-                    auditPs.setInt(2, updatedBy);
-                    auditPs.setString(3, "Updated Multipliers");
+                    auditPs.setDouble(2, oldFinalPrice);
+                    auditPs.setDouble(3, newFinalPrice);
+                    auditPs.setInt(4, updatedBy);
+                    auditPs.setString(5, "Updated seasonal/demand multipliers");
                     auditPs.executeUpdate();
                 }
             }
@@ -123,6 +171,45 @@ public class PricingRuleDAO {
             cs.execute();
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+
+    public List<com.nlogistic.model.PricingAudit> getAuditHistoryByType(String containerType) {
+        List<com.nlogistic.model.PricingAudit> list = new ArrayList<>();
+        String sql = "SELECT a.audit_id, a.pricing_id, a.old_price, a.new_price, a.reason, a.changed_at, " +
+                     "u.username AS changed_by_name, " +
+                     "CONCAT(COALESCE(pr.container_size, ''), ' ', COALESCE(pr.container_type, ?)) AS container_profile " +
+                     "FROM pricing_audit a " +
+                     "LEFT JOIN users u ON a.changed_by = u.user_id " +
+                     "LEFT JOIN pricing_rules pr ON a.pricing_id = pr.pricing_id " +
+                     "WHERE pr.container_type = ? OR pr.container_type LIKE ? " +
+                     "ORDER BY a.changed_at DESC LIMIT 100";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, containerType);
+            ps.setString(2, containerType);
+            ps.setString(3, "%" + containerType + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    com.nlogistic.model.PricingAudit a = new com.nlogistic.model.PricingAudit();
+                    a.setAuditId(rs.getInt("audit_id"));
+                    a.setPricingId(rs.getInt("pricing_id"));
+                    a.setOldPrice(rs.getDouble("old_price"));
+                    a.setNewPrice(rs.getDouble("new_price"));
+                    a.setReason(rs.getString("reason"));
+                    a.setChangedAt(rs.getTimestamp("changed_at"));
+                    a.setChangedByName(rs.getString("changed_by_name"));
+                    a.setContainerProfile(rs.getString("container_profile"));
+                    list.add(a);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (list.isEmpty()) {
+            return getAuditHistory();
+        }
+        return list;
     }
 
 }

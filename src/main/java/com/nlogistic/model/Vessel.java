@@ -5,6 +5,7 @@ public class Vessel {
     private String vesselName;
     private String imoNumber;
     private int capacityTeu;
+    private String status = "In Service";
 
     public Vessel() {}
 
@@ -40,4 +41,11 @@ public class Vessel {
         this.capacityTeu = capacityTeu;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

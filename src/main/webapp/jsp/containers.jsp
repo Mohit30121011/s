@@ -513,13 +513,22 @@
                                 <span class="specs-item-label"><i class="ti ti-cube"></i> Cargo Volume</span>
                                 <span class="specs-item-value"><fmt:formatNumber value="${container.goodsCapacityCbm}" maxFractionDigits="1"/> CBM</span>
                             </li>
+                            <li class="specs-item">
+                                <span class="specs-item-label"><i class="ti ti-map-pin"></i> Current Location</span>
+                                <span class="specs-item-value">
+                                    <c:choose>
+                                        <c:when test="${not empty container.portName}">${container.portName}<c:if test="${not empty container.portCountry}">, ${container.portCountry}</c:if></c:when>
+                                        <c:otherwise>—</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </li>
                         </ul>
 
                         <!-- Bottom Actions -->
                         <div class="card-actions-row">
                             <c:choose>
                                 <c:when test="${container.status == 'Available'}">
-                                    <a href="${pageContext.request.contextPath}/shipments/create?containerId=${container.containerId}" class="btn-allocate">
+                                    <a href="${pageContext.request.contextPath}/allocate?containerId=${container.containerId}" class="btn-allocate">
                                         <span>Allocate</span>
                                         <i class="ti ti-arrow-right"></i>
                                     </a>
@@ -538,8 +547,8 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius: 10px; padding: 6px; border: 1px solid #E2E8F0;">
                                         <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="openUpdateModal('${container.containerId}', '${container.containerNumber}', '${container.status}', '${container.currentPortId}')" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
-                                                <i class="ti ti-pencil" style="color: #FC8019;"></i> Update Status & Port
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="openUpdateModal({id: '${container.containerId}', number: '${container.containerNumber}', type: '${container.type}', size: '${container.size}', tare: ${container.tareWeightKg}, maxGross: ${container.maxGrossWeightKg}, capKg: ${container.goodsCapacityKg}, capCbm: ${container.goodsCapacityCbm}, status: '${container.status}', portId: '${container.currentPortId}'})" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
+                                                <i class="ti ti-pencil" style="color: #FC8019;"></i> Update Container
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider my-1"></li>
@@ -602,26 +611,66 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="<c:url value='/containers/update'/>" method="POST">
+            <form action="<c:url value='/containers/update'/>" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="containerId" id="updateContainerId" value="">
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
-                        <select name="status" id="updateStatusSelect" class="form-select form-select-custom no-custom-select" required>
-                            <option value="Available">Available</option>
-                            <option value="In-Transit">In-Transit</option>
-                            <option value="Under Maintenance">Under Maintenance</option>
-                            <option value="Allocated">Allocated</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
-                        <select name="portId" id="updatePortSelect" class="form-select form-select-custom no-custom-select" required>
-                            <c:forEach var="port" items="${ports}">
-                                <option value="${port.portId}">${port.portName} (${port.country})</option>
-                            </c:forEach>
-                        </select>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Type <span style="color: #FC8019;">*</span></label>
+                            <select name="type" id="updateTypeSelect" class="form-select form-select-custom no-custom-select" required>
+                                <option value="Dry">Dry</option>
+                                <option value="Reefer">Reefer</option>
+                                <option value="Open Top">Open Top</option>
+                                <option value="Flat Rack">Flat Rack</option>
+                                <option value="Tank">Tank</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Size <span style="color: #FC8019;">*</span></label>
+                            <select name="size" id="updateSizeSelect" class="form-select form-select-custom no-custom-select" required>
+                                <option value="20ft">20ft</option>
+                                <option value="40ft">40ft</option>
+                                <option value="40ft HC">40ft HC</option>
+                                <option value="45ft">45ft</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Tare Weight (kg) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.01" name="tareWeightKg" id="updateTareWeight" class="form-control form-select-custom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Max Gross Weight (kg) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.01" name="maxGrossWeightKg" id="updateMaxGross" class="form-control form-select-custom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Goods Capacity (kg) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.01" name="goodsCapacityKg" id="updateCapKg" class="form-control form-select-custom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Cargo Volume (CBM) <span style="color: #FC8019;">*</span></label>
+                            <input type="number" step="0.01" name="goodsCapacityCbm" id="updateCapCbm" class="form-control form-select-custom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
+                            <select name="status" id="updateStatusSelect" class="form-select form-select-custom no-custom-select" required>
+                                <option value="Available">Available</option>
+                                <option value="In-Transit">In-Transit</option>
+                                <option value="Under Maintenance">Under Maintenance</option>
+                                <option value="Allocated">Allocated</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
+                            <select name="portId" id="updatePortSelect" class="form-select form-select-custom no-custom-select" required>
+                                <c:forEach var="port" items="${ports}">
+                                    <option value="${port.portId}">${port.portName} (${port.country})</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Replace Container Image (optional)</label>
+                            <input type="file" name="containerImageFile" accept="image/*" class="form-control form-select-custom">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
@@ -839,10 +888,12 @@ window.toggleImageWebUrl = function() {
     }
 };
 
-// Modal TomSelect sync on shown
-const addModal = document.getElementById('addContainerModal');
-if (addModal) {
-    addModal.addEventListener('shown.bs.modal', function() {
+// Modal TomSelect sync on shown (fixes selects rendering blank/unstyled since TomSelect
+// can't measure width correctly while its modal is still display:none at init time)
+function syncModalTomSelects(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.addEventListener('shown.bs.modal', function() {
         this.querySelectorAll('select.tomselected').forEach(function(sel) {
             if (sel.tomselect) {
                 sel.tomselect.sync();
@@ -850,6 +901,8 @@ if (addModal) {
         });
     });
 }
+syncModalTomSelects('addContainerModal');
+syncModalTomSelects('singleUpdateContainerModal');
 
 window.applyContainerSizePreset = function(size) {
     const tare = document.getElementById('newTareWeight');
@@ -880,21 +933,24 @@ window.applyContainerSizePreset = function(size) {
     }
 };
 
-window.openUpdateModal = function(id, number, status, portId) {
-    document.getElementById('updateContainerId').value = id;
-    document.getElementById('updateContainerNumberDisplay').textContent = '#' + number;
+window.openUpdateModal = function(c) {
+    document.getElementById('updateContainerId').value = c.id;
+    document.getElementById('updateContainerNumberDisplay').textContent = '#' + c.number;
+    document.getElementById('updateTareWeight').value = c.tare;
+    document.getElementById('updateMaxGross').value = c.maxGross;
+    document.getElementById('updateCapKg').value = c.capKg;
+    document.getElementById('updateCapCbm').value = c.capCbm;
 
-    const statusSelect = document.getElementById('updateStatusSelect');
-    if (statusSelect) {
-        statusSelect.value = status;
-        if (statusSelect.tomselect) statusSelect.tomselect.setValue(status);
+    function setSelect(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = value;
+        if (el.tomselect) el.tomselect.setValue(value);
     }
-
-    const portSelect = document.getElementById('updatePortSelect');
-    if (portSelect) {
-        portSelect.value = portId;
-        if (portSelect.tomselect) portSelect.tomselect.setValue(portId);
-    }
+    setSelect('updateTypeSelect', c.type);
+    setSelect('updateSizeSelect', c.size);
+    setSelect('updateStatusSelect', c.status);
+    setSelect('updatePortSelect', c.portId);
 
     const modalEl = document.getElementById('singleUpdateContainerModal');
     const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);

@@ -69,7 +69,7 @@
                                 <td class="px-4 py-3 fw-bold text-dark">INV-${inv.invoiceId}</td>
                                 <td class="py-3 fw-bold">${inv.customerName}</td>
                                 <td class="py-3 text-muted" style="font-size: 13px;">
-                                    <i class="fa-solid fa-box text-primary me-1"></i> #${inv.shipmentId} - ${inv.cargoDesc}
+                                    <i class="fa-solid fa-box text-primary me-1"></i> #${inv.shipmentId} - ${inv.cargoDescription}
                                 </td>
                                 <td class="py-3">
                                     <div class="fw-bold">₹<fmt:formatNumber value="${inv.totalAmount}" pattern="#,##0.00"/></div>
@@ -204,7 +204,7 @@
     }
     
     function viewInvoice(invoiceId) {
-        window.open('${pageContext.request.contextPath}/view-invoice?id=' + invoiceId, '_blank');
+        window.open('${pageContext.request.contextPath}/invoices?id=' + invoiceId + '&action=view', '_blank');
     }
 </script>
 

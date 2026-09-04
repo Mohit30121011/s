@@ -220,8 +220,8 @@ public class ClaimDAO {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    /** DB signature: add_claim_document(p_claim_id, p_doc_type, p_file_path, p_uploaded_by) */
-    public void addClaimDocument(int claimId, String docType, String filePath, int uploadedBy) {
+    /** DB signature: add_claim_document(p_claim_id, p_doc_type, p_file_path, p_uploaded_by). Returns false (instead of silently swallowing) on failure so the caller can surface a real error. */
+    public boolean addClaimDocument(int claimId, String docType, String filePath, int uploadedBy) {
         String sql = "{CALL add_claim_document(?, ?, ?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
@@ -230,7 +230,8 @@ public class ClaimDAO {
             cs.setString(3, filePath);
             cs.setInt(4, uploadedBy);
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
     /** Get full status history for a claim (with username joined when available). DB: get_claim_history(p_claim_id) */

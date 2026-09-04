@@ -33,8 +33,16 @@ public class StockUploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = (User) request.getSession().getAttribute("user");
-        if (user == null || user.getRoleId() > 3) {
+        User user = null;
+        Object userObj = request.getSession().getAttribute("user");
+        if (userObj instanceof User) {
+            user = (User) userObj;
+        }
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        if (user.getRoleId() > 3) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
             return;
         }
@@ -131,8 +139,16 @@ public class StockUploadServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = (User) request.getSession().getAttribute("user");
-        if (user == null || user.getRoleId() > 3) {
+        User user = null;
+        Object userObj = request.getSession().getAttribute("user");
+        if (userObj instanceof User) {
+            user = (User) userObj;
+        }
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        if (user.getRoleId() > 3) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only Staff can upload stock.");
             return;
         }

@@ -478,7 +478,7 @@
                     <td>${doc.expiryDate}</td>
                     <td>
                         <div class="action-cell">
-                            <button class="btn-icon btn-view" title="View Document"><i class="fi fi-rr-eye"></i></button>
+                            <button class="btn-icon btn-view" title="View Document" onclick="window.open('${pageContext.request.contextPath}/jsp/doc-viewer.jsp?id=${doc.docId}', '_blank')"><i class="fi fi-rr-eye"></i></button>
                             <button class="btn-icon btn-edit" title="Update Status" onclick="document.getElementById('updateDocId').value='${doc.docId}'; document.getElementById('updateDocStatus').value='${doc.status}'; openModal('docUpdateModal');"><i class="fi fi-rr-edit"></i></button>
                             <div class="dropdown-container">
                                 <button class="btn-icon action-dropdown" onclick="toggleDropdown(this)"><i class="fi fi-rr-menu-dots-vertical"></i></button>

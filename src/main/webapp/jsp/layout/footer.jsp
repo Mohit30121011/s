@@ -41,6 +41,14 @@
 
             var left = rect.left + window.scrollX;
             var dropdownWidth = rect.width;
+            // Guard: if the control hasn't been laid out yet (e.g. it just became visible
+            // inside a modal, or the page hasn't finished its first layout pass), rect.width
+            // can be 0/near-0, which squashes the whole dropdown panel to a hairline strip.
+            // Fall back to the wrapper's width, then a sane minimum, so this never happens.
+            if (!dropdownWidth || dropdownWidth < 60) {
+                var wrapperWidth = this.wrapper ? this.wrapper.getBoundingClientRect().width : 0;
+                dropdownWidth = (wrapperWidth >= 60) ? wrapperWidth : 220;
+            }
 
             // For micro pagination dropdowns, keep minimum 74px width
             if (this.wrapper && this.wrapper.classList.contains('nl-page-size-ts')) {

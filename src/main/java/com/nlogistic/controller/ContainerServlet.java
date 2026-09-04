@@ -38,10 +38,35 @@ public class ContainerServlet extends HttpServlet {
         User currentUser = (User) session.getAttribute("user");
         if (pathInfo != null && pathInfo.equals("/update")) {
             int containerId = Integer.parseInt(request.getParameter("containerId"));
+            String type = request.getParameter("type");
+            String size = request.getParameter("size");
+            double tare = Double.parseDouble(request.getParameter("tareWeightKg"));
+            double maxGross = Double.parseDouble(request.getParameter("maxGrossWeightKg"));
+            double capKg = Double.parseDouble(request.getParameter("goodsCapacityKg"));
+            double capCbm = Double.parseDouble(request.getParameter("goodsCapacityCbm"));
             String status = request.getParameter("status");
             int portId = Integer.parseInt(request.getParameter("portId"));
 
-            boolean success = containerDAO.updateContainerStatus(containerId, status, portId);
+            String imageUrl = null;
+            try {
+                Part filePart = request.getPart("containerImageFile");
+                if (filePart != null && filePart.getSize() > 0) {
+                    String submittedName = new File(filePart.getSubmittedFileName()).getName();
+                    String ext = "";
+                    int dotIdx = submittedName.lastIndexOf('.');
+                    if (dotIdx > 0) ext = submittedName.substring(dotIdx);
+                    String fileName = "cont_" + System.currentTimeMillis() + ext;
+                    String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "containers";
+                    File uploadDir = new File(uploadPath);
+                    if (!uploadDir.exists()) uploadDir.mkdirs();
+                    filePart.write(uploadPath + File.separator + fileName);
+                    imageUrl = request.getContextPath() + "/uploads/containers/" + fileName;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            boolean success = containerDAO.updateContainer(containerId, type, size, tare, maxGross, capKg, capCbm, status, portId, imageUrl);
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/containers?success=true");
             } else {

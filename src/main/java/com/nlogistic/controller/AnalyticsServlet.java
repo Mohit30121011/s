@@ -13,9 +13,16 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import com.nlogistic.util.DBConnectionManager;
+import com.nlogistic.dao.AnalyticsDAO;
+import com.nlogistic.model.AbcResult;
+import com.nlogistic.model.LossReasonSummary;
+import com.nlogistic.model.StockValuation;
+import com.nlogistic.model.DemandForecast;
+import com.nlogistic.model.TurnoverResult;
 
 @WebServlet("/analytics/*")
 public class AnalyticsServlet extends HttpServlet {
+    private AnalyticsDAO analyticsDAO = new AnalyticsDAO();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String export = request.getParameter("export");
@@ -23,6 +30,17 @@ public class AnalyticsServlet extends HttpServlet {
             exportCsv(request, response);
             return;
         }
+
+        // Period used to (re)compute and read the cached analytical result tables
+        // (abc_classification_result, inventory_turnover_result, profitability_result, sales_trend_result)
+        String period = new java.text.SimpleDateFormat("yyyy-MM").format(new java.util.Date());
+        javax.servlet.http.HttpSession analyticsSession = request.getSession(false);
+        int analyticsUserId = 1;
+        try {
+            Object u = analyticsSession != null ? analyticsSession.getAttribute("user") : null;
+            if (u != null) analyticsUserId = ((com.nlogistic.model.User) u).getUserId();
+        } catch (Exception ignored) {}
+        analyticsDAO.computeAllAnalytics(period, analyticsUserId);
 
         // Read filter params
         String filterCompany  = request.getParameter("company");
@@ -39,11 +57,15 @@ public class AnalyticsServlet extends HttpServlet {
         request.setAttribute("filterDateTo",   filterDateTo   != null ? filterDateTo   : "");
 
         // Build WHERE clause based on filters (for profit_loss + shipment join)
+        // Note: profit_loss has no company_id column (see SRS Section 6.3) - company filtering must go
+        // through shipment -> customers -> users, matching the join used elsewhere in this file/DAO.
         StringBuilder where = new StringBuilder("WHERE 1=1");
         List<String> params = new ArrayList<>();
 
         if (filterCompany != null && !filterCompany.trim().isEmpty()) {
-            where.append(" AND pl.company_id = ?");
+            where.append(" AND pl.shipment_id IN (SELECT s.shipment_id FROM shipment s " +
+                    "JOIN customers c ON s.customer_id = c.customer_id " +
+                    "JOIN users u ON c.user_id = u.user_id WHERE u.company_id = ?)");
             params.add(filterCompany);
         }
         if (filterDateFrom != null && !filterDateFrom.trim().isEmpty()) {
@@ -53,6 +75,13 @@ public class AnalyticsServlet extends HttpServlet {
         if (filterDateTo != null && !filterDateTo.trim().isEmpty()) {
             where.append(" AND pl.record_date <= ?");
             params.add(filterDateTo);
+        }
+        if (filterRoute != null && !filterRoute.trim().isEmpty() && filterRoute.contains("-")) {
+            String[] portIds = filterRoute.split("-", 2);
+            where.append(" AND pl.shipment_id IN (SELECT s.shipment_id FROM shipment s " +
+                    "WHERE s.origin_port_id = ? AND s.destination_port_id = ?)");
+            params.add(portIds[0]);
+            params.add(portIds[1]);
         }
 
         int activeShipments = 0;
@@ -145,9 +174,88 @@ public class AnalyticsServlet extends HttpServlet {
             double utilPct = totalContainers > 0 ? (inUseContainers * 100.0 / totalContainers) : 0;
             request.setAttribute("utilizationPct", String.format("%.1f", utilPct));
 
+            // ---- On-Time Delivery Rate (was previously hardcoded to 78.6) ----
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT COUNT(*) as total_delivered, " +
+                    "SUM(CASE WHEN actual_arrival_date <= expected_arrival_date OR delay_days <= 0 THEN 1 ELSE 0 END) as on_time " +
+                    "FROM container_movements WHERE actual_arrival_date IS NOT NULL")) {
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    int totalDelivered = rs.getInt("total_delivered");
+                    int onTime = rs.getInt("on_time");
+                    if (totalDelivered > 0) onTimePct = (onTime * 100.0 / totalDelivered);
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // ---- ABC Classification, Top Loss Reasons, Stock Valuation, Demand Forecast, Turnover ----
+        // (Wired to the same real data the KPIs above already use, mirroring the existing plgJson pattern,
+        // instead of the static placeholder chart data the page previously shipped with.)
+        StringBuilder abcJson = new StringBuilder("[");
+        boolean firstAbc = true;
+        for (AbcResult a : analyticsDAO.getAbcResults(period, analyticsUserId)) {
+            if (!firstAbc) abcJson.append(",");
+            abcJson.append("{\"class\":\"Class ").append(a.getClassName()).append("\",\"count\":").append(a.getProductCount()).append("}");
+            firstAbc = false;
+        }
+        abcJson.append("]");
+        request.setAttribute("abcJson", abcJson.toString());
+
+        StringBuilder lossJson = new StringBuilder("[");
+        boolean firstLoss = true;
+        double totalLossImpact = 0.0;
+        for (LossReasonSummary l : analyticsDAO.getTopLossReasons(7, analyticsUserId)) {
+            if (!firstLoss) lossJson.append(",");
+            lossJson.append("{\"reason\":\"").append(l.getReasonName() != null ? l.getReasonName().replace("\"", "\\\"") : "").append("\",")
+                    .append("\"impact\":").append(l.getTotalFinancialImpact()).append("}");
+            totalLossImpact += l.getTotalFinancialImpact();
+            firstLoss = false;
+        }
+        lossJson.append("]");
+        request.setAttribute("lossJson", lossJson.toString());
+        request.setAttribute("totalLossImpact", totalLossImpact);
+
+        Integer stockCompanyId = null;
+        try { if (filterCompany != null && !filterCompany.trim().isEmpty()) stockCompanyId = Integer.parseInt(filterCompany); } catch (Exception ignored) {}
+        double currentStockValue = 0.0;
+        java.util.Map<String, Double> stockByCategory = new java.util.LinkedHashMap<>();
+        for (StockValuation sv : analyticsDAO.getStockValuation(stockCompanyId != null ? stockCompanyId : 0, analyticsUserId)) {
+            String cat = (sv.getCategory() != null && !sv.getCategory().trim().isEmpty()) ? sv.getCategory() : "Uncategorized";
+            if (filterCategory != null && !filterCategory.trim().isEmpty() && !filterCategory.equals(cat)) {
+                continue; // Category filter applied (FR6.2)
+            }
+            currentStockValue += sv.getTotalInventoryValuation();
+            stockByCategory.merge(cat, sv.getTotalInventoryValuation(), Double::sum);
+        }
+        request.setAttribute("currentStockValue", currentStockValue);
+
+        StringBuilder stockValJson = new StringBuilder("[");
+        boolean firstSv = true;
+        for (java.util.Map.Entry<String, Double> e : stockByCategory.entrySet()) {
+            if (!firstSv) stockValJson.append(",");
+            stockValJson.append("{\"category\":\"").append(e.getKey().replace("\"", "\\\"")).append("\",")
+                        .append("\"value\":").append(e.getValue()).append("}");
+            firstSv = false;
+        }
+        stockValJson.append("]");
+        request.setAttribute("stockValJson", stockValJson.toString());
+
+        StringBuilder demandJson = new StringBuilder("[");
+        boolean firstDf = true;
+        for (DemandForecast df : analyticsDAO.getDemandForecast(null, null)) {
+            if (!firstDf) demandJson.append(",");
+            demandJson.append("{\"period\":\"").append(df.getForecastPeriod()).append("\",")
+                      .append("\"demand\":").append(df.getForecastedDemand()).append("}");
+            firstDf = false;
+        }
+        demandJson.append("]");
+        request.setAttribute("demandJson", demandJson.toString());
+
+        TurnoverResult turnover = analyticsDAO.getTurnoverResult(period, analyticsUserId);
+        request.setAttribute("avgTurnoverRatio", turnover.getAvgTurnoverRatio());
 
         request.setAttribute("activeShipments", activeShipments);
         request.setAttribute("totalRevenue",    totalRevenue);

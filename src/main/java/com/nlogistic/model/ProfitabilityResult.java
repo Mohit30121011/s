@@ -3,6 +3,8 @@ package com.nlogistic.model;
 public class ProfitabilityResult {
     private int id;
     private int productId;
+    private String productName;
+    private String category;
     private String period;
     private double revenue;
     private double directCogs;
@@ -11,6 +13,11 @@ public class ProfitabilityResult {
     private double profitMarginPct;
 
     public ProfitabilityResult() {}
+
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
     public int getId() {
         return id;
