@@ -695,17 +695,17 @@
         <!-- Enterprise Theme Pagination Bar -->
         <div class="nl-pagination-wrapper" id="companiesPagination">
             <div class="nl-pagination-info">
-                <span>Showing <strong id="companiesPageStart">1</strong> to <strong id="companiesPageEnd">10</strong> of <strong id="companiesTotalRows">0</strong> records</span>
+                <span>Showing <strong id="compPageStart">1</strong> to <strong id="compPageEnd">10</strong> of <strong id="compTotalRows">0</strong> records</span>
                 <div class="d-inline-flex align-items-center gap-2 ms-2">
                     <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
-                    <select id="companiesPageSize" class="nl-page-size-select no-custom-select" onchange="changeCompaniesPageSize(this.value)">
+                    <select id="companiesPageSize" class="nl-page-size-select no-custom-select" onchange="changeCompPageSize(this.value)">
                         <option value="10" selected>10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                     </select>
                 </div>
             </div>
-            <div class="nl-pagination-nav" id="companiesPageNav">
+            <div class="nl-pagination-nav" id="compPageNav">
                 <!-- Dynamically generated page buttons -->
             </div>
         </div>
