@@ -309,9 +309,14 @@ public class ClaimDAO {
         return d;
     }
 
-    /** Get KPI stats for the claims dashboard. */
+    /** Get KPI stats for the claims dashboard (optionally scoped to a customer). */
     public Map<String, Object> getClaimStats() {
+        return getClaimStats(null);
+    }
+
+    public Map<String, Object> getClaimStats(Integer customerId) {
         Map<String, Object> stats = new HashMap<>();
+        boolean isCustomer = (customerId != null && customerId > 0);
         String sql = "SELECT " +
                      "COUNT(*) AS total, " +
                      "SUM(CASE WHEN status='Filed' THEN 1 ELSE 0 END) AS filed, " +
@@ -321,19 +326,21 @@ public class ClaimDAO {
                      "SUM(CASE WHEN status='Rejected' THEN 1 ELSE 0 END) AS rejected, " +
                      "COALESCE(SUM(claimed_amount), 0) AS total_claimed, " +
                      "COALESCE(SUM(approved_amount), 0) AS total_approved " +
-                     "FROM CLAIMS";
+                     "FROM CLAIMS" + (isCustomer ? " WHERE customer_id = ?" : "");
         try (Connection conn = DBConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                stats.put("total", rs.getInt("total"));
-                stats.put("filed", rs.getInt("filed"));
-                stats.put("underReview", rs.getInt("under_review"));
-                stats.put("approved", rs.getInt("approved"));
-                stats.put("settled", rs.getInt("settled"));
-                stats.put("rejected", rs.getInt("rejected"));
-                stats.put("totalClaimed", rs.getDouble("total_claimed"));
-                stats.put("totalApproved", rs.getDouble("total_approved"));
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (isCustomer) ps.setInt(1, customerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("total", rs.getInt("total"));
+                    stats.put("filed", rs.getInt("filed"));
+                    stats.put("underReview", rs.getInt("under_review"));
+                    stats.put("approved", rs.getInt("approved"));
+                    stats.put("settled", rs.getInt("settled"));
+                    stats.put("rejected", rs.getInt("rejected"));
+                    stats.put("totalClaimed", rs.getDouble("total_claimed"));
+                    stats.put("totalApproved", rs.getDouble("total_approved"));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

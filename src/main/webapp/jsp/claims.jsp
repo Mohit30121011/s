@@ -2,13 +2,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
-    // Resilient self-load: if this JSP is hit without going through ClaimServlet (e.g. a
-    // stale bookmark), populate the same attributes the servlet would so the page still renders.
+    // Ensure data is available if accessed directly without going through servlet
     if (request.getAttribute("claims") == null) {
         com.nlogistic.model.User __u = (com.nlogistic.model.User) session.getAttribute("user");
         if (__u != null) {
-            int __roleId = session.getAttribute("roleId") != null ? (Integer) session.getAttribute("roleId") : __u.getRoleId();
             com.nlogistic.dao.ClaimDAO __claimDao = new com.nlogistic.dao.ClaimDAO();
+            int __roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : __u.getRoleId();
             Integer __customerId = (Integer) session.getAttribute("customerId");
             if (__customerId == null && __roleId == 5) {
                 try (java.sql.Connection __c = com.nlogistic.util.DBConnectionManager.getConnection();
@@ -23,7 +22,7 @@
                     ? (__customerId != null ? __claimDao.getClaimsByCustomer(__customerId) : new java.util.ArrayList<com.nlogistic.model.Claim>())
                     : __claimDao.getAllClaims();
             request.setAttribute("claims", __claims);
-            request.setAttribute("stats", __claimDao.getClaimStats());
+            request.setAttribute("stats", __claimDao.getClaimStats(__roleId == 5 ? __customerId : null));
             request.setAttribute("lossReasons", __claimDao.getAllLossReasons());
             request.setAttribute("shipments", __claimDao.getShipmentsForUser(__u.getUserId(), __roleId, __customerId));
             request.setAttribute("roleId", __roleId);
@@ -46,15 +45,18 @@
     }
     .btn-add-container:hover { background: #E66F0F; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(252, 128, 25, 0.35); }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .kpi-card {
         background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px 18px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between;
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; cursor: pointer; text-decoration: none;
     }
     .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); border-color: #CBD5E1; }
+    .kpi-card.active-kpi { border-color: #FC8019; box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.2); }
     .kpi-label { font-size: 11.5px; font-weight: 600; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
     .kpi-value { font-size: 23px; font-weight: 800; color: #0F172A; line-height: 1; }
+    .kpi-subtext { font-size: 11px; color: #94A3B8; margin-top: 4px; font-weight: 500; }
     .kpi-icon-pill { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
     .kpi-icon-pill.amber { background: #FFFBEB; color: #D97706; }
     .kpi-icon-pill.blue { background: #EFF6FF; color: #2563EB; }
@@ -62,19 +64,50 @@
     .kpi-icon-pill.red { background: #FEF2F2; color: #DC2626; }
     .kpi-icon-pill.purple { background: #F3E8FF; color: #9333EA; }
     .kpi-icon-pill.slate { background: #F1F5F9; color: #475569; }
+    .kpi-icon-pill.orange { background: #FFF3EA; color: #FC8019; }
 
+    /* Toolbar */
     .toolbar-card {
         background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px 14px 0 0; padding: 14px 20px;
         display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid #F1F5F9;
     }
     .nav-tabs-pill { display: flex; align-items: center; gap: 6px; background: #F8FAFC; padding: 4px; border-radius: 50px; border: 1px solid #E2E8F0; flex-wrap: wrap; }
     .tab-pill-btn {
-        background: transparent; border: none; padding: 7px 16px; border-radius: 50px; font-size: 12.5px; font-weight: 600;
+        background: transparent; border: none; padding: 7px 14px; border-radius: 50px; font-size: 12.5px; font-weight: 600;
         color: #64748B; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px; text-decoration: none;
     }
     .tab-pill-btn:hover { color: #0F172A; }
-    .tab-pill-btn.active { background: #FFFFFF; color: #FC8019; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+    .tab-pill-btn.active { background: #FFFFFF; color: #FC8019; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); font-weight: 700; }
+    .tab-count-badge {
+        background: #E2E8F0; color: #475569; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 50px;
+        transition: all 0.2s ease;
+    }
+    .tab-pill-btn.active .tab-count-badge { background: #FFF3EA; color: #FC8019; }
 
+    .toolbar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .search-wrap { position: relative; width: 260px; }
+    .search-wrap i.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; pointer-events: none; }
+    .search-input {
+        width: 100%; height: 38px; border-radius: 50px; border: 1.5px solid #E2E8F0; padding: 0 34px 0 38px;
+        font-size: 12.5px; color: #1E293B; background: #FFFFFF; outline: none; transition: all 0.2s ease;
+    }
+    .search-input:focus { border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12); }
+    .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94A3B8; cursor: pointer; display: none; font-size: 14px; }
+    .search-clear:hover { color: #0F172A; }
+
+    .filter-type-wrap { width: 140px; }
+    .filter-type-select {
+        height: 38px; border-radius: 50px; border: 1.5px solid #E2E8F0; padding: 0 12px; font-size: 12.5px;
+        color: #1E293B; background: #FFFFFF; outline: none; width: 100%; cursor: pointer; transition: all 0.2s ease;
+    }
+    .filter-type-select:focus { border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12); }
+
+    .table-counter-badge {
+        font-size: 12px; font-weight: 600; color: #64748B; background: #F8FAFC; border: 1px solid #E2E8F0;
+        padding: 5px 12px; border-radius: 50px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    }
+
+    /* Table */
     .table-panel { background: #FFFFFF; border: 1px solid #E2E8F0; border-top: none; border-radius: 0 0 16px 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); overflow: hidden; margin-bottom: 32px; }
     table.claims-table { width: 100%; border-collapse: collapse; margin: 0; }
     .claims-table th { background: #F8FAFC; padding: 13px 18px; font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; text-align: left; }
@@ -105,34 +138,52 @@
     .btn-claim-view { background: #FFFFFF; border-color: #E2E8F0; color: #475569 !important; }
     .btn-claim-view:hover { background: #F8FAFC; }
 
+    /* Modern Pagination Bar */
+    .pagination-bar {
+        padding: 14px 24px; border-top: 1px solid #F1F5F9;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+        background: #FFFFFF;
+    }
+    .page-info-wrap { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .page-size-wrap { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #64748B; font-weight: 500; }
+    .page-size-select {
+        height: 32px; padding: 0 8px; border-radius: 8px; border: 1.5px solid #E2E8F0;
+        background: #FFFFFF; font-size: 12px; font-weight: 600; color: #1E293B; outline: none; cursor: pointer;
+    }
+    .page-size-select:focus { border-color: #FC8019; }
+    .page-info { font-size: 12.5px; color: #64748B; font-weight: 500; }
+
+    .pagination-controls { display: flex; align-items: center; gap: 6px; }
+    .page-btn {
+        height: 34px; padding: 0 14px; border-radius: 50px; border: 1.5px solid #E2E8F0;
+        background: #FFFFFF; color: #475569; font-size: 12px; font-weight: 600;
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+        transition: all 0.15s ease;
+    }
+    .page-btn:hover:not(:disabled) { background: #FFF3EA; color: #FC8019; border-color: #FC8019; }
+    .page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .page-numbers-wrap { display: flex; align-items: center; gap: 4px; }
+    .page-num {
+        width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #E2E8F0;
+        background: #FFFFFF; color: #475569; font-size: 12px; font-weight: 600;
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+        transition: all 0.15s ease;
+    }
+    .page-num:hover:not(.active) { background: #FFF3EA; color: #FC8019; border-color: #FC8019; }
+    .page-num.active { background: #FC8019 !important; color: #FFFFFF !important; border-color: #FC8019 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(252, 128, 25, 0.3); }
+
     .empty-state-card { padding: 60px 24px; text-align: center; background: #FFFFFF; }
     .empty-state-icon-box {
         width: 64px; height: 64px; border-radius: 18px; background: #F8FAFC; border: 1px solid #E2E8F0;
         color: #94A3B8; font-size: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
     }
     .empty-state-title { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
-    .empty-state-desc { font-size: 13px; color: #64748B; }
+    .empty-state-desc { font-size: 13px; color: #64748B; margin-bottom: 16px; }
 
-    /* Select / form controls */
+    /* Select / form controls in modal */
     .select-wrapper { position: relative; width: 100%; }
     .select-wrapper:has(.ts-wrapper)::after,
     .select-wrapper.has-tomselect::after { display: none !important; }
-    .nl-modal-dialog .ts-wrapper.form-select-custom .ts-control {
-        border: 1.5px solid #E2E8F0 !important;
-        border-radius: 10px !important;
-        height: 42px !important;
-        display: flex !important;
-        align-items: center !important;
-        padding: 0 38px 0 16px !important;
-        font-size: 13px !important;
-        color: #1E293B !important;
-        box-shadow: none !important;
-        background-color: #FFFFFF !important;
-    }
-    .nl-modal-dialog .ts-wrapper.form-select-custom.focus .ts-control {
-        border-color: #FC8019 !important;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
-    }
     .select-wrapper::after {
         content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -153,6 +204,23 @@
     .modal-form-input:focus { border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12); }
     .row-2 { display: flex; gap: 14px; }
     .row-2 > div { flex: 1; }
+
+    .nl-modal-dialog .ts-wrapper.form-select-custom .ts-control {
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 10px !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 38px 0 16px !important;
+        font-size: 13px !important;
+        color: #1E293B !important;
+        box-shadow: none !important;
+        background-color: #FFFFFF !important;
+    }
+    .nl-modal-dialog .ts-wrapper.form-select-custom.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+    }
 
     /* Standard modal (form-driven) */
     .nl-modal-backdrop {
@@ -214,135 +282,225 @@
         <c:remove var="errorMessage" scope="session"/>
     </c:if>
 
-    <!-- KPI Dashboard -->
+    <!-- KPI Dashboard (100% Real Database Queries) -->
     <div class="kpi-grid">
-        <a class="kpi-card" href="${pageContext.request.contextPath}/claims">
-            <div><div class="kpi-label">Total</div><div class="kpi-value">${stats.total}</div></div>
+        <div class="kpi-card" onclick="filterByStatusTab('')">
+            <div>
+                <div class="kpi-label">Total Claims</div>
+                <div class="kpi-value">${stats.total}</div>
+                <div class="kpi-subtext">&#8377;<fmt:formatNumber value="${stats.totalClaimed}" pattern="#,##0.00"/> Claimed</div>
+            </div>
             <div class="kpi-icon-pill slate"><i class="ti ti-file-stack"></i></div>
-        </a>
-        <a class="kpi-card" href="${pageContext.request.contextPath}/claims?statusFilter=Filed">
-            <div><div class="kpi-label">Filed</div><div class="kpi-value">${stats.filed}</div></div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatusTab('Filed')">
+            <div>
+                <div class="kpi-label">Filed</div>
+                <div class="kpi-value">${stats.filed}</div>
+                <div class="kpi-subtext">Awaiting Ops Review</div>
+            </div>
             <div class="kpi-icon-pill amber"><i class="ti ti-file-alert"></i></div>
-        </a>
-        <a class="kpi-card" href="${pageContext.request.contextPath}/claims?statusFilter=Under Review">
-            <div><div class="kpi-label">Under Review</div><div class="kpi-value">${stats.underReview}</div></div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatusTab('Under Review')">
+            <div>
+                <div class="kpi-label">Under Review</div>
+                <div class="kpi-value">${stats.underReview}</div>
+                <div class="kpi-subtext">In Investigation</div>
+            </div>
             <div class="kpi-icon-pill blue"><i class="ti ti-search"></i></div>
-        </a>
-        <a class="kpi-card" href="${pageContext.request.contextPath}/claims?statusFilter=Approved">
-            <div><div class="kpi-label">Approved</div><div class="kpi-value">${stats.approved}</div></div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatusTab('Approved')">
+            <div>
+                <div class="kpi-label">Approved</div>
+                <div class="kpi-value">${stats.approved}</div>
+                <div class="kpi-subtext">Pending Settlement</div>
+            </div>
             <div class="kpi-icon-pill purple"><i class="ti ti-thumb-up"></i></div>
-        </a>
-        <a class="kpi-card" href="${pageContext.request.contextPath}/claims?statusFilter=Rejected">
-            <div><div class="kpi-label">Rejected</div><div class="kpi-value">${stats.rejected}</div></div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatusTab('Rejected')">
+            <div>
+                <div class="kpi-label">Rejected</div>
+                <div class="kpi-value">${stats.rejected}</div>
+                <div class="kpi-subtext">Declined by Finance</div>
+            </div>
             <div class="kpi-icon-pill red"><i class="ti ti-x"></i></div>
-        </a>
-        <a class="kpi-card" href="${pageContext.request.contextPath}/claims?statusFilter=Settled">
-            <div><div class="kpi-label">Settled</div><div class="kpi-value">${stats.settled}</div></div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatusTab('Settled')">
+            <div>
+                <div class="kpi-label">Settled</div>
+                <div class="kpi-value">${stats.settled}</div>
+                <div class="kpi-subtext">&#8377;<fmt:formatNumber value="${stats.totalApproved}" pattern="#,##0.00"/> Paid Out</div>
+            </div>
             <div class="kpi-icon-pill green"><i class="ti ti-circle-check"></i></div>
-        </a>
-    </div>
-
-    <!-- Toolbar / status filter tabs -->
-    <div class="toolbar-card">
-        <div class="nav-tabs-pill">
-            <a class="tab-pill-btn ${empty statusFilter ? 'active' : ''}" href="${pageContext.request.contextPath}/claims">All</a>
-            <a class="tab-pill-btn ${statusFilter == 'Filed' ? 'active' : ''}" href="${pageContext.request.contextPath}/claims?statusFilter=Filed">Filed</a>
-            <a class="tab-pill-btn ${statusFilter == 'Under Review' ? 'active' : ''}" href="${pageContext.request.contextPath}/claims?statusFilter=Under Review">Under Review</a>
-            <a class="tab-pill-btn ${statusFilter == 'Approved' ? 'active' : ''}" href="${pageContext.request.contextPath}/claims?statusFilter=Approved">Approved</a>
-            <a class="tab-pill-btn ${statusFilter == 'Rejected' ? 'active' : ''}" href="${pageContext.request.contextPath}/claims?statusFilter=Rejected">Rejected</a>
-            <a class="tab-pill-btn ${statusFilter == 'Settled' ? 'active' : ''}" href="${pageContext.request.contextPath}/claims?statusFilter=Settled">Settled</a>
         </div>
     </div>
 
-    <!-- Claims Table -->
+    <!-- Toolbar / status filter tabs + Live Search + Type Filter -->
+    <div class="toolbar-card">
+        <div class="nav-tabs-pill">
+            <button type="button" class="tab-pill-btn active" data-status="" onclick="filterByStatusTab('')">
+                All <span class="tab-count-badge">${stats.total}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" data-status="Filed" onclick="filterByStatusTab('Filed')">
+                Filed <span class="tab-count-badge">${stats.filed}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" data-status="Under Review" onclick="filterByStatusTab('Under Review')">
+                Under Review <span class="tab-count-badge">${stats.underReview}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" data-status="Approved" onclick="filterByStatusTab('Approved')">
+                Approved <span class="tab-count-badge">${stats.approved}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" data-status="Rejected" onclick="filterByStatusTab('Rejected')">
+                Rejected <span class="tab-count-badge">${stats.rejected}</span>
+            </button>
+            <button type="button" class="tab-pill-btn" data-status="Settled" onclick="filterByStatusTab('Settled')">
+                Settled <span class="tab-count-badge">${stats.settled}</span>
+            </button>
+        </div>
+
+        <div class="toolbar-actions">
+            <!-- Search Bar -->
+            <div class="search-wrap">
+                <i class="ti ti-search search-icon"></i>
+                <input type="text" id="claimsSearchInput" class="search-input" placeholder="Search claims, shipments, customers..." oninput="handleFilter()" autocomplete="off">
+                <button type="button" id="searchClearBtn" class="search-clear" onclick="clearSearch()">&times;</button>
+            </div>
+
+            <!-- Type Filter Dropdown -->
+            <div class="filter-type-wrap">
+                <select id="claimTypeFilter" class="filter-type-select no-custom-select" onchange="handleFilter()">
+                    <option value="ALL">All Types</option>
+                    <option value="Damage">Damage</option>
+                    <option value="Loss">Loss</option>
+                    <option value="Shortage">Shortage</option>
+                </select>
+            </div>
+
+            <!-- Count Badge -->
+            <div id="showingCountBadge" class="table-counter-badge">
+                <i class="ti ti-list"></i> Showing ${claims.size()} Claims
+            </div>
+        </div>
+    </div>
+
+    <!-- Claims Table Panel -->
     <div class="table-panel">
-        <c:choose>
-            <c:when test="${empty claims}">
-                <div class="empty-state-card">
-                    <div class="empty-state-icon-box"><i class="ti ti-file-off"></i></div>
-                    <div class="empty-state-title">No claims found</div>
-                    <div class="empty-state-desc">${roleId == 5 ? 'You have not filed any claims yet.' : 'No claims match the current filter.'}</div>
+        <table class="claims-table" id="claimsTable">
+            <thead>
+                <tr>
+                    <th>Claim</th>
+                    <th>Shipment</th>
+                    <th>Type</th>
+                    <th>Incident Date</th>
+                    <c:if test="${roleId != 5}"><th>Customer</th></c:if>
+                    <th>Claimed</th>
+                    <th>Approved</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="claimsTableBody">
+                <c:forEach var="cl" items="${claims}">
+                    <tr class="claim-row"
+                        data-id="${cl.claimId}"
+                        data-status="${cl.status}"
+                        data-type="${cl.claimType}"
+                        data-search="#${cl.claimId} SHP-${cl.shipmentId} ${cl.claimType} ${cl.customerName} ${cl.status} ${cl.claimedAmount} ${cl.description}"
+                        onclick="if(!event.target.closest('.actions-flex')) window.location='${pageContext.request.contextPath}/claims?action=view&claimId=${cl.claimId}';">
+                        <td><strong>#${cl.claimId}</strong></td>
+                        <td>SHP-${cl.shipmentId}</td>
+                        <td>${cl.claimType}</td>
+                        <td><fmt:formatDate value="${cl.incidentDate}" pattern="dd MMM yyyy"/></td>
+                        <c:if test="${roleId != 5}"><td><c:out value="${empty cl.customerName ? 'Customer #'.concat(cl.customerId) : cl.customerName}"/></td></c:if>
+                        <td>&#8377;<fmt:formatNumber value="${cl.claimedAmount}" groupingUsed="true" maxFractionDigits="0"/></td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${cl.approvedAmount > 0}">&#8377;<fmt:formatNumber value="${cl.approvedAmount}" groupingUsed="true" maxFractionDigits="0"/></c:when>
+                                <c:otherwise><span style="color:#94A3B8;">&mdash;</span></c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${cl.status == 'Filed'}"><span class="status-pill filed"><i class="ti ti-file-alert"></i> Filed</span></c:when>
+                                <c:when test="${cl.status == 'Under Review'}"><span class="status-pill review"><i class="ti ti-search"></i> Under Review</span></c:when>
+                                <c:when test="${cl.status == 'Approved'}"><span class="status-pill approved"><i class="ti ti-thumb-up"></i> Approved</span></c:when>
+                                <c:when test="${cl.status == 'Rejected'}"><span class="status-pill rejected"><i class="ti ti-x"></i> Rejected</span></c:when>
+                                <c:when test="${cl.status == 'Settled'}"><span class="status-pill settled"><i class="ti ti-circle-check"></i> Settled</span></c:when>
+                                <c:otherwise><span class="status-pill">${cl.status}</span></c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <div class="actions-flex">
+                                <a class="btn-claim-action btn-claim-view" href="${pageContext.request.contextPath}/claims?action=view&claimId=${cl.claimId}"><i class="ti ti-eye"></i> View</a>
+
+                                <c:if test="${(roleId == 1 || roleId == 2 || roleId == 3) && cl.status == 'Filed'}">
+                                    <form method="post" action="${pageContext.request.contextPath}/claims" style="display:inline;">
+                                        <input type="hidden" name="action" value="review">
+                                        <input type="hidden" name="claimId" value="${cl.claimId}">
+                                        <input type="hidden" name="remarks" value="Taken under review">
+                                        <button type="button" class="btn-claim-action btn-claim-review"
+                                            onclick="showCustomConfirm({title:'Move to Under Review?', desc:'Claim #${cl.claimId} will move to Under Review for Finance evaluation.', icon:'ti ti-search', type:'success', confirmText:'Yes, Start Review', form:this.form})">
+                                            <i class="ti ti-search"></i> Review
+                                        </button>
+                                    </form>
+                                </c:if>
+
+                                <c:if test="${(roleId == 1 || roleId == 2 || roleId == 4) && cl.status == 'Under Review'}">
+                                    <button type="button" class="btn-claim-action btn-claim-approve" onclick="openApproveModal(${cl.claimId}, ${cl.claimedAmount})"><i class="ti ti-thumb-up"></i> Approve</button>
+                                    <button type="button" class="btn-claim-action btn-claim-reject" onclick="openRejectModal(${cl.claimId})"><i class="ti ti-x"></i> Reject</button>
+                                </c:if>
+
+                                <c:if test="${(roleId == 1 || roleId == 2 || roleId == 4) && cl.status == 'Approved'}">
+                                    <form method="post" action="${pageContext.request.contextPath}/claims" style="display:inline;">
+                                        <input type="hidden" name="action" value="settle">
+                                        <input type="hidden" name="claimId" value="${cl.claimId}">
+                                        <button type="button" class="btn-claim-action btn-claim-settle"
+                                            onclick="showCustomConfirm({title:'Settle Claim?', desc:'Claim #${cl.claimId} will be marked Settled and a credit note posted to billing.', icon:'ti ti-circle-check', type:'success', confirmText:'Yes, Settle', form:this.form})">
+                                            <i class="ti ti-circle-check"></i> Settle
+                                        </button>
+                                    </form>
+                                </c:if>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+
+        <!-- Empty State (Shown when 0 claims match search/filter) -->
+        <div class="empty-state-card" id="claimsEmptyState" style="display: none;">
+            <div class="empty-state-icon-box"><i class="ti ti-file-off"></i></div>
+            <div class="empty-state-title">No Claims Found</div>
+            <div class="empty-state-desc" id="emptyStateDesc">No cargo claims match your current filter or search criteria.</div>
+            <button type="button" class="page-btn" style="background:#FFF3EA; color:#FC8019; border-color:#FC8019;" onclick="resetFilters()">
+                <i class="ti ti-refresh me-1"></i> Reset Filters
+            </button>
+        </div>
+
+        <!-- Modern Pagination Bar -->
+        <div class="pagination-bar" id="claimsPagination">
+            <div class="page-info-wrap">
+                <div class="page-size-wrap">
+                    <span>Rows per page:</span>
+                    <select id="claimsPageSize" class="page-size-select no-custom-select" onchange="changeClaimsPageSize(this.value)">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="ALL">All</option>
+                    </select>
                 </div>
-            </c:when>
-            <c:otherwise>
-                <table class="claims-table">
-                    <thead>
-                        <tr>
-                            <th>Claim</th>
-                            <th>Shipment</th>
-                            <th>Type</th>
-                            <th>Incident Date</th>
-                            <c:if test="${roleId != 5}"><th>Customer</th></c:if>
-                            <th>Claimed</th>
-                            <th>Approved</th>
-                            <th>Status</th>
-                            <th style="text-align:right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="cl" items="${claims}">
-                            <tr class="claim-row" onclick="if(!event.target.closest('.actions-flex')) window.location='${pageContext.request.contextPath}/claims?action=view&claimId=${cl.claimId}';">
-                                <td><strong>#${cl.claimId}</strong></td>
-                                <td>SHP-${cl.shipmentId}</td>
-                                <td>${cl.claimType}</td>
-                                <td><fmt:formatDate value="${cl.incidentDate}" pattern="dd MMM yyyy"/></td>
-                                <c:if test="${roleId != 5}"><td>${cl.customerName}</td></c:if>
-                                <td>&#8377;<fmt:formatNumber value="${cl.claimedAmount}" groupingUsed="true" maxFractionDigits="0"/></td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${cl.approvedAmount > 0}">&#8377;<fmt:formatNumber value="${cl.approvedAmount}" groupingUsed="true" maxFractionDigits="0"/></c:when>
-                                        <c:otherwise><span style="color:#94A3B8;">&mdash;</span></c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${cl.status == 'Filed'}"><span class="status-pill filed"><i class="ti ti-file-alert"></i> Filed</span></c:when>
-                                        <c:when test="${cl.status == 'Under Review'}"><span class="status-pill review"><i class="ti ti-search"></i> Under Review</span></c:when>
-                                        <c:when test="${cl.status == 'Approved'}"><span class="status-pill approved"><i class="ti ti-thumb-up"></i> Approved</span></c:when>
-                                        <c:when test="${cl.status == 'Rejected'}"><span class="status-pill rejected"><i class="ti ti-x"></i> Rejected</span></c:when>
-                                        <c:when test="${cl.status == 'Settled'}"><span class="status-pill settled"><i class="ti ti-circle-check"></i> Settled</span></c:when>
-                                        <c:otherwise><span class="status-pill">${cl.status}</span></c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>
-                                    <div class="actions-flex">
-                                        <a class="btn-claim-action btn-claim-view" href="${pageContext.request.contextPath}/claims?action=view&claimId=${cl.claimId}"><i class="ti ti-eye"></i> View</a>
-
-                                        <c:if test="${(roleId == 1 || roleId == 2 || roleId == 3) && cl.status == 'Filed'}">
-                                            <form method="post" action="${pageContext.request.contextPath}/claims" style="display:inline;">
-                                                <input type="hidden" name="action" value="review">
-                                                <input type="hidden" name="claimId" value="${cl.claimId}">
-                                                <input type="hidden" name="remarks" value="Taken under review">
-                                                <button type="button" class="btn-claim-action btn-claim-review"
-                                                    onclick="showCustomConfirm({title:'Move to Under Review?', desc:'Claim #${cl.claimId} will move to Under Review for Finance evaluation.', icon:'ti ti-search', type:'success', confirmText:'Yes, Start Review', form:this.form})">
-                                                    <i class="ti ti-search"></i> Review
-                                                </button>
-                                            </form>
-                                        </c:if>
-
-                                        <c:if test="${(roleId == 1 || roleId == 2 || roleId == 4) && cl.status == 'Under Review'}">
-                                            <button type="button" class="btn-claim-action btn-claim-approve" onclick="openApproveModal(${cl.claimId}, ${cl.claimedAmount})"><i class="ti ti-thumb-up"></i> Approve</button>
-                                            <button type="button" class="btn-claim-action btn-claim-reject" onclick="openRejectModal(${cl.claimId})"><i class="ti ti-x"></i> Reject</button>
-                                        </c:if>
-
-                                        <c:if test="${(roleId == 1 || roleId == 2 || roleId == 4) && cl.status == 'Approved'}">
-                                            <form method="post" action="${pageContext.request.contextPath}/claims" style="display:inline;">
-                                                <input type="hidden" name="action" value="settle">
-                                                <input type="hidden" name="claimId" value="${cl.claimId}">
-                                                <button type="button" class="btn-claim-action btn-claim-settle"
-                                                    onclick="showCustomConfirm({title:'Settle Claim?', desc:'Claim #${cl.claimId} will be marked Settled and a credit note posted to billing.', icon:'ti ti-circle-check', type:'success', confirmText:'Yes, Settle', form:this.form})">
-                                                    <i class="ti ti-circle-check"></i> Settle
-                                                </button>
-                                            </form>
-                                        </c:if>
-                                    </div>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
-            </c:otherwise>
-        </c:choose>
+                <div class="page-info" id="pageInfoText">Showing 1 to 10 of ${claims.size()} claims</div>
+            </div>
+            <div class="pagination-controls">
+                <button type="button" class="page-btn" id="prevPageBtn" onclick="changePage(-1)">
+                    <i class="ti ti-chevron-left me-1"></i> Previous
+                </button>
+                <div class="page-numbers-wrap" id="pageNumbersWrap"></div>
+                <button type="button" class="page-btn" id="nextPageBtn" onclick="changePage(1)">
+                    Next <i class="ti ti-chevron-right ms-1"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -389,7 +547,7 @@
                 </div>
                 <div class="modal-form-group">
                     <label class="modal-form-label">Product ID</label>
-                    <input type="number" name="productId" id="fileProductId" class="modal-form-input" placeholder="Optional (e.g. 101)">
+                    <input type="number" name="productId" id="fileProductId" class="modal-form-input" placeholder="Optional (e.g. 1)">
                 </div>
             </div>
             <div class="row-2">
@@ -500,8 +658,12 @@
 </div>
 
 <script>
+    /* ==========================================================================
+       MODAL CONTROLLER
+       ========================================================================== */
     function openModal(id) {
         const modal = document.getElementById(id);
+        if (!modal) return;
         modal.style.display = 'flex';
         requestAnimationFrame(() => modal.classList.add('show'));
         if (id === 'fileClaimModal') {
@@ -517,6 +679,7 @@
     }
     function closeModal(id) {
         const modal = document.getElementById(id);
+        if (!modal) return;
         modal.classList.remove('show');
         setTimeout(() => { modal.style.display = 'none'; }, 200);
     }
@@ -530,6 +693,7 @@
         document.getElementById('rejectClaimId').value = claimId;
         openModal('rejectClaimModal');
     }
+
     function syncShipmentCustomer(sel) {
         const custField = document.getElementById('fileCustomerId');
         const custDisplay = document.getElementById('fileCustomerDisplay');
@@ -548,7 +712,7 @@
         }
         
         if (!opt || !val) {
-            if (custField && ${roleId != 5}) custField.value = '';
+            if (custField && ${roleId != 5 ? 'true' : 'false'}) custField.value = '';
             if (custDisplay) custDisplay.value = '';
             if (contField) contField.value = '';
             return;
@@ -589,17 +753,37 @@
         setTimeout(() => { modal.style.display = 'none'; pendingFormToSubmit = null; }, 200);
     }
 
+    /* ==========================================================================
+       FRONTEND PAGINATION, SEARCH & FILTER CONTROLLER
+       ========================================================================== */
+    let allClaimRows = [];
+    let matchingClaimRows = [];
+    let currentStatusFilter = '';
+    let currentPage = 1;
+    let pageSize = 10;
+
     document.addEventListener('DOMContentLoaded', function() {
+        allClaimRows = Array.from(document.querySelectorAll('#claimsTableBody .claim-row'));
+
+        // Check if there is a statusFilter from server request
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialStatus = urlParams.get('statusFilter');
+        if (initialStatus) {
+            currentStatusFilter = initialStatus;
+            updateActiveStatusTab(initialStatus);
+        }
+
+        handleFilter();
+
+        // Form submit validation
         const fileForm = document.getElementById('fileClaimForm');
         const shipSelect = document.getElementById('fileShipmentSelect');
-        
         if (shipSelect) {
             shipSelect.addEventListener('change', function() { syncShipmentCustomer(this); });
             if (shipSelect.tomselect) {
                 shipSelect.tomselect.on('change', function() { syncShipmentCustomer(shipSelect); });
             }
         }
-        
         if (fileForm) {
             fileForm.addEventListener('submit', function(e) {
                 if (shipSelect && !shipSelect.value) {
@@ -616,6 +800,7 @@
             });
         }
 
+        // Custom confirm submit
         const submitBtn = document.getElementById('nlConfirmSubmitBtn');
         if (submitBtn) {
             submitBtn.addEventListener('click', function() {
@@ -626,9 +811,18 @@
                 }
             });
         }
+
+        // Modal backdrop click
         document.querySelectorAll('.nl-modal-backdrop').forEach(function(modal) {
-            modal.addEventListener('click', function(e) { if (e.target === this) { this.classList.remove('show'); setTimeout(() => { this.style.display = 'none'; }, 200); } });
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                    setTimeout(() => { this.style.display = 'none'; }, 200);
+                }
+            });
         });
+
+        // ESC key closes modals
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.nl-modal-backdrop.show').forEach(function(modal) {
@@ -638,6 +832,168 @@
             }
         });
     });
+
+    function filterByStatusTab(status) {
+        currentStatusFilter = status;
+        updateActiveStatusTab(status);
+        handleFilter();
+    }
+
+    function updateActiveStatusTab(status) {
+        document.querySelectorAll('.nav-tabs-pill .tab-pill-btn').forEach(btn => {
+            const btnStatus = btn.getAttribute('data-status') || '';
+            if (btnStatus.toLowerCase() === status.toLowerCase()) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    function handleFilter() {
+        const query = (document.getElementById('claimsSearchInput').value || '').trim().toLowerCase();
+        const typeSelect = document.getElementById('claimTypeFilter');
+        const selectedType = typeSelect ? typeSelect.value : 'ALL';
+        const clearBtn = document.getElementById('searchClearBtn');
+
+        if (clearBtn) {
+            clearBtn.style.display = query ? 'block' : 'none';
+        }
+
+        matchingClaimRows = [];
+
+        allClaimRows.forEach(row => {
+            const searchData = (row.getAttribute('data-search') || '').toLowerCase();
+            const rowStatus = (row.getAttribute('data-status') || '').trim();
+            const rowType = (row.getAttribute('data-type') || '').trim();
+
+            // Status Match
+            const matchesStatus = !currentStatusFilter || (rowStatus.toLowerCase() === currentStatusFilter.toLowerCase());
+
+            // Type Match
+            const matchesType = (selectedType === 'ALL' || rowType.toLowerCase() === selectedType.toLowerCase());
+
+            // Search Query Match
+            const matchesQuery = !query || searchData.includes(query);
+
+            if (matchesStatus && matchesType && matchesQuery) {
+                matchingClaimRows.push(row);
+            }
+        });
+
+        currentPage = 1;
+        renderPage();
+    }
+
+    function renderPage() {
+        const table = document.getElementById('claimsTable');
+        const emptyState = document.getElementById('claimsEmptyState');
+        const pagination = document.getElementById('claimsPagination');
+        const countBadge = document.getElementById('showingCountBadge');
+
+        const totalMatches = matchingClaimRows.length;
+        countBadge.innerHTML = '<i class="ti ti-list"></i> Showing ' + totalMatches + ' of ' + allClaimRows.length + ' Claims';
+
+        if (totalMatches === 0) {
+            table.style.display = 'none';
+            emptyState.style.display = 'block';
+            pagination.style.display = 'none';
+            allClaimRows.forEach(row => row.style.display = 'none');
+            return;
+        }
+
+        table.style.display = 'table';
+        emptyState.style.display = 'none';
+        pagination.style.display = 'flex';
+
+        let effectivePageSize = (pageSize === 'ALL' || pageSize >= 9999) ? totalMatches : pageSize;
+        const totalPages = Math.max(1, Math.ceil(totalMatches / effectivePageSize));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        // Hide all rows first
+        allClaimRows.forEach(row => row.style.display = 'none');
+
+        // Show matching slice
+        const start = (currentPage - 1) * effectivePageSize;
+        const end = Math.min(start + effectivePageSize, totalMatches);
+
+        for (let i = start; i < end; i++) {
+            matchingClaimRows[i].style.display = '';
+        }
+
+        // Update Info Text
+        document.getElementById('pageInfoText').innerText = 'Showing ' + (start + 1) + ' to ' + end + ' of ' + totalMatches + ' claims';
+
+        // Update Prev / Next buttons
+        document.getElementById('prevPageBtn').disabled = (currentPage === 1);
+        document.getElementById('nextPageBtn').disabled = (currentPage === totalPages);
+
+        // Render Page Number Buttons
+        renderPaginationNumbers(totalPages);
+    }
+
+    function renderPaginationNumbers(totalPages) {
+        const wrap = document.getElementById('pageNumbersWrap');
+        wrap.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) {
+            endPage = Math.min(5, totalPages);
+        }
+        if (currentPage >= totalPages - 2) {
+            startPage = Math.max(1, totalPages - 4);
+        }
+
+        for (let p = startPage; p <= endPage; p++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'page-num' + (p === currentPage ? ' active' : '');
+            btn.innerText = p;
+            btn.onclick = (function(pageNum) {
+                return function() {
+                    currentPage = pageNum;
+                    renderPage();
+                };
+            })(p);
+            wrap.appendChild(btn);
+        }
+    }
+
+    function changePage(delta) {
+        currentPage += delta;
+        renderPage();
+    }
+
+    function changeClaimsPageSize(val) {
+        if (val === 'ALL') {
+            pageSize = 999999;
+        } else {
+            pageSize = parseInt(val, 10) || 10;
+        }
+        currentPage = 1;
+        renderPage();
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('claimsSearchInput');
+        input.value = '';
+        handleFilter();
+        input.focus();
+    }
+
+    function resetFilters() {
+        document.getElementById('claimsSearchInput').value = '';
+        document.getElementById('claimTypeFilter').value = 'ALL';
+        currentStatusFilter = '';
+        updateActiveStatusTab('');
+        handleFilter();
+    }
 </script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />
