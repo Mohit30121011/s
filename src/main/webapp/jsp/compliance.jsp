@@ -1,12 +1,13 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
 
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
   <style>
     :root {
         --bg-surface: #ffffff;
@@ -329,6 +330,41 @@
         border-radius: 6px;
         font-size: 14px;
     }
+        /* Modal Select Wrapper & Swiggy Orange Custom Native Select */
+    .select-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    .select-wrapper select.form-select-custom,
+    select.form-select-custom.no-custom-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 100%;
+        height: 42px;
+        padding: 0 38px 0 14px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1F2937;
+        background-color: #FFFFFF;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 14px center !important;
+        background-size: 12px 10px !important;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        box-sizing: border-box;
+    }
+    .select-wrapper select.form-select-custom:focus,
+    select.form-select-custom.no-custom-select:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+        outline: none !important;
+    }
+
     .form-control:focus {
         outline: none;
         border-color: var(--primary);
@@ -371,8 +407,41 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
-</style>
 
+    .expiry-alert-banner {
+        background: #F3E8FF;
+        border: 1px solid #E9D5FF;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 24px;
+    }
+    .expiry-alert-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #6B21A8;
+    }
+    .expiry-alert-toggle {
+        margin-left: auto;
+        color: #9333EA;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: underline;
+    }
+    .expiry-alert-list {
+        margin-top: 12px;
+        border-top: 1px solid #E9D5FF;
+        padding-top: 10px;
+    }
+    .expiry-alert-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 13px;
+        color: #4C1D95;
+    }
 </style>
 
 <div class="dashboard-container">
@@ -382,8 +451,25 @@
             <p>Upload, manage and track compliance documents for shipments.</p>
         </div>
     </div>
-    
-    
+
+    <c:if test="${not empty expiringDocs}">
+    <div class="expiry-alert-banner">
+        <div class="expiry-alert-head">
+            <i class="fi fi-rr-bell" style="color:#9333EA;"></i>
+            <strong>${fn:length(expiringDocs)} compliance document<c:if test="${fn:length(expiringDocs) != 1}">s</c:if> expiring within 15 days</strong>
+            <span class="expiry-alert-toggle" onclick="var el=document.getElementById('expiryAlertList'); el.style.display = (el.style.display==='none'?'block':'none');">Show details</span>
+        </div>
+        <div id="expiryAlertList" class="expiry-alert-list" style="display:none;">
+            <c:forEach var="ed" items="${expiringDocs}">
+                <div class="expiry-alert-row">
+                    <span><strong>DOC-${ed.docId}</strong> &middot; ${ed.docType} &middot; SHP-${ed.shipmentId}</span>
+                    <span>Expires <fmt:formatDate value="${ed.expiryDate}" pattern="dd MMM yyyy"/></span>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+    </c:if>
+
     <div class="kpi-grid">
         <div class="kpi-card">
             <div class="kpi-icon icon-docs"><i class="fi fi-rr-document"></i></div>
@@ -422,7 +508,7 @@
             <div class="kpi-data">
                 <div class="kpi-title">Expiring Soon</div>
                 <div class="kpi-val">${docExpiring}</div>
-                <div class="kpi-sub">Next 30 days</div>
+                <div class="kpi-sub">Next 15 days</div>
             </div>
         </div>
     </div>
@@ -484,7 +570,7 @@
                                 <button class="btn-icon action-dropdown" onclick="toggleDropdown(this)"><i class="fi fi-rr-menu-dots-vertical"></i></button>
                                 <div class="dropdown-menu-custom">
                                     <a href="${pageContext.request.contextPath}/${doc.filePath}" download class="dropdown-item"><i class="fi fi-rr-download"></i> Download</a>
-                                    <a href="#" class="dropdown-item text-danger"><i class="fi fi-rr-trash"></i> Delete</a>
+                                    <a href="#" class="dropdown-item text-danger" onclick="document.getElementById('deleteDocId').value='${doc.docId}'; openModal('docDeleteModal'); return false;"><i class="fi fi-rr-trash"></i> Delete</a>
                                 </div>
                             </div>
                         </div>
@@ -507,16 +593,19 @@
             <form action="${pageContext.request.contextPath}/compliance/upload" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label>Related Shipment</label>
-                    <select name="shipmentId" class="form-control form-select-custom" required>
+                    <div class="select-wrapper">
+                        <select name="shipmentId" class="form-control form-select-custom no-custom-select" required>
                         <option value="">Select Shipment...</option>
                         <c:forEach var="s" items="${shipments}">
                             <option value="${s.shipmentId}">SHP-${s.shipmentId}</option>
                         </c:forEach>
-                    </select>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Document Type</label>
-                    <select name="docType" class="form-control form-select-custom" required>
+                    <div class="select-wrapper">
+                        <select name="docType" class="form-control form-select-custom no-custom-select" required>
                         <option value="">Select Type...</option>
                         <option value="Customs Declaration">Customs Declaration</option>
                         <option value="Import License">Import License</option>
@@ -524,7 +613,8 @@
                         <option value="Certificate of Origin">Certificate of Origin</option>
                         <option value="Insurance">Insurance</option>
                         <option value="Inspection">Inspection</option>
-                    </select>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Document Number</label>
@@ -567,11 +657,13 @@
                 <input type="hidden" name="docId" id="updateDocId">
                 <div class="form-group">
                     <label>New Status</label>
-                    <select name="status" id="updateDocStatus" class="form-control" style="width:100%;" required>
+                    <div class="select-wrapper">
+                        <select name="status" id="updateDocStatus" class="form-control form-select-custom no-custom-select" style="width:100%;" required>
                         <option value="Under Review">Under Review</option>
                         <option value="Approved">Approved</option>
                         <option value="Rejected">Rejected</option>
-                    </select>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-custom btn-outline" onclick="closeModal('docUpdateModal')">Cancel</button>
@@ -581,10 +673,28 @@
         </div>
     </div>
 
+    <!-- Delete Document Confirm Modal -->
+    <div class="modal-overlay" id="docDeleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Document</h3>
+                <button class="modal-close" onclick="closeModal('docDeleteModal')"><i class="fi fi-rr-cross"></i></button>
+            </div>
+            <p style="color:var(--text-sub); font-size:14px; margin:0 0 8px;">This will permanently delete this compliance document record. This action cannot be undone.</p>
+            <form action="${pageContext.request.contextPath}/compliance/delete" method="post">
+                <input type="hidden" name="docId" id="deleteDocId">
+                <div class="modal-actions">
+                    <button type="button" class="btn-custom btn-outline" onclick="closeModal('docDeleteModal')">Cancel</button>
+                    <button type="submit" class="btn-custom" style="background:var(--danger); color:#fff;">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
 <script>
 
     function paginateTable(tableId, rowsPerPage) {
@@ -652,14 +762,7 @@
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     
-    document.querySelectorAll('.form-select-custom').forEach((el) => {
-        if (!el.tomselect) {
-            new TomSelect(el, {
-                create: false,
-                sortField: { field: "text", direction: "asc" }
-            });
-        }
-    });
+// Native custom select initialized
 
     window.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal-overlay')) {
