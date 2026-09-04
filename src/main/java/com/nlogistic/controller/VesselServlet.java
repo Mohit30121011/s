@@ -49,7 +49,49 @@ public class VesselServlet extends HttpServlet {
                 } catch (NumberFormatException e) {}
             }
             vesselDAO.addVessel(name, imo, capacity);
-            request.getSession().setAttribute("successMessage", "Vessel added successfully.");
+            request.getSession().setAttribute("successMessage", "Vessel " + (name != null ? name : "") + " registered successfully.");
+        } else if ("edit".equals(action)) {
+            String vesselIdStr = request.getParameter("vesselId");
+            String name = request.getParameter("vesselName");
+            String imo = request.getParameter("imoNumber");
+            String capacityStr = request.getParameter("capacityTeu");
+            if (vesselIdStr != null) {
+                try {
+                    int vesselId = Integer.parseInt(vesselIdStr);
+                    int capacity = 0;
+                    if (capacityStr != null && !capacityStr.trim().isEmpty()) {
+                        capacity = Integer.parseInt(capacityStr);
+                    }
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE vessels SET vessel_name = ?, imo_number = ?, capacity_teu = ? WHERE vessel_id = ?")) {
+                        ps.setString(1, name);
+                        ps.setString(2, imo);
+                        ps.setInt(3, capacity);
+                        ps.setInt(4, vesselId);
+                        ps.executeUpdate();
+                    }
+                    request.getSession().setAttribute("successMessage", "Vessel #" + vesselId + " updated successfully.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.getSession().setAttribute("errorMessage", "Failed to update vessel: " + e.getMessage());
+                }
+            }
+        } else if ("delete".equals(action)) {
+            String vesselIdStr = request.getParameter("vesselId");
+            if (vesselIdStr != null) {
+                try {
+                    int vesselId = Integer.parseInt(vesselIdStr);
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM vessels WHERE vessel_id = ?")) {
+                        ps.setInt(1, vesselId);
+                        ps.executeUpdate();
+                    }
+                    request.getSession().setAttribute("successMessage", "Vessel #" + vesselId + " deleted successfully.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.getSession().setAttribute("errorMessage", "Failed to delete vessel: " + e.getMessage());
+                }
+            }
         }
         
         response.sendRedirect(request.getContextPath() + "/vessels");

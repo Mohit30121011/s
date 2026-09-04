@@ -2058,7 +2058,7 @@
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="vesselsSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/vessels">All Vessels</a></li>
+                    <li><a href="${pageContext.request.contextPath}/jsp/vessels.jsp">All Vessels</a></li>
                 </ul>
             </div>
 
