@@ -36,10 +36,29 @@ public class ManualStockServlet extends HttpServlet {
             return;
         }
 
+        // Super Admin has no company of their own — they must pick which company this
+        // entry is for (hidden "companyId" field on the form, from the page's company picker).
         int companyId = user.getCompanyId();
-        if (companyId == 0) {
-            request.getSession().setAttribute("errorMessage", "Super Admins cannot upload stock manually.");
-            response.sendRedirect(request.getContextPath() + "/upload-stock");
+        if (user.getRoleId() == 1) {
+            String companyParam = request.getParameter("companyId");
+            if (companyParam == null || companyParam.trim().isEmpty()) {
+                request.getSession().setAttribute("errorMessage", "Please select which company this stock entry is for.");
+                request.getSession().setAttribute("selectedCompanyId", companyId);
+        response.sendRedirect(request.getContextPath() + "/upload-stock?companyId=" + companyId + "&tab=overview");
+                return;
+            }
+            try {
+                companyId = Integer.parseInt(companyParam.trim());
+            } catch (NumberFormatException e) {
+                request.getSession().setAttribute("errorMessage", "Invalid company selection.");
+                request.getSession().setAttribute("selectedCompanyId", companyId);
+        response.sendRedirect(request.getContextPath() + "/upload-stock?companyId=" + companyId + "&tab=overview");
+                return;
+            }
+        } else if (companyId == 0) {
+            request.getSession().setAttribute("errorMessage", "You must belong to a company to upload stock manually.");
+            request.getSession().setAttribute("selectedCompanyId", companyId);
+        response.sendRedirect(request.getContextPath() + "/upload-stock?companyId=" + companyId + "&tab=overview");
             return;
         }
 
@@ -192,6 +211,7 @@ public class ManualStockServlet extends HttpServlet {
             request.getSession().setAttribute("errorMessage", "Error adding manual stock: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/upload-stock");
+        request.getSession().setAttribute("selectedCompanyId", companyId);
+        response.sendRedirect(request.getContextPath() + "/upload-stock?companyId=" + companyId + "&tab=overview");
     }
 }
