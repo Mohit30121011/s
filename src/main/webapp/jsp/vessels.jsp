@@ -159,12 +159,12 @@
         background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px 14px 0 0; padding: 16px 24px;
         display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid #F1F5F9;
     }
-    .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
+    .toolbar-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: 1; }
     
     .table-search-wrap { position: relative; width: 320px; }
     .table-search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; }
     .table-search-input {
-        width: 100%; height: 40px; padding-left: 42px !important; padding-right: 18px !important;
+        width: 100%; height: 42px; padding-left: 42px !important; padding-right: 18px !important;
         border-radius: 50px !important; font-size: 13px !important; border: 1.5px solid #E2E8F0 !important; background: #F8FAFC !important;
         outline: none; transition: all 0.2s ease;
     }
@@ -172,30 +172,39 @@
         background: #FFFFFF !important; border-color: #FC8019 !important; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.14) !important;
     }
 
-    /* Custom Dropdown Chevron Pill */
-    .select-wrapper {
-        position: relative; width: 220px;
+    /* Capacity Filter Dropdown Wrap (No awkward text wrapping) */
+    .capacity-filter-wrap {
+        min-width: 270px !important;
+        position: relative !important;
     }
-    .select-wrapper::after {
-        content: '';
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 15px;
-        height: 15px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-size: contain;
-        background-repeat: no-repeat;
-        pointer-events: none;
+    .capacity-filter-wrap .ts-wrapper,
+    .capacity-filter-wrap .ts-control {
+        min-width: 270px !important;
+        white-space: nowrap !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        padding-left: 18px !important;
+        padding-right: 36px !important;
     }
-    .form-select-pill {
-        appearance: none; -webkit-appearance: none; width: 100%; height: 40px; padding: 0 38px 0 16px;
-        border: 1.5px solid #E2E8F0; border-radius: 50px; font-size: 13px; font-weight: 500; color: #1E293B;
-        background-color: #F8FAFC; outline: none; transition: all 0.2s ease; cursor: pointer;
+    .capacity-filter-wrap .ts-control .item {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #1E293B !important;
+        line-height: 1 !important;
     }
-    .form-select-pill:focus {
-        background-color: #FFFFFF; border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.14);
+    .ts-dropdown {
+        min-width: 280px !important;
+        white-space: nowrap !important;
+    }
+    .ts-dropdown .option {
+        white-space: nowrap !important;
+        font-size: 13px !important;
+        padding: 10px 18px !important;
     }
 
     .toolbar-count-badge {
@@ -342,17 +351,48 @@
     .field-label {
         font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;
     }
-    .field-input-wrap { position: relative; }
+
+    /* Absolute Input + Lead Icon (Bulletproof No-Overlap Styling) */
+    .field-input-wrap {
+        position: relative !important;
+        width: 100% !important;
+    }
     .field-input-wrap i {
-        position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 16px;
+        position: absolute !important;
+        left: 18px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: #94A3B8 !important;
+        font-size: 18px !important;
+        z-index: 5 !important;
+        pointer-events: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 20px !important;
+        height: 20px !important;
     }
-    .field-input {
-        width: 100%; height: 44px; padding: 0 16px 0 42px; border-radius: 10px;
-        border: 1.5px solid #E2E8F0; font-size: 13.5px; color: #1E293B; background: #FFFFFF;
-        outline: none; transition: all 0.2s ease;
+    .field-input-wrap input.field-input,
+    .field-input-wrap input,
+    input.field-input {
+        padding-left: 50px !important;
+        padding-right: 20px !important;
+        border-radius: 50px !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        font-size: 13.5px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background: #FFFFFF !important;
+        color: #0F172A !important;
+        width: 100% !important;
+        outline: none !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
     }
-    .field-input:focus {
-        border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.14);
+    .field-input-wrap input.field-input:focus,
+    .field-input-wrap input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
     }
     .field-helper { font-size: 11.5px; color: #94A3B8; margin-top: 5px; }
 
@@ -501,9 +541,9 @@
                 <input type="text" id="vesselSearchInput" class="table-search-input" placeholder="Search vessels by name, IMO, or ID..." oninput="handleFilter()">
             </div>
 
-            <!-- Capacity Tier Filter (Wrapped in select-wrapper for custom SVG chevron) -->
-            <div class="select-wrapper">
-                <select id="capacityFilter" class="form-select-pill" onchange="handleFilter()">
+            <!-- Capacity Tier Filter (Wrapped in capacity-filter-wrap with no text wrapping) -->
+            <div class="capacity-filter-wrap">
+                <select id="capacityFilter" class="form-select-custom" onchange="handleFilter()">
                     <option value="ALL">All Vessel Classes</option>
                     <option value="FEEDER">Feeder (&lt; 3,000 TEU)</option>
                     <option value="PANAMAX">Panamax (3,000 - 10,000 TEU)</option>
@@ -693,7 +733,7 @@
                 <!-- Vessel Name -->
                 <div class="field-group">
                     <label class="field-label">Vessel Official Name <span style="color: #DC2626;">*</span></label>
-                    <div class="field-input-wrap">
+                    <div class="field-input-wrap input-icon-wrap has-lead-icon">
                         <i class="ti ti-ship"></i>
                         <input type="text" class="field-input" name="vesselName" id="addVesselName" required placeholder="e.g. CMA CGM Jacques Saadé">
                     </div>
@@ -703,7 +743,7 @@
                 <!-- IMO Number -->
                 <div class="field-group">
                     <label class="field-label">IMO Registration Number <span style="color: #DC2626;">*</span></label>
-                    <div class="field-input-wrap">
+                    <div class="field-input-wrap input-icon-wrap has-lead-icon">
                         <i class="ti ti-shield-check"></i>
                         <input type="text" class="field-input" name="imoNumber" id="addImoNumber" required placeholder="e.g. IMO9839179" style="font-family: monospace; text-transform: uppercase;">
                     </div>
@@ -713,7 +753,7 @@
                 <!-- Capacity TEU -->
                 <div class="field-group">
                     <label class="field-label">Cargo Capacity (TEU) <span style="color: #DC2626;">*</span></label>
-                    <div class="field-input-wrap">
+                    <div class="field-input-wrap input-icon-wrap has-lead-icon">
                         <i class="ti ti-box-seam"></i>
                         <input type="number" class="field-input" name="capacityTeu" id="addCapacityTeu" required min="100" max="30000" placeholder="e.g. 18000">
                     </div>
@@ -760,7 +800,7 @@
                 <!-- Vessel Name -->
                 <div class="field-group">
                     <label class="field-label">Vessel Official Name <span style="color: #DC2626;">*</span></label>
-                    <div class="field-input-wrap">
+                    <div class="field-input-wrap input-icon-wrap has-lead-icon">
                         <i class="ti ti-ship"></i>
                         <input type="text" class="field-input" name="vesselName" id="editVesselName" required>
                     </div>
@@ -769,7 +809,7 @@
                 <!-- IMO Number -->
                 <div class="field-group">
                     <label class="field-label">IMO Registration Number <span style="color: #DC2626;">*</span></label>
-                    <div class="field-input-wrap">
+                    <div class="field-input-wrap input-icon-wrap has-lead-icon">
                         <i class="ti ti-shield-check"></i>
                         <input type="text" class="field-input" name="imoNumber" id="editImoNumber" required style="font-family: monospace; text-transform: uppercase;">
                     </div>
@@ -778,7 +818,7 @@
                 <!-- Capacity TEU -->
                 <div class="field-group">
                     <label class="field-label">Cargo Capacity (TEU) <span style="color: #DC2626;">*</span></label>
-                    <div class="field-input-wrap">
+                    <div class="field-input-wrap input-icon-wrap has-lead-icon">
                         <i class="ti ti-box-seam"></i>
                         <input type="number" class="field-input" name="capacityTeu" id="editCapacityTeu" required min="100" max="30000">
                     </div>
@@ -956,7 +996,12 @@
 
     function resetFilters() {
         document.getElementById('vesselSearchInput').value = '';
-        document.getElementById('capacityFilter').value = 'ALL';
+        const capSelect = document.getElementById('capacityFilter');
+        if (capSelect.tomselect) {
+            capSelect.tomselect.setValue('ALL');
+        } else {
+            capSelect.value = 'ALL';
+        }
         handleFilter();
     }
 
