@@ -2,6 +2,24 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="en_US" scope="session"/>
+<%
+if (request.getAttribute("kpi") == null) {
+    try {
+        com.nlogistic.dao.ProfitLossDAO plDao = new com.nlogistic.dao.ProfitLossDAO();
+        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
+        com.nlogistic.dao.PortDAO pDao = new com.nlogistic.dao.PortDAO();
+        request.setAttribute("companies", cDao.getAllCompanies());
+        request.setAttribute("ports", pDao.getAllPorts());
+        request.setAttribute("kpi", plDao.getOverallKPIs(null, null, null, null));
+        request.setAttribute("monthlyTrend", plDao.getMonthlyTrend(null, null, null, null));
+        request.setAttribute("quarterlyTrend", plDao.getQuarterlyTrend(null, null, null, null));
+        request.setAttribute("yearlyTrend", plDao.getYearlyTrend(null, null, null, null));
+        request.setAttribute("lossBreakdown", plDao.getLossReasonBreakdown(null, null, null, null));
+        request.setAttribute("companySummary", plDao.getCompanyProfitLossSummary(null, null, null, null));
+        request.setAttribute("customerProfitability", plDao.getCustomerProfitability(null, null, null, null));
+    } catch (Exception ignored) {}
+}
+%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <!-- Chart.js CDN -->

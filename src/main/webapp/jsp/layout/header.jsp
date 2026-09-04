@@ -2069,15 +2069,17 @@
 
             <!-- Shipments Dropdown -->
             <div class="nav-item">
-                <a href="javascript:void(0);" data-target="shipmentsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
+                <a href="javascript:void(0);" data-target="shipmentsSubmenu" class="nav-link sidebar-dropdown-toggle ${pageContext.request.requestURI.contains('/shipment') || pageContext.request.requestURI.contains('/finance') ? 'active' : 'collapsed'}">
                     <i class="ti ti-truck main-icon"></i>
                     <span>Shipments</span>
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
-                <ul class="sub-nav" id="shipmentsSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/shipments">All Shipments</a></li>
-                    <li><a href="${pageContext.request.contextPath}/shipments/create">Create Shipment</a></li>
-                    <li><a href="${pageContext.request.contextPath}/shipments/tracking">Live Tracking</a></li>
+                <ul class="sub-nav" id="shipmentsSubmenu" style="${pageContext.request.requestURI.contains('/shipment') || pageContext.request.requestURI.contains('/finance') ? 'display: block;' : 'display: none;'}">
+                    <li><a href="${pageContext.request.contextPath}/shipments" class="${pageContext.request.requestURI.endsWith('/shipments') || pageContext.request.requestURI.contains('/shipments.jsp') ? 'active' : ''}">All Shipments</a></li>
+                    <li><a href="${pageContext.request.contextPath}/shipments/create" class="${pageContext.request.requestURI.contains('/create') ? 'active' : ''}">Create Shipment</a></li>
+                    <li><a href="${pageContext.request.contextPath}/shipments/tracking" class="${pageContext.request.requestURI.contains('/tracking') ? 'active' : ''}">Live Tracking</a></li>
+                    <li><a href="${pageContext.request.contextPath}/finance/profit-loss" class="${pageContext.request.requestURI.contains('/profit-loss') ? 'active' : ''}">Profit &amp; Loss Analytics</a></li>
+                    <li><a href="${pageContext.request.contextPath}/finance/shipment-drilldown?id=1" class="${pageContext.request.requestURI.contains('/shipment-drilldown') ? 'active' : ''}">Financial Drilldown</a></li>
                 </ul>
             </div>
 
@@ -2095,23 +2097,11 @@
                 </ul>
             </div>
 
-            <!-- Vessels Dropdown -->
+            <!-- Vessels -->
             <div class="nav-item">
-                <a href="javascript:void(0);" data-target="vesselsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
+                <a href="${pageContext.request.contextPath}/jsp/vessels.jsp" class="nav-link">
                     <i class="ti ti-ship main-icon"></i>
                     <span>Vessels</span>
-                    <i class="ti ti-chevron-down caret"></i>
-                </a>
-                <ul class="sub-nav" id="vesselsSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/jsp/vessels.jsp">All Vessels</a></li>
-                </ul>
-            </div>
-
-            <!-- Customers -->
-            <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/customers" class="nav-link">
-                    <i class="ti ti-users main-icon"></i>
-                    <span>Customers</span>
                 </a>
             </div>
 
@@ -2123,13 +2113,6 @@
                 </a>
             </div>
 
-            <!-- Tracking -->
-            <div class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="ti ti-map-pin main-icon"></i>
-                    <span>Tracking</span>
-                </a>
-            </div>
 
             <!-- SECTION 2: MANAGEMENT -->
             <div class="sidebar-section-header">

@@ -266,6 +266,38 @@
         box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
     }
 
+
+    .btn-profit-loss {
+        background: #FFF2EB;
+        color: #FC8019 !important;
+        border: 1.5px solid #FFD4C2;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    .btn-profit-loss:hover {
+        background: #FC8019;
+        color: #FFFFFF !important;
+        border-color: #FC8019;
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.25);
+        transform: translateY(-1px);
+    }
+    .btn-icon-action.drilldown {
+        background: #EFF6FF;
+        color: #2563EB;
+    }
+    .btn-icon-action.drilldown:hover {
+        background: #2563EB;
+        color: #FFFFFF;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
 </style>
 
 <div class="main-content">
@@ -304,9 +336,14 @@
             <input type="text" id="shipmentSearchInput" placeholder="Search by ID, Customer, Container, or Route...">
             <i class="fa-solid fa-xmark clear-icon d-none" id="clearSearchBtn" title="Clear Search"></i>
         </div>
-        <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
-            <i class="fa-solid fa-plus"></i> Book Shipment
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="${pageContext.request.contextPath}/finance/profit-loss" class="btn-profit-loss" title="View Profit &amp; Loss Trend Graph &amp; Cost Attribution">
+                <i class="ti ti-chart-line"></i> Profit &amp; Loss Analytics
+            </a>
+            <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
+                <i class="fa-solid fa-plus"></i> Book Shipment
+            </a>
+        </div>
     </div>
 
     <!-- Table Card -->
@@ -342,6 +379,9 @@
                         </td>
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
+                                <a href="${pageContext.request.contextPath}/finance/shipment-drilldown?id=${s.shipmentId}" class="btn-icon-action drilldown" title="Financial Drilldown &amp; Loss Attribution">
+                                    <i class="ti ti-chart-arrows-vertical"></i>
+                                </a>
                                 <a href="${pageContext.request.contextPath}/shipments/edit?id=${s.shipmentId}" class="btn-icon-action edit" title="Edit Shipment">
                                     <i class="ti ti-pencil"></i>
                                 </a>

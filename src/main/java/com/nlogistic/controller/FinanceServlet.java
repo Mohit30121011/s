@@ -28,7 +28,8 @@ public class FinanceServlet extends HttpServlet {
         String pathInfo = request.getPathInfo();
 
         if (pathInfo == null || pathInfo.equals("/")) {
-            request.getRequestDispatcher("/jsp/profit_loss_analytics.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/finance/profit-loss");
+            return;
         } else if (pathInfo.equals("/profit-loss")) {
             
             Integer companyId = null;
@@ -70,24 +71,26 @@ public class FinanceServlet extends HttpServlet {
             request.getRequestDispatcher("/jsp/profit_loss_analytics.jsp").forward(request, response);
         } else if (pathInfo.equals("/shipment-drilldown")) {
             String idParam = request.getParameter("id");
+            int shipmentId = 1;
             if (idParam != null && !idParam.isEmpty()) {
-                int shipmentId = 0;
                 try {
-                    if(idParam.startsWith("SHP-")) {
+                    if (idParam.startsWith("SHP-")) {
                         shipmentId = Integer.parseInt(idParam.substring(4));
                     } else {
                         shipmentId = Integer.parseInt(idParam);
                     }
-                    com.nlogistic.model.ShipmentDrilldown sd = profitLossDAO.getShipmentDrilldownDetails(shipmentId);
-                    request.setAttribute("drilldown", sd);
-                    request.setAttribute("allLossReasons", profitLossDAO.getAllLossReasons());
-                    request.getRequestDispatcher("/jsp/shipment_drilldown.jsp").forward(request, response);
-                    return;
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    shipmentId = 1;
                 }
             }
-            response.sendRedirect(request.getContextPath() + "/finance/profit-loss");
+            com.nlogistic.model.ShipmentDrilldown sd = profitLossDAO.getShipmentDrilldownDetails(shipmentId);
+            if (sd == null && shipmentId != 1) {
+                sd = profitLossDAO.getShipmentDrilldownDetails(1);
+            }
+            request.setAttribute("drilldown", sd);
+            request.setAttribute("allLossReasons", profitLossDAO.getAllLossReasons());
+            request.getRequestDispatcher("/jsp/shipment_drilldown.jsp").forward(request, response);
+            return;
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
