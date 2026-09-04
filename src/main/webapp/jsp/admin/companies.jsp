@@ -21,6 +21,90 @@
                 } else if ("reject".equals(action)) {
                     cDao.updateCompanyStatus(compId, "Suspended");
                     session.setAttribute("errorMessage", "Company Rejected / Suspended.");
+                } else if ("delete".equals(action)) {
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
+                        conn.setAutoCommit(false);
+                        try {
+                            // Find and delete all users associated with this company
+                            java.util.List<Integer> compUsers = new java.util.ArrayList<>();
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("SELECT user_id FROM users WHERE company_id = ?")) {
+                                ps.setInt(1, compId);
+                                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                                    while (rs.next()) compUsers.add(rs.getInt(1));
+                                }
+                            }
+                            for (int uId : compUsers) {
+                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE user_id = ?")) {
+                                    ps.setInt(1, uId);
+                                    ps.executeUpdate();
+                                }
+                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM audit_log WHERE user_id = ?")) {
+                                    ps.setInt(1, uId);
+                                    ps.executeUpdate();
+                                }
+                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM pricing_rules WHERE user_id = ?")) {
+                                    ps.setInt(1, uId);
+                                    ps.executeUpdate();
+                                }
+                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE user_id = ?")) {
+                                    ps.setInt(1, uId);
+                                    ps.executeUpdate();
+                                }
+                            }
+                            // Nullify or clean up containers / stock
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE containers SET owner_company_id = NULL WHERE owner_company_id = ?")) {
+                                ps.setInt(1, compId);
+                                ps.executeUpdate();
+                            }
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM stock_upload_log WHERE company_id = ?")) {
+                                ps.setInt(1, compId);
+                                ps.executeUpdate();
+                            }
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM stock WHERE company_id = ?")) {
+                                ps.setInt(1, compId);
+                                ps.executeUpdate();
+                            }
+                            // Finally delete company
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM companies WHERE company_id = ?")) {
+                                ps.setInt(1, compId);
+                                ps.executeUpdate();
+                            }
+                            conn.commit();
+                            session.setAttribute("successMessage", "Company #CMP-" + compId + " permanently deleted from database.");
+                        } catch(Exception ex) {
+                            conn.rollback();
+                            session.setAttribute("errorMessage", "Failed to delete company: " + ex.getMessage());
+                            ex.printStackTrace();
+                        } finally {
+                            conn.setAutoCommit(true);
+                        }
+                    }
+                } else if ("update".equals(action)) {
+                    String companyName = request.getParameter("companyName");
+                    String licenseNo = request.getParameter("licenseNo");
+                    String gstNo = request.getParameter("gstNo");
+                    String address = request.getParameter("address");
+                    String email = request.getParameter("contactEmail");
+                    String phone = request.getParameter("contactPhone");
+                    String approvalStatus = request.getParameter("approvalStatus");
+
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                         java.sql.PreparedStatement ps = conn.prepareStatement(
+                            "UPDATE companies SET company_name = ?, license_no = ?, gst_no = ?, address = ?, contact_email = ?, contact_phone = ?, approval_status = ?, updated_at = CURRENT_TIMESTAMP WHERE company_id = ?")) {
+                        ps.setString(1, companyName != null ? companyName.trim() : "");
+                        ps.setString(2, licenseNo != null ? licenseNo.trim() : "");
+                        ps.setString(3, gstNo != null ? gstNo.trim() : "");
+                        ps.setString(4, address != null ? address.trim() : "");
+                        ps.setString(5, email != null ? email.trim() : "");
+                        ps.setString(6, phone != null ? phone.trim() : "");
+                        ps.setString(7, approvalStatus != null ? approvalStatus.trim() : "Pending");
+                        ps.setInt(8, compId);
+                        ps.executeUpdate();
+                        session.setAttribute("successMessage", "Company details for #CMP-" + compId + " updated successfully.");
+                    } catch(Exception ex) {
+                        session.setAttribute("errorMessage", "Failed to update company: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
                 }
             } catch(Exception ex) { ex.printStackTrace(); }
             response.sendRedirect(request.getRequestURI());
@@ -240,6 +324,101 @@
     .nl-modal-btn.confirm.success { background: #10B981 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28); }
     .nl-modal-btn.confirm.success:hover { background: #059669 !important; transform: translateY(-1px); }
 
+    /* Action Buttons: Edit & Delete */
+    .btn-approval-edit {
+        background: #FFFFFF; border: 1.5px solid #BFDBFE; color: #2563EB !important; padding: 6px 14px; border-radius: 50px;
+        font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);
+    }
+    .btn-approval-edit:hover {
+        background: #EFF6FF; border-color: #3B82F6; color: #1D4ED8 !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+    }
+    .btn-approval-edit:active { transform: translateY(0); }
+    .btn-approval-edit i { font-size: 12.5px; transition: transform 0.2s ease; }
+    .btn-approval-edit:hover i { transform: scale(1.15); }
+
+    .btn-approval-delete {
+        background: #FFFFFF; border: 1.5px solid #FECACA; color: #DC2626 !important; padding: 6px 14px; border-radius: 50px;
+        font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+    }
+    .btn-approval-delete:hover {
+        background: #FEF2F2; border-color: #EF4444; color: #B91C1C !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.18);
+    }
+    .btn-approval-delete:active { transform: translateY(0); }
+    .btn-approval-delete i { font-size: 12.5px; transition: transform 0.2s ease; }
+    .btn-approval-delete:hover i { transform: scale(1.15); }
+
+    /* Custom Form Controls & Select Styling */
+    .edit-modal-dialog {
+        max-width: 540px !important;
+        text-align: left !important;
+        padding: 28px 30px 24px !important;
+    }
+    .modal-form-group {
+        margin-bottom: 16px;
+        text-align: left;
+    }
+    .modal-form-label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+    .modal-form-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 16px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px;
+        font-size: 13px;
+        color: #1E293B;
+        background-color: #FFFFFF;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .modal-form-input:focus {
+        border-color: #FC8019;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+
+    .select-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    .select-wrapper::after {
+        content: '';
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        pointer-events: none;
+    }
+    .form-select-custom, .select-wrapper select {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 100%;
+        height: 42px;
+        padding: 0 38px 0 16px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px;
+        font-size: 13px;
+        color: #1E293B;
+        background-color: #FFFFFF;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .form-select-custom:focus, .select-wrapper select:focus {
+        border-color: #FC8019;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+
 </style>
 
 <div class="approvals-page-container">
@@ -449,46 +628,60 @@
 
                             <!-- Actions -->
                             <td style="padding-right: 24px; text-align: right;">
-                                <c:choose>
-                                    <c:when test="${comp.approvalStatus == 'Pending'}">
-                                        <div class="actions-flex">
+                                <div class="actions-flex">
+                                    <c:choose>
+                                        <c:when test="${comp.approvalStatus == 'Pending'}">
                                             <!-- Approve Button -->
-                                            <form  method="POST" class="d-inline m-0">
+                                            <form method="POST" class="d-inline m-0">
                                                 <input type="hidden" name="companyId" value="${comp.companyId}">
                                                 <input type="hidden" name="action" value="accept">
-                                                <button type="submit" class="btn-approval-accept" title="Approve and activate company">
+                                                <button type="submit" class="btn-approval-accept" title="Approve and activate company" style="padding: 6px 14px; font-size: 11.5px;">
                                                     <i class="ti ti-check"></i> Approve
                                                 </button>
                                             </form>
                                             <!-- Reject Button -->
-                                            <form  method="POST" class="d-inline m-0">
+                                            <form method="POST" class="d-inline m-0">
                                                 <input type="hidden" name="companyId" value="${comp.companyId}">
                                                 <input type="hidden" name="action" value="reject">
-                                                <button type="button" class="btn-approval-reject" title="Reject registration" onclick="showCustomConfirm({title: 'Reject Company Registration?', desc: 'Are you sure you want to reject this enterprise tenant registration?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});">
+                                                <button type="button" class="btn-approval-reject" title="Reject registration" onclick="showCustomConfirm({title: 'Reject Company Registration?', desc: 'Are you sure you want to reject this enterprise tenant registration?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
                                                     <i class="ti ti-x"></i> Reject
                                                 </button>
                                             </form>
-                                        </div>
-                                    </c:when>
-                                    <c:when test="${comp.approvalStatus == 'Active'}">
-                                        <form  method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="companyId" value="${comp.companyId}">
-                                            <input type="hidden" name="action" value="reject">
-                                            <button type="button" class="btn-approval-reject" title="Suspend verified company" onclick="showCustomConfirm({title: 'Suspend Enterprise Tenant?', desc: 'Are you sure you want to suspend this company? All associated operations and user accounts will be deactivated.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Company', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-ban"></i> Suspend
-                                            </button>
-                                        </form>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <form  method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="companyId" value="${comp.companyId}">
-                                            <input type="hidden" name="action" value="accept">
-                                            <button type="button" class="btn-approval-accept" title="Reactivate company" onclick="showCustomConfirm({title: 'Reactivate Enterprise Tenant?', desc: 'Are you sure you want to restore and reactivate this company account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-reload"></i> Reactivate
-                                            </button>
-                                        </form>
-                                    </c:otherwise>
-                                </c:choose>
+                                        </c:when>
+                                        <c:when test="${comp.approvalStatus == 'Active'}">
+                                            <form method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="companyId" value="${comp.companyId}">
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="button" class="btn-approval-reject" title="Suspend verified company" onclick="showCustomConfirm({title: 'Suspend Enterprise Tenant?', desc: 'Are you sure you want to suspend this company? All associated operations and user accounts will be deactivated.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Company', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
+                                                    <i class="ti ti-ban"></i> Suspend
+                                                </button>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <form method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="companyId" value="${comp.companyId}">
+                                                <input type="hidden" name="action" value="accept">
+                                                <button type="button" class="btn-approval-accept" title="Reactivate company" onclick="showCustomConfirm({title: 'Reactivate Enterprise Tenant?', desc: 'Are you sure you want to restore and reactivate this company account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
+                                                    <i class="ti ti-reload"></i> Reactivate
+                                                </button>
+                                            </form>
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                    <!-- Edit Company Action -->
+                                    <button type="button" class="btn-approval-edit" title="Edit Company Details" onclick="openEditCompanyModal({companyId: '${comp.companyId}', companyName: '${comp.companyName}', licenseNo: '${comp.licenseNo}', gstNo: '${comp.gstNo}', address: '${comp.address}', contactEmail: '${comp.contactEmail}', contactPhone: '${comp.contactPhone}', approvalStatus: '${comp.approvalStatus}'})">
+                                        <i class="ti ti-edit"></i> Edit
+                                    </button>
+
+                                    <!-- Delete Company Action -->
+                                    <form method="POST" class="d-inline m-0" id="deleteCompanyForm_${comp.companyId}">
+                                        <input type="hidden" name="companyId" value="${comp.companyId}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="button" class="btn-approval-delete" title="Permanently Delete Company" onclick="showCustomConfirm({title: 'Delete Enterprise Tenant?', desc: 'Are you sure you want to permanently delete company \'${comp.companyName}\' (#CMP-${comp.companyId}) and all associated records from the database? This action cannot be undone.', icon: 'ti ti-trash', type: 'danger', confirmText: 'Yes, Delete Permanently', form: this.form});">
+                                            <i class="ti ti-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </c:forEach>
@@ -548,11 +741,112 @@
         </div>
     </div>
 
+    <!-- Custom Edit Company Modal -->
+    <div id="editCompanyModal" class="nl-modal-backdrop" style="display: none;">
+        <div class="nl-modal-dialog edit-modal-dialog">
+            <button type="button" class="nl-modal-close" onclick="closeEditCompanyModal()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">
+                    <i class="ti ti-building"></i>
+                </div>
+                <div>
+                    <h5 class="nl-modal-title" style="margin: 0; font-size: 17px; text-align: left;">Edit Company Details</h5>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Update company profile, registrations and approval status</p>
+                </div>
+            </div>
+
+            <form method="POST" id="editCompanyForm">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="companyId" id="editCompanyId">
+
+                <div class="modal-form-group">
+                    <label class="modal-form-label" for="editCompanyName">Company Legal Name <span style="color: #DC2626;">*</span></label>
+                    <input type="text" id="editCompanyName" name="companyName" class="modal-form-input" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="modal-form-group">
+                        <label class="modal-form-label" for="editLicenseNo">License Number</label>
+                        <input type="text" id="editLicenseNo" name="licenseNo" class="modal-form-input" placeholder="e.g. LIC-482910">
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-form-label" for="editGstNo">GST Number</label>
+                        <input type="text" id="editGstNo" name="gstNo" class="modal-form-input" placeholder="e.g. 27AAAAA0000A1Z5">
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-form-label" for="editAddress">Physical Address</label>
+                    <input type="text" id="editAddress" name="address" class="modal-form-input" placeholder="City, State, Country">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="modal-form-group">
+                        <label class="modal-form-label" for="editContactEmail">Contact Email</label>
+                        <input type="email" id="editContactEmail" name="contactEmail" class="modal-form-input" placeholder="contact@company.com">
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-form-label" for="editContactPhone">Contact Phone</label>
+                        <input type="tel" id="editContactPhone" name="contactPhone" class="modal-form-input" placeholder="+91 98201 12345">
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-form-label" for="editApprovalStatus">Approval Status <span style="color: #DC2626;">*</span></label>
+                    <div class="select-wrapper">
+                        <select id="editApprovalStatus" name="approvalStatus" class="form-select-custom">
+                            <option value="Pending">Pending Review</option>
+                            <option value="Active">Active / Approved</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="nl-modal-actions" style="margin-top: 22px; justify-content: flex-end;">
+                    <button type="button" class="nl-modal-btn cancel" onclick="closeEditCompanyModal()">Cancel</button>
+                    <button type="submit" class="nl-modal-btn confirm" style="background: #FC8019 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(252, 128, 25, 0.28);">
+                        <i class="ti ti-device-floppy"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>
 
     let pendingFormToSubmit = null;
+
+    function openEditCompanyModal(data) {
+        document.getElementById('editCompanyId').value = data.companyId || '';
+        document.getElementById('editCompanyName').value = data.companyName || '';
+        document.getElementById('editLicenseNo').value = data.licenseNo || '';
+        document.getElementById('editGstNo').value = data.gstNo || '';
+        document.getElementById('editAddress').value = data.address || '';
+        document.getElementById('editContactEmail').value = data.contactEmail || '';
+        document.getElementById('editContactPhone').value = data.contactPhone || '';
+        if (document.getElementById('editApprovalStatus')) {
+            document.getElementById('editApprovalStatus').value = data.approvalStatus || 'Pending';
+        }
+
+        const modal = document.getElementById('editCompanyModal');
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+    }
+
+    function closeEditCompanyModal() {
+        const modal = document.getElementById('editCompanyModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 200);
+    }
 
     function showCustomConfirm(options) {
         pendingFormToSubmit = options.form;
@@ -597,15 +891,25 @@
             });
         }
 
-        const modal = document.getElementById('nlCustomConfirmModal');
-        if (modal) {
-            modal.addEventListener('click', function(e) {
+        const confirmModal = document.getElementById('nlCustomConfirmModal');
+        if (confirmModal) {
+            confirmModal.addEventListener('click', function(e) {
                 if (e.target === this) closeCustomConfirmModal();
             });
         }
 
+        const editModal = document.getElementById('editCompanyModal');
+        if (editModal) {
+            editModal.addEventListener('click', function(e) {
+                if (e.target === this) closeEditCompanyModal();
+            });
+        }
+
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeCustomConfirmModal();
+            if (e.key === 'Escape') {
+                closeCustomConfirmModal();
+                closeEditCompanyModal();
+            }
         });
     });
 

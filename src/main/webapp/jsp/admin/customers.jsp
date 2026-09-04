@@ -16,6 +16,75 @@
                 } else if ("reject".equals(action)) {
                     uDao.updateUserStatus(uid, "Suspended");
                     session.setAttribute("errorMessage", "Customer Account Suspended / Rejected.");
+                } else if ("delete".equals(action)) {
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
+                        conn.setAutoCommit(false);
+                        try {
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE user_id = ?")) {
+                                ps.setInt(1, uid);
+                                ps.executeUpdate();
+                            }
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM audit_log WHERE user_id = ?")) {
+                                ps.setInt(1, uid);
+                                ps.executeUpdate();
+                            }
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM pricing_rules WHERE user_id = ?")) {
+                                ps.setInt(1, uid);
+                                ps.executeUpdate();
+                            }
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE user_id = ?")) {
+                                ps.setInt(1, uid);
+                                ps.executeUpdate();
+                            }
+                            conn.commit();
+                            session.setAttribute("successMessage", "Customer account #USR-" + uid + " permanently deleted from database.");
+                        } catch(Exception ex) {
+                            conn.rollback();
+                            session.setAttribute("errorMessage", "Failed to delete customer: " + ex.getMessage());
+                            ex.printStackTrace();
+                        } finally {
+                            conn.setAutoCommit(true);
+                        }
+                    }
+                } else if ("update".equals(action)) {
+                    String username = request.getParameter("username");
+                    String email = request.getParameter("email");
+                    String phone = request.getParameter("phone");
+                    String status = request.getParameter("status");
+                    String roleIdStr = request.getParameter("roleId");
+                    int roleId = 5;
+                    if (roleIdStr != null && !roleIdStr.trim().isEmpty()) {
+                        try { roleId = Integer.parseInt(roleIdStr.trim()); } catch(Exception ignored) {}
+                    }
+                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
+                        conn.setAutoCommit(false);
+                        try {
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement(
+                                    "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?")) {
+                                ps.setString(1, username != null ? username.trim() : "");
+                                ps.setString(2, email != null ? email.trim() : "");
+                                ps.setString(3, phone != null ? phone.trim() : "");
+                                ps.setInt(4, roleId);
+                                ps.setString(5, status != null ? status.trim() : "Pending");
+                                ps.setInt(6, uid);
+                                ps.executeUpdate();
+                            }
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement(
+                                    "UPDATE customers SET customer_name = ? WHERE user_id = ?")) {
+                                ps.setString(1, username != null ? username.trim() : "");
+                                ps.setInt(2, uid);
+                                ps.executeUpdate();
+                            }
+                            conn.commit();
+                            session.setAttribute("successMessage", "Customer details for #USR-" + uid + " updated successfully.");
+                        } catch(Exception ex) {
+                            conn.rollback();
+                            session.setAttribute("errorMessage", "Failed to update customer: " + ex.getMessage());
+                            ex.printStackTrace();
+                        } finally {
+                            conn.setAutoCommit(true);
+                        }
+                    }
                 }
             } catch(Exception ex) { ex.printStackTrace(); }
             response.sendRedirect(request.getRequestURI());
@@ -409,6 +478,101 @@
     .nl-modal-btn.confirm.success { background: #10B981 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28); }
     .nl-modal-btn.confirm.success:hover { background: #059669 !important; transform: translateY(-1px); }
 
+    /* Action Buttons: Edit & Delete */
+    .btn-approval-edit {
+        background: #FFFFFF; border: 1.5px solid #BFDBFE; color: #2563EB !important; padding: 6px 14px; border-radius: 50px;
+        font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);
+    }
+    .btn-approval-edit:hover {
+        background: #EFF6FF; border-color: #3B82F6; color: #1D4ED8 !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+    }
+    .btn-approval-edit:active { transform: translateY(0); }
+    .btn-approval-edit i { font-size: 12.5px; transition: transform 0.2s ease; }
+    .btn-approval-edit:hover i { transform: scale(1.15); }
+
+    .btn-approval-delete {
+        background: #FFFFFF; border: 1.5px solid #FECACA; color: #DC2626 !important; padding: 6px 14px; border-radius: 50px;
+        font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+    }
+    .btn-approval-delete:hover {
+        background: #FEF2F2; border-color: #EF4444; color: #B91C1C !important; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.18);
+    }
+    .btn-approval-delete:active { transform: translateY(0); }
+    .btn-approval-delete i { font-size: 12.5px; transition: transform 0.2s ease; }
+    .btn-approval-delete:hover i { transform: scale(1.15); }
+
+    /* Custom Form Controls & Select Styling */
+    .edit-modal-dialog {
+        max-width: 520px !important;
+        text-align: left !important;
+        padding: 28px 30px 24px !important;
+    }
+    .modal-form-group {
+        margin-bottom: 16px;
+        text-align: left;
+    }
+    .modal-form-label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+    .modal-form-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 16px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px;
+        font-size: 13px;
+        color: #1E293B;
+        background-color: #FFFFFF;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .modal-form-input:focus {
+        border-color: #FC8019;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+
+    .select-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    .select-wrapper::after {
+        content: '';
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        pointer-events: none;
+    }
+    .form-select-custom, .select-wrapper select {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 100%;
+        height: 42px;
+        padding: 0 38px 0 16px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px;
+        font-size: 13px;
+        color: #1E293B;
+        background-color: #FFFFFF;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .form-select-custom:focus, .select-wrapper select:focus {
+        border-color: #FC8019;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+
 </style>
 
 <div class="approvals-page-container">
@@ -639,44 +803,58 @@
 
                             <!-- Actions -->
                             <td style="padding-right: 24px; text-align: right;">
-                                <c:choose>
-                                    <c:when test="${u.status == 'Active'}">
-                                        <form method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="userId" value="${u.userId}">
-                                            <input type="hidden" name="action" value="reject">
-                                            <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-ban"></i> Suspend
-                                            </button>
-                                        </form>
-                                    </c:when>
-                                    <c:when test="${u.status == 'Suspended' || u.status == 'Locked' || u.status == 'Rejected'}">
-                                        <form method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="userId" value="${u.userId}">
-                                            <input type="hidden" name="action" value="accept">
-                                            <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-reload"></i> Reactivate
-                                            </button>
-                                        </form>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="actions-flex">
+                                <div class="actions-flex">
+                                    <c:choose>
+                                        <c:when test="${u.status == 'Active'}">
+                                            <form method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="userId" value="${u.userId}">
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
+                                                    <i class="ti ti-ban"></i> Suspend
+                                                </button>
+                                            </form>
+                                        </c:when>
+                                        <c:when test="${u.status == 'Suspended' || u.status == 'Locked' || u.status == 'Rejected'}">
                                             <form method="POST" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="accept">
-                                                <button type="submit" class="btn-approval-accept" title="Approve Customer Account">
+                                                <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
+                                                    <i class="ti ti-reload"></i> Reactivate
+                                                </button>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <form method="POST" class="d-inline m-0">
+                                                <input type="hidden" name="userId" value="${u.userId}">
+                                                <input type="hidden" name="action" value="accept">
+                                                <button type="submit" class="btn-approval-accept" title="Approve Customer Account" style="padding: 6px 14px; font-size: 11.5px;">
                                                     <i class="ti ti-check"></i> Approve
                                                 </button>
                                             </form>
                                             <form method="POST" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="reject">
-                                                <button type="button" class="btn-approval-reject" title="Reject Customer Account" onclick="showCustomConfirm({title: 'Reject Customer Account?', desc: 'Are you sure you want to reject this customer registration request?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});">
+                                                <button type="button" class="btn-approval-reject" title="Reject Customer Account" onclick="showCustomConfirm({title: 'Reject Customer Account?', desc: 'Are you sure you want to reject this customer registration request?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
                                                     <i class="ti ti-x"></i> Reject
                                                 </button>
                                             </form>
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                    <!-- Edit Customer Details -->
+                                    <button type="button" class="btn-approval-edit" title="Edit Customer Details" onclick="openEditCustomerModal({userId: '${u.userId}', username: '${u.username}', email: '${u.email}', phone: '${u.phone}', roleId: '${u.roleId}', status: '${u.status}'})">
+                                        <i class="ti ti-edit"></i> Edit
+                                    </button>
+
+                                    <!-- Delete Customer -->
+                                    <form method="POST" class="d-inline m-0" id="deleteCustomerForm_${u.userId}">
+                                        <input type="hidden" name="userId" value="${u.userId}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="button" class="btn-approval-delete" title="Permanently Delete Customer" onclick="showCustomConfirm({title: 'Delete Customer Account?', desc: 'Are you sure you want to permanently delete customer \'${u.username}\' (#USR-${u.userId}) from the database? This action cannot be undone.', icon: 'ti ti-trash', type: 'danger', confirmText: 'Yes, Delete Permanently', form: this.form});">
+                                            <i class="ti ti-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </c:forEach>
@@ -736,11 +914,111 @@
         </div>
     </div>
 
+    <!-- Custom Edit Customer Modal -->
+    <div id="editCustomerModal" class="nl-modal-backdrop" style="display: none;">
+        <div class="nl-modal-dialog edit-modal-dialog">
+            <button type="button" class="nl-modal-close" onclick="closeEditCustomerModal()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">
+                    <i class="ti ti-user-edit"></i>
+                </div>
+                <div>
+                    <h5 class="nl-modal-title" style="margin: 0; font-size: 17px; text-align: left;">Edit Customer Details</h5>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Update profile, contact info and account status</p>
+                </div>
+            </div>
+
+            <form method="POST" id="editCustomerForm">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="userId" id="editUserId">
+
+                <div class="modal-form-group">
+                    <label class="modal-form-label" for="editUsername">Customer Name / Username <span style="color: #DC2626;">*</span></label>
+                    <input type="text" id="editUsername" name="username" class="modal-form-input" required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-form-label" for="editEmail">Email Address <span style="color: #DC2626;">*</span></label>
+                    <input type="email" id="editEmail" name="email" class="modal-form-input" required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-form-label" for="editPhone">Contact Phone</label>
+                    <input type="tel" id="editPhone" name="phone" class="modal-form-input" placeholder="+91 98765 43210">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="modal-form-group">
+                        <label class="modal-form-label" for="editRoleId">Assigned Role</label>
+                        <div class="select-wrapper">
+                            <select id="editRoleId" name="roleId" class="form-select-custom">
+                                <option value="5">Customer / Client</option>
+                                <option value="3">Operations Staff</option>
+                                <option value="4">Finance Staff</option>
+                                <option value="2">Company Admin</option>
+                                <option value="1">Super Admin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label class="modal-form-label" for="editStatus">Account Status <span style="color: #DC2626;">*</span></label>
+                        <div class="select-wrapper">
+                            <select id="editStatus" name="status" class="form-select-custom">
+                                <option value="Pending">Pending Review</option>
+                                <option value="Active">Active</option>
+                                <option value="Suspended">Suspended</option>
+                                <option value="Locked">Locked</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nl-modal-actions" style="margin-top: 22px; justify-content: flex-end;">
+                    <button type="button" class="nl-modal-btn cancel" onclick="closeEditCustomerModal()">Cancel</button>
+                    <button type="submit" class="nl-modal-btn confirm" style="background: #FC8019 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(252, 128, 25, 0.28);">
+                        <i class="ti ti-device-floppy"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>
 
     let pendingFormToSubmit = null;
+
+    function openEditCustomerModal(data) {
+        document.getElementById('editUserId').value = data.userId || '';
+        document.getElementById('editUsername').value = data.username || '';
+        document.getElementById('editEmail').value = data.email || '';
+        document.getElementById('editPhone').value = data.phone || '';
+        if (document.getElementById('editRoleId')) {
+            document.getElementById('editRoleId').value = data.roleId || '5';
+        }
+        if (document.getElementById('editStatus')) {
+            document.getElementById('editStatus').value = data.status || 'Pending';
+        }
+
+        const modal = document.getElementById('editCustomerModal');
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+    }
+
+    function closeEditCustomerModal() {
+        const modal = document.getElementById('editCustomerModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 200);
+    }
 
     function showCustomConfirm(options) {
         pendingFormToSubmit = options.form;
@@ -785,15 +1063,25 @@
             });
         }
 
-        const modal = document.getElementById('nlCustomConfirmModal');
-        if (modal) {
-            modal.addEventListener('click', function(e) {
+        const confirmModal = document.getElementById('nlCustomConfirmModal');
+        if (confirmModal) {
+            confirmModal.addEventListener('click', function(e) {
                 if (e.target === this) closeCustomConfirmModal();
             });
         }
 
+        const editModal = document.getElementById('editCustomerModal');
+        if (editModal) {
+            editModal.addEventListener('click', function(e) {
+                if (e.target === this) closeEditCustomerModal();
+            });
+        }
+
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeCustomConfirmModal();
+            if (e.key === 'Escape') {
+                closeCustomConfirmModal();
+                closeEditCustomerModal();
+            }
         });
     });
 

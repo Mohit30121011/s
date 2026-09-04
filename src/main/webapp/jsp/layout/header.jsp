@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -2359,7 +2359,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <c:if test="${not empty sessionScope.user}">
                     <a href="${pageContext.request.contextPath}/logout" class="user-profile" title="Click to Logout">
-                        <div class="avatar">${sessionScope.user.username.substring(0, 2).toUpperCase()}</div>
+                        <div class="avatar">${sessionScope.user.username.length() >= 2 ? sessionScope.user.username.substring(0, 2).toUpperCase() : sessionScope.user.username.toUpperCase()}</div>
                         <div class="user-info">
                             <h6>${sessionScope.user.username}</h6>
                             <small>Logout</small>
