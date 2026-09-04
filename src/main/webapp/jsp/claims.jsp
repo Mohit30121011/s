@@ -115,6 +115,24 @@
 
     /* Select / form controls */
     .select-wrapper { position: relative; width: 100%; }
+    .select-wrapper:has(.ts-wrapper)::after,
+    .select-wrapper.has-tomselect::after { display: none !important; }
+    .nl-modal-dialog .ts-wrapper.form-select-custom .ts-control {
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 10px !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 38px 0 16px !important;
+        font-size: 13px !important;
+        color: #1E293B !important;
+        box-shadow: none !important;
+        background-color: #FFFFFF !important;
+    }
+    .nl-modal-dialog .ts-wrapper.form-select-custom.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
+    }
     .select-wrapper::after {
         content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -333,7 +351,7 @@
     <div class="nl-modal-dialog wide">
         <button type="button" class="nl-modal-close" onclick="closeModal('fileClaimModal')"><i class="ti ti-x"></i></button>
         <div class="nl-modal-title left">File Loss / Damage Claim</div>
-        <form method="post" action="${pageContext.request.contextPath}/claims">
+        <form method="post" action="${pageContext.request.contextPath}/claims" id="fileClaimForm">
             <input type="hidden" name="action" value="file">
             <div class="row-2">
                 <div class="modal-form-group">
@@ -342,29 +360,36 @@
                         <select name="shipmentId" id="fileShipmentSelect" class="form-select-custom" required onchange="syncShipmentCustomer(this)">
                             <option value="">Select shipment...</option>
                             <c:forEach var="s" items="${shipments}">
-                                <option value="${s[0]}" data-customer="${s[3]}">SHP-${s[0]} &mdash; ${s[1]} (${s[4]})</option>
+                                <option value="${s[0]}" data-customer="${s[3]}" data-customername="${s[4]}" data-container="${s[5]}">
+                                    SHP-${s[0]} &mdash; <c:out value="${empty s[1] ? 'General Cargo' : s[1]}"/> (<c:out value="${empty s[4] ? 'Customer #'.concat(s[3]) : s[4]}"/>)
+                                </option>
                             </c:forEach>
                         </select>
                     </div>
                 </div>
                 <c:if test="${roleId == 5}">
-                    <input type="hidden" name="customerId" value="${customerId}">
+                    <input type="hidden" name="customerId" id="fileCustomerId" value="${customerId}">
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">Customer</label>
+                        <input type="text" class="modal-form-input" readonly value="My Account (ID: ${customerId})" style="background-color: #F8FAFC; cursor: not-allowed; color: #64748B;">
+                    </div>
                 </c:if>
                 <c:if test="${roleId != 5}">
                     <div class="modal-form-group">
-                        <label class="modal-form-label">Customer ID *</label>
-                        <input type="number" name="customerId" id="fileCustomerId" class="modal-form-input" required>
+                        <label class="modal-form-label">Customer *</label>
+                        <input type="hidden" name="customerId" id="fileCustomerId" required>
+                        <input type="text" id="fileCustomerDisplay" class="modal-form-input" readonly placeholder="Auto-filled from selected shipment..." style="background-color: #F8FAFC; cursor: not-allowed; color: #334155; font-weight: 500;">
                     </div>
                 </c:if>
             </div>
             <div class="row-2">
                 <div class="modal-form-group">
                     <label class="modal-form-label">Container ID</label>
-                    <input type="number" name="containerId" class="modal-form-input" placeholder="Optional">
+                    <input type="number" name="containerId" id="fileContainerId" class="modal-form-input" placeholder="Auto-filled from shipment (optional)">
                 </div>
                 <div class="modal-form-group">
                     <label class="modal-form-label">Product ID</label>
-                    <input type="number" name="productId" class="modal-form-input" placeholder="Optional">
+                    <input type="number" name="productId" id="fileProductId" class="modal-form-input" placeholder="Optional (e.g. 101)">
                 </div>
             </div>
             <div class="row-2">
@@ -380,13 +405,13 @@
                 </div>
                 <div class="modal-form-group">
                     <label class="modal-form-label">Incident Date *</label>
-                    <input type="date" name="incidentDate" class="modal-form-input" required>
+                    <input type="date" name="incidentDate" id="fileIncidentDate" class="modal-form-input" required>
                 </div>
             </div>
             <div class="row-2">
                 <div class="modal-form-group">
                     <label class="modal-form-label">Claimed Amount (&#8377;) *</label>
-                    <input type="number" step="0.01" name="claimedAmount" class="modal-form-input" required>
+                    <input type="number" step="0.01" min="1" name="claimedAmount" class="modal-form-input" placeholder="e.g. 15000.00" required>
                 </div>
                 <div class="modal-form-group">
                     <label class="modal-form-label">Loss Reason</label>
@@ -402,7 +427,7 @@
             </div>
             <div class="modal-form-group">
                 <label class="modal-form-label">Description *</label>
-                <textarea name="description" class="modal-form-input" rows="3" required></textarea>
+                <textarea name="description" class="modal-form-input" rows="3" required placeholder="Describe the loss or damage details observed..."></textarea>
             </div>
             <div class="nl-modal-actions left">
                 <button type="button" class="nl-modal-btn cancel" onclick="closeModal('fileClaimModal')">Cancel</button>
@@ -479,6 +504,16 @@
         const modal = document.getElementById(id);
         modal.style.display = 'flex';
         requestAnimationFrame(() => modal.classList.add('show'));
+        if (id === 'fileClaimModal') {
+            const dateInput = document.getElementById('fileIncidentDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+            const shipSelect = document.getElementById('fileShipmentSelect');
+            if (shipSelect && shipSelect.tomselect) {
+                shipSelect.tomselect.sync();
+            }
+        }
     }
     function closeModal(id) {
         const modal = document.getElementById(id);
@@ -497,10 +532,39 @@
     }
     function syncShipmentCustomer(sel) {
         const custField = document.getElementById('fileCustomerId');
-        if (!custField) return;
-        const opt = sel.options[sel.selectedIndex];
-        const custId = opt ? opt.getAttribute('data-customer') : '';
-        if (custId) custField.value = custId;
+        const custDisplay = document.getElementById('fileCustomerDisplay');
+        const contField = document.getElementById('fileContainerId');
+        
+        let selectElem = sel && sel.target ? sel.target : (sel || document.getElementById('fileShipmentSelect'));
+        if (!selectElem) return;
+        
+        let val = selectElem.value;
+        let opt = null;
+        if (selectElem.options && selectElem.selectedIndex >= 0) {
+            opt = selectElem.options[selectElem.selectedIndex];
+        }
+        if (!opt && val) {
+            opt = selectElem.querySelector('option[value="' + val + '"]');
+        }
+        
+        if (!opt || !val) {
+            if (custField && ${roleId != 5}) custField.value = '';
+            if (custDisplay) custDisplay.value = '';
+            if (contField) contField.value = '';
+            return;
+        }
+        
+        const custId = opt.getAttribute('data-customer') || '';
+        const custName = opt.getAttribute('data-customername') || '';
+        const contId = opt.getAttribute('data-container') || '';
+        
+        if (custField) custField.value = custId;
+        if (custDisplay) {
+            custDisplay.value = custName ? (custName + ' (ID: ' + custId + ')') : ('Customer #' + custId);
+        }
+        if (contField && contId && contId !== 'null') {
+            contField.value = contId;
+        }
     }
 
     let pendingFormToSubmit = null;
@@ -526,6 +590,32 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        const fileForm = document.getElementById('fileClaimForm');
+        const shipSelect = document.getElementById('fileShipmentSelect');
+        
+        if (shipSelect) {
+            shipSelect.addEventListener('change', function() { syncShipmentCustomer(this); });
+            if (shipSelect.tomselect) {
+                shipSelect.tomselect.on('change', function() { syncShipmentCustomer(shipSelect); });
+            }
+        }
+        
+        if (fileForm) {
+            fileForm.addEventListener('submit', function(e) {
+                if (shipSelect && !shipSelect.value) {
+                    e.preventDefault();
+                    if (shipSelect.tomselect) {
+                        shipSelect.tomselect.focus();
+                        shipSelect.tomselect.open();
+                    } else {
+                        shipSelect.focus();
+                    }
+                    alert('Please select a shipment to file a claim.');
+                    return false;
+                }
+            });
+        }
+
         const submitBtn = document.getElementById('nlConfirmSubmitBtn');
         if (submitBtn) {
             submitBtn.addEventListener('click', function() {

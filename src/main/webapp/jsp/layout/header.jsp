@@ -1143,6 +1143,49 @@
             border: 2px solid white;
         }
         
+        .notif-bell-wrap { position: relative; }
+        .notif-dropdown-panel {
+            position: absolute;
+            top: calc(100% + 14px);
+            right: -10px;
+            width: 340px;
+            max-height: 420px;
+            overflow-y: auto;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+            z-index: 99999;
+            display: none;
+        }
+        .notif-dropdown-panel.show { display: block; }
+        .notif-dropdown-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 700;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .notif-dropdown-list { padding: 6px; }
+        .notif-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .notif-item:hover { background: #F9FAFB; }
+        .notif-item .notif-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: var(--brand-orange); margin-top: 6px; flex-shrink: 0;
+        }
+        .notif-item .notif-title { font-size: 12.5px; font-weight: 600; color: #1E293B; margin-bottom: 2px; }
+        .notif-item .notif-message { font-size: 12px; color: #64748B; line-height: 1.4; }
+        .notif-empty { padding: 30px 16px; text-align: center; color: #94A3B8; font-size: 12.5px; }
+
         .user-profile {
             display: flex;
             align-items: center;
@@ -1153,7 +1196,7 @@
             text-decoration: none;
             color: inherit;
         }
-        
+
         .avatar {
             width: 36px;
             height: 36px;
@@ -1568,7 +1611,7 @@
             padding: 6px !important;
             background: #FFFFFF !important;
             margin-top: 4px !important;
-            z-index: 99999 !important;
+            z-index: 100000000 !important;
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
         }
@@ -1712,7 +1755,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
             padding: 4px !important;
             margin-top: 4px !important;
-            z-index: 99999 !important;
+            z-index: 100000000 !important;
             background: #FFFFFF !important;
         }
         .ts-wrapper.nl-page-size-ts .ts-dropdown .option {
@@ -1786,7 +1829,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
             padding: 4px !important;
             margin-top: 4px !important;
-            z-index: 99999 !important;
+            z-index: 100000000 !important;
             background: #FFFFFF !important;
         }
         .ts-wrapper.nl-page-size-ts .ts-dropdown .option {
@@ -2047,6 +2090,7 @@
                 </a>
                 <ul class="sub-nav" id="containersSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/containers">All Containers</a></li>
+                    <li><a href="${pageContext.request.contextPath}/predictive-graph">Predictive Pricing Graph</a></li>
                 </ul>
             </div>
 
@@ -2108,7 +2152,7 @@
 
             <!-- Claims Management -->
             <div class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="${pageContext.request.contextPath}/claims" class="nav-link ${pageContext.request.requestURI.contains('/claims') ? 'active' : ''}">
                     <i class="ti ti-shield main-icon"></i>
                     <span>Claims Management</span>
                 </a>
@@ -2124,6 +2168,7 @@
                 <ul class="sub-nav" id="complianceSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/compliance">Government Compliance</a></li>
                     <li><a href="${pageContext.request.contextPath}/billing">Billing & Invoices</a></li>
+                    <li><a href="${pageContext.request.contextPath}/invoices">Invoices &amp; Statements</a></li>
                 </ul>
             </div>
 
@@ -2136,6 +2181,8 @@
                 </a>
                 <ul class="sub-nav" id="stockSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/upload-stock">Upload / Manage Stock</a></li>
+                    <li><a href="${pageContext.request.contextPath}/inventory/products">Product Catalog</a></li>
+                    <li><a href="${pageContext.request.contextPath}/inventory/stock">Stock Overview</a></li>
                     <li><a href="${pageContext.request.contextPath}/ledger">Inventory Ledger</a></li>
                 </ul>
             </div>
@@ -2156,6 +2203,14 @@
             <!-- SECTION 3: INSIGHTS & CONFIGURATION -->
             <div class="sidebar-section-header">
                 <span>INSIGHTS & CONFIGURATION</span>
+            </div>
+
+            <!-- Executive Dashboard -->
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/dashboard/executive" class="nav-link ${pageContext.request.requestURI.contains('/dashboard/executive') ? 'active' : ''}">
+                    <i class="ti ti-report-analytics main-icon"></i>
+                    <span>Executive Dashboard</span>
+                </a>
             </div>
 
             <!-- Analytics -->
@@ -2349,10 +2404,22 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             <div class="header-actions">
-                <div class="header-icon" title="Notifications">
-                    <i class="ti ti-bell"></i>
-                    <div class="badge-notification">3</div>
+                <c:if test="${not empty sessionScope.user}">
+                <div class="notif-bell-wrap" id="notifBellWrap">
+                    <div class="header-icon" title="Notifications" id="notifBellIcon" onclick="toggleNotifDropdown(event)">
+                        <i class="ti ti-bell"></i>
+                        <div class="badge-notification" id="notifBadge" style="display:none;">0</div>
+                    </div>
+                    <div class="notif-dropdown-panel" id="notifDropdownPanel">
+                        <div class="notif-dropdown-header">
+                            <span>Notifications</span>
+                        </div>
+                        <div class="notif-dropdown-list" id="notifDropdownList">
+                            <div class="notif-empty">No new notifications</div>
+                        </div>
+                    </div>
                 </div>
+                </c:if>
                 <div class="header-icon" title="Help and Documentation">
                     <i class="ti ti-help"></i>
                 </div>
@@ -2382,6 +2449,56 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 (function() {
     const ctx = '${pageContext.request.contextPath}';
+
+    // ---- Notification bell: poll /notifications every 30s (JSON), render dropdown ----
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function renderNotifications(notifs) {
+        const badge = document.getElementById('notifBadge');
+        const list = document.getElementById('notifDropdownList');
+        if (!badge || !list) return;
+        if (!notifs || notifs.length === 0) {
+            badge.style.display = 'none';
+            list.innerHTML = '<div class="notif-empty">No new notifications</div>';
+            return;
+        }
+        badge.style.display = 'flex';
+        badge.textContent = notifs.length > 9 ? '9+' : notifs.length;
+        list.innerHTML = notifs.map(function(n) {
+            const link = n.link ? (ctx + n.link) : '#';
+            return '<a class="notif-item" href="' + link + '">' +
+                   '<div class="notif-dot"></div>' +
+                   '<div><div class="notif-title">' + escapeHtml(n.title) + '</div>' +
+                   '<div class="notif-message">' + escapeHtml(n.message) + '</div></div>' +
+                   '</a>';
+        }).join('');
+    }
+    function pollNotifications() {
+        fetch(ctx + '/notifications', { credentials: 'same-origin' })
+            .then(function(res) { return res.ok ? res.json() : []; })
+            .then(function(data) { renderNotifications(data); })
+            .catch(function() { /* silently ignore - bell just stays empty */ });
+    }
+    window.toggleNotifDropdown = function(e) {
+        if (e) e.stopPropagation();
+        const panel = document.getElementById('notifDropdownPanel');
+        if (!panel) return;
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) pollNotifications();
+    };
+    document.addEventListener('click', function(e) {
+        const wrap = document.getElementById('notifBellWrap');
+        const panel = document.getElementById('notifDropdownPanel');
+        if (wrap && panel && panel.classList.contains('show') && !wrap.contains(e.target)) {
+            panel.classList.remove('show');
+        }
+    });
+    if (document.getElementById('notifBellWrap')) {
+        pollNotifications();
+        setInterval(pollNotifications, 30000);
+    }
 
     const OMNIBOX_DATA = [
         // Shipments Module

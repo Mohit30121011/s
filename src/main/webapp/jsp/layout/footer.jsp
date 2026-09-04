@@ -119,6 +119,12 @@
                         if (el.value && !ts.getValue()) {
                             ts.setValue(el.value);
                         }
+                        ts.on('change', function(val) {
+                            if (typeof el.onchange === 'function') {
+                                try { el.onchange(); } catch(e) { console.error(e); }
+                            }
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
                     } catch(err) {
                         console.warn("TomSelect init error:", err);
                     }
