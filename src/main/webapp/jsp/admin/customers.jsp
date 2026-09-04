@@ -24,11 +24,11 @@
                                 ps.setInt(1, uid);
                                 ps.executeUpdate();
                             }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM audit_log WHERE user_id = ?")) {
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM password_resets WHERE user_id = ?")) {
                                 ps.setInt(1, uid);
                                 ps.executeUpdate();
                             }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM pricing_rules WHERE user_id = ?")) {
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM audit_log WHERE user_id = ?")) {
                                 ps.setInt(1, uid);
                                 ps.executeUpdate();
                             }
