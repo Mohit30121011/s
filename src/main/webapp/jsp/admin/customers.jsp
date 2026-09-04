@@ -50,7 +50,7 @@
                     String username = request.getParameter("username");
                     String email = request.getParameter("email");
                     String phone = request.getParameter("phone");
-                    String status = request.getParameter("status");
+                    String address = request.getParameter("address");
                     String roleIdStr = request.getParameter("roleId");
                     int roleId = 5;
                     if (roleIdStr != null && !roleIdStr.trim().isEmpty()) {
@@ -60,23 +60,23 @@
                         conn.setAutoCommit(false);
                         try {
                             try (java.sql.PreparedStatement ps = conn.prepareStatement(
-                                    "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?")) {
+                                    "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?")) {
                                 ps.setString(1, username != null ? username.trim() : "");
                                 ps.setString(2, email != null ? email.trim() : "");
                                 ps.setString(3, phone != null ? phone.trim() : "");
                                 ps.setInt(4, roleId);
-                                ps.setString(5, status != null ? status.trim() : "Pending");
-                                ps.setInt(6, uid);
+                                ps.setInt(5, uid);
                                 ps.executeUpdate();
                             }
                             try (java.sql.PreparedStatement ps = conn.prepareStatement(
-                                    "UPDATE customers SET customer_name = ? WHERE user_id = ?")) {
+                                    "UPDATE customers SET customer_name = ?, address = ? WHERE user_id = ?")) {
                                 ps.setString(1, username != null ? username.trim() : "");
-                                ps.setInt(2, uid);
+                                ps.setString(2, address != null ? address.trim() : "");
+                                ps.setInt(3, uid);
                                 ps.executeUpdate();
                             }
                             conn.commit();
-                            session.setAttribute("successMessage", "Customer details for #USR-" + uid + " updated successfully.");
+                            session.setAttribute("successMessage", "Customer #" + uid + " details updated successfully.");
                         } catch(Exception ex) {
                             conn.rollback();
                             session.setAttribute("errorMessage", "Failed to update customer: " + ex.getMessage());
@@ -842,7 +842,7 @@
                                     </c:choose>
 
                                     <!-- Edit Customer Details -->
-                                    <button type="button" class="btn-approval-edit" title="Edit Customer Details" onclick="openEditCustomerModal({userId: '${u.userId}', username: '${u.username}', email: '${u.email}', phone: '${u.phone}', roleId: '${u.roleId}', status: '${u.status}'})">
+                                    <button type="button" class="btn-approval-edit" title="Edit Customer Details" onclick="openEditCustomerModal({userId: '${u.userId}', username: '${u.username}', email: '${u.email}', phone: '${u.phone}', roleId: '${u.roleId}'})">
                                         <i class="ti ti-edit"></i> Edit
                                     </button>
 
@@ -926,7 +926,7 @@
                 </div>
                 <div>
                     <h5 class="nl-modal-title" style="margin: 0; font-size: 17px; text-align: left;">Edit Customer Details</h5>
-                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Update profile, contact info and account status</p>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Update profile, contact and address details</p>
                 </div>
             </div>
 
@@ -964,16 +964,8 @@
                     </div>
 
                     <div class="modal-form-group">
-                        <label class="modal-form-label" for="editStatus">Account Status <span style="color: #DC2626;">*</span></label>
-                        <div class="select-wrapper">
-                            <select id="editStatus" name="status" class="form-select-custom">
-                                <option value="Pending">Pending Review</option>
-                                <option value="Active">Active</option>
-                                <option value="Suspended">Suspended</option>
-                                <option value="Locked">Locked</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
-                        </div>
+                        <label class="modal-form-label" for="editAddress">Registered Address</label>
+                        <input type="text" id="editAddress" name="address" class="modal-form-input" placeholder="City, State, Country">
                     </div>
                 </div>
 
@@ -998,11 +990,9 @@
         document.getElementById('editUsername').value = data.username || '';
         document.getElementById('editEmail').value = data.email || '';
         document.getElementById('editPhone').value = data.phone || '';
+        document.getElementById('editAddress').value = data.address || '';
         if (document.getElementById('editRoleId')) {
             document.getElementById('editRoleId').value = data.roleId || '5';
-        }
-        if (document.getElementById('editStatus')) {
-            document.getElementById('editStatus').value = data.status || 'Pending';
         }
 
         const modal = document.getElementById('editCustomerModal');

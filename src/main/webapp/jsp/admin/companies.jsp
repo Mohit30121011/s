@@ -86,21 +86,23 @@
                     String address = request.getParameter("address");
                     String email = request.getParameter("contactEmail");
                     String phone = request.getParameter("contactPhone");
-                    String approvalStatus = request.getParameter("approvalStatus");
 
                     try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
                          java.sql.PreparedStatement ps = conn.prepareStatement(
-                            "UPDATE companies SET company_name = ?, license_no = ?, gst_no = ?, address = ?, contact_email = ?, contact_phone = ?, approval_status = ?, updated_at = CURRENT_TIMESTAMP WHERE company_id = ?")) {
+                            "UPDATE companies SET company_name = ?, license_no = ?, gst_no = ?, address = ?, contact_email = ?, contact_phone = ? WHERE company_id = ?")) {
                         ps.setString(1, companyName != null ? companyName.trim() : "");
                         ps.setString(2, licenseNo != null ? licenseNo.trim() : "");
                         ps.setString(3, gstNo != null ? gstNo.trim() : "");
                         ps.setString(4, address != null ? address.trim() : "");
                         ps.setString(5, email != null ? email.trim() : "");
                         ps.setString(6, phone != null ? phone.trim() : "");
-                        ps.setString(7, approvalStatus != null ? approvalStatus.trim() : "Pending");
-                        ps.setInt(8, compId);
-                        ps.executeUpdate();
-                        session.setAttribute("successMessage", "Company details for #CMP-" + compId + " updated successfully.");
+                        ps.setInt(7, compId);
+                        int affected = ps.executeUpdate();
+                        if (affected > 0) {
+                            session.setAttribute("successMessage", "Company #" + compId + " details updated successfully.");
+                        } else {
+                            session.setAttribute("errorMessage", "Company #" + compId + " not found.");
+                        }
                     } catch(Exception ex) {
                         session.setAttribute("errorMessage", "Failed to update company: " + ex.getMessage());
                         ex.printStackTrace();
@@ -669,7 +671,7 @@
                                     </c:choose>
 
                                     <!-- Edit Company Action -->
-                                    <button type="button" class="btn-approval-edit" title="Edit Company Details" onclick="openEditCompanyModal({companyId: '${comp.companyId}', companyName: '${comp.companyName}', licenseNo: '${comp.licenseNo}', gstNo: '${comp.gstNo}', address: '${comp.address}', contactEmail: '${comp.contactEmail}', contactPhone: '${comp.contactPhone}', approvalStatus: '${comp.approvalStatus}'})">
+                                    <button type="button" class="btn-approval-edit" title="Edit Company Details" onclick="openEditCompanyModal({companyId: '${comp.companyId}', companyName: '${comp.companyName}', licenseNo: '${comp.licenseNo}', gstNo: '${comp.gstNo}', address: '${comp.address}', contactEmail: '${comp.contactEmail}', contactPhone: '${comp.contactPhone}'})">
                                         <i class="ti ti-edit"></i> Edit
                                     </button>
 
@@ -693,17 +695,17 @@
         <!-- Enterprise Theme Pagination Bar -->
         <div class="nl-pagination-wrapper" id="companiesPagination">
             <div class="nl-pagination-info">
-                <span>Showing <strong id="compPageStart">1</strong> to <strong id="compPageEnd">10</strong> of <strong id="compTotalRows">0</strong> records</span>
+                <span>Showing <strong id="companiesPageStart">1</strong> to <strong id="companiesPageEnd">10</strong> of <strong id="companiesTotalRows">0</strong> records</span>
                 <div class="d-inline-flex align-items-center gap-2 ms-2">
                     <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
-                    <select id="compPageSize" class="nl-page-size-select no-custom-select" onchange="changeCompPageSize(this.value)">
+                    <select id="companiesPageSize" class="nl-page-size-select no-custom-select" onchange="changeCompaniesPageSize(this.value)">
                         <option value="10" selected>10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                     </select>
                 </div>
             </div>
-            <div class="nl-pagination-nav" id="compPageNav">
+            <div class="nl-pagination-nav" id="companiesPageNav">
                 <!-- Dynamically generated page buttons -->
             </div>
         </div>
@@ -715,7 +717,7 @@
             </div>
             <div class="empty-caught-up-title" id="emptyStateTitle">All Caught Up!</div>
             <p class="empty-caught-up-desc" id="emptyStateDesc">
-                There are currently no pending company registration requests requiring Super Admin verification. All corporate onboarding is up to date.
+                There are currently no pending company registration requests requiring Super Admin verification. All enterprise tenant onboarding is up to date.
             </p>
             <button type="button" class="btn-view-all-tenants" onclick="filterByTab('All')">
                 <i class="ti ti-list"></i> View All Registered Tenants
@@ -753,7 +755,7 @@
                 </div>
                 <div>
                     <h5 class="nl-modal-title" style="margin: 0; font-size: 17px; text-align: left;">Edit Company Details</h5>
-                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Update company profile, registrations and approval status</p>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Update company profile, registrations and contact details</p>
                 </div>
             </div>
 
@@ -793,18 +795,6 @@
                     </div>
                 </div>
 
-                <div class="modal-form-group">
-                    <label class="modal-form-label" for="editApprovalStatus">Approval Status <span style="color: #DC2626;">*</span></label>
-                    <div class="select-wrapper">
-                        <select id="editApprovalStatus" name="approvalStatus" class="form-select-custom">
-                            <option value="Pending">Pending Review</option>
-                            <option value="Active">Active / Approved</option>
-                            <option value="Suspended">Suspended</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div class="nl-modal-actions" style="margin-top: 22px; justify-content: flex-end;">
                     <button type="button" class="nl-modal-btn cancel" onclick="closeEditCompanyModal()">Cancel</button>
                     <button type="submit" class="nl-modal-btn confirm" style="background: #FC8019 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(252, 128, 25, 0.28);">
@@ -829,9 +819,6 @@
         document.getElementById('editAddress').value = data.address || '';
         document.getElementById('editContactEmail').value = data.contactEmail || '';
         document.getElementById('editContactPhone').value = data.contactPhone || '';
-        if (document.getElementById('editApprovalStatus')) {
-            document.getElementById('editApprovalStatus').value = data.approvalStatus || 'Pending';
-        }
 
         const modal = document.getElementById('editCompanyModal');
         modal.style.display = 'flex';
