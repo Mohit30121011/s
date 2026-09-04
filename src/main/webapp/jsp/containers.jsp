@@ -1,6 +1,16 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+if (request.getAttribute("ports") == null) {
+    com.nlogistic.dao.PortDAO pDao = new com.nlogistic.dao.PortDAO();
+    request.setAttribute("ports", pDao.getAllPorts());
+}
+if (request.getAttribute("containers") == null) {
+    com.nlogistic.dao.ContainerDAO cDao = new com.nlogistic.dao.ContainerDAO();
+    request.setAttribute("containers", cDao.getAllContainers());
+}
+%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -636,19 +646,19 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Tare Weight (kg) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.01" name="tareWeightKg" id="updateTareWeight" class="form-control form-select-custom" required>
+                            <input type="number" step="0.01" name="tareWeightKg" id="updateTareWeight" class="form-control" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Max Gross Weight (kg) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.01" name="maxGrossWeightKg" id="updateMaxGross" class="form-control form-select-custom" required>
+                            <input type="number" step="0.01" name="maxGrossWeightKg" id="updateMaxGross" class="form-control" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Goods Capacity (kg) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.01" name="goodsCapacityKg" id="updateCapKg" class="form-control form-select-custom" required>
+                            <input type="number" step="0.01" name="goodsCapacityKg" id="updateCapKg" class="form-control" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Cargo Volume (CBM) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.01" name="goodsCapacityCbm" id="updateCapCbm" class="form-control form-select-custom" required>
+                            <input type="number" step="0.01" name="goodsCapacityCbm" id="updateCapCbm" class="form-control" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
@@ -662,6 +672,7 @@
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
                             <select name="portId" id="updatePortSelect" class="form-select form-select-custom no-custom-select" required>
+                                <option value="" disabled>-- Select Assigned Port --</option>
                                 <c:forEach var="port" items="${ports}">
                                     <option value="${port.portId}">${port.portName} (${port.country})</option>
                                 </c:forEach>
@@ -669,7 +680,7 @@
                         </div>
                         <div class="col-md-12">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Replace Container Image (optional)</label>
-                            <input type="file" name="containerImageFile" accept="image/*" class="form-control form-select-custom">
+                            <input type="file" name="containerImageFile" accept="image/*" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -945,7 +956,10 @@ window.openUpdateModal = function(c) {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = value;
-        if (el.tomselect) el.tomselect.setValue(value);
+        if (el.tomselect) {
+            el.tomselect.setValue(String(value), false);
+            el.tomselect.sync();
+        }
     }
     setSelect('updateTypeSelect', c.type);
     setSelect('updateSizeSelect', c.size);

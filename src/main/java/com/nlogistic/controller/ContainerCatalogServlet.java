@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.nlogistic.dao.ContainerDAO;
+import com.nlogistic.dao.PortDAO;
 import com.nlogistic.model.Container;
 
 /**
@@ -18,6 +19,7 @@ import com.nlogistic.model.Container;
 public class ContainerCatalogServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ContainerDAO containerDAO = new ContainerDAO();
+    private PortDAO portDAO = new PortDAO();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
@@ -45,6 +47,7 @@ public class ContainerCatalogServlet extends HttpServlet {
         int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
         
         request.setAttribute("containers", containers);
+        request.setAttribute("ports", portDAO.getAllPorts());
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("statusFilter", statusFilter);
