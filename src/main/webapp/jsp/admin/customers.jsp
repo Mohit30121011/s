@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
@@ -14,8 +14,8 @@
                     uDao.updateUserStatus(uid, "Active");
                     session.setAttribute("successMessage", "Customer Account Approved & Activated Successfully.");
                 } else if ("reject".equals(action)) {
-                    uDao.updateUserStatus(uid, "Locked");
-                    session.setAttribute("errorMessage", "Customer Account Suspended / Locked.");
+                    uDao.updateUserStatus(uid, "Suspended");
+                    session.setAttribute("errorMessage", "Customer Account Suspended / Rejected.");
                 }
             } catch(Exception ex) { ex.printStackTrace(); }
             response.sendRedirect(request.getRequestURI());
@@ -45,12 +45,12 @@
 
         if (allUsrs != null) {
             for (com.nlogistic.model.User u : allUsrs) {
-                if ("Pending".equalsIgnoreCase(u.getStatus())) {
-                    pendingCount++;
-                } else if ("Active".equalsIgnoreCase(u.getStatus())) {
+                if ("Active".equalsIgnoreCase(u.getStatus())) {
                     activeCount++;
-                } else {
+                } else if ("Suspended".equalsIgnoreCase(u.getStatus()) || "Locked".equalsIgnoreCase(u.getStatus()) || "Rejected".equalsIgnoreCase(u.getStatus())) {
                     inactiveCount++;
+                } else {
+                    pendingCount++;
                 }
             }
         }
@@ -619,19 +619,19 @@
                             <!-- Status Badge -->
                             <td>
                                 <c:choose>
-                                    <c:when test="${u.status == 'Pending'}">
-                                        <span class="status-pill pending">
-                                            <i class="ti ti-clock"></i> Pending Review
-                                        </span>
-                                    </c:when>
                                     <c:when test="${u.status == 'Active'}">
                                         <span class="status-pill active">
                                             <i class="ti ti-circle-check"></i> Approved
                                         </span>
                                     </c:when>
-                                    <c:otherwise>
+                                    <c:when test="${u.status == 'Suspended' || u.status == 'Locked' || u.status == 'Rejected'}">
                                         <span class="status-pill suspended">
                                             <i class="ti ti-ban"></i> Suspended
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="status-pill pending">
+                                            <i class="ti ti-clock"></i> Pending Review
                                         </span>
                                     </c:otherwise>
                                 </c:choose>
@@ -640,7 +640,25 @@
                             <!-- Actions -->
                             <td style="padding-right: 24px; text-align: right;">
                                 <c:choose>
-                                    <c:when test="${u.status == 'Pending'}">
+                                    <c:when test="${u.status == 'Active'}">
+                                        <form method="POST" class="d-inline m-0">
+                                            <input type="hidden" name="userId" value="${u.userId}">
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
+                                                <i class="ti ti-ban"></i> Suspend
+                                            </button>
+                                        </form>
+                                    </c:when>
+                                    <c:when test="${u.status == 'Suspended' || u.status == 'Locked' || u.status == 'Rejected'}">
+                                        <form method="POST" class="d-inline m-0">
+                                            <input type="hidden" name="userId" value="${u.userId}">
+                                            <input type="hidden" name="action" value="accept">
+                                            <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
+                                                <i class="ti ti-reload"></i> Reactivate
+                                            </button>
+                                        </form>
+                                    </c:when>
+                                    <c:otherwise>
                                         <div class="actions-flex">
                                             <form method="POST" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
@@ -657,24 +675,6 @@
                                                 </button>
                                             </form>
                                         </div>
-                                    </c:when>
-                                    <c:when test="${u.status == 'Active'}">
-                                        <form method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="userId" value="${u.userId}">
-                                            <input type="hidden" name="action" value="reject">
-                                            <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-ban"></i> Suspend
-                                            </button>
-                                        </form>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <form method="POST" class="d-inline m-0">
-                                            <input type="hidden" name="userId" value="${u.userId}">
-                                            <input type="hidden" name="action" value="accept">
-                                            <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 5px 14px; font-size: 11.5px;">
-                                                <i class="ti ti-reload"></i> Reactivate
-                                            </button>
-                                        </form>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
@@ -841,8 +841,20 @@
             const status = row.getAttribute('data-status');
             const searchData = row.getAttribute('data-search') || '';
 
-            const matchesTab = (currentTab === 'All') || 
-                               (currentTab === 'Suspended' ? (status === 'Locked' || status === 'Suspended' || status === 'Inactive') : (status === currentTab));
+            const isSuspended = (status === 'Locked' || status === 'Suspended' || status === 'Rejected');
+            const isActive = (status === 'Active');
+            const isPending = (!isActive && !isSuspended);
+
+            let matchesTab = false;
+            if (currentTab === 'All') {
+                matchesTab = true;
+            } else if (currentTab === 'Active') {
+                matchesTab = isActive;
+            } else if (currentTab === 'Suspended') {
+                matchesTab = isSuspended;
+            } else if (currentTab === 'Pending') {
+                matchesTab = isPending;
+            }
             const matchesQuery = !query || searchData.includes(query);
 
             if (matchesTab && matchesQuery) {

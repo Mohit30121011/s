@@ -80,7 +80,7 @@ public class RegisterServlet extends HttpServlet {
 
                 if (companyId > 0) {
                     // Register Company Admin (Role 2) with status 'Inactive' pending Super Admin approval
-                    int userId = userDAO.createUser(username.trim(), email.trim(), password, phone.trim(), 2, companyId, "Inactive");
+                    int userId = userDAO.createUser(username.trim(), email.trim(), password, phone.trim(), 2, companyId, "Pending");
                     if (userId <= 0) {
                         throw new Exception("Username or email already in use. Please choose a different one.");
                     }
@@ -128,7 +128,7 @@ public class RegisterServlet extends HttpServlet {
                 }
 
                 // Register User (Role 5 = Customer) with status 'Inactive'
-                int newUserId = userDAO.createUser(username.trim(), email.trim(), password, phone.trim(), 5, null, "Inactive");
+                int newUserId = userDAO.createUser(username.trim(), email.trim(), password, phone.trim(), 5, null, "Pending");
                 if (newUserId > 0) {
                     userDAO.registerCustomer(newUserId, customerName.trim(), address.trim(), kycDocPath, 0.0);
                 } else {

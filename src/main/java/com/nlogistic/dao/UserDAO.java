@@ -119,7 +119,7 @@ public User getUserByUsername(String username) {
             ps.setString(4, phone != null ? phone : "");
             ps.setInt(5, roleId);
             if (companyId != null) ps.setInt(6, companyId); else ps.setNull(6, Types.INTEGER);
-            ps.setString(7, status != null ? status : "Active");
+            ps.setString(7, (status != null && !status.trim().isEmpty()) ? status : "Pending");
             int affected = ps.executeUpdate();
             if (affected > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -138,7 +138,7 @@ public User getUserByUsername(String username) {
      * Direct persistent registration with SHA-256 password hashing and audit logging
      */
     public void registerUser(String username, String email, String password, String phone, int roleId, Integer companyId, String status) {
-        int newId = createUser(username, email, password, phone, roleId, companyId, status != null ? status : "Inactive");
+        int newId = createUser(username, email, password, phone, roleId, companyId, (status != null && !status.trim().isEmpty()) ? status : "Pending");
         if (newId > 0) {
             logAuditEvent(newId, "USER_REGISTERED", username, "127.0.0.1");
         }
@@ -350,7 +350,7 @@ public User getUserByUsername(String username) {
     }
     public java.util.List<com.nlogistic.model.User> getPendingUsers() {
         java.util.List<com.nlogistic.model.User> list = new java.util.ArrayList<>();
-        String sql = "SELECT * FROM users WHERE status = 'Inactive'";
+        String sql = "SELECT * FROM users WHERE status = 'Pending' OR status = 'Inactive'";
         try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {

@@ -134,7 +134,7 @@ public class CompanyDAO {
     }
     public java.util.List<com.nlogistic.model.Company> getPendingCompanies() {
         java.util.List<com.nlogistic.model.Company> list = new java.util.ArrayList<>();
-        String sql = "SELECT * FROM companies WHERE approval_status = 'Pending'";
+        String sql = "SELECT * FROM companies WHERE approval_status = 'Pending' OR approval_status = 'Inactive' OR approval_status = '' OR approval_status IS NULL";
         try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {
