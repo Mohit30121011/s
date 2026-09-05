@@ -4,36 +4,9 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
-<%
-    // Ensure products list is populated even under direct JSP dispatch
-    if (request.getAttribute("products") == null) {
-        try {
-            com.nlogistic.dao.ProductDAO pDao = new com.nlogistic.dao.ProductDAO();
-            request.setAttribute("products", pDao.getAllProducts());
-        } catch (Exception ignored) {}
-    }
-
-    java.util.List<com.nlogistic.model.Product> prodList = (java.util.List<com.nlogistic.model.Product>) request.getAttribute("products");
-    int totalProducts = (prodList != null) ? prodList.size() : 0;
-    double totalVal = 0.0;
-    double totalCst = 0.0;
-    java.util.Set<String> categories = new java.util.TreeSet<String>();
-    if (prodList != null) {
-        for (com.nlogistic.model.Product p : prodList) {
-            totalVal += p.getUnitPrice();
-            totalCst += p.getUnitCost();
-            if (p.getCategory() != null && !p.getCategory().trim().isEmpty()) {
-                categories.add(p.getCategory().trim());
-            }
-        }
-    }
-    request.setAttribute("kpiTotalProducts", totalProducts);
-    request.setAttribute("kpiTotalCategories", categories.size());
-    request.setAttribute("kpiTotalValue", totalVal);
-    request.setAttribute("kpiTotalCost", totalCst);
-    request.setAttribute("categoriesSet", categories);
-%>
-
+<%-- MVC2 (SRS 10.2): data and actions come from InventoryServlet (/inventory/products).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <style>
     /* ==========================================================================
        PRODUCT CATALOG THEME (SWIGGY ORANGE ENTERPRISE)

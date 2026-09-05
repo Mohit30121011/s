@@ -1,103 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-        String action = request.getParameter("action");
-        if (action != null) {
-            try {
-                com.nlogistic.dao.VesselDAO vDao = new com.nlogistic.dao.VesselDAO();
-                if ("add".equals(action)) {
-                    String name = request.getParameter("vesselName");
-                    String imo = request.getParameter("imoNumber");
-                    String capStr = request.getParameter("capacityTeu");
-                    int cap = 0;
-                    if (capStr != null && !capStr.trim().isEmpty()) {
-                        try { cap = Integer.parseInt(capStr.trim()); } catch(Exception ignored) {}
-                    }
-                    String status = request.getParameter("status");
-                    if (status == null || status.trim().isEmpty()) status = "In Service";
-                    vDao.addVessel(name != null ? name.trim() : "", imo != null ? imo.trim() : "", cap, status.trim());
-                    session.setAttribute("successMessage", "Vessel \"" + (name != null ? name.trim() : "") + "\" registered to maritime fleet successfully.");
-                } else if ("edit".equals(action)) {
-                    String vIdStr = request.getParameter("vesselId");
-                    String name = request.getParameter("vesselName");
-                    String imo = request.getParameter("imoNumber");
-                    String capStr = request.getParameter("capacityTeu");
-                    if (vIdStr != null) {
-                        int vId = Integer.parseInt(vIdStr);
-                        int cap = 0;
-                        if (capStr != null && !capStr.trim().isEmpty()) {
-                            try { cap = Integer.parseInt(capStr.trim()); } catch(Exception ignored) {}
-                        }
-                        String status = request.getParameter("status");
-                        if (status == null || status.trim().isEmpty()) status = "In Service";
-                        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                             java.sql.PreparedStatement ps = conn.prepareStatement(
-                                "UPDATE vessels SET vessel_name = ?, imo_number = ?, capacity_teu = ?, status = ? WHERE vessel_id = ?")) {
-                            ps.setString(1, name != null ? name.trim() : "");
-                            ps.setString(2, imo != null ? imo.trim() : "");
-                            ps.setInt(3, cap);
-                            ps.setString(4, status.trim());
-                            ps.setInt(5, vId);
-                            ps.executeUpdate();
-                            session.setAttribute("successMessage", "Vessel #VSL-" + vId + " details and status updated successfully.");
-                        }
-                    }
-                } else if ("delete".equals(action)) {
-                    String vIdStr = request.getParameter("vesselId");
-                    if (vIdStr != null) {
-                        int vId = Integer.parseInt(vIdStr);
-                        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                             java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM vessels WHERE vessel_id = ?")) {
-                            ps.setInt(1, vId);
-                            ps.executeUpdate();
-                            session.setAttribute("successMessage", "Vessel #VSL-" + vId + " decommissioned and removed from fleet.");
-                        }
-                    }
-                }
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                session.setAttribute("errorMessage", "Operation failed: " + ex.getMessage());
-            }
-            response.sendRedirect(request.getRequestURI());
-            return;
-        }
-    }
-
-    if (request.getAttribute("vessels") == null) {
-        com.nlogistic.dao.VesselDAO vDao = new com.nlogistic.dao.VesselDAO();
-        java.util.List<com.nlogistic.model.Vessel> vList = vDao.getAllVessels();
-        request.setAttribute("vessels", vList);
-    }
-
-    // Compute live KPI metrics
-    java.util.List<com.nlogistic.model.Vessel> allVessels = (java.util.List<com.nlogistic.model.Vessel>) request.getAttribute("vessels");
-    int totalFleetCount = (allVessels != null) ? allVessels.size() : 0;
-    long totalTeuCapacity = 0;
-    int ulcvCount = 0; // >= 14,000 TEU
-    int panamaxCount = 0;
-
-    if (allVessels != null) {
-        for (com.nlogistic.model.Vessel v : allVessels) {
-            int cap = v.getCapacityTeu();
-            totalTeuCapacity += cap;
-            if (cap >= 14000) {
-                ulcvCount++;
-            } else if (cap >= 3000) {
-                panamaxCount++;
-            }
-        }
-    }
-    long avgCapacity = (totalFleetCount > 0) ? (totalTeuCapacity / totalFleetCount) : 0;
-
-    request.setAttribute("totalFleetCount", totalFleetCount);
-    request.setAttribute("totalTeuCapacity", totalTeuCapacity);
-    request.setAttribute("avgCapacity", avgCapacity);
-    request.setAttribute("ulcvCount", ulcvCount);
-%>
-
+<%-- MVC2 (SRS 10.2): data and actions come from VesselServlet (/vessels).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -771,7 +677,7 @@
             </div>
             <button type="button" class="btn-modal-close" onclick="closeAddVesselModal()">&times;</button>
         </div>
-        <form method="POST" action="${pageContext.request.contextPath}/jsp/vessels.jsp" id="addVesselForm">
+        <form method="POST" action="${pageContext.request.contextPath}/vessels" id="addVesselForm">
             <input type="hidden" name="action" value="add">
             <div class="modal-form-body">
                 <!-- Vessel Name -->
@@ -851,7 +757,7 @@
             </div>
             <button type="button" class="btn-modal-close" onclick="closeEditVesselModal()">&times;</button>
         </div>
-        <form method="POST" action="${pageContext.request.contextPath}/jsp/vessels.jsp" id="editVesselForm">
+        <form method="POST" action="${pageContext.request.contextPath}/vessels" id="editVesselForm">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="vesselId" id="editVesselId">
             <div class="modal-form-body">
@@ -930,7 +836,7 @@
             </div>
             <button type="button" class="btn-modal-close" onclick="closeDeleteVesselModal()">&times;</button>
         </div>
-        <form method="POST" action="${pageContext.request.contextPath}/jsp/vessels.jsp" id="deleteVesselForm">
+        <form method="POST" action="${pageContext.request.contextPath}/vessels" id="deleteVesselForm">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="vesselId" id="deleteVesselId">
             <div class="modal-form-body">

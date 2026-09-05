@@ -15,7 +15,7 @@
                     </div>
                     <h5 class="fw-bold">Book Shipment</h5>
                     <p class="text-muted mb-4">Create a new shipment request to transport your goods globally.</p>
-                    <a href="#" class="btn text-white w-100 rounded-3" style="background-color: #FC8019;">Start Booking</a>
+                    <a href="${pageContext.request.contextPath}/shipments/create" class="btn text-white w-100 rounded-3" style="background-color: #FC8019;">Start Booking</a>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
                     </div>
                     <h5 class="fw-bold">Book Container</h5>
                     <p class="text-muted mb-4">Reserve empty shipping containers for your upcoming cargo.</p>
-                    <a href="#" class="btn text-white w-100 rounded-3" style="background-color: #4F46E5;">Reserve Now</a>
+                    <a href="${pageContext.request.contextPath}/containers" class="btn text-white w-100 rounded-3" style="background-color: #4F46E5;">Reserve Now</a>
                 </div>
             </div>
         </div>

@@ -1,16 +1,9 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-if (request.getAttribute("ports") == null) {
-    com.nlogistic.dao.PortDAO pDao = new com.nlogistic.dao.PortDAO();
-    request.setAttribute("ports", pDao.getAllPorts());
-}
-if (request.getAttribute("containers") == null) {
-    com.nlogistic.dao.ContainerDAO cDao = new com.nlogistic.dao.ContainerDAO();
-    request.setAttribute("containers", cDao.getAllContainers());
-}
-%>
+<%-- MVC2 (SRS 10.2): data and actions come from ContainerCatalogServlet (/containers).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -405,39 +398,109 @@ if (request.getAttribute("containers") == null) {
         </c:if>
     </div>
 
-    <!-- Interactive Filter & Search Bar -->
-    <div class="filter-bar-card">
+    <!-- Alert Notifications for Add / Update / Error -->
+    <c:if test="${param.add == 'true'}">
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert" style="border-radius: 10px; border: 1px solid #BBF7D0; background: #F0FDF4; color: #166534; padding: 14px 20px;">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 36px; height: 36px; background: #DCFCE7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #16A34A; flex-shrink: 0;">
+                    <i class="ti ti-circle-check"></i>
+                </div>
+                <div>
+                    <strong style="font-size: 14px;">Container Registered Successfully!</strong>
+                    <div style="font-size: 12.5px; margin-top: 2px;">
+                        <c:choose>
+                            <c:when test="${not empty param.number}">
+                                Container <strong><c:out value="${param.number}"/></strong> has been saved and is now live in the catalog with automatic QR barcode tracking.
+                            </c:when>
+                            <c:otherwise>
+                                Container has been added to the catalog and is ready for cargo allocation.
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <c:if test="${param.error == 'duplicate'}">
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert" style="border-radius: 10px; border: 1px solid #FECACA; background: #FEF2F2; color: #991B1B; padding: 14px 20px;">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 36px; height: 36px; background: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #DC2626; flex-shrink: 0;">
+                    <i class="ti ti-alert-triangle"></i>
+                </div>
+                <div>
+                    <strong style="font-size: 14px;">Duplicate Container Number!</strong>
+                    <div style="font-size: 12.5px; margin-top: 2px;">
+                        A container with number <strong><c:out value="${param.number}"/></strong> already exists in the system. Container numbers must be unique.
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <c:if test="${param.add == 'false'}">
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert" style="border-radius: 10px; border: 1px solid #FECACA; background: #FEF2F2; color: #991B1B; padding: 14px 20px;">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 36px; height: 36px; background: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #DC2626; flex-shrink: 0;">
+                    <i class="ti ti-circle-x"></i>
+                </div>
+                <div>
+                    <strong style="font-size: 14px;">Failed to Add Container</strong>
+                    <div style="font-size: 12.5px; margin-top: 2px;">
+                        An unexpected database error occurred while registering the container. Please verify all inputs and try again.
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <!--
+      Filter & search bar.
+
+      These controls used to filter in JavaScript over the cards already on the
+      page, which was one page of the fleet - so searching for a container that
+      happened to sit on page 4 found nothing. They now submit to the servlet and
+      filter in SQL, and the selections are echoed back from the request.
+    -->
+    <form method="get" action="${pageContext.request.contextPath}/containers" id="containerFilterForm" class="filter-bar-card">
+        <input type="hidden" name="pageSize" value="${pageSize}">
         <div class="filter-search-box">
             <i class="ti ti-search search-icon"></i>
-            <input type="text" id="containerSearchInput" placeholder="Search by container number, type, size...">
-            <button class="filter-search-clear d-none" id="clearContainerSearchBtn" type="button"><i class="ti ti-x"></i></button>
+            <input type="text" id="containerSearchInput" name="search" value="${searchTerm}"
+                   placeholder="Search by container number, type, size...">
+            <c:if test="${not empty searchTerm}">
+                <a class="filter-search-clear" href="${pageContext.request.contextPath}/containers?status=${statusFilter}&amp;type=${typeFilter}&amp;pageSize=${pageSize}"><i class="ti ti-x"></i></a>
+            </c:if>
         </div>
 
         <div class="filter-select-wrap">
-            <select id="statusFilter" class="form-select form-select-custom no-custom-select">
-                <option value="All" selected>All Statuses</option>
-                <option value="Available">Available</option>
-                <option value="Allocated">Allocated</option>
-                <option value="In-Transit">In-Transit</option>
-                <option value="Under Maintenance">Under Maintenance</option>
+            <select id="statusFilter" name="status" class="form-select form-select-custom no-custom-select"
+                    onchange="document.getElementById('containerFilterForm').submit();">
+                <c:forEach var="st" items="All,Available,Allocated,In-Transit,Under Maintenance">
+                    <option value="${st}" ${statusFilter eq st ? 'selected' : ''}>${st eq 'All' ? 'All Statuses' : st}</option>
+                </c:forEach>
             </select>
         </div>
 
         <div class="filter-select-wrap">
-            <select id="typeFilter" class="form-select form-select-custom no-custom-select">
-                <option value="All" selected>All Types</option>
-                <option value="Dry">Dry</option>
-                <option value="Reefer">Reefer</option>
-                <option value="Open Top">Open Top</option>
-                <option value="Flat Rack">Flat Rack</option>
-                <option value="Tank">Tank</option>
+            <select id="typeFilter" name="type" class="form-select form-select-custom no-custom-select"
+                    onchange="document.getElementById('containerFilterForm').submit();">
+                <c:forEach var="ty" items="All,Dry,Reefer,Open Top,Flat Rack,Tank">
+                    <option value="${ty}" ${typeFilter eq ty ? 'selected' : ''}>${ty eq 'All' ? 'All Types' : ty}</option>
+                </c:forEach>
             </select>
         </div>
 
-        <button class="btn-reset-filters" id="resetContainerFiltersBtn" title="Reset Filters" type="button">
-            <i class="ti ti-rotate"></i>
+        <button class="btn-reset-filters" type="submit" title="Apply filters">
+            <i class="ti ti-search"></i>
         </button>
-    </div>
+        <a class="btn-reset-filters" href="${pageContext.request.contextPath}/containers" title="Reset Filters">
+            <i class="ti ti-rotate"></i>
+        </a>
+    </form>
 
     <!-- Container Cards Grid -->
     <div class="row g-4" id="containerGrid">
@@ -537,11 +600,25 @@ if (request.getAttribute("containers") == null) {
                         <!-- Bottom Actions -->
                         <div class="card-actions-row">
                             <c:choose>
-                                <c:when test="${container.status == 'Available'}">
+                                <%-- Allocation: Super Admin, Company Admin, Operations only --%>
+                                <c:when test="${container.status == 'Available' && sessionScope.user.roleId <= 3}">
                                     <a href="${pageContext.request.contextPath}/allocate?containerId=${container.containerId}" class="btn-allocate">
                                         <span>Allocate</span>
                                         <i class="ti ti-arrow-right"></i>
                                     </a>
+                                </c:when>
+                                <%-- Customers book instead of allocating (FR2.1) --%>
+                                <c:when test="${container.status == 'Available' && sessionScope.user.roleId == 5}">
+                                    <a href="${pageContext.request.contextPath}/shipments/create?containerId=${container.containerId}" class="btn-allocate">
+                                        <span>Book This Container</span>
+                                        <i class="ti ti-arrow-right"></i>
+                                    </a>
+                                </c:when>
+                                <%-- Finance: catalog is read-only --%>
+                                <c:when test="${container.status == 'Available'}">
+                                    <button class="btn-not-available" disabled type="button">
+                                        Available
+                                    </button>
                                 </c:when>
                                 <c:otherwise>
                                     <button class="btn-not-available" disabled type="button">
@@ -576,8 +653,8 @@ if (request.getAttribute("containers") == null) {
             </div>
         </c:forEach>
     </div>
-    <!-- No Results Placeholder -->
-    <div id="noContainerResults" class="text-center py-5 d-none">
+    <!-- Empty state. Server-rendered now that filtering happens in SQL. -->
+    <div id="noContainerResults" class="text-center py-5 ${empty containers ? '' : 'd-none'}">
         <div style="width: 64px; height: 64px; background: #F1F5F9; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #94A3B8; font-size: 28px;">
             <i class="ti ti-box-off"></i>
         </div>
@@ -585,22 +662,47 @@ if (request.getAttribute("containers") == null) {
         <p style="color: var(--nl-text-muted); font-size: 13.5px;">No containers matching your search and filter criteria.</p>
     </div>
 
-    <!-- Enterprise Theme Pagination Bar -->
+    <!--
+      Pagination.
+
+      The old bar was driven entirely by JavaScript over the cards in the DOM,
+      while the servlet was already paginating in SQL. The two cancelled out: the
+      page always held 12 rows, the counter read "of 0 containers" because the
+      script never saw a server total, and the page buttons hid themselves
+      because 12 was never more than one client-side page. It is server-driven
+      now, so the whole fleet is reachable.
+    -->
+    <c:set var="qsBase" value="status=${statusFilter}&amp;type=${typeFilter}&amp;search=${searchTerm}&amp;pageSize=${pageSize}" />
     <div class="nl-pagination-wrapper mt-4" id="containerPagination" style="border-radius: 12px; border: 1px solid var(--nl-border);">
         <div class="nl-pagination-info">
-            <span>Showing <strong id="containerPageStart">1</strong> to <strong id="containerPageEnd">12</strong> of <strong id="containerTotalRows">0</strong> containers</span>
+            <span>Showing <strong>${rangeStart}</strong> to <strong>${rangeEnd}</strong> of <strong>${totalRecords}</strong> containers</span>
             <div class="d-inline-flex align-items-center gap-2 ms-2">
                 <span style="color: #94A3B8; font-size: 12.5px;">Cards per page:</span>
-                <select id="containerPageSize" class="nl-page-size-select no-custom-select">
-                    <option value="12" selected>12</option>
-                    <option value="24">24</option>
-                    <option value="48">48</option>
-                    <option value="96">96</option>
+                <select id="containerPageSize" class="nl-page-size-select no-custom-select"
+                        onchange="location.href='${pageContext.request.contextPath}/containers?status=${statusFilter}&amp;type=${typeFilter}&amp;search=${searchTerm}&amp;page=1&amp;pageSize=' + this.value;">
+                    <c:forEach var="ps" items="${pageSizes}">
+                        <option value="${ps}" ${pageSize eq ps ? 'selected' : ''}>${ps}</option>
+                    </c:forEach>
                 </select>
             </div>
         </div>
-        <div class="nl-pagination-nav" id="containerPageNav">
-            <!-- Dynamically generated page buttons -->
+        <c:if test="${totalPages > 1}">
+            <div class="nl-pagination-nav">
+                <c:if test="${currentPage > 1}">
+                    <a class="nl-page-btn nl-page-nav-btn" href="?${qsBase}&amp;page=${currentPage - 1}">Prev</a>
+                </c:if>
+                <c:forEach begin="${currentPage - 2 > 1 ? currentPage - 2 : 1}"
+                           end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}" var="pg">
+                    <a class="nl-page-btn nl-page-num ${pg == currentPage ? 'active' : ''}" href="?${qsBase}&amp;page=${pg}">${pg}</a>
+                </c:forEach>
+                <c:if test="${currentPage < totalPages}">
+                    <a class="nl-page-btn nl-page-nav-btn" href="?${qsBase}&amp;page=${currentPage + 1}">Next</a>
+                </c:if>
+            </div>
+        </c:if>
+    </div>
+
+<!-- Dynamically generated page buttons -->
         </div>
     </div>
 </div>
@@ -718,9 +820,33 @@ if (request.getAttribute("containers") == null) {
                     <div class="row g-3">
                         <!-- Container Number -->
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Number <span style="color: #FC8019;">*</span></label>
-                            <input type="text" name="containerNumber" id="newContainerNumber" class="form-control" required placeholder="e.g. CONT0000301" style="border-radius: 8px; font-size: 13.5px; text-transform: uppercase;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label mb-0" style="font-weight: 600; font-size: 13px;">Container Number <span style="color: #FC8019;">*</span></label>
+                                <button type="button" class="btn btn-link p-0 text-decoration-none" style="font-size: 11.5px; color: #FC8019; font-weight: 600;" onclick="generateRandomContainerNumber()">
+                                    <i class="ti ti-wand"></i> Auto-Generate
+                                </button>
+                            </div>
+                            <input type="text" name="containerNumber" id="newContainerNumber" class="form-control" required placeholder="e.g. CONT0000305" style="border-radius: 8px; font-size: 13.5px; text-transform: uppercase;">
                         </div>
+
+                        <!-- Owner Company (Super Admin selects tenant; Tenant staff defaults to own company) -->
+                        <c:choose>
+                            <c:when test="${sessionScope.user.roleId == 1}">
+                                <div class="col-md-6">
+                                    <label class="form-label" style="font-weight: 600; font-size: 13px;">
+                                        <i class="ti ti-building me-1" style="color: #FC8019;"></i> Owner Company <span style="color: #FC8019;">*</span>
+                                    </label>
+                                    <select name="companyId" class="form-select form-select-custom no-custom-select" required>
+                                        <c:forEach var="comp" items="${companies}" varStatus="cStatus">
+                                            <option value="${comp.companyId}" ${cStatus.first ? 'selected' : ''}>${comp.companyName}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <input type="hidden" name="companyId" value="${sessionScope.user.companyId}">
+                            </c:otherwise>
+                        </c:choose>
 
                         <!-- Assigned Port / Location -->
                         <div class="col-md-6">
@@ -978,213 +1104,38 @@ window.deleteContainer = function(id, number) {
     }
 };
 
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById('containerSearchInput');
-    const clearBtn = document.getElementById('clearContainerSearchBtn');
-    const statusFilter = document.getElementById('statusFilter');
-    const typeFilter = document.getElementById('typeFilter');
-    const resetBtn = document.getElementById('resetContainerFiltersBtn');
-    const pageSizeSelect = document.getElementById('containerPageSize');
-    const pageNav = document.getElementById('containerPageNav');
-    const pageStartEl = document.getElementById('containerPageStart');
-    const pageEndEl = document.getElementById('containerPageEnd');
-    const totalRowsEl = document.getElementById('containerTotalRows');
-    const noResultsEl = document.getElementById('noContainerResults');
-    const allCards = Array.from(document.querySelectorAll('.container-col'));
-
-    let currentPage = 1;
-    let pageSize = parseInt(pageSizeSelect ? pageSizeSelect.value : 12, 10);
-    let matchingCards = [];
-
-    function updatePagination() {
-        const total = matchingCards.length;
-        const totalPages = Math.ceil(total / pageSize) || 1;
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
-        const endIndex = Math.min(startIndex + pageSize, total);
-
-        if (pageStartEl) pageStartEl.textContent = total === 0 ? '0' : (startIndex + 1);
-        if (pageEndEl) pageEndEl.textContent = endIndex;
-        if (totalRowsEl) totalRowsEl.textContent = total;
-
-        allCards.forEach(col => { col.style.display = 'none'; });
-
-        for (let i = startIndex; i < endIndex; i++) {
-            if (matchingCards[i]) {
-                matchingCards[i].style.display = '';
-            }
-        }
-
-        if (noResultsEl) {
-            if (total === 0) {
-                noResultsEl.classList.remove('d-none');
-            } else {
-                noResultsEl.classList.add('d-none');
-            }
-        }
-
-        renderPageButtons(totalPages);
+window.generateRandomContainerNumber = function() {
+    const prefixes = ['CONT', 'MSCU', 'CMAU', 'HLCU', 'ONEU', 'MAEU'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const num = Math.floor(100000 + Math.random() * 900000);
+    const check = Math.floor(Math.random() * 10);
+    const input = document.getElementById('newContainerNumber');
+    if (input) {
+        input.value = prefix + num + check;
     }
+};
 
-    function renderPageButtons(totalPages) {
-        if (!pageNav) return;
-        pageNav.innerHTML = '';
-
-        if (totalPages <= 1 && matchingCards.length <= pageSize) {
-            return;
-        }
-
-        const prevBtn = document.createElement('button');
-        prevBtn.type = 'button';
-        prevBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === 1 ? ' disabled' : '');
-        prevBtn.innerHTML = '<i class=\"ti ti-chevron-left\"></i> Prev';
-        prevBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (currentPage > 1) {
-                currentPage--;
-                updatePagination();
-                window.scrollTo({ top: 100, behavior: 'smooth' });
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEl = document.getElementById('addContainerModal');
+    if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', function() {
+            const input = document.getElementById('newContainerNumber');
+            if (input && (!input.value || input.value.trim() === '')) {
+                window.generateRandomContainerNumber();
             }
         });
-        pageNav.appendChild(prevBtn);
-
-        let pages = [];
-        if (totalPages <= 7) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
-        } else {
-            if (currentPage <= 4) {
-                pages = [1, 2, 3, 4, 5, '...', totalPages];
-            } else if (currentPage >= totalPages - 3) {
-                pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-            } else {
-                pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
-            }
-        }
-
-        pages.forEach(p => {
-            if (p === '...') {
-                const ellipsis = document.createElement('span');
-                ellipsis.className = 'nl-page-ellipsis';
-                ellipsis.textContent = 'â€¦';
-                pageNav.appendChild(ellipsis);
-            } else {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'nl-page-btn nl-page-num' + (p === currentPage ? ' active' : '');
-                btn.textContent = p;
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (currentPage !== p) {
-                        currentPage = p;
-                        updatePagination();
-                        window.scrollTo({ top: 100, behavior: 'smooth' });
-                    }
-                });
-                pageNav.appendChild(btn);
-            }
-        });
-
-        const nextBtn = document.createElement('button');
-        nextBtn.type = 'button';
-        nextBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === totalPages ? ' disabled' : '');
-        nextBtn.innerHTML = 'Next <i class=\"ti ti-chevron-right\"></i>';
-        nextBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (currentPage < totalPages) {
-                currentPage++;
-                updatePagination();
-                window.scrollTo({ top: 100, behavior: 'smooth' });
-            }
-        });
-        pageNav.appendChild(nextBtn);
     }
-
-    function filterCards() {
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const selectedStatus = (statusFilter ? statusFilter.value : 'All').toLowerCase().trim();
-        const selectedType = (typeFilter ? typeFilter.value : 'All').toLowerCase().trim();
-        matchingCards = [];
-
-        if (clearBtn) {
-            if (query.length > 0) {
-                clearBtn.classList.remove('d-none');
-            } else {
-                clearBtn.classList.add('d-none');
-            }
-        }
-
-        const isAllStatus = (!selectedStatus || selectedStatus === 'all');
-        const isAllType = (!selectedType || selectedType === 'all');
-
-        allCards.forEach(col => {
-            const num = (col.dataset.number || '').toLowerCase();
-            const status = (col.dataset.status || '').toLowerCase();
-            const type = (col.dataset.type || '').toLowerCase();
-            const size = (col.dataset.size || '').toLowerCase();
-            const cardText = col.textContent.toLowerCase();
-
-            const matchesQuery = !query || num.includes(query) || type.includes(query) || size.includes(query) || cardText.includes(query);
-            const matchesStatus = isAllStatus || status === selectedStatus;
-            const matchesType = isAllType || type === selectedType;
-
-            if (matchesQuery && matchesStatus && matchesType) {
-                matchingCards.push(col);
-            }
-        });
-
-        currentPage = 1;
-        updatePagination();
-    }
-
-    if (pageSizeSelect) {
-        pageSizeSelect.addEventListener('change', function() {
-            pageSize = parseInt(this.value, 10);
-            currentPage = 1;
-            updatePagination();
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', filterCards);
-    }
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            if (searchInput) {
-                searchInput.value = '';
-                searchInput.focus();
-            }
-            filterCards();
-        });
-    }
-
-    if (statusFilter) {
-        statusFilter.addEventListener('change', filterCards);
-    }
-    if (typeFilter) {
-        typeFilter.addEventListener('change', filterCards);
-    }
-
-    if (resetBtn) {
-        resetBtn.addEventListener('click', function() {
-            if (searchInput) searchInput.value = '';
-            if (statusFilter) {
-                statusFilter.value = '';
-                if (statusFilter.tomselect) statusFilter.tomselect.setValue('');
-            }
-            if (typeFilter) {
-                typeFilter.value = '';
-                if (typeFilter.tomselect) typeFilter.tomselect.setValue('');
-            }
-            filterCards();
-        });
-    }
-
-    filterCards();
 });
+
+/*
+ * The client-side search / filter / pagination engine that lived here has been
+ * removed. It operated on the cards in the DOM, which is one server page of the
+ * fleet, so it silently disagreed with the SQL pagination underneath it: the
+ * counter reported "of 0 containers", the page buttons suppressed themselves,
+ * and the cards-per-page selector changed nothing. Search, status, type, page
+ * and page size are all query parameters now, handled in
+ * ContainerCatalogServlet and ContainerDAO.getCatalogPage().
+ */
 </script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />

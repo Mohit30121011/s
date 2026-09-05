@@ -163,11 +163,12 @@ public class ManualStockServlet extends HttpServlet {
                     }
                 }
 
-                if (stockId == -1) {
+                boolean newStockRecord = (stockId == -1);
+                if (newStockRecord) {
                     String insertStock = "INSERT INTO stock "
                             + "(company_id, product_id, warehouse_location, quantity_on_hand, batch_no, expiry_date) "
                             + "VALUES (?, ?, ?, ?, ?, ?)";
-                    try (PreparedStatement psInsertStock = conn.prepareStatement(insertStock)) {
+                    try (PreparedStatement psInsertStock = conn.prepareStatement(insertStock, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                         psInsertStock.setInt(1, companyId);
                         psInsertStock.setInt(2, productId);
                         psInsertStock.setString(3, warehouse);
@@ -175,6 +176,9 @@ public class ManualStockServlet extends HttpServlet {
                         psInsertStock.setString(5, batchNo != null && !batchNo.trim().isEmpty() ? batchNo.trim() : null);
                         psInsertStock.setDate(6, expiryDate);
                         psInsertStock.executeUpdate();
+                        try (ResultSet gk = psInsertStock.getGeneratedKeys()) {
+                            if (gk.next()) stockId = gk.getInt(1);
+                        }
                     }
                 } else {
                     String updateStock = "UPDATE stock SET quantity_on_hand = quantity_on_hand + ?, "
@@ -191,11 +195,12 @@ public class ManualStockServlet extends HttpServlet {
                 }
 
                 // ── Step 3: Inventory Ledger entry (FR4.5) ────────────────────
-                String insertLedger = "INSERT INTO inventory_ledger (product_id, transaction_type, quantity, unit_cost_at_txn, reference_type) VALUES (?, 'IN', ?, ?, 'Manual Entry')";
+                String insertLedger = "INSERT INTO inventory_ledger (product_id, transaction_type, quantity, unit_cost_at_txn, reference_type, reference_id) VALUES (?, 'IN', ?, ?, 'Manual Entry', ?)";
                 try (PreparedStatement psInsertLedger = conn.prepareStatement(insertLedger)) {
                     psInsertLedger.setInt(1, productId);
                     psInsertLedger.setDouble(2, quantity);
                     psInsertLedger.setDouble(3, unitCost);
+                    psInsertLedger.setInt(4, stockId); // FR4.5: traceable back to the stock row
                     psInsertLedger.executeUpdate();
                 }
 
@@ -203,6 +208,11 @@ public class ManualStockServlet extends HttpServlet {
                 request.getSession().setAttribute("successMessage",
                         String.format("Manual stock entry added successfully for '%s' (Qty: %.2f %s, Warehouse: %s).",
                                 productName.trim(), quantity, uom, warehouse));
+
+                // FR8.1: auto-generate a barcode for every newly created stock/inventory record
+                if (newStockRecord && stockId != -1) {
+                    com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Stock", stockId, user.getUserId());
+                }
             }
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("errorMessage", e.getMessage());

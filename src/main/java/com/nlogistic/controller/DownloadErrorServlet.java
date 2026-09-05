@@ -17,9 +17,30 @@ public class DownloadErrorServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // GAP 4: the only guard here was "the file sits in the OS temp dir", so any
+        // authenticated user who guessed a report name could pull another company's
+        // rejected stock rows. Error reports belong to the upload batch that produced
+        // them, so the caller must own that batch.
+        com.nlogistic.model.User user = com.nlogistic.util.RbacContext.user(request);
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        if (user.getRoleId() > 3) { // warehouse function: Admins and Operations only
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "Access Denied: stock error reports are an Operations function.");
+            return;
+        }
+
         String filePath = request.getParameter("file");
         if (filePath == null || filePath.trim().isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "File parameter is missing");
+            return;
+        }
+
+        if (!ownsErrorReport(filePath, user)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "Access Denied: this error report belongs to another company's upload.");
             return;
         }
         
@@ -56,5 +77,26 @@ public class DownloadErrorServlet extends HttpServlet {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error downloading file");
         }
+    }
+
+    /**
+     * True when this error report was produced by an upload belonging to the
+     * caller's company. Super Admin may read any report.
+     */
+    private boolean ownsErrorReport(String rawPath, com.nlogistic.model.User user) {
+        if (user.getRoleId() == 1) return true;
+        String sql = "SELECT 1 FROM stock_upload_log WHERE error_report_path = ? AND company_id = ?";
+        try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            String decoded = java.net.URLDecoder.decode(rawPath, "UTF-8");
+            ps.setString(1, decoded);
+            ps.setInt(2, user.getCompanyId());
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

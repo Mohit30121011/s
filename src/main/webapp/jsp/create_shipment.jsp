@@ -96,7 +96,7 @@
     <c:remove var="errorMessage" scope="session"/>
 </c:if>
 
-<form action="${pageContext.request.contextPath}/shipments/save" method="POST">
+<form method="POST" action="${pageContext.request.contextPath}<c:choose><c:when test="${sessionScope.user.roleId == 5}">/shipments/quote</c:when><c:otherwise>/shipments/save</c:otherwise></c:choose>">
     <div class="card-custom">
         <div class="card-header-custom">
             <i class="fa-regular fa-file-lines"></i>
@@ -108,12 +108,22 @@
             <div class="col-md-6">
                 <label class="form-label">Customer <span class="required">*</span></label>
                 <div class="select-wrapper">
-                    <select class="form-select-custom form-select" name="customerId" required>
-                        <option value="" disabled selected>Search and select customer</option>
+                    <select class="form-select-custom form-select" name="customerId" required
+                            <c:if test="${lockCustomer}">data-locked="true" tabindex="-1"
+                            style="pointer-events:none; background:var(--nl-surface-subtle,#F9FAFB);"</c:if>>
+                        <%-- Staff pick a customer; a Customer is pinned to their own account. --%>
+                        <c:if test="${not lockCustomer}">
+                            <option value="" disabled selected>Search and select customer</option>
+                        </c:if>
                         <c:forEach var="cust" items="${customers}">
-                            <option value="${cust.customerId}">${cust.customerName} (CUST-${cust.customerId})</option>
+                            <option value="${cust.customerId}" <c:if test="${lockCustomer}">selected</c:if>>${cust.customerName} (CUST-${cust.customerId})</option>
                         </c:forEach>
                     </select>
+                    <c:if test="${lockCustomer}">
+                        <div style="font-size:11.5px; color:var(--text-sub); margin-top:6px;">
+                            <i class="ti ti-lock"></i> Bookings are placed under your own account.
+                        </div>
+                    </c:if>
                 </div>
             </div>
 
@@ -122,11 +132,22 @@
                 <label class="form-label">Container ID <span class="required">*</span></label>
                 <div class="select-wrapper">
                     <select class="form-select-custom form-select" name="containerId" required>
-                        <option value="" disabled selected>Search and select container</option>
+                        <%-- Preselected when the user arrived from a catalog card --%>
+                        <c:if test="${empty preselectedContainerId}">
+                            <option value="" disabled selected>Search and select container</option>
+                        </c:if>
                         <c:forEach var="cont" items="${containers}">
-                            <option value="${cont.containerId}">${cont.containerNumber} (${cont.type})</option>
+                            <option value="${cont.containerId}"
+                                <c:if test="${cont.containerId == preselectedContainerId}">selected</c:if>>${cont.containerNumber} (${cont.type})</option>
                         </c:forEach>
                     </select>
+                    <c:if test="${not empty preselectedContainer}">
+                        <div style="font-size:11.5px; color:var(--text-sub); margin-top:6px;">
+                            <i class="ti ti-check"></i>
+                            ${preselectedContainer.containerNumber} selected from the catalog
+                            &bull; max ${preselectedContainer.maxGrossWeightKg} kg / ${preselectedContainer.goodsCapacityCbm} CBM
+                        </div>
+                    </c:if>
                 </div>
             </div>
         </div>
@@ -201,11 +222,26 @@
                 <label class="form-label">Declared Value ($) <span class="required">*</span></label>
                 <input type="number" step="0.01" class="form-control-custom form-control" name="cargoValue" required>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Freight Cost ($) <span class="required">*</span></label>
-                <input type="number" step="0.01" class="form-control-custom form-control" name="freightCost" required>
-            </div>
+            <%-- Freight rate is internal pricing: staff enter it, customers are quoted it. --%>
+            <c:choose>
+                <c:when test="${sessionScope.user.roleId == 5}">
+                    <input type="hidden" name="freightCost" value="0">
+                </c:when>
+                <c:otherwise>
+                    <div class="col-md-3">
+                        <label class="form-label">Freight Cost ($) <span class="required">*</span></label>
+                        <input type="number" step="0.01" class="form-control-custom form-control" name="freightCost" required>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
+        <c:if test="${sessionScope.user.roleId == 5}">
+            <div class="mt-3" style="font-size:12.5px; color:var(--text-sub);">
+                <i class="ti ti-info-circle"></i>
+                Your freight quote is calculated automatically from the live rate card and
+                confirmed on your invoice.
+            </div>
+        </c:if>
 
         <style>
             .card-custom {

@@ -118,7 +118,7 @@ public class BillingDAO {
         try (Connection conn = DBConnectionManager.getConnection()) {
             conn.setAutoCommit(false);
             double subtotal = freightCost + serviceCharges;
-            double tax = subtotal * taxRate;
+            double tax = subtotal * normaliseTaxRate(taxRate);
             double total = subtotal + tax;
 
             String insertInv = "INSERT INTO BILLING_INVOICES (customer_id, shipment_id, invoice_date, due_date, "
@@ -490,5 +490,105 @@ public class BillingDAO {
         } catch (SQLException ignored) {}
 
         return inv;
+    }
+
+    /* ==================================================================
+     * RBAC invoice scoping (CLAUDE.md S6.2.2).
+     * ================================================================== */
+
+    private static final String INVOICE_SELECT =
+          "SELECT bi.*, c.customer_name, u.email AS customer_email, u.phone AS customer_phone, "
+        + "s.cargo_description, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
+        + "FROM BILLING_INVOICES bi "
+        + "JOIN CUSTOMERS c ON bi.customer_id = c.customer_id "
+        + "LEFT JOIN USERS u ON c.user_id = u.user_id "
+        + "JOIN SHIPMENT s ON bi.shipment_id = s.shipment_id "
+        + "LEFT JOIN CONTAINERS cnt ON s.container_id = cnt.container_id "
+        + "LEFT JOIN PORTS p_orig ON s.origin_port_id = p_orig.port_id "
+        + "LEFT JOIN PORTS p_dest ON s.destination_port_id = p_dest.port_id ";
+
+    private List<Invoice> queryInvoices(String whereClause, int... params) {
+        List<Invoice> list = new ArrayList<>();
+        String sql = INVOICE_SELECT + whereClause + " ORDER BY bi.invoice_id DESC";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                ps.setInt(i + 1, params[i]);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToInvoice(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /** Self-scoped invoices for Role 5 (Customer) - FR5.8. */
+    public List<Invoice> getInvoicesByCustomerId(int customerId) {
+        return queryInvoices("WHERE bi.customer_id = ?", customerId);
+    }
+
+    /** Tenant-scoped invoices for Roles 2 and 4. */
+    public List<Invoice> getInvoicesByCompanyId(int companyId) {
+        return queryInvoices(
+            "WHERE cnt.owner_company_id = ? " +
+            "   OR s.created_by IN (SELECT user_id FROM users WHERE company_id = ?)",
+            companyId, companyId);
+    }
+
+    /** Single entry point returning only the invoices this caller may see. */
+    public List<Invoice> getInvoicesForRole(int roleId, Integer companyId, Integer customerId) {
+        if (roleId == 5) {
+            return getInvoicesByCustomerId(customerId != null ? customerId : -1);
+        }
+        if (roleId == 2 || roleId == 3 || roleId == 4) {
+            return getInvoicesByCompanyId(companyId != null ? companyId : -1);
+        }
+        return getAllInvoices();
+    }
+
+    /** IDOR guard for /view-invoice and /record-payment. */
+    public boolean canAccessInvoice(int invoiceId, int roleId, Integer companyId, Integer customerId) {
+        if (roleId == 1) return true;
+        String sql;
+        if (roleId == 5) {
+            sql = "SELECT 1 FROM billing_invoices WHERE invoice_id = ? AND customer_id = ?";
+        } else {
+            sql = "SELECT 1 FROM billing_invoices bi JOIN shipment s ON bi.shipment_id = s.shipment_id "
+                + "LEFT JOIN containers cnt ON s.container_id = cnt.container_id "
+                + "WHERE bi.invoice_id = ? AND (cnt.owner_company_id = ? "
+                + "   OR s.created_by IN (SELECT user_id FROM users WHERE company_id = ?))";
+        }
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, invoiceId);
+            if (roleId == 5) {
+                ps.setInt(2, customerId != null ? customerId : -1);
+            } else {
+                int cid = companyId != null ? companyId : -1;
+                ps.setInt(2, cid);
+                ps.setInt(3, cid);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+
+    /**
+     * Gap 7: the two billing pipelines disagreed on what taxRate meant.
+     * /billing/generate defaulted to 0.18 (a fraction) while the Generate Invoice
+     * form sent 18 (a percentage), so the same "18" typed into one screen produced
+     * 18x the tax of the other. Normalise once, here: anything above 1 is read as
+     * a percentage.
+     */
+    public static double normaliseTaxRate(double rate) {
+        if (rate < 0) return 0.0;
+        return (rate > 1.0) ? rate / 100.0 : rate;
     }
 }

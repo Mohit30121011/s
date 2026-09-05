@@ -372,6 +372,13 @@ public class AnalyticsDAO {
 
     public void computeAllAnalytics(String period, int computedBy) {
         try (Connection conn = DBConnectionManager.getConnection()) {
+            // The four compute_* procedures INSERT without clearing the previous run,
+            // and computeAllAnalytics() is called on every /analytics page load. That
+            // grew the four result tables to 21,301 rows for 200 products and made the
+            // ABC chart climb on every refresh. Clear this period first so a recompute
+            // replaces rather than accumulates.
+            purgePeriod(conn, period);
+
             CallableStatement cs1 = conn.prepareCall("{CALL compute_abc_classification(?, ?)}");
             cs1.setString(1, period); cs1.setInt(2, computedBy); cs1.execute(); cs1.close();
             
@@ -383,6 +390,12 @@ public class AnalyticsDAO {
             
             CallableStatement cs4 = conn.prepareCall("{CALL compute_sales_trend(?, ?)}");
             cs4.setString(1, period); cs4.setInt(2, computedBy); cs4.execute(); cs4.close();
+
+            // SRS 5.5 / FR3.6 - Algorithm 5. This was missing entirely, so
+            // demand_forecast never refreshed and both the predictive graph and the
+            // FR3.5 demand multiplier ran on static seed rows.
+            CallableStatement cs5 = conn.prepareCall("{CALL compute_demand_forecast(?, ?)}");
+            cs5.setString(1, period); cs5.setInt(2, computedBy); cs5.execute(); cs5.close();
         } catch (Exception e) { e.printStackTrace(); }
     }
 
@@ -489,5 +502,297 @@ public class AnalyticsDAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+
+    /**
+     * Demand forecast aggregated for the dashboard card.
+     *
+     * getDemandForecast(null, null) returns one row per lane per period. Once
+     * Algorithm 5 began producing real per-lane forecasts that became ~600 rows,
+     * and the chart plotted every one of them - repeating each quarter label and
+     * stacking bars on top of each other. The card wants total projected demand
+     * per period, so aggregate here.
+     *
+     * @param containerType optional filter; null/blank = every type.
+     */
+    public java.util.List<java.util.Map<String, Object>> getDemandForecastByPeriod(String containerType) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        boolean filtered = containerType != null && !containerType.trim().isEmpty()
+                && !"All".equalsIgnoreCase(containerType.trim());
+
+        String sql = "SELECT forecast_period, SUM(forecasted_demand) AS demand, AVG(forecasted_price) AS price "
+                   + "FROM demand_forecast "
+                   + "WHERE algorithm_version = (SELECT algorithm_version FROM demand_forecast "
+                   + "                            ORDER BY generated_at DESC, forecast_id DESC LIMIT 1) "
+                   + (filtered ? "AND container_type = ? " : "")
+                   + "GROUP BY forecast_period ORDER BY forecast_period ASC LIMIT 6";
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (filtered) ps.setString(1, containerType.trim());
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("period", rs.getString("forecast_period"));
+                    m.put("demand", Math.round(rs.getDouble("demand") * 100.0) / 100.0);
+                    m.put("price", Math.round(rs.getDouble("price") * 100.0) / 100.0);
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** Container types that actually have a forecast, for the card's filter. */
+    public java.util.List<String> getForecastContainerTypes() {
+        java.util.List<String> types = new java.util.ArrayList<>();
+        String sql = "SELECT DISTINCT container_type FROM demand_forecast ORDER BY container_type";
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) types.add(rs.getString(1));
+        } catch (Exception e) { e.printStackTrace(); }
+        return types;
+    }
+
+    /**
+     * FR5.8 / FR6.1 - invoice aging buckets from real receivables.
+     *
+     * The Invoice Aging widget on analytics.jsp was hardcoded HTML (55/20/15/10%
+     * with a fixed total). This returns the actual outstanding balance split by how
+     * far past its due date each invoice is.
+     *
+     * @param companyId tenant scope; null = all companies (Super Admin).
+     */
+    public java.util.Map<String, Double> getInvoiceAging(Integer companyId) {
+        java.util.Map<String, Double> out = new java.util.LinkedHashMap<>();
+        out.put("current", 0.0); out.put("d31_60", 0.0);
+        out.put("d61_90", 0.0);  out.put("d90plus", 0.0);
+        out.put("total", 0.0);   out.put("overdue", 0.0);
+
+        String sql = "SELECT DATEDIFF(CURDATE(), bi.due_date) AS days_late, "
+                   + "       SUM(bi.total_amount - bi.paid_amount) AS balance "
+                   + "FROM billing_invoices bi "
+                   + (companyId != null
+                        ? "JOIN shipment s ON s.shipment_id = bi.shipment_id "
+                        + "LEFT JOIN containers c ON c.container_id = s.container_id " : "")
+                   + "WHERE bi.total_amount > bi.paid_amount "
+                   + (companyId != null
+                        ? "AND (c.owner_company_id = ? OR s.created_by IN "
+                        + "     (SELECT user_id FROM users WHERE company_id = ?)) " : "")
+                   + "GROUP BY DATEDIFF(CURDATE(), bi.due_date)";
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (companyId != null) { ps.setInt(1, companyId); ps.setInt(2, companyId); }
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int late = rs.getInt("days_late");
+                    double bal = rs.getDouble("balance");
+                    String bucket = (late <= 30) ? "current"
+                                  : (late <= 60) ? "d31_60"
+                                  : (late <= 90) ? "d61_90" : "d90plus";
+                    out.put(bucket, out.get(bucket) + bal);
+                    out.put("total", out.get("total") + bal);
+                    if (late > 0) out.put("overdue", out.get("overdue") + bal);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /**
+     * SRS 5.3 inputs - COGS and average inventory value, computed live.
+     * inventory_turnover_result.cogs_amount is 0 on most cached rows, so the
+     * analytics card was showing fixed placeholder rupee figures instead.
+     */
+    public java.util.Map<String, Double> getTurnoverInputs(Integer companyId) {
+        java.util.Map<String, Double> out = new java.util.LinkedHashMap<>();
+        out.put("cogs", 0.0);
+        out.put("avgInventoryValue", 0.0);
+
+        String cogsSql = "SELECT COALESCE(SUM(st.quantity_sold * p.unit_cost), 0) AS cogs "
+                       + "FROM sales_transactions st JOIN products p ON p.product_id = st.product_id";
+        String invSql  = "SELECT COALESCE(SUM(s.quantity_on_hand * p.unit_cost), 0) AS inv "
+                       + "FROM stock s JOIN products p ON p.product_id = s.product_id"
+                       + (companyId != null ? " WHERE s.company_id = ?" : "");
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection()) {
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(cogsSql);
+                 java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) out.put("cogs", rs.getDouble("cogs"));
+            }
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(invSql)) {
+                if (companyId != null) ps.setInt(1, companyId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) out.put("avgInventoryValue", rs.getDouble("inv"));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /* ==================================================================
+     * FR6.2 - "All dashboard charts shall be filterable by date range,
+     * company, route, and product/category."
+     *
+     * Gap 2: only the KPI totals and the P&L trend honoured the filter bar.
+     * Container utilisation, ABC, loss reasons and turnover each ran their own
+     * unfiltered query, so selecting a company still left competitor figures on
+     * screen. These variants take the same filter set.
+     * ================================================================== */
+
+    /** Fleet utilisation, optionally limited to one company's containers. */
+    public double[] getContainerUtilization(Integer companyId) {
+        double[] out = new double[]{0, 0, 0}; // total, inUse, pct
+        String sql = "SELECT COUNT(*) AS total, "
+                   + "SUM(CASE WHEN status IN ('In-Transit','Allocated') THEN 1 ELSE 0 END) AS inuse "
+                   + "FROM containers"
+                   + (companyId != null ? " WHERE owner_company_id = ?" : "");
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (companyId != null) ps.setInt(1, companyId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    out[0] = rs.getInt("total");
+                    out[1] = rs.getInt("inuse");
+                    out[2] = out[0] > 0 ? (out[1] * 100.0 / out[0]) : 0.0;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** ABC class distribution, optionally limited to one product category. */
+    public java.util.List<java.util.Map<String, Object>> getAbcDistribution(String period, String category) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        boolean byCat = category != null && !category.trim().isEmpty() && !"All".equalsIgnoreCase(category.trim());
+        String sql = "SELECT r.class AS cls, COUNT(*) AS n "
+                   + "FROM abc_classification_result r "
+                   + "JOIN products p ON p.product_id = r.product_id "
+                   + "WHERE r.computed_period = ? "
+                   + (byCat ? "AND p.category = ? " : "")
+                   + "GROUP BY r.class ORDER BY r.class";
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, period);
+            if (byCat) ps.setString(2, category.trim());
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("cls", rs.getString("cls"));
+                    m.put("count", rs.getInt("n"));
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** Top loss reasons under the active company / date / route filters. */
+    public java.util.List<java.util.Map<String, Object>> getTopLossReasonsFiltered(
+            int limit, Integer companyId, String dateFrom, String dateTo,
+            String originPortId, String destPortId) {
+
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+              "SELECT lr.reason_name, COUNT(m.id) AS occurrences, "
+            + "       COALESCE(ABS(SUM(pl.profit_loss_amount)), 0) AS impact "
+            + "FROM loss_reasons lr "
+            + "JOIN profit_loss_reason_map m ON m.reason_id = lr.reason_id "
+            + "JOIN profit_loss pl ON pl.pl_id = m.pl_id "
+            + "LEFT JOIN shipment s ON s.shipment_id = pl.shipment_id "
+            + "LEFT JOIN containers c ON c.container_id = s.container_id "
+            + "WHERE 1=1 ");
+        java.util.List<Object> args = new java.util.ArrayList<>();
+
+        if (companyId != null) {
+            sql.append("AND (c.owner_company_id = ? OR s.created_by IN "
+                     + "(SELECT user_id FROM users WHERE company_id = ?)) ");
+            args.add(companyId); args.add(companyId);
+        }
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) { sql.append("AND pl.record_date >= ? "); args.add(dateFrom.trim()); }
+        if (dateTo   != null && !dateTo.trim().isEmpty())   { sql.append("AND pl.record_date <= ? "); args.add(dateTo.trim()); }
+        if (originPortId != null && destPortId != null) {
+            sql.append("AND s.origin_port_id = ? AND s.destination_port_id = ? ");
+            args.add(originPortId); args.add(destPortId);
+        }
+        sql.append("GROUP BY lr.reason_id, lr.reason_name ORDER BY impact DESC LIMIT ").append(Math.max(1, limit));
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < args.size(); i++) ps.setObject(i + 1, args.get(i));
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("reason", rs.getString("reason_name"));
+                    m.put("impact", Math.round(rs.getDouble("impact") * 100.0) / 100.0);
+                    m.put("occurrences", rs.getInt("occurrences"));
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** Stock valuation by category, optionally limited to one category. */
+    public java.util.List<java.util.Map<String, Object>> getStockValuationByCategory(Integer companyId, String category) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        boolean byCat = category != null && !category.trim().isEmpty() && !"All".equalsIgnoreCase(category.trim());
+        String sql = "SELECT p.category, COALESCE(SUM(s.quantity_on_hand * p.unit_cost), 0) AS value "
+                   + "FROM stock s JOIN products p ON p.product_id = s.product_id WHERE 1=1 "
+                   + (companyId != null ? "AND s.company_id = ? " : "")
+                   + (byCat ? "AND p.category = ? " : "")
+                   + "GROUP BY p.category ORDER BY value DESC";
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            int i = 1;
+            if (companyId != null) ps.setInt(i++, companyId);
+            if (byCat) ps.setString(i, category.trim());
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("category", rs.getString("category"));
+                    m.put("value", Math.round(rs.getDouble("value") * 100.0) / 100.0);
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** Distinct product categories, for the analytics category filter. */
+    public java.util.List<String> getProductCategories() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(
+                 "SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category <> '' ORDER BY category");
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) out.add(rs.getString(1));
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /**
+     * Removes the cached analytical results for one period so a recompute is
+     * idempotent. These are derived tables (SRS 6.9 "cached outputs for dashboard
+     * performance"), rebuilt immediately by the procedures that follow.
+     */
+    private void purgePeriod(java.sql.Connection conn, String period) {
+        String[] statements = {
+            "DELETE FROM abc_classification_result WHERE computed_period = ?",
+            "DELETE FROM inventory_turnover_result WHERE period = ?",
+            "DELETE FROM profitability_result WHERE period = ?",
+            "DELETE FROM sales_trend_result WHERE period = ?"
+        };
+        for (String sql : statements) {
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, period);
+                ps.executeUpdate();
+            } catch (Exception e) {
+                // A schema variation on one table must not stop the others.
+                e.printStackTrace();
+            }
+        }
     }
 }

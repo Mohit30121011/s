@@ -41,6 +41,11 @@ public class AllocateContainerServlet extends HttpServlet {
             }
 
             request.setAttribute("container", container);
+            // FR2.1 / GAP-M3-02: staff book on behalf of a shipper, so they must be
+            // able to choose one. Without this the booking had no customer at all.
+            if (com.nlogistic.util.RbacContext.roleId(request) <= 3) {
+                request.setAttribute("customers", new com.nlogistic.dao.CustomerDAO().getAllCustomers());
+            }
             // Genuinely missing previously: the origin/destination port dropdowns in
             // allocate-container.jsp were hardcoded to 5 fixed IDs/names that may not match
             // the actual seeded `ports` table rows. Drive them from the real data instead.
@@ -103,6 +108,7 @@ public class AllocateContainerServlet extends HttpServlet {
         request.setAttribute("destination", request.getParameter("destination"));
         request.setAttribute("pricingRule", rule);
         request.setAttribute("finalPrice", finalPrice);
+        request.setAttribute("customerId", request.getParameter("customerId"));
         
         // Resolve Origin and Destination port entities for display in pricing.jsp
         try {

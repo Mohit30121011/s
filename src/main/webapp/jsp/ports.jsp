@@ -1,114 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-        String action = request.getParameter("action");
-        if (action != null) {
-            try {
-                com.nlogistic.dao.PortDAO pDao = new com.nlogistic.dao.PortDAO();
-                if ("add".equalsIgnoreCase(action)) {
-                    String name = request.getParameter("portName");
-                    String code = request.getParameter("portCode");
-                    String country = request.getParameter("country");
-                    String latStr = request.getParameter("latitude");
-                    String lngStr = request.getParameter("longitude");
-
-                    double lat = 0.0;
-                    double lng = 0.0;
-                    if (latStr != null && !latStr.trim().isEmpty()) {
-                        try { lat = Double.parseDouble(latStr.trim()); } catch (Exception ignored) {}
-                    }
-                    if (lngStr != null && !lngStr.trim().isEmpty()) {
-                        try { lng = Double.parseDouble(lngStr.trim()); } catch (Exception ignored) {}
-                    }
-
-                    if (name != null && !name.trim().isEmpty()) {
-                        pDao.addPort(name.trim(), code != null ? code.trim().toUpperCase() : "", country != null ? country.trim() : "", lat, lng);
-                        session.setAttribute("successMessage", "Port \"" + name.trim() + "\" registered successfully to international directory.");
-                    } else {
-                        session.setAttribute("errorMessage", "Port official name is required.");
-                    }
-                } else if ("edit".equalsIgnoreCase(action) || "update".equalsIgnoreCase(action)) {
-                    String pIdStr = request.getParameter("portId");
-                    String name = request.getParameter("portName");
-                    String code = request.getParameter("portCode");
-                    String country = request.getParameter("country");
-                    String latStr = request.getParameter("latitude");
-                    String lngStr = request.getParameter("longitude");
-
-                    if (pIdStr != null && !pIdStr.trim().isEmpty()) {
-                        int pId = Integer.parseInt(pIdStr.trim());
-                        double lat = 0.0;
-                        double lng = 0.0;
-                        if (latStr != null && !latStr.trim().isEmpty()) {
-                            try { lat = Double.parseDouble(latStr.trim()); } catch (Exception ignored) {}
-                        }
-                        if (lngStr != null && !lngStr.trim().isEmpty()) {
-                            try { lng = Double.parseDouble(lngStr.trim()); } catch (Exception ignored) {}
-                        }
-
-                        if (name != null && !name.trim().isEmpty()) {
-                            pDao.updatePort(pId, name.trim(), code != null ? code.trim().toUpperCase() : "", country != null ? country.trim() : "", lat, lng);
-                            session.setAttribute("successMessage", "Port #PRT-" + pId + " (" + name.trim() + ") credentials updated successfully.");
-                        } else {
-                            session.setAttribute("errorMessage", "Port name cannot be empty.");
-                        }
-                    }
-                } else if ("delete".equalsIgnoreCase(action)) {
-                    String pIdStr = request.getParameter("portId");
-                    if (pIdStr != null && !pIdStr.trim().isEmpty()) {
-                        int pId = Integer.parseInt(pIdStr.trim());
-                        pDao.deletePort(pId);
-                        session.setAttribute("successMessage", "Port #PRT-" + pId + " decommissioned and removed from directory.");
-                    }
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                session.setAttribute("errorMessage", "Operation failed: " + ex.getMessage());
-            }
-            response.sendRedirect(request.getRequestURI());
-            return;
-        }
-    }
-
-    if (request.getAttribute("ports") == null) {
-        com.nlogistic.dao.PortDAO pDao = new com.nlogistic.dao.PortDAO();
-        java.util.List<com.nlogistic.model.Port> pList = pDao.getAllPorts();
-        request.setAttribute("ports", pList);
-    }
-
-    // Dynamic Database Metrics Calculation (100% Non-hardcoded, computed directly from DB results)
-    java.util.List<com.nlogistic.model.Port> allPorts = (java.util.List<com.nlogistic.model.Port>) request.getAttribute("ports");
-    int totalPortsCount = (allPorts != null) ? allPorts.size() : 0;
-    java.util.Set<String> uniqueCountries = new java.util.HashSet<String>();
-    int geotaggedCount = 0;
-    int unlocodeAssignedCount = 0;
-
-    if (allPorts != null) {
-        for (com.nlogistic.model.Port p : allPorts) {
-            if (p.getCountry() != null && !p.getCountry().trim().isEmpty()) {
-                uniqueCountries.add(p.getCountry().trim());
-            }
-            if (p.getLatitude() != 0.0 || p.getLongitude() != 0.0) {
-                geotaggedCount++;
-            }
-            if (p.getPortCode() != null && !p.getPortCode().trim().isEmpty() && !p.getPortCode().equalsIgnoreCase("N/A")) {
-                unlocodeAssignedCount++;
-            }
-        }
-    }
-    int distinctCountriesCount = uniqueCountries.size();
-    int geocodePercent = (totalPortsCount > 0) ? Math.round((float) geotaggedCount * 100.0f / totalPortsCount) : 0;
-
-    request.setAttribute("totalPortsCount", totalPortsCount);
-    request.setAttribute("distinctCountriesCount", distinctCountriesCount);
-    request.setAttribute("geotaggedCount", geotaggedCount);
-    request.setAttribute("unlocodeAssignedCount", unlocodeAssignedCount);
-    request.setAttribute("geocodePercent", geocodePercent);
-%>
-
+<%-- MVC2 (SRS 10.2): data and actions come from PortServlet (/ports).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -824,7 +719,7 @@
             </div>
             <button type="button" class="btn-modal-close" onclick="closeAddPortModal()">&times;</button>
         </div>
-        <form method="POST" action="${pageContext.request.contextPath}/jsp/ports.jsp" id="addPortForm">
+        <form method="POST" action="${pageContext.request.contextPath}/ports" id="addPortForm">
             <input type="hidden" name="action" value="add">
             <div class="modal-form-body">
                 <!-- Port Name -->
@@ -915,7 +810,7 @@
             </div>
             <button type="button" class="btn-modal-close" onclick="closeEditPortModal()">&times;</button>
         </div>
-        <form method="POST" action="${pageContext.request.contextPath}/jsp/ports.jsp" id="editPortForm">
+        <form method="POST" action="${pageContext.request.contextPath}/ports" id="editPortForm">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="portId" id="editPortId">
             <div class="modal-form-body">
@@ -995,7 +890,7 @@
             </div>
             <button type="button" class="btn-modal-close" onclick="closeDeletePortModal()">&times;</button>
         </div>
-        <form method="POST" action="${pageContext.request.contextPath}/jsp/ports.jsp" id="deletePortForm">
+        <form method="POST" action="${pageContext.request.contextPath}/ports" id="deletePortForm">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="portId" id="deletePortId">
             <div class="modal-form-body">

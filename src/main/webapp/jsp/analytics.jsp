@@ -1,4 +1,4 @@
-﻿<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -50,12 +50,52 @@
     
     
     
-    .gauge-canvas-wrap { width: 200px; height: 100px; position: relative; overflow: hidden; flex-shrink: 0; }
-    .gauge-canvas-wrap canvas { display: block; }
-    .gauge-text { text-align: center; margin-top: 6px; }
-    .gauge-val { font-size: 28px; font-weight: 700; color: var(--text-main); line-height: 1.2; }
-    .gauge-sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
-    .gauge-labels { display: flex; justify-content: space-between; width: 200px; margin-top: 6px; font-size: 11px; color: var(--text-sub); }
+    /* ===== Container Utilization Gauge (SVG — presentation only) ===== */
+    .gauge-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; padding: 4px 0 0; }
+    .nl-gauge { position: relative; width: 100%; max-width: 240px; }
+    .nl-gauge svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .nl-gauge-track {
+        fill: none;
+        stroke: #EDF0F5;
+        stroke-width: 16;
+        stroke-linecap: round;
+    }
+    .nl-gauge-fill {
+        fill: none;
+        stroke: url(#utilGaugeGrad);
+        stroke-width: 16;
+        stroke-linecap: round;
+        stroke-dasharray: 282.74;
+        stroke-dashoffset: 282.74;
+        transition: stroke-dashoffset 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    /* value block sits inside the arc */
+    .nl-gauge-center {
+        position: absolute;
+        left: 0; right: 0;
+        bottom: 8%;
+        text-align: center;
+        pointer-events: none;
+    }
+    .nl-gauge-val {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text-main, #1F2937);
+        line-height: 1.05;
+        font-variant-numeric: tabular-nums;
+    }
+    .nl-gauge-val span { font-size: 17px; font-weight: 700; margin-left: 1px; color: var(--text-sub, #64748B); }
+    .nl-gauge-sub { font-size: 11.5px; font-weight: 600; color: var(--text-sub, #64748B); margin-top: 3px; }
+    .nl-gauge-scale {
+        display: flex;
+        justify-content: space-between;
+        margin-top: -2px;
+        padding: 0 4px;
+        font-size: 10.5px;
+        font-weight: 600;
+        color: var(--text-light, #94A3B8);
+    }
     
     /* ===== Filter Bar ===== */
     .filters-bar-wrap {
@@ -203,10 +243,10 @@
     .charts-grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
     
     .chart-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; position: relative; }
-    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .chart-title { font-size: 16px; font-weight: 600; color: var(--text-main); margin: 0; }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .chart-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 0; min-width: 0; }
     
-    .chart-actions { display: flex; gap: 8px; align-items: center; }
+    .chart-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
     .chart-tabs {
         display: flex;
         background: #F3F4F6;
@@ -409,7 +449,6 @@
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Top Loss Reasons</h3>
-                <i class="fi fi-rr-download" style="color:var(--text-sub); cursor:pointer;"></i>
             </div>
             <div class="chart-body">
                 <canvas id="lossChart"></canvas>
@@ -425,16 +464,25 @@
             </div>
             <div class="chart-body" style="min-height: 180px;">
                 <div class="gauge-wrapper">
-                    <div class="gauge-canvas-wrap">
-                        <canvas id="utilizationChart"></canvas>
-                    </div>
-                    <div class="gauge-text">
-                        <div class="gauge-val"><c:out value="${not empty utilizationPct ? utilizationPct : '76.4'}"/>%</div>
-                        <div class="gauge-sub">Utilization Rate</div>
-                    </div>
-                    <div class="gauge-labels">
-                        <span>0%</span>
-                        <span>100%</span>
+                    <div class="nl-gauge" id="utilGauge" data-pct="${not empty utilizationPct ? utilizationPct : '0'}">
+                        <svg viewBox="0 0 220 128" role="img" aria-label="Container utilization gauge">
+                            <defs>
+                                <linearGradient id="utilGaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%"   stop-color="#FDBA74"/>
+                                    <stop offset="55%"  stop-color="#FC8019"/>
+                                    <stop offset="100%" stop-color="#EA6A05"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- track -->
+                            <path class="nl-gauge-track" d="M 20 110 A 90 90 0 0 1 200 110"/>
+                            <!-- value arc (stroke-dashoffset animated in JS) -->
+                            <path class="nl-gauge-fill" d="M 20 110 A 90 90 0 0 1 200 110"/>
+                        </svg>
+                        <div class="nl-gauge-center">
+                            <div class="nl-gauge-val"><c:out value="${not empty utilizationPct ? utilizationPct : '0'}"/><span>%</span></div>
+                            <div class="nl-gauge-sub">Utilization Rate</div>
+                        </div>
+                        <div class="nl-gauge-scale"><span>0%</span><span>100%</span></div>
                     </div>
                 </div>
             </div>
@@ -488,10 +536,18 @@
     <div class="charts-grid-half">
         <div class="chart-card">
             <div class="chart-header">
-                <h3 class="chart-title">Demand Forecast (Next 3 Months)</h3>
+                <h3 class="chart-title">Demand Forecast (Next 6 Quarters)</h3>
                 <div class="chart-actions">
-                    <select class="form-select-custom" style="padding:4px 24px 4px 8px; font-size:12px; height:auto; line-height:1.2; border:1px solid var(--border-color); border-radius:6px;"><option>All Categories</option></select>
-                    <i class="fi fi-rr-menu-dots-vertical" style="color:var(--text-sub); margin-left:8px; cursor:pointer;"></i>
+                    <%-- Was a dead stub with a single hardcoded option; now a real filter. --%>
+                    <form method="GET" action="${pageContext.request.contextPath}/analytics" style="display:inline-block; margin:0;">
+                        <select name="forecastType" onchange="this.form.submit()" class="form-select-custom no-custom-select"
+                                style="padding: 5px 28px 5px 10px !important; font-size: 12.5px !important; height: 32px !important; line-height: 1.2; border: 1px solid var(--border-color) !important; border-radius: 6px !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background-position: right 8px center !important; cursor: pointer;">
+                            <option value="">All Container Types</option>
+                            <c:forEach var="ft" items="${forecastTypes}">
+                                <option value="${ft}" ${selectedForecastType == ft ? 'selected' : ''}>${ft}</option>
+                            </c:forEach>
+                        </select>
+                    </form>
                 </div>
             </div>
             <div class="chart-body" style="min-height:220px;">
@@ -520,11 +576,11 @@
                 <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:12px;">
                     <div>
                         <div style="font-size:11px; color:var(--text-sub); margin-bottom:2px;">Cost of Goods Sold</div>
-                        <div style="font-size:14px; font-weight:600; color:var(--text-main);">&#8377; 32,80,500</div>
+                        <div style="font-size:14px; font-weight:600; color:var(--text-main);">&#8377; ${cogsStr}</div>
                     </div>
                     <div style="text-align:right">
                         <div style="font-size:11px; color:var(--text-sub); margin-bottom:2px;">Avg Inventory Value</div>
-                        <div style="font-size:14px; font-weight:600; color:var(--text-main);">&#8377; 6,05,800</div>
+                        <div style="font-size:14px; font-weight:600; color:var(--text-main);">&#8377; ${avgInvValueStr}</div>
                     </div>
                 </div>
             </div>
@@ -540,20 +596,36 @@
                     <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#FC8019;"></span> 61 - 90 Days</span>
                     <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#EF4444;"></span> > 90 Days</span>
                 </div>
-                <div style="height:24px; border-radius:4px; display:flex; overflow:hidden; margin-bottom:12px;">
-                    <div style="width:55%; background:#10B981; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">55%</div>
-                    <div style="width:20%; background:#FBBF24; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">20%</div>
-                    <div style="width:15%; background:#FC8019; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">15%</div>
-                    <div style="width:10%; background:#EF4444; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;">10%</div>
-                </div>
+                <%-- Real receivables split by days past due (FR5.8). --%>
+                <c:set var="agingTotal" value="${aging.total > 0 ? aging.total : 0}"/>
+                <c:choose>
+                    <c:when test="${agingTotal > 0}">
+                        <div style="height:24px; border-radius:4px; display:flex; overflow:hidden; margin-bottom:12px;">
+                            <c:set var="pCur" value="${aging.current * 100 / agingTotal}"/>
+                            <c:set var="p60"  value="${aging.d31_60 * 100 / agingTotal}"/>
+                            <c:set var="p90"  value="${aging.d61_90 * 100 / agingTotal}"/>
+                            <c:set var="pOld" value="${aging.d90plus * 100 / agingTotal}"/>
+                            <c:if test="${pCur > 0}"><div style="width:${pCur}%; background:#10B981; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;"><c:if test="${pCur >= 8}"><fmt:formatNumber value="${pCur}" maxFractionDigits="0"/>%</c:if></div></c:if>
+                            <c:if test="${p60 > 0}"><div style="width:${p60}%; background:#FBBF24; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;"><c:if test="${p60 >= 8}"><fmt:formatNumber value="${p60}" maxFractionDigits="0"/>%</c:if></div></c:if>
+                            <c:if test="${p90 > 0}"><div style="width:${p90}%; background:#FC8019; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;"><c:if test="${p90 >= 8}"><fmt:formatNumber value="${p90}" maxFractionDigits="0"/>%</c:if></div></c:if>
+                            <c:if test="${pOld > 0}"><div style="width:${pOld}%; background:#EF4444; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:600;"><c:if test="${pOld >= 8}"><fmt:formatNumber value="${pOld}" maxFractionDigits="0"/>%</c:if></div></c:if>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div style="height:24px; border-radius:4px; background:#F1F5F9; display:flex; align-items:center; justify-content:center; color:var(--text-sub); font-size:11px; font-weight:600; margin-bottom:12px;">
+                            No outstanding receivables
+                        </div>
+                    </c:otherwise>
+                </c:choose>
                 <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:12px;">
                     <div>
                         <div style="font-size:11px; color:var(--text-sub); margin-bottom:2px;">Total Outstanding</div>
-                        <div style="font-size:14px; font-weight:600; color:var(--text-main);">&#8377; 15,94,750</div>
+                        <div style="font-size:14px; font-weight:600; color:var(--text-main);">&#8377; ${agingTotalStr}</div>
                     </div>
                     <div style="text-align:right">
                         <div style="font-size:11px; color:var(--text-sub); margin-bottom:2px;">Overdue Amount</div>
-                        <div style="font-size:14px; font-weight:600; color:var(--danger);">&#8377; 2,39,450 <span style="font-weight:normal">(25%)</span></div>
+                        <div style="font-size:14px; font-weight:600; color:var(--danger);">&#8377; ${agingOverdueStr}
+                            <span style="font-weight:normal">(${agingOverduePct}%)</span></div>
                     </div>
                 </div>
             </div>
@@ -561,7 +633,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/nl-chart-theme.js"></script>
 
 <script>
     // Inject backend data into JS
@@ -575,7 +648,7 @@
             datasets: [
                 {
                     label: 'Profit (\u20B9)',
-                    data: plgDataJson.length > 0 ? plgDataJson.map(function(d){return d.revenue/100000;}) : [0, 10, 20, 10, 15, 10, 25],
+                    data: plgDataJson.length > 0 ? plgDataJson.map(function(d){return Math.round(d.revenue/1000);}) : [0, 10, 20, 10, 15, 10, 25],
                     borderColor: '#10B981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 2,
@@ -677,29 +750,25 @@
         }]
     });
 
-    // Container Utilization (Gauge / Half Doughnut)
-    const utilPct = parseFloat('${not empty utilizationPct ? utilizationPct : "76.4"}') || 76.4;
-    new Chart(document.getElementById('utilizationChart'), {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [utilPct, 100 - utilPct],
-                backgroundColor: ['#FC8019', '#F3F4F6'],
-                borderWidth: 0,
-                circumference: 180,
-                rotation: 270,
-                cutout: '80%'
-            }]
-        },
-        options: {
-            responsive: false,
-            animation: false,
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-            layout: { padding: 0 }
-        }
-    });
+    // Container Utilization Gauge — SVG arc driven by the same DB-backed value.
+    // Arc length = PI * r = PI * 90 = 282.74 (matches stroke-dasharray in CSS).
+    (function () {
+        var g = document.getElementById('utilGauge');
+        if (!g) return;
+        var arc = g.querySelector('.nl-gauge-fill');
+        var pct = parseFloat(g.getAttribute('data-pct'));
+        if (isNaN(pct)) pct = 0;
+        pct = Math.max(0, Math.min(100, pct));
+        var LEN = Math.PI * 90;
+        // paint on the next frame so the CSS transition actually runs
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                arc.style.strokeDashoffset = (LEN * (1 - pct / 100)).toFixed(2);
+            });
+        });
+    })();
 
-    // Stock Valuation by Category (Bar) \u2014 100% DB-driven from AnalyticsDAO.getStockValuation()
+    // Stock Valuation by Category (Bar) \— 100% DB-driven from AnalyticsDAO.getStockValuation()
     var stockValJson = ${not empty stockValJson ? stockValJson : '[]'};
     new Chart(document.getElementById('stockChart'), {
         type: 'bar',
@@ -864,5 +933,8 @@
     }
 
 </script>
+
+<%-- Export + Fullscreen controls on every card --%>
+<script src="${pageContext.request.contextPath}/assets/js/nl-card-tools.js"></script>
 </body>
 </html>

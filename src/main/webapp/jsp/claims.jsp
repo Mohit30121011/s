@@ -1,35 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    // Ensure data is available if accessed directly without going through servlet
-    if (request.getAttribute("claims") == null) {
-        com.nlogistic.model.User __u = (com.nlogistic.model.User) session.getAttribute("user");
-        if (__u != null) {
-            com.nlogistic.dao.ClaimDAO __claimDao = new com.nlogistic.dao.ClaimDAO();
-            int __roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : __u.getRoleId();
-            Integer __customerId = (Integer) session.getAttribute("customerId");
-            if (__customerId == null && __roleId == 5) {
-                try (java.sql.Connection __c = com.nlogistic.util.DBConnectionManager.getConnection();
-                     java.sql.PreparedStatement __ps = __c.prepareStatement("SELECT customer_id FROM CUSTOMERS WHERE user_id = ?")) {
-                    __ps.setInt(1, __u.getUserId());
-                    try (java.sql.ResultSet __rs = __ps.executeQuery()) {
-                        if (__rs.next()) { __customerId = __rs.getInt(1); session.setAttribute("customerId", __customerId); }
-                    }
-                } catch (Exception __ignored) {}
-            }
-            java.util.List<com.nlogistic.model.Claim> __claims = (__roleId == 5)
-                    ? (__customerId != null ? __claimDao.getClaimsByCustomer(__customerId) : new java.util.ArrayList<com.nlogistic.model.Claim>())
-                    : __claimDao.getAllClaims();
-            request.setAttribute("claims", __claims);
-            request.setAttribute("stats", __claimDao.getClaimStats(__roleId == 5 ? __customerId : null));
-            request.setAttribute("lossReasons", __claimDao.getAllLossReasons());
-            request.setAttribute("shipments", __claimDao.getShipmentsForUser(__u.getUserId(), __roleId, __customerId));
-            request.setAttribute("roleId", __roleId);
-            request.setAttribute("customerId", __customerId);
-        }
-    }
-%>
+<%-- MVC2 (SRS 10.2): data and actions come from ClaimServlet (/claims).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -84,6 +58,39 @@
     }
     .tab-pill-btn.active .tab-count-badge { background: #FFF3EA; color: #FC8019; }
 
+
+    /* FR7.7 register filter bar */
+    .claims-filter-bar {
+        display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px;
+        padding: 14px 18px; margin-bottom: 16px;
+    }
+    .claims-filter-bar .cfb-field { display: flex; flex-direction: column; gap: 6px; }
+    .claims-filter-bar label {
+        font-size: 11px; font-weight: 600; color: #64748B;
+        text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .claims-filter-bar input[type="date"],
+    .claims-filter-bar select {
+        height: 38px; border-radius: 10px; border: 1.5px solid #E2E8F0;
+        padding: 0 12px; font-size: 12.5px; color: #1E293B; background: #FFFFFF;
+        outline: none; transition: all 0.2s ease; min-width: 160px;
+    }
+    .claims-filter-bar input[type="date"]:focus,
+    .claims-filter-bar select:focus {
+        border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+    .claims-filter-bar .cfb-actions { display: flex; gap: 8px; margin-left: auto; }
+    .claims-filter-bar .cfb-btn {
+        height: 38px; display: inline-flex; align-items: center; gap: 6px;
+        padding: 0 16px; border-radius: 10px; border: 1.5px solid transparent;
+        font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .claims-filter-bar .cfb-btn.apply { background: #FC8019; color: #FFFFFF; }
+    .claims-filter-bar .cfb-btn.apply:hover { background: #E8730F; }
+    .claims-filter-bar .cfb-btn.clear { background: #FFFFFF; border-color: #E2E8F0; color: #475569; }
+    .claims-filter-bar .cfb-btn.clear:hover { border-color: #CBD5E1; color: #0F172A; }
     .toolbar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .search-wrap { position: relative; width: 260px; }
     .search-wrap i.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; pointer-events: none; }
@@ -481,6 +488,47 @@
         </div>
     </div>
 
+    <!--
+      FR7.7 register filters. The status tabs and the search box above filter the
+      rows already on the page; these narrow what the server sends, which is what
+      the requirement asks for and what makes the register usable once a tenant
+      has more claims than one screenful.
+    -->
+    <form method="get" action="${pageContext.request.contextPath}/claims" class="claims-filter-bar">
+        <div class="cfb-field">
+            <label for="cfbFrom">Incident from</label>
+            <input type="date" id="cfbFrom" name="dateFrom" value="${dateFrom}">
+        </div>
+        <div class="cfb-field">
+            <label for="cfbTo">Incident to</label>
+            <input type="date" id="cfbTo" name="dateTo" value="${dateTo}">
+        </div>
+        <div class="cfb-field">
+            <label for="cfbStatus">Status</label>
+            <select id="cfbStatus" name="statusFilter" class="no-custom-select">
+                <option value="">All statuses</option>
+                <c:forEach var="st" items="Filed,Under Review,Approved,Rejected,Settled">
+                    <option value="${st}" ${statusFilter eq st ? 'selected' : ''}>${st}</option>
+                </c:forEach>
+            </select>
+        </div>
+        <c:if test="${roleId != 5 && not empty filterCustomers}">
+            <div class="cfb-field">
+                <label for="cfbCustomer">Customer</label>
+                <select id="cfbCustomer" name="customerFilter" class="no-custom-select">
+                    <option value="">All customers</option>
+                    <c:forEach var="fc" items="${filterCustomers}">
+                        <option value="${fc[0]}" ${customerFilter eq fc[0] ? 'selected' : ''}>${fc[1]}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </c:if>
+        <div class="cfb-actions">
+            <button type="submit" class="cfb-btn apply"><i class="ti ti-filter"></i> Apply</button>
+            <a href="${pageContext.request.contextPath}/claims" class="cfb-btn clear"><i class="ti ti-x"></i> Clear</a>
+        </div>
+    </form>
+
     <!-- Claims Table Panel -->
     <div class="table-panel">
         <table class="claims-table" id="claimsTable">
@@ -608,7 +656,8 @@
     <div class="nl-modal-dialog wide">
         <button type="button" class="nl-modal-close" onclick="closeModal('fileClaimModal')"><i class="ti ti-x"></i></button>
         <div class="nl-modal-title left">File Loss / Damage Claim</div>
-        <form method="post" action="${pageContext.request.contextPath}/claims" id="fileClaimForm">
+        <form method="post" action="${pageContext.request.contextPath}/claims" id="fileClaimForm"
+              enctype="multipart/form-data">
             <input type="hidden" name="action" value="file">
             <div class="row-2">
                 <div class="modal-form-group">
@@ -634,7 +683,11 @@
                 <c:if test="${roleId != 5}">
                     <div class="modal-form-group">
                         <label class="modal-form-label">Customer *</label>
-                        <input type="hidden" name="customerId" id="fileCustomerId" required>
+                        <!-- NOT `required`: a hidden empty required field silently blocks form
+                             submission in every browser (it can't be focused to show an error).
+                             The value is auto-filled from the selected shipment; the server also
+                             validates it, and submit is gated in JS below with a visible message. -->
+                        <input type="hidden" name="customerId" id="fileCustomerId">
                         <input type="text" id="fileCustomerDisplay" class="modal-form-input" readonly placeholder="Auto-filled from selected shipment..." style="background-color: #F8FAFC; cursor: not-allowed; color: #334155; font-weight: 500;">
                     </div>
                 </c:if>
@@ -685,6 +738,20 @@
             <div class="modal-form-group">
                 <label class="modal-form-label">Description *</label>
                 <textarea name="description" class="modal-form-input" rows="3" required placeholder="Describe the loss or damage details observed..."></textarea>
+            </div>
+            <!--
+              FR7.2 asks for evidence to be captured with the claim. Until now the
+              only way to attach a photograph or inspection report was to file the
+              claim first and then upload against it from the detail screen, which
+              meant a claim reached Under Review with nothing to review.
+            -->
+            <div class="modal-form-group">
+                <label class="modal-form-label">Photo Evidence / Inspection Report</label>
+                <input type="file" name="evidenceFile" class="modal-form-input"
+                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                <small style="display:block;margin-top:6px;color:#94A3B8;font-size:11.5px;">
+                    Optional. PDF, JPG, PNG or DOC, up to 15 MB. More files can be added later from the claim.
+                </small>
             </div>
             <div class="nl-modal-actions left">
                 <button type="button" class="nl-modal-btn cancel" onclick="closeModal('fileClaimModal')">Cancel</button>
@@ -792,6 +859,27 @@
         document.getElementById('rejectClaimId').value = claimId;
         openModal('rejectClaimModal');
     }
+
+    // Gate submission visibly if the customer couldn't be resolved from the shipment,
+    // instead of the browser silently refusing to submit.
+    document.addEventListener('DOMContentLoaded', function() {
+        const fcf = document.getElementById('fileClaimForm');
+        if (fcf) {
+            fcf.addEventListener('submit', function(e) {
+                const cust = document.getElementById('fileCustomerId');
+                if (cust && !cust.value) {
+                    e.preventDefault();
+                    const disp = document.getElementById('fileCustomerDisplay');
+                    if (disp) {
+                        disp.style.borderColor = '#DC2626';
+                        disp.placeholder = 'Please select a shipment first — customer could not be resolved.';
+                    }
+                    const ship = document.getElementById('fileShipmentSelect');
+                    if (ship) ship.focus();
+                }
+            });
+        }
+    });
 
     function syncShipmentCustomer(sel) {
         const custField = document.getElementById('fileCustomerId');

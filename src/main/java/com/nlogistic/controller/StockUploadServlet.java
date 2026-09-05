@@ -419,14 +419,17 @@ public class StockUploadServlet extends HttpServlet {
                 String insertStock = "INSERT INTO stock (company_id, product_id, warehouse_location, quantity_on_hand, batch_no, expiry_date) VALUES (?, ?, ?, ?, ?, ?)";
                 String updateStock = "UPDATE stock SET quantity_on_hand = quantity_on_hand + ?, warehouse_location = ?, last_updated = CURRENT_TIMESTAMP WHERE stock_id = ?";
                 
-                String insertLedger = "INSERT INTO inventory_ledger (product_id, transaction_type, quantity, unit_cost_at_txn, reference_type) VALUES (?, 'IN', ?, ?, 'Bulk Upload')";
+                // FR4.5: the ledger entry must point back at its upload batch, otherwise
+                // the row cannot be traced and turnover reconciliation breaks.
+                java.util.List<Integer> ledgerRowIds = new java.util.ArrayList<>();
+                String insertLedger = "INSERT INTO inventory_ledger (product_id, transaction_type, quantity, unit_cost_at_txn, reference_type, reference_id) VALUES (?, 'IN', ?, ?, 'Bulk Upload', ?)";
                 
                 try (PreparedStatement psCheckProd = conn.prepareStatement(checkProduct);
                      PreparedStatement psInsertProd = conn.prepareStatement(insertProduct, java.sql.Statement.RETURN_GENERATED_KEYS);
                      PreparedStatement psCheckStock = conn.prepareStatement(checkStock);
-                     PreparedStatement psInsertStock = conn.prepareStatement(insertStock);
+                     PreparedStatement psInsertStock = conn.prepareStatement(insertStock, java.sql.Statement.RETURN_GENERATED_KEYS);
                      PreparedStatement psUpdateStock = conn.prepareStatement(updateStock);
-                     PreparedStatement psInsertLedger = conn.prepareStatement(insertLedger)) {
+                     PreparedStatement psInsertLedger = conn.prepareStatement(insertLedger, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                     
                     for (String validLine : validData) {
                         String[] cols = validLine.split(",", -1);
@@ -475,7 +478,8 @@ public class StockUploadServlet extends HttpServlet {
                             if (rs.next()) stockId = rs.getInt("stock_id");
                         }
                         
-                        if (stockId == -1) {
+                        boolean newBulkStockRow = (stockId == -1);
+                        if (newBulkStockRow) {
                             psInsertStock.setInt(1, companyId);
                             psInsertStock.setInt(2, productId);
                             psInsertStock.setString(3, warehouse);
@@ -483,6 +487,13 @@ public class StockUploadServlet extends HttpServlet {
                             psInsertStock.setString(5, batch);
                             psInsertStock.setDate(6, expiry);
                             psInsertStock.executeUpdate();
+                            try (ResultSet gkStock = psInsertStock.getGeneratedKeys()) {
+                                if (gkStock.next()) {
+                                    stockId = gkStock.getInt(1);
+                                    // FR8.1: auto-generate a barcode for every newly created stock row (bulk upload path)
+                                    com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Stock", stockId, user.getUserId());
+                                }
+                            }
                         } else {
                             psUpdateStock.setDouble(1, quantity);
                             psUpdateStock.setString(2, warehouse);
@@ -494,7 +505,11 @@ public class StockUploadServlet extends HttpServlet {
                         psInsertLedger.setInt(1, productId);
                         psInsertLedger.setDouble(2, quantity);
                         psInsertLedger.setDouble(3, unitCost);
+                        psInsertLedger.setNull(4, java.sql.Types.INTEGER); // linked to the batch below
                         psInsertLedger.executeUpdate();
+                        try (java.sql.ResultSet lk = psInsertLedger.getGeneratedKeys()) {
+                            if (lk.next()) ledgerRowIds.add(lk.getInt(1));
+                        }
                     }
                 }
                 
@@ -511,7 +526,8 @@ public class StockUploadServlet extends HttpServlet {
                 }
                 
                 String insertLog = "INSERT INTO stock_upload_log (company_id, uploaded_by, file_name, total_records, success_count, failure_count, error_report_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement psLog = conn.prepareStatement(insertLog)) {
+                int uploadBatchId = -1;
+                try (PreparedStatement psLog = conn.prepareStatement(insertLog, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                     psLog.setInt(1, companyId);
                     psLog.setInt(2, user.getUserId());
                     psLog.setString(3, fileName);
@@ -520,6 +536,24 @@ public class StockUploadServlet extends HttpServlet {
                     psLog.setInt(6, invalidRows);
                     psLog.setString(7, errorFilePath);
                     psLog.executeUpdate();
+                    try (java.sql.ResultSet gk = psLog.getGeneratedKeys()) {
+                        if (gk.next()) uploadBatchId = gk.getInt(1);
+                    }
+                }
+
+                // FR4.5: point every ledger row at the batch that produced it. The
+                // batch id only exists after the log row is written, so the link is
+                // completed here - inside the same transaction.
+                if (uploadBatchId > 0 && !ledgerRowIds.isEmpty()) {
+                    try (PreparedStatement psLink = conn.prepareStatement(
+                            "UPDATE inventory_ledger SET reference_id = ? WHERE ledger_id = ?")) {
+                        for (Integer ledgerId : ledgerRowIds) {
+                            psLink.setInt(1, uploadBatchId);
+                            psLink.setInt(2, ledgerId);
+                            psLink.addBatch();
+                        }
+                        psLink.executeBatch();
+                    }
                 }
                 
                 conn.commit();

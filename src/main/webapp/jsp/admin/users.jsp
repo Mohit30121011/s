@@ -1,283 +1,11 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.nlogistic.model.User, com.nlogistic.dao.UserDAO, com.nlogistic.dao.CompanyDAO, com.nlogistic.util.EmailService"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.nlogistic.model.User, com.nlogistic.dao.UserDAO, com.nlogistic.dao.CompanyDAO, com.nlogistic.util.EmailService"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<%
-    // Resilient fallback controller logic for Users & Roles Governance
-    com.nlogistic.model.User currentUser = (com.nlogistic.model.User) session.getAttribute("user");
-    if (currentUser == null) {
-        response.sendRedirect(request.getContextPath() + "/login");
-        return;
-    }
-
-    com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
-    com.nlogistic.dao.CompanyDAO compDao = new com.nlogistic.dao.CompanyDAO();
-
-    // Handle POST actions (suspend, activate, delete, update permissions, invite)
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-        String action = request.getParameter("action");
-        String uidStr = request.getParameter("userId");
-        if (uidStr != null && !uidStr.trim().isEmpty() && action != null) {
-            try {
-                int uid = Integer.parseInt(uidStr.trim());
-                if ("suspend".equals(action)) {
-                    uDao.updateUserStatus(uid, "Locked");
-                    session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been suspended.");
-                } else if ("activate".equals(action) || "reactivate".equals(action)) {
-                    uDao.updateUserStatus(uid, "Active");
-                    session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been successfully activated.");
-                } else if ("delete".equals(action)) {
-                    uDao.updateUserStatus(uid, "Inactive");
-                    session.setAttribute("successMessage", "Staff account #USR-" + uid + " has been removed from active directory.");
-                } else if ("savePermissions".equals(action)) {
-                    String newRoleStr = request.getParameter("assignedRoleId");
-                    if (newRoleStr != null && !newRoleStr.trim().isEmpty()) {
-                        try {
-                            int newRoleId = Integer.parseInt(newRoleStr.trim());
-                            String updRoleSql = "UPDATE users SET role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
-                            try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                                 java.sql.PreparedStatement ps = conn.prepareStatement(updRoleSql)) {
-                                ps.setInt(1, newRoleId);
-                                ps.setInt(2, uid);
-                                ps.executeUpdate();
-                            }
-                            uDao.logAuditEvent(uid, "PERMISSIONS_UPDATED", "Role assigned: " + newRoleId, request.getRemoteAddr());
-                            session.setAttribute("successMessage", "Role-based module permissions saved successfully for staff #USR-" + uid + ".");
-                        } catch (Exception ex) {
-                            session.setAttribute("errorMessage", "Failed to update permissions: " + ex.getMessage());
-                        }
-                    } else {
-                        session.setAttribute("successMessage", "Granular module permissions verified for staff #USR-" + uid + ".");
-                    }
-                } else if ("sendResetPassword".equals(action)) {
-                    com.nlogistic.model.User targetUser = uDao.getUserById(uid);
-                    if (targetUser != null && targetUser.getEmail() != null && !targetUser.getEmail().trim().isEmpty()) {
-                        String email = targetUser.getEmail().trim();
-                        String token = uDao.generatePasswordResetToken(email);
-                        if (token != null) {
-                            String resetLink = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/reset-password?token=" + token;
-                            boolean sent = com.nlogistic.util.EmailService.sendPasswordResetEmail(email, targetUser.getUsername(), resetLink);
-                            uDao.logAuditEvent(uid, "PASSWORD_RESET_DISPATCHED", targetUser.getUsername(), request.getRemoteAddr());
-                            if (sent) {
-                                session.setAttribute("successMessage", "Password reset email successfully sent to " + email + "!");
-                            } else {
-                                session.setAttribute("successMessage", "Password reset link generated! Direct link: " + resetLink + " (Please set Google App Password in mail.properties for direct inbox dispatch)");
-                            }
-                        } else {
-                            session.setAttribute("errorMessage", "Could not generate reset token for " + email);
-                        }
-                    } else {
-                        session.setAttribute("errorMessage", "Target staff member has no registered email address.");
-                    }
-                }
-            } catch (Exception e) {
-                session.setAttribute("errorMessage", "Error processing staff action: " + e.getMessage());
-            }
-        } else if ("updateStaffProfile".equals(action)) {
-            String editUidStr = request.getParameter("userId");
-            String uName = request.getParameter("staffUsername");
-            String uEmail = request.getParameter("staffEmail");
-            String uPhone = request.getParameter("staffPhone");
-            String uRoleStr = request.getParameter("staffRoleId");
-            String compIdStr = request.getParameter("staffCompanyId");
-            String uStatus = request.getParameter("staffStatus");
-
-            if (editUidStr != null && !editUidStr.trim().isEmpty() && uName != null && uEmail != null) {
-                try {
-                    int uid = Integer.parseInt(editUidStr.trim());
-                    int rId = (uRoleStr != null) ? Integer.parseInt(uRoleStr.trim()) : 3;
-                    Integer compId = (compIdStr != null && !compIdStr.trim().isEmpty()) ? Integer.parseInt(compIdStr.trim()) : null;
-                    if (uPhone == null || uPhone.trim().isEmpty()) uPhone = "+91 98765 43210";
-                    if (uStatus == null || uStatus.trim().isEmpty()) uStatus = "Active";
-
-                    String updSql = "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, company_id = ?, status = ? WHERE user_id = ?";
-                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                         java.sql.PreparedStatement ps = conn.prepareStatement(updSql)) {
-                        ps.setString(1, uName.trim());
-                        ps.setString(2, uEmail.trim());
-                        ps.setString(3, uPhone.trim());
-                        ps.setInt(4, rId);
-                        if (compId != null) ps.setInt(5, compId); else ps.setNull(5, java.sql.Types.INTEGER);
-                        ps.setString(6, uStatus.trim());
-                        ps.setInt(7, uid);
-                        ps.executeUpdate();
-                    }
-
-                    uDao.logAuditEvent(uid, "USER_PROFILE_UPDATED", uName.trim(), request.getRemoteAddr());
-                    session.setAttribute("successMessage", "Staff profile for " + uName + " (#USR-" + uid + ") updated successfully!");
-                } catch (Exception e) {
-                    session.setAttribute("errorMessage", "Error updating staff profile: " + e.getMessage());
-                }
-            }
-        } else if ("addStaff".equals(action) || "inviteStaff".equals(action)) {
-            String uName = request.getParameter("staffUsername");
-            if (uName == null || uName.trim().isEmpty()) uName = request.getParameter("inviteName");
-            String uEmail = request.getParameter("staffEmail");
-            if (uEmail == null || uEmail.trim().isEmpty()) uEmail = request.getParameter("inviteEmail");
-            String uPass = request.getParameter("staffPassword");
-            if (uPass == null || uPass.trim().isEmpty()) uPass = "Staff@12345";
-            String uPhone = request.getParameter("staffPhone");
-            if (uPhone == null || uPhone.trim().isEmpty()) uPhone = request.getParameter("invitePhone");
-            if (uPhone == null || uPhone.trim().isEmpty()) uPhone = "+91 98765 43210";
-            String uRoleStr = request.getParameter("staffRoleId");
-            if (uRoleStr == null) uRoleStr = request.getParameter("inviteRoleId");
-            int rId = 3;
-            if (uRoleStr != null) {
-                try { rId = Integer.parseInt(uRoleStr.trim()); } catch(Exception ignored) {}
-            }
-            String compIdStr = request.getParameter("staffCompanyId");
-            Integer compId = null;
-            if (compIdStr != null && !compIdStr.trim().isEmpty()) {
-                try { compId = Integer.parseInt(compIdStr.trim()); } catch(Exception ignored) {}
-            }
-            String uStatus = request.getParameter("staffStatus");
-            if (uStatus == null || uStatus.trim().isEmpty()) uStatus = "Active";
-
-            if (uName != null && uEmail != null && !uName.trim().isEmpty() && !uEmail.trim().isEmpty()) {
-                try {
-                    int newUserId = uDao.createUser(uName.trim(), uEmail.trim(), uPass.trim(), uPhone.trim(), rId, compId, uStatus.trim());
-                    if (newUserId > 0) {
-                        uDao.logAuditEvent(newUserId, "USER_REGISTERED", uName.trim(), request.getRemoteAddr());
-                        session.setAttribute("successMessage", "New staff account #" + newUserId + " (" + uName + ") added successfully!");
-                    } else {
-                        session.setAttribute("errorMessage", "Could not create staff account. Username or email may already exist.");
-                    }
-                } catch (Exception e) {
-                    session.setAttribute("errorMessage", "Error adding staff member: " + e.getMessage());
-                }
-            }
-        }
-        response.sendRedirect(request.getRequestURI());
-        return;
-    }
-
-    // Load real staff users, full user table properties, and real audit logs
-    java.util.List<java.util.Map<String, Object>> staffList = new java.util.ArrayList<java.util.Map<String, Object>>();
-    java.util.Set<String> allDeptNames = new java.util.TreeSet<String>();
-    java.util.Map<Integer, java.util.List<java.util.Map<String, String>>> userAuditMap = new java.util.HashMap<Integer, java.util.List<java.util.Map<String, String>>>();
-
-    String staffSql = "SELECT u.user_id, u.username, u.email, u.phone, u.role_id, r.role_name, r.description as role_desc, " +
-                      "u.company_id, c.company_name, u.status, u.failed_login_count, u.last_login_at, u.created_at, u.updated_at " +
-                      "FROM users u " +
-                      "LEFT JOIN roles r ON u.role_id = r.role_id " +
-                      "LEFT JOIN companies c ON u.company_id = c.company_id " +
-                      "ORDER BY u.user_id ASC";
-
-    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
-        java.text.SimpleDateFormat sdfJoined = new java.text.SimpleDateFormat("dd MMM yyyy");
-        java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a");
-        long now = new java.util.Date().getTime();
-
-        try (java.sql.PreparedStatement ps = conn.prepareStatement(staffSql);
-             java.sql.ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                java.util.Map<String, Object> map = new java.util.HashMap<String, Object>();
-                int uid = rs.getInt("user_id");
-                int rId = rs.getInt("role_id");
-                String compName = rs.getString("company_name");
-                String dept = (rId == 1) ? "Administration" : ((compName != null && !compName.trim().isEmpty()) ? compName.trim() : "Fleet Operations");
-                allDeptNames.add(dept);
-
-                java.sql.Timestamp lastLogin = rs.getTimestamp("last_login_at");
-                String lastActive = "Never logged in";
-                if (lastLogin != null) {
-                    long diffSec = (now - lastLogin.getTime()) / 1000;
-                    if (diffSec < 120) {
-                        lastActive = "Just now";
-                    } else if (diffSec < 3600) {
-                        lastActive = (diffSec / 60) + " min ago";
-                    } else if (diffSec < 86400) {
-                        lastActive = (diffSec / 3600) + " hours ago";
-                    } else if (diffSec < 172800) {
-                        lastActive = "Yesterday";
-                    } else {
-                        lastActive = sdfFull.format(lastLogin);
-                    }
-                }
-
-                java.sql.Timestamp createdAt = rs.getTimestamp("created_at");
-                String joinedStr = (createdAt != null) ? sdfJoined.format(createdAt) : "02 Sep 2026";
-
-                java.sql.Timestamp updatedAt = rs.getTimestamp("updated_at");
-                String updatedStr = (updatedAt != null) ? sdfJoined.format(updatedAt) : joinedStr;
-
-                map.put("userId", uid);
-                map.put("username", rs.getString("username"));
-                map.put("email", rs.getString("email"));
-                String ph = rs.getString("phone");
-                map.put("phone", (ph != null && !ph.trim().isEmpty() && !"N/A".equalsIgnoreCase(ph.trim())) ? ph.trim() : "+91 98765 43210");
-                map.put("roleId", rId);
-                map.put("roleName", rs.getString("role_name"));
-                String rDesc = rs.getString("role_desc");
-                map.put("roleDesc", rDesc != null ? rDesc : "Authorized logistics operations account");
-                map.put("dept", dept);
-                map.put("companyId", rs.getInt("company_id"));
-                map.put("status", rs.getString("status"));
-                map.put("failedLoginCount", rs.getInt("failed_login_count"));
-                map.put("lastActive", lastActive);
-                map.put("lastLoginFull", (lastLogin != null) ? sdfFull.format(lastLogin) : "Never logged in");
-                map.put("joinedDate", joinedStr);
-                map.put("updatedDate", updatedStr);
-                staffList.add(map);
-            }
-        }
-
-        // Fetch real activity audit events from audit_log table
-        String auditSql = "SELECT log_id, user_id, action, entity_name, entity_id, ip_address, timestamp FROM audit_log ORDER BY timestamp DESC";
-        try (java.sql.PreparedStatement psAudit = conn.prepareStatement(auditSql);
-             java.sql.ResultSet rsAudit = psAudit.executeQuery()) {
-            while (rsAudit.next()) {
-                int aUid = rsAudit.getInt("user_id");
-                java.util.Map<String, String> ev = new java.util.HashMap<String, String>();
-                ev.put("action", rsAudit.getString("action"));
-                String ent = rsAudit.getString("entity_name");
-                int entId = rsAudit.getInt("entity_id");
-                ev.put("entity", (ent != null ? ent : "system") + (entId > 0 ? " #" + entId : ""));
-                String ip = rsAudit.getString("ip_address");
-                ev.put("ip", ip != null ? ip : "127.0.0.1");
-                ev.put("time", sdfFull.format(rsAudit.getTimestamp("timestamp")));
-
-                java.util.List<java.util.Map<String, String>> evList = userAuditMap.get(aUid);
-                if (evList == null) {
-                    evList = new java.util.ArrayList<java.util.Map<String, String>>();
-                    userAuditMap.put(aUid, evList);
-                }
-                if (evList.size() < 10) {
-                    evList.add(ev);
-                }
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-
-    // Build pure JSON string for real audit data
-    StringBuilder auditJson = new StringBuilder("{");
-    boolean firstU = true;
-    for (java.util.Map.Entry<Integer, java.util.List<java.util.Map<String, String>>> entry : userAuditMap.entrySet()) {
-        if (!firstU) auditJson.append(",");
-        firstU = false;
-        auditJson.append("\"").append(entry.getKey()).append("\":[");
-        boolean firstE = true;
-        for (java.util.Map<String, String> ev : entry.getValue()) {
-            if (!firstE) auditJson.append(",");
-            firstE = false;
-            auditJson.append("{\"action\":\"").append(ev.get("action")).append("\",");
-            auditJson.append("\"entity\":\"").append(ev.get("entity")).append("\",");
-            auditJson.append("\"ip\":\"").append(ev.get("ip")).append("\",");
-            auditJson.append("\"time\":\"").append(ev.get("time")).append("\"}");
-        }
-        auditJson.append("]");
-    }
-    auditJson.append("}");
-
-    java.util.List<com.nlogistic.model.Company> allCompanies = compDao.getAllCompanies();
-    request.setAttribute("allCompanies", allCompanies);
-    request.setAttribute("staffList", staffList);
-    request.setAttribute("allDeptNames", allDeptNames);
-    request.setAttribute("userAuditJson", auditJson.toString());
-%>
-
+<%-- MVC2: this view renders only. All data and every POST action are
+     handled by AdminUserServlet (/admin/users). The previous inline
+     controller scriptlet duplicated that logic and bypassed the audited
+     stored procedures. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -1388,6 +1116,7 @@
                                 data-updated="${u.updatedDate}"
                                 data-lastactive="${u.lastActive}"
                                 data-lastloginfull="${u.lastLoginFull}"
+                                data-perms="${u.modulePermissions}"
                                 onclick="selectStaffMember(${u.userId})">
 
                                 <!-- Staff Member Profile -->
@@ -1483,7 +1212,7 @@
                                             </button>
                                             <c:choose>
                                                 <c:when test="${u.status == 'Active'}">
-                                                    <form method="POST" id="suspendForm_${u.userId}" style="margin: 0;">
+                                                    <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="suspendForm_${u.userId}" style="margin: 0;">
                                                         <input type="hidden" name="userId" value="${u.userId}">
                                                         <input type="hidden" name="action" value="suspend">
                                                         <button type="button" class="dropdown-item-btn" onclick="confirmSuspend(${u.userId}, '${u.username}')">
@@ -1492,7 +1221,7 @@
                                                     </form>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <form method="POST" id="activateForm_${u.userId}" style="margin: 0;">
+                                                    <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="activateForm_${u.userId}" style="margin: 0;">
                                                         <input type="hidden" name="userId" value="${u.userId}">
                                                         <input type="hidden" name="action" value="activate">
                                                         <button type="button" class="dropdown-item-btn" onclick="confirmActivate(${u.userId}, '${u.username}')">
@@ -1501,7 +1230,7 @@
                                                     </form>
                                                 </c:otherwise>
                                             </c:choose>
-                                            <form method="POST" id="deleteForm_${u.userId}" style="margin: 0;">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="deleteForm_${u.userId}" style="margin: 0;">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="delete">
                                                 <button type="button" class="dropdown-item-btn danger" onclick="confirmDelete(${u.userId}, '${u.username}')">
@@ -1637,7 +1366,7 @@
                 <div class="module-permissions-title">Module Permissions</div>
 
                 <!-- 10 Granular Module Permissions Matching Mockup & SRS -->
-                <form method="POST" id="savePermissionsForm">
+                <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="savePermissionsForm">
                     <input type="hidden" name="action" value="savePermissions">
                     <input type="hidden" name="userId" id="drawerUserIdInput" value="3">
 
@@ -1816,11 +1545,11 @@
             </button>
         </div>
 
-        <form method="POST" id="resetPasswordDirectForm" style="display: none;">
+        <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="resetPasswordDirectForm" style="display: none;">
     <input type="hidden" name="action" value="sendResetPassword">
     <input type="hidden" name="userId" id="resetPasswordDirectUserId">
 </form>
-        <form method="POST" id="addStaffForm">
+        <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="addStaffForm">
             <input type="hidden" name="action" value="addStaff">
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
@@ -1902,7 +1631,7 @@
             </button>
         </div>
 
-        <form method="POST" id="editStaffForm">
+        <form method="POST" action="${pageContext.request.contextPath}/admin/users" id="editStaffForm">
             <input type="hidden" name="action" value="updateStaffProfile">
             <input type="hidden" name="userId" id="editStaffUserId">
 
@@ -2034,28 +1763,45 @@
             rolePill.className = 'role-badge-pill super-admin';
             rolePill.textContent = 'Super Admin';
             roleBadgeHtml = '<span class="role-badge-pill super-admin">Super Admin</span>';
-            setAllToggles(true);
         } else if (roleId === 2) {
             rolePill.className = 'role-badge-pill company-admin';
             rolePill.textContent = 'Company Admin';
             roleBadgeHtml = '<span class="role-badge-pill company-admin">Company Admin</span>';
-            setRolePreset([true, true, true, true, true, true, true, true, true, false]);
         } else if (roleId === 4) {
             rolePill.className = 'role-badge-pill staff-finance';
             rolePill.textContent = 'Staff — Finance';
             roleBadgeHtml = '<span class="role-badge-pill staff-finance">Staff — Finance</span>';
-            setRolePreset([true, false, false, true, true, false, true, false, false, false]);
         } else if (roleId === 5) {
             rolePill.className = 'role-badge-pill customer';
             rolePill.textContent = 'Customer / Shipper';
             roleBadgeHtml = '<span class="role-badge-pill customer">Customer / Shipper</span>';
-            setRolePreset([true, true, true, false, false, false, false, false, false, false]);
         } else {
             rolePill.className = 'role-badge-pill staff-ops';
             rolePill.textContent = 'Company Staff — Operations';
             roleBadgeHtml = '<span class="role-badge-pill staff-ops">Company Staff — Operations</span>';
-            setRolePreset([true, true, true, false, false, true, true, true, false, false]);
         }
+
+        // Real Saved User Permissions from Database
+        const savedPermsStr = (row.getAttribute('data-perms') || '').toLowerCase();
+        const savedPerms = savedPermsStr ? savedPermsStr.split(',').map(s => s.trim()) : [];
+        const permKeys = ['dashboard', 'tracking', 'shipments', 'plg', 'invoicing', 
+                          'inventory', 'claims', 'compliance', 'users', 'settings'];
+        permKeys.forEach(key => {
+            const el = document.getElementById('perm_' + key);
+            if (el) {
+                if (roleId === 1) {
+                    el.checked = true; // Super Admin always full
+                } else if (savedPerms.length > 0) {
+                    el.checked = savedPerms.includes(key);
+                } else {
+                    // Fallback to role default
+                    if (roleId === 2) el.checked = (key !== 'settings');
+                    else if (roleId === 3) el.checked = ['dashboard', 'tracking', 'shipments', 'inventory', 'claims', 'compliance'].includes(key);
+                    else if (roleId === 4) el.checked = ['dashboard', 'plg', 'invoicing', 'claims'].includes(key);
+                    else el.checked = false;
+                }
+            }
+        });
 
         // 2. Populate Tab 1: Details View (Real Data from users table)
         const dStatus = document.getElementById('dStatus');
@@ -2679,15 +2425,108 @@
         nav.appendChild(next);
     }
 
-    // Auto-initialize with Rohit Sharma (or first staff) selected on load
+    // Auto-initialize with selected staff on load or first row
     document.addEventListener('DOMContentLoaded', function() {
         applyStaffFilters();
-        const firstRow = document.querySelector('.staff-row');
-        if (firstRow) {
-            const id = firstRow.getAttribute('data-id');
-            selectStaffMember(parseInt(id, 10));
+        const urlParams = new URLSearchParams(window.location.search);
+        const selId = urlParams.get('selectedUserId');
+        if (selId) {
+            selectStaffMember(parseInt(selId, 10));
+            switchDrawerTab('permissions');
+            openPermissionsDrawer();
+        } else {
+            const firstRow = document.querySelector('.staff-row');
+            if (firstRow) {
+                const id = firstRow.getAttribute('data-id');
+                selectStaffMember(parseInt(id, 10));
+            }
+        }
+
+        // Hook up AJAX save for Permissions Drawer Form
+        const permForm = document.getElementById('savePermissionsForm');
+        if (permForm) {
+            permForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+                const saveBtn = form.querySelector('.btn-drawer-save');
+                const origHtml = saveBtn ? saveBtn.innerHTML : 'Save Changes';
+                if (saveBtn) {
+                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" style="width:14px; height:14px;"></span> Saving...';
+                    saveBtn.disabled = true;
+                }
+
+                const formData = new FormData(form);
+                const params = new URLSearchParams(formData);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString()
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (saveBtn) {
+                        saveBtn.innerHTML = '<i class="ti ti-check me-1"></i> Saved!';
+                        setTimeout(() => {
+                            saveBtn.innerHTML = origHtml;
+                            saveBtn.disabled = false;
+                        }, 1600);
+                    }
+                    if (data && data.success) {
+                        const uid = document.getElementById('drawerUserIdInput').value;
+                        const row = document.getElementById('staffRow_' + uid);
+                        if (row) {
+                            row.setAttribute('data-perms', data.permissions);
+                        }
+                        showToastNotification('User permissions updated successfully!', 'success');
+                    } else {
+                        showToastNotification('Failed to update permissions.', 'danger');
+                    }
+                })
+                .catch(err => {
+                    console.warn('AJAX submit failed, using native submit:', err);
+                    form.submit();
+                });
+            });
         }
     });
+
+    // Sleek floating toast notification helper
+    function showToastNotification(message, type) {
+        let container = document.getElementById('nlToastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'nlToastContainer';
+            container.style.position = 'fixed';
+            container.style.top = '20px';
+            container.style.right = '24px';
+            container.style.zIndex = '9999999';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.gap = '8px';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-' + (type || 'success') + ' shadow-lg border-0 d-flex align-items-center gap-2 py-2 px-3';
+        toast.style.borderRadius = '10px';
+        toast.style.fontSize = '13.5px';
+        toast.style.fontWeight = '500';
+        toast.style.animation = 'fadeIn 0.2s ease-out';
+        toast.style.minWidth = '280px';
+        toast.innerHTML = '<i class="ti ' + (type === 'danger' ? 'ti-alert-triangle' : 'ti-circle-check') + ' fs-5"></i><span>' + message + '</span>';
+
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
 </script>
 
 <jsp:include page="/jsp/layout/footer.jsp" />

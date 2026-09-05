@@ -1,0 +1,101 @@
+ProductName,Category,HSNCode,UOM,Quantity,UnitCost,UnitPrice,WarehouseLocation,BatchNo,ExpiryDate
+TEST_STOCK_Brake_Pads_1,Pharmaceuticals,5277,box,409,3279.57,4426.65,Chennai WH-4,BATCH-001,2028-12-15
+TEST_STOCK_Sugar_Bags_2,Food & Beverage,4788,box,356,1163.37,1570.05,Bangalore WH-3,BATCH-002,2027-02-20
+TEST_STOCK_Hydraulic_Pump_3,Electronics,2655,pcs,315,4417.41,5962.95,Hyderabad WH-6,BATCH-003,2026-02-26
+TEST_STOCK_Paracetamol_Tablets_4,Textiles,1911,pallet,154,504.54,680.40,Chennai WH-4,BATCH-004,2028-06-01
+TEST_STOCK_Hydraulic_Pump_5,Consumer Goods,5258,pallet,296,3097.85,4180.95,Chennai WH-4,BATCH-005,2027-10-05
+TEST_STOCK_Wheat_Flour_6,Machinery,2047,litre,424,1137.87,1534.95,Kolkata WH-5,BATCH-006,2028-08-21
+TEST_STOCK_Brake_Pads_7,Pharmaceuticals,7797,carton,437,439.27,592.65,Mumbai WH-1,BATCH-007,2026-06-09
+TEST_STOCK_Wheat_Flour_8,Furniture,1920,box,418,3248.33,4384.80,Hyderabad WH-6,BATCH-008,2027-12-18
+TEST_STOCK_Silk_Saree_9,Pharmaceuticals,3407,carton,180,378.22,510.30,Mumbai WH-1,BATCH-009,2026-06-24
+TEST_STOCK_Diesel_Generator_10,Machinery,7456,litre,138,3635.47,4907.25,Hyderabad WH-6,BATCH-010,2027-02-27
+TEST_STOCK_Cement_Bags_11,Consumer Goods,5367,litre,106,1833.37,2474.55,Hyderabad WH-6,BATCH-011,2028-07-23
+TEST_STOCK_Sulfuric_Acid_12,Automotive Parts,2453,litre,484,201.44,271.35,Bangalore WH-3,BATCH-012,2026-02-09
+TEST_STOCK_Sulfuric_Acid_13,Construction Materials,1816,kg,221,1775.77,2396.25,Chennai WH-4,BATCH-013,2026-01-03
+TEST_STOCK_Wireless_Mouse_14,Textiles,6744,pallet,125,2223.26,3001.05,Hyderabad WH-6,BATCH-014,2026-07-16
+TEST_STOCK_Silk_Saree_15,Pharmaceuticals,1035,carton,389,1381.58,1864.35,Delhi WH-2,BATCH-015,2028-10-13
+TEST_STOCK_Silk_Saree_16,Machinery,5149,carton,488,446.15,602.10,Hyderabad WH-6,BATCH-016,2026-08-24
+TEST_STOCK_Hydraulic_Pump_17,Machinery,8215,carton,259,2183.80,2947.05,Hyderabad WH-6,BATCH-017,2028-04-19
+TEST_STOCK_Industrial_Motor_18,Electronics,2374,pallet,398,2711.77,3659.85,Mumbai WH-1,BATCH-018,2026-02-17
+TEST_STOCK_Bookshelf_19,Textiles,3512,box,193,2575.34,3476.25,Mumbai WH-1,BATCH-019,2027-01-16
+TEST_STOCK_Cotton_Fabric_20,Electronics,1734,box,40,4750.41,6412.50,Hyderabad WH-6,BATCH-020,2026-03-13
+TEST_STOCK_Steel_Rebar_21,Construction Materials,5096,pallet,116,2869.82,3873.15,Hyderabad WH-6,BATCH-021,2028-08-10
+TEST_STOCK_Wheat_Flour_22,Machinery,7065,carton,373,3512.57,4741.20,Bangalore WH-3,BATCH-022,2026-01-12
+TEST_STOCK_Steel_Rebar_23,Electronics,6560,pcs,342,1417.23,1912.95,Kolkata WH-5,BATCH-023,2027-06-25
+TEST_STOCK_Silk_Saree_24,Food & Beverage,5921,carton,452,2477.63,3343.95,Kolkata WH-5,BATCH-024,2027-11-12
+TEST_STOCK_Cotton_Fabric_25,Furniture,2500,pcs,11,4322.27,5834.70,Chennai WH-4,BATCH-025,2026-02-21
+TEST_STOCK_Brake_Pads_26,Chemicals,1731,box,140,4934.77,6660.90,Kolkata WH-5,BATCH-026,2027-03-27
+TEST_STOCK_Wheat_Flour_27,Consumer Goods,3062,carton,393,3712.94,5011.20,Delhi WH-2,BATCH-027,2028-03-28
+TEST_STOCK_Rice_Bags_28,Textiles,5064,kg,320,755.76,1019.25,Kolkata WH-5,BATCH-028,2028-10-18
+TEST_STOCK_Hydraulic_Pump_29,Automotive Parts,1848,box,197,550.22,742.50,Mumbai WH-1,BATCH-029,2027-08-24
+TEST_STOCK_Rice_Bags_30,Pharmaceuticals,3954,carton,450,4661.36,6292.35,Mumbai WH-1,BATCH-030,2028-11-13
+TEST_STOCK_Hydraulic_Pump_31,Textiles,1626,kg,387,238.37,321.30,Hyderabad WH-6,BATCH-031,2028-02-27
+TEST_STOCK_Denim_Jeans_32,Pharmaceuticals,5549,kg,365,2598.69,3507.30,Bangalore WH-3,BATCH-032,2026-11-15
+TEST_STOCK_Vitamin_C_Tablets_33,Electronics,3033,kg,35,339.63,457.65,Kolkata WH-5,BATCH-033,2028-07-09
+TEST_STOCK_Sodium_Hydroxide_34,Furniture,5660,kg,35,2659.70,3589.65,Delhi WH-2,BATCH-034,2028-03-09
+TEST_STOCK_Bookshelf_35,Pharmaceuticals,8885,box,108,3524.50,4757.40,Bangalore WH-3,BATCH-035,2028-08-16
+TEST_STOCK_Sugar_Bags_36,Food & Beverage,1408,box,249,5017.85,6772.95,Mumbai WH-1,BATCH-036,2027-08-17
+TEST_STOCK_Sand_Bags_37,Textiles,3261,pcs,43,2649.75,3576.15,Kolkata WH-5,BATCH-037,2028-11-24
+TEST_STOCK_Wooden_Table_38,Textiles,2118,pcs,201,4378.70,5910.30,Mumbai WH-1,BATCH-038,2027-08-26
+TEST_STOCK_Cement_Bags_39,Automotive Parts,6787,box,411,4314.14,5823.90,Chennai WH-4,BATCH-039,2028-08-09
+TEST_STOCK_Copper_Wire_40,Furniture,9244,pallet,138,1844.76,2489.40,Hyderabad WH-6,BATCH-040,2027-07-22
+TEST_STOCK_Vitamin_C_Tablets_41,Automotive Parts,4329,kg,329,2547.31,3438.45,Bangalore WH-3,BATCH-041,2026-05-15
+TEST_STOCK_LED_Bulbs_42,Construction Materials,6723,pallet,38,1289.97,1740.15,Chennai WH-4,BATCH-042,2026-08-24
+TEST_STOCK_Bluetooth_Speaker_43,Food & Beverage,4679,carton,248,3263.24,4405.05,Kolkata WH-5,BATCH-043,2026-03-27
+TEST_STOCK_Silk_Saree_44,Chemicals,7240,kg,146,2927.26,3951.45,Mumbai WH-1,BATCH-044,2027-06-25
+TEST_STOCK_Office_Chair_45,Machinery,1871,litre,324,97.59,130.95,Mumbai WH-1,BATCH-045,2028-11-13
+TEST_STOCK_Office_Chair_46,Furniture,7216,carton,42,4044.60,5459.40,Hyderabad WH-6,BATCH-046,2027-07-15
+TEST_STOCK_Sand_Bags_47,Furniture,1038,pcs,180,2635.89,3557.25,Hyderabad WH-6,BATCH-047,2028-03-19
+TEST_STOCK_Aluminium_Sheet_48,Textiles,3308,carton,109,2099.74,2833.65,Chennai WH-4,BATCH-048,2026-01-24
+TEST_STOCK_Steel_Rebar_49,Electronics,5242,litre,317,3056.47,4125.60,Chennai WH-4,BATCH-049,2027-01-08
+TEST_STOCK_Office_Chair_50,Construction Materials,8614,carton,46,589.90,795.15,Chennai WH-4,BATCH-050,2026-12-19
+TEST_STOCK_Rice_Bags_51,Machinery,1188,carton,23,4807.11,6489.45,Kolkata WH-5,BATCH-051,2028-06-24
+TEST_STOCK_LED_Bulbs_52,Chemicals,6214,litre,41,1514.76,2043.90,Kolkata WH-5,BATCH-052,2026-05-11
+TEST_STOCK_Insulin_Vials_53,Chemicals,4933,kg,487,3472.68,4687.20,Bangalore WH-3,BATCH-053,2027-04-10
+TEST_STOCK_Cement_Bags_54,Chemicals,4405,box,505,2294.98,3096.90,Bangalore WH-3,BATCH-054,2028-12-03
+TEST_STOCK_Cement_Bags_55,Chemicals,2864,box,84,4069.90,5493.15,Chennai WH-4,BATCH-055,2027-09-25
+TEST_STOCK_Wooden_Table_56,Furniture,9484,litre,324,2005.57,2706.75,Bangalore WH-3,BATCH-056,2027-09-08
+TEST_STOCK_Wheat_Flour_57,Consumer Goods,6881,carton,96,2521.23,3403.35,Chennai WH-4,BATCH-057,2026-10-23
+TEST_STOCK_Cement_Bags_58,Furniture,1042,pcs,105,1312.61,1771.20,Mumbai WH-1,BATCH-058,2027-06-27
+TEST_STOCK_Vitamin_C_Tablets_59,Machinery,9882,box,395,4118.83,5559.30,Bangalore WH-3,BATCH-059,2028-07-16
+TEST_STOCK_Vitamin_C_Tablets_60,Textiles,4699,pcs,209,3417.47,4612.95,Kolkata WH-5,BATCH-060,2026-03-11
+TEST_STOCK_Rice_Bags_61,Consumer Goods,6471,kg,362,243.59,328.05,Chennai WH-4,BATCH-061,2028-04-01
+TEST_STOCK_Paracetamol_Tablets_62,Chemicals,8486,box,139,2195.30,2963.25,Bangalore WH-3,BATCH-062,2026-09-19
+TEST_STOCK_Office_Chair_63,Automotive Parts,4332,pallet,79,1123.56,1516.05,Hyderabad WH-6,BATCH-063,2027-07-13
+TEST_STOCK_Steel_Rod_64,Chemicals,2856,carton,140,237.76,319.95,Hyderabad WH-6,BATCH-064,2026-08-26
+TEST_STOCK_Ammonia_Solution_65,Consumer Goods,6419,carton,167,2708.89,3655.80,Kolkata WH-5,BATCH-065,2027-07-04
+TEST_STOCK_Sodium_Hydroxide_66,Machinery,3362,litre,180,1544.60,2084.40,Mumbai WH-1,BATCH-066,2026-04-25
+TEST_STOCK_Wooden_Table_67,Machinery,5084,carton,268,919.37,1240.65,Chennai WH-4,BATCH-067,2028-12-21
+TEST_STOCK_Bluetooth_Speaker_68,Chemicals,6745,kg,76,4230.62,5710.50,Hyderabad WH-6,BATCH-068,2027-02-22
+TEST_STOCK_Sugar_Bags_69,Machinery,1312,litre,178,2316.67,3126.60,Delhi WH-2,BATCH-069,2028-09-16
+TEST_STOCK_Hydraulic_Pump_70,Furniture,9626,box,454,1493.56,2015.55,Kolkata WH-5,BATCH-070,2026-04-21
+TEST_STOCK_Bookshelf_71,Chemicals,1132,box,385,3354.77,4527.90,Hyderabad WH-6,BATCH-071,2026-05-14
+TEST_STOCK_Wireless_Mouse_72,Chemicals,5159,pallet,225,3253.48,4391.55,Mumbai WH-1,BATCH-072,2028-12-20
+TEST_STOCK_Brake_Pads_73,Food & Beverage,6926,pallet,367,3071.16,4145.85,Delhi WH-2,BATCH-073,2027-09-12
+TEST_STOCK_Sulfuric_Acid_74,Furniture,4893,pallet,125,977.51,1318.95,Kolkata WH-5,BATCH-074,2028-12-24
+TEST_STOCK_Bookshelf_75,Consumer Goods,7121,box,177,4817.89,6502.95,Mumbai WH-1,BATCH-075,2026-09-28
+TEST_STOCK_Steel_Rebar_76,Consumer Goods,1027,pcs,302,4062.95,5483.70,Delhi WH-2,BATCH-076,2028-08-14
+TEST_STOCK_Sulfuric_Acid_77,Construction Materials,7684,box,44,617.39,832.95,Delhi WH-2,BATCH-077,2027-02-02
+TEST_STOCK_Paracetamol_Tablets_78,Construction Materials,8656,kg,39,3008.76,4060.80,Delhi WH-2,BATCH-078,2027-02-19
+TEST_STOCK_Cement_Bags_79,Machinery,4225,carton,270,4246.16,5732.10,Mumbai WH-1,BATCH-079,2028-02-17
+TEST_STOCK_Paracetamol_Tablets_80,Chemicals,4037,litre,355,1443.56,1948.05,Kolkata WH-5,BATCH-080,2027-01-18
+TEST_STOCK_Aluminium_Sheet_81,Construction Materials,7239,litre,111,3416.34,4611.60,Mumbai WH-1,BATCH-081,2028-05-08
+TEST_STOCK_Tyre_Set_82,Textiles,1114,litre,357,3461.96,4672.35,Kolkata WH-5,BATCH-082,2027-02-12
+TEST_STOCK_Office_Chair_83,Consumer Goods,9139,pallet,156,3739.85,5047.65,Kolkata WH-5,BATCH-083,2028-04-23
+TEST_STOCK_Cotton_Fabric_84,Automotive Parts,3483,pallet,52,157.33,211.95,Bangalore WH-3,BATCH-084,2027-09-10
+TEST_STOCK_Ammonia_Solution_85,Machinery,3882,box,257,2710.91,3658.50,Mumbai WH-1,BATCH-085,2027-04-27
+TEST_STOCK_Industrial_Motor_86,Automotive Parts,7769,box,425,2552.25,3445.20,Hyderabad WH-6,BATCH-086,2026-11-18
+TEST_STOCK_Brake_Pads_87,Automotive Parts,1249,pcs,369,4000.73,5400.00,Chennai WH-4,BATCH-087,2028-01-01
+TEST_STOCK_Paracetamol_Tablets_88,Textiles,6928,litre,222,1457.87,1966.95,Kolkata WH-5,BATCH-088,2026-03-12
+TEST_STOCK_Steel_Rebar_89,Textiles,3455,pcs,84,3694.71,4986.90,Mumbai WH-1,BATCH-089,2026-09-26
+TEST_STOCK_Sand_Bags_90,Pharmaceuticals,9010,carton,118,3916.51,5286.60,Kolkata WH-5,BATCH-090,2026-10-20
+TEST_STOCK_Car_Battery_91,Textiles,1525,pcs,87,1161.49,1567.35,Chennai WH-4,BATCH-091,2027-10-11
+TEST_STOCK_Insulin_Vials_92,Construction Materials,9808,box,485,884.59,1193.40,Hyderabad WH-6,BATCH-092,2028-03-28
+TEST_STOCK_Bluetooth_Speaker_93,Food & Beverage,1391,kg,498,4865.75,6567.75,Hyderabad WH-6,BATCH-093,2028-03-23
+TEST_STOCK_LED_Bulbs_94,Pharmaceuticals,2059,carton,48,233.28,314.55,Bangalore WH-3,BATCH-094,2027-08-08
+TEST_STOCK_Hydraulic_Pump_95,Construction Materials,3737,carton,206,4770.82,6439.50,Kolkata WH-5,BATCH-095,2027-05-03
+TEST_STOCK_Brake_Pads_96,Pharmaceuticals,3818,pcs,363,2214.89,2988.90,Mumbai WH-1,BATCH-096,2028-06-07
+TEST_STOCK_Diesel_Generator_97,Food & Beverage,9032,litre,381,3076.66,4152.60,Hyderabad WH-6,BATCH-097,2028-05-09
+TEST_STOCK_Brake_Pads_98,Consumer Goods,1217,litre,415,876.47,1182.60,Bangalore WH-3,BATCH-098,2026-07-19
+TEST_STOCK_Sugar_Bags_99,Construction Materials,9139,litre,408,4471.54,6035.85,Bangalore WH-3,BATCH-099,2027-06-21
+TEST_STOCK_Car_Battery_100,Textiles,1367,pallet,188,2143.44,2893.05,Chennai WH-4,BATCH-100,2028-02-04

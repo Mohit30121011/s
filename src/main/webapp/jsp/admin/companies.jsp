@@ -1,147 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-        String action = request.getParameter("action");
-        String compIdStr = request.getParameter("companyId");
-        if (compIdStr != null && action != null) {
-            try {
-                int compId = Integer.parseInt(compIdStr);
-                com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
-                if ("accept".equals(action)) {
-                    cDao.updateCompanyStatus(compId, "Active");
-                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                         java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE users SET status = 'Active' WHERE company_id = ?")) {
-                        ps.setInt(1, compId);
-                        ps.executeUpdate();
-                    } catch(Exception ex) { ex.printStackTrace(); }
-                    session.setAttribute("successMessage", "Company Approved & Activated Successfully.");
-                } else if ("reject".equals(action)) {
-                    cDao.updateCompanyStatus(compId, "Suspended");
-                    session.setAttribute("errorMessage", "Company Rejected / Suspended.");
-                } else if ("delete".equals(action)) {
-                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
-                        conn.setAutoCommit(false);
-                        try {
-                            // Find and delete all users associated with this company
-                            java.util.List<Integer> compUsers = new java.util.ArrayList<>();
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("SELECT user_id FROM users WHERE company_id = ?")) {
-                                ps.setInt(1, compId);
-                                try (java.sql.ResultSet rs = ps.executeQuery()) {
-                                    while (rs.next()) compUsers.add(rs.getInt(1));
-                                }
-                            }
-                            for (int uId : compUsers) {
-                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE user_id = ?")) {
-                                    ps.setInt(1, uId);
-                                    ps.executeUpdate();
-                                }
-                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM password_resets WHERE user_id = ?")) {
-                                    ps.setInt(1, uId);
-                                    ps.executeUpdate();
-                                }
-                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM audit_log WHERE user_id = ?")) {
-                                    ps.setInt(1, uId);
-                                    ps.executeUpdate();
-                                }
-                                try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE user_id = ?")) {
-                                    ps.setInt(1, uId);
-                                    ps.executeUpdate();
-                                }
-                            }
-                            // Nullify or clean up containers / stock
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE containers SET owner_company_id = NULL WHERE owner_company_id = ?")) {
-                                ps.setInt(1, compId);
-                                ps.executeUpdate();
-                            }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM stock_upload_log WHERE company_id = ?")) {
-                                ps.setInt(1, compId);
-                                ps.executeUpdate();
-                            }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM stock WHERE company_id = ?")) {
-                                ps.setInt(1, compId);
-                                ps.executeUpdate();
-                            }
-                            // Finally delete company
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM companies WHERE company_id = ?")) {
-                                ps.setInt(1, compId);
-                                ps.executeUpdate();
-                            }
-                            conn.commit();
-                            session.setAttribute("successMessage", "Company #CMP-" + compId + " permanently deleted from database.");
-                        } catch(Exception ex) {
-                            conn.rollback();
-                            session.setAttribute("errorMessage", "Failed to delete company: " + ex.getMessage());
-                            ex.printStackTrace();
-                        } finally {
-                            conn.setAutoCommit(true);
-                        }
-                    }
-                } else if ("update".equals(action)) {
-                    String companyName = request.getParameter("companyName");
-                    String licenseNo = request.getParameter("licenseNo");
-                    String gstNo = request.getParameter("gstNo");
-                    String address = request.getParameter("address");
-                    String email = request.getParameter("contactEmail");
-                    String phone = request.getParameter("contactPhone");
-
-                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                         java.sql.PreparedStatement ps = conn.prepareStatement(
-                            "UPDATE companies SET company_name = ?, license_no = ?, gst_no = ?, address = ?, contact_email = ?, contact_phone = ? WHERE company_id = ?")) {
-                        ps.setString(1, companyName != null ? companyName.trim() : "");
-                        ps.setString(2, licenseNo != null ? licenseNo.trim() : "");
-                        ps.setString(3, gstNo != null ? gstNo.trim() : "");
-                        ps.setString(4, address != null ? address.trim() : "");
-                        ps.setString(5, email != null ? email.trim() : "");
-                        ps.setString(6, phone != null ? phone.trim() : "");
-                        ps.setInt(7, compId);
-                        int affected = ps.executeUpdate();
-                        if (affected > 0) {
-                            session.setAttribute("successMessage", "Company #" + compId + " details updated successfully.");
-                        } else {
-                            session.setAttribute("errorMessage", "Company #" + compId + " not found.");
-                        }
-                    } catch(Exception ex) {
-                        session.setAttribute("errorMessage", "Failed to update company: " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
-                }
-            } catch(Exception ex) { ex.printStackTrace(); }
-            response.sendRedirect(request.getRequestURI());
-            return;
-        }
-    }
-
-    if (request.getAttribute("allCompanies") == null) {
-        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
-        java.util.List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
-        java.util.List<com.nlogistic.model.Company> pendComps = cDao.getPendingCompanies();
-        int pendingCount = (pendComps != null) ? pendComps.size() : 0;
-        int activeCount = 0;
-        int suspendedCount = 0;
-        int totalCount = (allComps != null) ? allComps.size() : 0;
-
-        if (allComps != null) {
-            for (com.nlogistic.model.Company c : allComps) {
-                if ("Active".equalsIgnoreCase(c.getApprovalStatus())) {
-                    activeCount++;
-                } else if ("Suspended".equalsIgnoreCase(c.getApprovalStatus()) || "Rejected".equalsIgnoreCase(c.getApprovalStatus())) {
-                    suspendedCount++;
-                }
-            }
-        }
-
-        request.setAttribute("allCompanies", allComps);
-        request.setAttribute("pendingCompanies", pendComps);
-        request.setAttribute("pendingCount", pendingCount);
-        request.setAttribute("activeCount", activeCount);
-        request.setAttribute("suspendedCount", suspendedCount);
-        request.setAttribute("totalCount", totalCount);
-    }
-%>
-
+<%-- MVC2: this view renders only. All data and every POST action are
+     handled by AdminCompanyServlet (/admin/companies). The previous inline
+     controller scriptlet duplicated that logic and bypassed the audited
+     stored procedures. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -511,7 +374,7 @@
     <!-- Toolbar: Filter Tabs & Real-Time Search -->
     <div class="approvals-toolbar">
         <div class="nav-tabs-pill">
-            <button type="button" class="tab-pill-btn active" id="tabPendingBtn" onclick="filterByTab('Pending')">
+            <button type="button" class="tab-pill-btn" id="tabPendingBtn" onclick="filterByTab('Pending')">
                 <i class="ti ti-clock"></i> Pending Review
                 <span class="tab-counter">${not empty pendingCount ? pendingCount : 0}</span>
             </button>
@@ -523,7 +386,7 @@
                 <i class="ti ti-ban"></i> Suspended &amp; Rejected
                 <span class="tab-counter" style="color: #DC2626; background: #FEF2F2;">${not empty suspendedCount ? suspendedCount : 0}</span>
             </button>
-            <button type="button" class="tab-pill-btn" id="tabAllBtn" onclick="filterByTab('All')">
+            <button type="button" class="tab-pill-btn active" id="tabAllBtn" onclick="filterByTab('All')">
                 <i class="ti ti-list"></i> All Tenants
                 <span class="tab-counter">${not empty totalCount ? totalCount : 0}</span>
             </button>
@@ -634,7 +497,7 @@
                                     <c:choose>
                                         <c:when test="${comp.approvalStatus == 'Pending'}">
                                             <!-- Approve Button -->
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/companies" class="d-inline m-0">
                                                 <input type="hidden" name="companyId" value="${comp.companyId}">
                                                 <input type="hidden" name="action" value="accept">
                                                 <button type="submit" class="btn-approval-accept" title="Approve and activate company" style="padding: 6px 14px; font-size: 11.5px;">
@@ -642,7 +505,7 @@
                                                 </button>
                                             </form>
                                             <!-- Reject Button -->
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/companies" class="d-inline m-0">
                                                 <input type="hidden" name="companyId" value="${comp.companyId}">
                                                 <input type="hidden" name="action" value="reject">
                                                 <button type="button" class="btn-approval-reject" title="Reject registration" onclick="showCustomConfirm({title: 'Reject Company Registration?', desc: 'Are you sure you want to reject this enterprise tenant registration?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
@@ -651,7 +514,7 @@
                                             </form>
                                         </c:when>
                                         <c:when test="${comp.approvalStatus == 'Active'}">
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/companies" class="d-inline m-0">
                                                 <input type="hidden" name="companyId" value="${comp.companyId}">
                                                 <input type="hidden" name="action" value="reject">
                                                 <button type="button" class="btn-approval-reject" title="Suspend verified company" onclick="showCustomConfirm({title: 'Suspend Enterprise Tenant?', desc: 'Are you sure you want to suspend this company? All associated operations and user accounts will be deactivated.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Company', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
@@ -660,7 +523,7 @@
                                             </form>
                                         </c:when>
                                         <c:otherwise>
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/companies" class="d-inline m-0">
                                                 <input type="hidden" name="companyId" value="${comp.companyId}">
                                                 <input type="hidden" name="action" value="accept">
                                                 <button type="button" class="btn-approval-accept" title="Reactivate company" onclick="showCustomConfirm({title: 'Reactivate Enterprise Tenant?', desc: 'Are you sure you want to restore and reactivate this company account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
@@ -676,7 +539,7 @@
                                     </button>
 
                                     <!-- Delete Company Action -->
-                                    <form method="POST" class="d-inline m-0" id="deleteCompanyForm_${comp.companyId}">
+                                    <form method="POST" action="${pageContext.request.contextPath}/admin/companies" class="d-inline m-0" id="deleteCompanyForm_${comp.companyId}">
                                         <input type="hidden" name="companyId" value="${comp.companyId}">
                                         <input type="hidden" name="action" value="delete">
                                         <button type="button" class="btn-approval-delete" title="Permanently Delete Company" onclick="showCustomConfirm({title: 'Delete Enterprise Tenant?', desc: 'Are you sure you want to permanently delete company \'${comp.companyName}\' (#CMP-${comp.companyId}) and all associated records from the database? This action cannot be undone.', icon: 'ti ti-trash', type: 'danger', confirmText: 'Yes, Delete Permanently', form: this.form});">
@@ -759,7 +622,7 @@
                 </div>
             </div>
 
-            <form method="POST" id="editCompanyForm">
+            <form method="POST" action="${pageContext.request.contextPath}/admin/companies" id="editCompanyForm">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="companyId" id="editCompanyId">
 
@@ -1096,7 +959,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        filterByTab('Pending');
+        filterByTab('All');
     });
 </script>
 

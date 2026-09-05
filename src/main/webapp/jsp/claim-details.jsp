@@ -1,25 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    // Resilient self-load: allows direct access (e.g. bookmark) without breaking.
-    if (request.getAttribute("claim") == null && request.getParameter("claimId") != null) {
-        try {
-            int __claimId = Integer.parseInt(request.getParameter("claimId"));
-            com.nlogistic.dao.ClaimDAO __dao = new com.nlogistic.dao.ClaimDAO();
-            com.nlogistic.model.Claim __claim = __dao.getClaimById(__claimId);
-            if (__claim != null) {
-                request.setAttribute("claim", __claim);
-                request.setAttribute("history", __dao.getClaimHistory(__claimId));
-                request.setAttribute("documents", __dao.getClaimDocuments(__claimId));
-                com.nlogistic.model.User __u = (com.nlogistic.model.User) session.getAttribute("user");
-                int __roleId = (__u != null) ? (session.getAttribute("roleId") != null ? (Integer) session.getAttribute("roleId") : __u.getRoleId()) : 5;
-                request.setAttribute("roleId", __roleId);
-                request.setAttribute("customerId", session.getAttribute("customerId"));
-            }
-        } catch (Exception __ignored) {}
-    }
-%>
+<%-- MVC2 (SRS 10.2): data and actions come from ClaimServlet (/claims?action=view).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>

@@ -77,9 +77,13 @@ public class ClaimServlet extends HttpServlet {
                     Claim claim = claimDAO.getClaimById(claimId);
 
                     if (claim != null) {
-                        // Customer can only view their own claims
-                        if (roleId == ROLE_CUSTOMER && customerId != null && claim.getCustomerId() != customerId) {
-                            session.setAttribute("errorMessage", "Access denied - this is not your claim.");
+                        // Gap 4: this used to check customers only, so a member of
+                        // Company A could read Company B's claim - customer name,
+                        // cargo description, amounts, internal remarks and evidence
+                        // links - just by changing claimId in the URL.
+                        if (!claimDAO.canAccessClaim(claimId, roleId,
+                                com.nlogistic.util.RbacContext.companyId(request), customerId)) {
+                            session.setAttribute("errorMessage", "Access denied - this claim does not belong to your account.");
                             response.sendRedirect(request.getContextPath() + "/claims");
                             return;
                         }
@@ -99,33 +103,38 @@ public class ClaimServlet extends HttpServlet {
             }
         }
 
-        // Claims register / dashboard
-        String statusFilter = request.getParameter("statusFilter");
-        String typeFilter = request.getParameter("typeFilter");
+        // Claims register / dashboard.
+        // FR7.7: status and type were the only filters; date range, customer and
+        // (for a Super Admin) company are added here. Scoping now happens inside
+        // the query rather than by reading every claim and discarding the ones
+        // the caller may not see.
+        String statusFilter   = request.getParameter("statusFilter");
+        String typeFilter     = request.getParameter("typeFilter");
+        String dateFrom       = request.getParameter("dateFrom");
+        String dateTo         = request.getParameter("dateTo");
+        Integer custFilter    = parseIntOrNull(request.getParameter("customerFilter"));
+        Integer companyFilter = (roleId == ROLE_SUPER_ADMIN)
+                                ? parseIntOrNull(request.getParameter("companyFilter")) : null;
 
-        List<Claim> claims;
-        // Customer sees only their own claims
-        if (roleId == ROLE_CUSTOMER) {
-            claims = (customerId != null && customerId > 0)
-                     ? claimDAO.getClaimsByCustomer(customerId)
-                     : new java.util.ArrayList<>();
-        } else if (statusFilter != null && !statusFilter.isEmpty()) {
-            claims = claimDAO.getClaimsByStatus(statusFilter);
-        } else {
-            claims = claimDAO.getAllClaims();
+        Integer scopeCompany = com.nlogistic.util.RbacContext.companyId(request);
+        List<Claim> claims = claimDAO.getClaimsFiltered(roleId, scopeCompany, customerId,
+                statusFilter, typeFilter, dateFrom, dateTo, custFilter, companyFilter);
+
+        if (roleId != ROLE_CUSTOMER) {
+            request.setAttribute("filterCustomers", claimDAO.getFilterCustomers(roleId, scopeCompany));
         }
+        request.setAttribute("dateFrom", dateFrom != null ? dateFrom : "");
+        request.setAttribute("dateTo", dateTo != null ? dateTo : "");
+        request.setAttribute("customerFilter", custFilter != null ? String.valueOf(custFilter) : "");
+        request.setAttribute("companyFilter", companyFilter != null ? String.valueOf(companyFilter) : "");
 
-        // Type filter (Java-side)
-        if (typeFilter != null && !typeFilter.isEmpty()) {
-            final String tf = typeFilter;
-            claims.removeIf(c -> !tf.equals(c.getClaimType()));
-        }
-
-        Map<String, Object> stats = (roleId == ROLE_CUSTOMER && customerId != null) 
-                     ? claimDAO.getClaimStats(customerId) 
-                     : claimDAO.getClaimStats();
+        // KPI cards used to come from an unscoped COUNT over the whole claims
+        // table, so company staff read system-wide totals above a table that
+        // showed only their own tenant. Summarising the rows on screen keeps the
+        // cards honest and makes them follow the filters as well.
+        Map<String, Object> stats = summarise(claims);
         List<LossReason> lossReasons = claimDAO.getAllLossReasons();
-        List<Object[]> shipments = claimDAO.getShipmentsForUser(userId, roleId, customerId);
+        List<Object[]> shipments = claimDAO.getShipmentsForUser(userId, roleId, customerId, scopeCompany);
 
         request.setAttribute("claims", claims);
         request.setAttribute("stats", stats);
@@ -136,6 +145,115 @@ public class ClaimServlet extends HttpServlet {
         request.setAttribute("roleId", roleId);
         request.setAttribute("customerId", customerId);
         request.getRequestDispatcher("/jsp/claims.jsp").forward(request, response);
+    }
+
+    /**
+     * Gap 4 (write side): review / approve / reject / settle checked the caller's
+     * role but never that the claim belonged to their company, so a Finance
+     * officer at one carrier could approve and settle a rival's claim - raising a
+     * real credit note against another tenant's customer.
+     */
+    private void requireTenant(HttpServletRequest request, int claimId, int roleId, Integer customerId) {
+        if (!claimDAO.canAccessClaim(claimId, roleId,
+                com.nlogistic.util.RbacContext.companyId(request), customerId)) {
+            throw new SecurityException("That claim does not belong to your company.");
+        }
+    }
+
+    /**
+     * Save an optional evidence file submitted alongside a new claim.
+     * Returns a fragment to append to the success message; never throws, because
+     * a rejected attachment must not lose the claim that was just filed.
+     */
+    private String storeEvidence(HttpServletRequest request, int claimId, int userId) {
+        try {
+            Part filePart = request.getPart("evidenceFile");
+            if (filePart == null || filePart.getSize() <= 0) return "";
+            String submitted = filePart.getSubmittedFileName();
+            if (submitted == null || submitted.trim().isEmpty()) return "";
+
+            String lower = submitted.toLowerCase();
+            boolean validExt = lower.endsWith(".pdf") || lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+                    || lower.endsWith(".png") || lower.endsWith(".doc") || lower.endsWith(".docx");
+            if (!validExt) return " The attachment was not saved: allowed types are PDF, JPG, PNG and DOC.";
+
+            String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "claims";
+            File dir = new File(uploadPath);
+            if (!dir.exists()) dir.mkdirs();
+            String sanitized = System.currentTimeMillis() + "_claim" + claimId + "_"
+                    + submitted.replaceAll("[^a-zA-Z0-9.-]", "_");
+            filePart.write(uploadPath + File.separator + sanitized);
+
+            boolean saved = claimDAO.addClaimDocument(claimId, "Photo Evidence",
+                    "uploads/claims/" + sanitized, userId);
+            return saved ? " Evidence \"" + submitted + "\" attached."
+                         : " The attachment could not be recorded against the claim.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return " The attachment could not be saved.";
+        }
+    }
+
+    /** Claim KPI counters for exactly the rows the caller is allowed to see. */
+    private static Map<String, Object> summarise(List<Claim> claims) {
+        int filed = 0, review = 0, approved = 0, settled = 0, rejected = 0;
+        double claimed = 0, approvedAmt = 0;
+        for (Claim c : claims) {
+            String st = c.getStatus();
+            if ("Filed".equals(st)) filed++;
+            else if ("Under Review".equals(st)) review++;
+            else if ("Approved".equals(st)) approved++;
+            else if ("Settled".equals(st)) settled++;
+            else if ("Rejected".equals(st)) rejected++;
+            claimed += c.getClaimedAmount();
+            approvedAmt += c.getApprovedAmount();
+        }
+        Map<String, Object> m = new java.util.HashMap<>();
+        m.put("total", claims.size());
+        m.put("filed", filed);
+        m.put("underReview", review);
+        m.put("approved", approved);
+        m.put("settled", settled);
+        m.put("rejected", rejected);
+        m.put("totalClaimed", claimed);
+        m.put("totalApproved", approvedAmt);
+        return m;
+    }
+
+    private static Integer parseIntOrNull(String v) {
+        if (v == null || v.trim().isEmpty()) return null;
+        try { return Integer.valueOf(v.trim()); } catch (NumberFormatException e) { return null; }
+    }
+
+    /**
+     * FR7.3 / FR7.5 state machine.
+     *
+     * Gap 2: the servlet executed whatever transition the request asked for. A
+     * claim could go straight from Filed to Approved without review, an already
+     * Settled claim could be reopened to Approved and then settled a second time
+     * (raising a second credit note against the customer), and a Rejected claim
+     * could be resurrected. Three database triggers cover part of this, but they
+     * only guard entry into Settled - everything else was unguarded.
+     *
+     * @return null when the transition is legal, otherwise why it is not.
+     */
+    private String checkTransition(String current, String target) {
+        if (current == null) return "That claim no longer exists.";
+        if ("Settled".equals(current))  return "Claim is already settled; settled claims cannot be changed.";
+        if ("Rejected".equals(current)) return "Claim was rejected; a rejected claim cannot be reopened.";
+
+        if ("Under Review".equals(target)) {
+            if (!"Filed".equals(current)) return "Only a claim in Filed status can be moved to Under Review.";
+        } else if ("Approved".equals(target)) {
+            if (!"Under Review".equals(current)) return "A claim must be Under Review before it can be approved.";
+        } else if ("Rejected".equals(target)) {
+            if (!"Filed".equals(current) && !"Under Review".equals(current)) {
+                return "Only a Filed or Under Review claim can be rejected.";
+            }
+        } else if ("Settled".equals(target)) {
+            if (!"Approved".equals(current)) return "A claim must be Approved before it can be settled.";
+        }
+        return null;
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -184,11 +302,32 @@ public class ClaimServlet extends HttpServlet {
                         throw new SecurityException("You can only file claims for your own account.");
                     }
 
+                    // Gap 3: the account was checked but the shipment was not, so a
+                    // customer could file a claim against a stranger's shipment simply
+                    // by posting its id, and staff could file against another tenant's.
+                    com.nlogistic.dao.ShipmentDAO shipScope = new com.nlogistic.dao.ShipmentDAO();
+                    if (roleId == ROLE_CUSTOMER) {
+                        if (!shipScope.canAccessShipment(shipmentId, roleId, null, claimCustId)) {
+                            throw new SecurityException("That shipment is not on your account.");
+                        }
+                    } else if (!shipScope.canAccessShipment(shipmentId, roleId,
+                            com.nlogistic.util.RbacContext.companyId(request), null)) {
+                        throw new SecurityException("That shipment does not belong to your company.");
+                    }
+
                     int newClaimId = claimDAO.fileClaim(shipmentId, containerId, productId, claimCustId,
                                                          claimType, desc, incidentDate, claimedAmt, reasonId, userId);
                     if (newClaimId > 0) {
-                        session.setAttribute("successMessage", "Claim #" + newClaimId + " filed successfully. Current Status: Filed.");
+                        // FR7.2: evidence supplied with the claim is stored against it
+                        // straight away rather than requiring a second upload step.
+                        String evidenceNote = storeEvidence(request, newClaimId, userId);
+
+                        session.setAttribute("successMessage", "Claim #" + newClaimId
+                                + " filed successfully. Current Status: Filed." + evidenceNote);
                         redirectUrl = request.getContextPath() + "/claims?action=view&claimId=" + newClaimId;
+
+                        // FR8.1: auto-generate a barcode for every newly filed claim
+                        com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Claim", newClaimId, userId);
                     } else {
                         session.setAttribute("successMessage", "Claim filed successfully.");
                     }
@@ -200,9 +339,17 @@ public class ClaimServlet extends HttpServlet {
                         throw new SecurityException("Only Operations staff can move a claim to Under Review.");
                     }
                     int claimId = Integer.parseInt(request.getParameter("claimId").trim());
+                    requireTenant(request, claimId, roleId, customerId);
+                    String block = checkTransition(claimDAO.getClaimStatus(claimId), "Under Review");
+                    if (block != null) { session.setAttribute("errorMessage", block); break; }
+
                     String remark = request.getParameter("remarks");
-                    claimDAO.startReview(claimId, userId, remark);
-                    session.setAttribute("successMessage", "Claim #" + claimId + " is now Under Review. Finance team will evaluate.");
+                    String err = claimDAO.startReview(claimId, userId, remark);
+                    if (err != null) {
+                        session.setAttribute("errorMessage", err);
+                    } else {
+                        session.setAttribute("successMessage", "Claim #" + claimId + " is now Under Review. Finance team will evaluate.");
+                    }
                     redirectUrl = request.getContextPath() + "/claims?action=view&claimId=" + claimId;
                     break;
                 }
@@ -212,11 +359,26 @@ public class ClaimServlet extends HttpServlet {
                         throw new SecurityException("Only Finance staff can approve a claim.");
                     }
                     int claimId = Integer.parseInt(request.getParameter("claimId").trim());
+                    requireTenant(request, claimId, roleId, customerId);
+                    String block = checkTransition(claimDAO.getClaimStatus(claimId), "Approved");
+                    if (block != null) { session.setAttribute("errorMessage", block); break; }
+
                     double approvedAmt = Double.parseDouble(request.getParameter("approvedAmount").trim());
+                    // FR7.5 precondition: an approval must carry a real amount, or the
+                    // settlement that follows raises a credit note for nothing.
+                    if (approvedAmt <= 0) {
+                        session.setAttribute("errorMessage",
+                                "Approved amount must be greater than zero. Reject the claim instead if nothing is payable.");
+                        break;
+                    }
                     String remark = request.getParameter("remarks");
-                    claimDAO.approveClaim(claimId, approvedAmt, userId, remark);
-                    session.setAttribute("successMessage", "Claim #" + claimId + " approved for " + String.format("%,.2f", approvedAmt) +
-                        ". Credit note posted to billing.");
+                    String err = claimDAO.approveClaim(claimId, approvedAmt, userId, remark);
+                    if (err != null) {
+                        session.setAttribute("errorMessage", err);
+                    } else {
+                        session.setAttribute("successMessage", "Claim #" + claimId + " approved for " + String.format("%,.2f", approvedAmt) +
+                            ". Settle the claim to raise the credit note.");
+                    }
                     redirectUrl = request.getContextPath() + "/claims?action=view&claimId=" + claimId;
                     break;
                 }
@@ -226,9 +388,17 @@ public class ClaimServlet extends HttpServlet {
                         throw new SecurityException("Only Finance staff can reject a claim.");
                     }
                     int claimId = Integer.parseInt(request.getParameter("claimId").trim());
+                    requireTenant(request, claimId, roleId, customerId);
+                    String block = checkTransition(claimDAO.getClaimStatus(claimId), "Rejected");
+                    if (block != null) { session.setAttribute("errorMessage", block); break; }
+
                     String remark = request.getParameter("remarks");
-                    claimDAO.rejectClaim(claimId, userId, remark);
-                    session.setAttribute("successMessage", "Claim #" + claimId + " has been rejected. Reason recorded in status history.");
+                    String err = claimDAO.rejectClaim(claimId, userId, remark);
+                    if (err != null) {
+                        session.setAttribute("errorMessage", err);
+                    } else {
+                        session.setAttribute("successMessage", "Claim #" + claimId + " has been rejected. Reason recorded in status history.");
+                    }
                     redirectUrl = request.getContextPath() + "/claims?action=view&claimId=" + claimId;
                     break;
                 }
@@ -238,8 +408,31 @@ public class ClaimServlet extends HttpServlet {
                         throw new SecurityException("Only Finance staff can settle a claim.");
                     }
                     int claimId = Integer.parseInt(request.getParameter("claimId").trim());
-                    claimDAO.settleClaim(claimId, userId);
-                    session.setAttribute("successMessage", "Claim #" + claimId + " settled. Resolution recorded and credit note posted to billing.");
+                    requireTenant(request, claimId, roleId, customerId);
+                    com.nlogistic.model.Claim settling = claimDAO.getClaimById(claimId);
+                    String block = checkTransition(settling != null ? settling.getStatus() : null, "Settled");
+                    if (block != null) { session.setAttribute("errorMessage", block); break; }
+
+                    // FR7.5 contract precondition.
+                    if (settling.getApprovedAmount() <= 0) {
+                        session.setAttribute("errorMessage",
+                                "Claim #" + claimId + " has no approved amount, so it cannot be settled.");
+                        break;
+                    }
+
+                    // FR7.4 / FR7.6 are handled inside the settle_claim stored procedure,
+                    // which raises the credit note in billing_invoices and posts the cost
+                    // to profit_loss with its loss reason. Do NOT credit again here - an
+                    // earlier attempt to do so in Java double-credited the customer.
+                    String err = claimDAO.settleClaim(claimId, userId);
+                    if (err != null) {
+                        session.setAttribute("errorMessage", err);
+                    } else {
+                        session.setAttribute("successMessage",
+                                "Claim #" + claimId + " settled and resolution recorded. Credit note of "
+                                + String.format("%,.2f", settling.getApprovedAmount())
+                                + " raised against the customer's account.");
+                    }
                     redirectUrl = request.getContextPath() + "/claims?action=view&claimId=" + claimId;
                     break;
                 }
@@ -247,12 +440,7 @@ public class ClaimServlet extends HttpServlet {
                 case "addDoc": {
                     int claimId = Integer.parseInt(request.getParameter("claimId").trim());
                     String docType = request.getParameter("docType");
-                    if (roleId == ROLE_CUSTOMER) {
-                        Claim c = claimDAO.getClaimById(claimId);
-                        if (c == null || (customerId != null && c.getCustomerId() != customerId)) {
-                            throw new SecurityException("Cannot upload a document to a claim you don't own.");
-                        }
-                    }
+                    requireTenant(request, claimId, roleId, customerId);
 
                     Part filePart = request.getPart("evidenceFile");
                     String submittedName = (filePart != null) ? filePart.getSubmittedFileName() : null;

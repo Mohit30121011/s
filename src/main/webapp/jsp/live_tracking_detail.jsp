@@ -346,6 +346,8 @@
 </div>
 
 <div class="panels-grid">
+    <%-- FR2.3: only Operations and Admins record checkpoints. --%>
+    <c:if test="${sessionScope.user.roleId <= 3}">
     <!-- Live Form Panel: Record Next Checkpoint -->
     <div class="card-panel" style="margin-bottom: 0;">
         <div class="panel-header">
@@ -383,6 +385,7 @@
             </div>
         </form>
     </div>
+    </c:if>
 
     <!-- Summary Panel (Real Database Data) -->
     <div class="card-panel" style="margin-bottom: 0;">
@@ -413,6 +416,9 @@
     </div>
 </div>
 
+<%-- Internal audit trail: who recorded each checkpoint. Customers see
+     their progress timeline above, not staff attribution. --%>
+<c:if test="${sessionScope.user.roleId != 5}">
 <!-- Audit Log (100% Real DB container_movements Data) -->
 <div class="card-panel">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -478,6 +484,7 @@
         </table>
     </div>
 </div>
+</c:if>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

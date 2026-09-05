@@ -1,21 +1,14 @@
-<%
-    if (request.getAttribute("auditHistory") == null) {
-        try {
-            com.nlogistic.dao.PricingRuleDAO pDao = new com.nlogistic.dao.PricingRuleDAO();
-            String cType = (String) request.getAttribute("selectedType");
-            if (cType == null) cType = request.getParameter("type");
-            if (cType == null) cType = "Dry";
-            request.setAttribute("auditHistory", pDao.getAuditHistoryByType(cType));
-        } catch (Exception ignored) {}
-    }
-%>
+<%-- MVC2 (SRS 10.2): data and actions come from PredictiveGraphServlet (/predictive-graph).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <!-- Include Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/nl-chart-theme.js"></script>
 <script>
     // ==========================================
     // PREDICTIVE AUDIT TRAIL PAGINATION & SEARCH

@@ -199,6 +199,7 @@
     .status-paid { background: var(--success-light); color: var(--success); }
     .status-unpaid { background: var(--danger-light); color: var(--danger); }
     .status-partial { background: var(--warning-light); color: var(--warning); }
+    .status-overdue { background: #FEE2E2; color: #B91C1C; }
 
     .action-cell {
         display: flex;
@@ -371,6 +372,35 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+
+    .payment-mode-fields { margin-top: 4px; }
+    .qr-box {
+        background: var(--primary-light);
+        border: 1px dashed var(--primary);
+        border-radius: 10px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .qr-pattern {
+        width: 140px;
+        height: 140px;
+        background:
+            repeating-linear-gradient(0deg, #111827 0 6px, transparent 6px 12px),
+            repeating-linear-gradient(90deg, #111827 0 6px, transparent 6px 12px);
+        background-blend-mode: multiply;
+        background-color: #fff;
+        border: 6px solid #111827;
+        border-radius: 6px;
+    }
+    .qr-caption {
+        font-size: 12px;
+        color: var(--text-sub);
+        font-weight: 500;
+    }
 </style>
 
 </style>
@@ -470,6 +500,7 @@
                         <c:choose>
                             <c:when test="${inv.paymentStatus == 'Paid'}"><span class="status-badge status-paid">Paid</span></c:when>
                             <c:when test="${inv.paymentStatus == 'Partial'}"><span class="status-badge status-partial">Partial</span></c:when>
+                            <c:when test="${inv.paymentStatus == 'Overdue'}"><span class="status-badge status-overdue">Overdue</span></c:when>
                             <c:otherwise><span class="status-badge status-unpaid">Unpaid</span></c:otherwise>
                         </c:choose>
                     </td>
@@ -534,24 +565,94 @@
                 <h3>Record Payment</h3>
                 <button class="modal-close" onclick="closeModal('paymentModal')"><i class="fi fi-rr-cross"></i></button>
             </div>
-            <form action="${pageContext.request.contextPath}/billing/pay" method="post">
+            <form action="${pageContext.request.contextPath}/billing/pay" method="post" id="paymentForm" onsubmit="return preparePaymentSubmit();">
                 <input type="hidden" name="invoiceId" id="payInvoiceId">
+                <input type="hidden" name="transactionRef" id="transactionRefHidden">
                 <div class="form-group">
                     <label>Amount Paid (&#8377;)</label>
                     <input type="number" step="0.01" name="amountPaid" class="form-control" required placeholder="0.00">
                 </div>
                 <div class="form-group">
                     <label>Payment Mode</label>
-                    <select name="paymentMode" class="form-control" style="width:100%;" required>
+                    <select name="paymentMode" id="paymentModeSelect" class="form-control" style="width:100%;" required onchange="onPaymentModeChange()">
+                        <option value="UPI">UPI</option>
+                        <option value="Card">Card</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Netbanking">Netbanking</option>
                         <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Credit Card">Credit Card</option>
                         <option value="Cash">Cash</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Transaction Reference</label>
-                    <input type="text" name="transactionRef" class="form-control" required placeholder="e.g. TXN-12345">
+
+                <!-- UPI: instant QR code -->
+                <div class="payment-mode-fields" id="fields-UPI">
+                    <div class="qr-box" id="upiQrBox">
+                        <div class="qr-pattern" id="upiQrPattern"></div>
+                        <div class="qr-caption">Scan to pay via any UPI app</div>
+                    </div>
+                    <div class="form-group">
+                        <label>UPI Reference / VPA</label>
+                        <input type="text" id="upiRef" class="form-control" placeholder="e.g. 9876543210@upi">
+                    </div>
                 </div>
+
+                <!-- Card -->
+                <div class="payment-mode-fields" id="fields-Card" style="display:none;">
+                    <div class="form-group">
+                        <label>Card Holder Name</label>
+                        <input type="text" id="cardHolder" class="form-control" placeholder="e.g. R. Sharma">
+                    </div>
+                    <div style="display:flex; gap:16px;">
+                        <div class="form-group" style="flex:1;">
+                            <label>Card Number (last 4 digits)</label>
+                            <input type="text" id="cardLast4" maxlength="4" pattern="[0-9]{4}" class="form-control" placeholder="1234">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Card Network</label>
+                            <select id="cardNetwork" class="form-control">
+                                <option value="Visa">Visa</option>
+                                <option value="Mastercard">Mastercard</option>
+                                <option value="RuPay">RuPay</option>
+                                <option value="Amex">Amex</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cheque -->
+                <div class="payment-mode-fields" id="fields-Cheque" style="display:none;">
+                    <div class="form-group">
+                        <label>Cheque Number</label>
+                        <input type="text" id="chequeNumber" class="form-control" placeholder="e.g. 004521">
+                    </div>
+                    <div class="form-group">
+                        <label>Bearer Name</label>
+                        <input type="text" id="bearerName" class="form-control" placeholder="e.g. Company Bank Pvt Ltd">
+                    </div>
+                </div>
+
+                <!-- Netbanking -->
+                <div class="payment-mode-fields" id="fields-Netbanking" style="display:none;">
+                    <div class="form-group">
+                        <label>Bank</label>
+                        <select id="netbankBank" class="form-control">
+                            <option value="HDFC Bank">HDFC Bank</option>
+                            <option value="ICICI Bank">ICICI Bank</option>
+                            <option value="State Bank of India">State Bank of India</option>
+                            <option value="Axis Bank">Axis Bank</option>
+                            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Bank Transfer / Cash: plain reference -->
+                <div class="payment-mode-fields" id="fields-Other" style="display:none;">
+                    <div class="form-group">
+                        <label>Transaction Reference</label>
+                        <input type="text" id="plainTxnRef" class="form-control" placeholder="e.g. TXN-12345">
+                    </div>
+                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn-custom btn-outline" onclick="closeModal('paymentModal')">Cancel</button>
                     <button type="submit" class="btn-custom btn-primary-custom">Record Payment</button>
@@ -562,7 +663,8 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/nl-chart-theme.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <script>
 
@@ -628,8 +730,85 @@
         }
     });
 
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+        if (id === 'paymentModal') { onPaymentModeChange(); }
+    }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // FR5.7 / README2: dynamic payment mode fields (UPI QR, Cheque, Card, Netbanking)
+    function onPaymentModeChange() {
+        var mode = document.getElementById('paymentModeSelect').value;
+        var groups = { 'UPI': 'fields-UPI', 'Card': 'fields-Card', 'Cheque': 'fields-Cheque', 'Netbanking': 'fields-Netbanking' };
+        ['fields-UPI', 'fields-Card', 'fields-Cheque', 'fields-Netbanking', 'fields-Other'].forEach(function(id) {
+            document.getElementById(id).style.display = 'none';
+        });
+        var targetId = groups[mode] || 'fields-Other';
+        document.getElementById(targetId).style.display = 'block';
+        if (mode === 'UPI') {
+            generateQrPattern();
+        }
+    }
+
+    function generateQrPattern() {
+        var el = document.getElementById('upiQrPattern');
+        var invId = document.getElementById('payInvoiceId').value || '0';
+        var seed = parseInt(invId, 10) + Date.now();
+        function rand() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+        var size = 10, cell = 14;
+        var canvas = document.createElement('canvas');
+        canvas.width = size * cell; canvas.height = size * cell;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#111827';
+        for (var r = 0; r < size; r++) {
+            for (var c = 0; c < size; c++) {
+                if (rand() > 0.5) ctx.fillRect(c * cell, r * cell, cell, cell);
+            }
+        }
+        // Finder-pattern corners for a QR-like look
+        [[0,0],[size-3,0],[0,size-3]].forEach(function(p) {
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(p[0]*cell, p[1]*cell, cell*3, cell*3);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(p[0]*cell+cell*0.5, p[1]*cell+cell*0.5, cell*2, cell*2);
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(p[0]*cell+cell, p[1]*cell+cell, cell, cell);
+        });
+        el.innerHTML = '';
+        canvas.style.width = '100%'; canvas.style.height = '100%'; canvas.style.borderRadius = '4px';
+        el.appendChild(canvas);
+        document.getElementById('upiRef').value = 'UPI' + invId + Date.now().toString().slice(-6) + '@nlogistic';
+    }
+
+    function preparePaymentSubmit() {
+        var mode = document.getElementById('paymentModeSelect').value;
+        var ref = '';
+        if (mode === 'UPI') {
+            var vpa = document.getElementById('upiRef').value.trim();
+            ref = 'UPI-' + (vpa || 'REF' + Date.now());
+        } else if (mode === 'Card') {
+            var holder = document.getElementById('cardHolder').value.trim();
+            var last4 = document.getElementById('cardLast4').value.trim();
+            var net = document.getElementById('cardNetwork').value;
+            if (!last4) { alert('Please enter the last 4 digits of the card.'); return false; }
+            ref = 'CARD-' + net + '-XXXX' + last4 + (holder ? (' (' + holder + ')') : '');
+        } else if (mode === 'Cheque') {
+            var chq = document.getElementById('chequeNumber').value.trim();
+            var bearer = document.getElementById('bearerName').value.trim();
+            if (!chq) { alert('Please enter the cheque number.'); return false; }
+            ref = 'CHQ-' + chq + (bearer ? (' / Bearer: ' + bearer) : '');
+        } else if (mode === 'Netbanking') {
+            var bank = document.getElementById('netbankBank').value;
+            ref = 'NB-' + bank.replace(/\s+/g, '') + '-' + Date.now().toString().slice(-8);
+        } else {
+            var plain = document.getElementById('plainTxnRef').value.trim();
+            if (!plain) { alert('Please enter a transaction reference.'); return false; }
+            ref = plain;
+        }
+        document.getElementById('transactionRefHidden').value = ref;
+        return true;
+    }
     
     document.querySelectorAll('.form-select-custom').forEach((el) => {
         if (!el.tomselect) {
@@ -648,5 +827,8 @@
 
     paginateTable('invoiceTable', 15);
 </script>
+
+<%-- Export + Fullscreen controls on every card --%>
+<script src="${pageContext.request.contextPath}/assets/js/nl-card-tools.js"></script>
 </body>
 </html>

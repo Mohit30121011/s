@@ -337,12 +337,18 @@
             <i class="fa-solid fa-xmark clear-icon d-none" id="clearSearchBtn" title="Clear Search"></i>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="${pageContext.request.contextPath}/finance/profit-loss" class="btn-profit-loss" title="View Profit &amp; Loss Trend Graph &amp; Cost Attribution">
-                <i class="ti ti-chart-line"></i> Profit &amp; Loss Analytics
-            </a>
-            <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
-                <i class="fa-solid fa-plus"></i> Book Shipment
-            </a>
+            <%-- Cost structure & margins: Super Admin, Company Admin, Finance only --%>
+            <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 4}">
+                <a href="${pageContext.request.contextPath}/finance/profit-loss" class="btn-profit-loss" title="View Profit &amp; Loss Trend Graph &amp; Cost Attribution">
+                    <i class="ti ti-chart-line"></i> Profit &amp; Loss Analytics
+                </a>
+            </c:if>
+            <%-- Finance staff do not create bookings --%>
+            <c:if test="${sessionScope.user.roleId != 4}">
+                <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
+                    <i class="fa-solid fa-plus"></i> Book Shipment
+                </a>
+            </c:if>
         </div>
     </div>
 
@@ -379,15 +385,31 @@
                         </td>
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="${pageContext.request.contextPath}/finance/shipment-drilldown?id=${s.shipmentId}" class="btn-icon-action drilldown" title="Financial Drilldown &amp; Loss Attribution">
-                                    <i class="ti ti-chart-arrows-vertical"></i>
+                                <%-- Financial Drilldown: Admins & Finance only (CLAUDE.md S3.5.6) --%>
+                                <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 4}">
+                                    <a href="${pageContext.request.contextPath}/finance/shipment-drilldown?id=${s.shipmentId}" class="btn-icon-action drilldown" title="Financial Drilldown &amp; Loss Attribution">
+                                        <i class="ti ti-chart-arrows-vertical"></i>
+                                    </a>
+                                </c:if>
+                                <%-- Edit & checkpoint updates: Admins & Operations only --%>
+                                <c:if test="${sessionScope.user.roleId <= 3}">
+                                    <a href="${pageContext.request.contextPath}/shipments/edit?id=${s.shipmentId}" class="btn-icon-action edit" title="Edit Shipment">
+                                        <i class="ti ti-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn-icon-action" data-bs-toggle="modal" data-bs-target="#updateModal${s.shipmentId}" title="Update Checkpoint Status">
+                                        <i class="ti ti-refresh"></i>
+                                    </button>
+                                </c:if>
+                                <%-- Deletion of core records: Super Admin only --%>
+                                <c:if test="${sessionScope.user.roleId == 1}">
+                                    <button class="btn-icon-action delete" data-bs-toggle="modal" data-bs-target="#deleteModal${s.shipmentId}" title="Delete Shipment">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </c:if>
+                                <%-- Live tracking timeline: available to every role --%>
+                                <a href="${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-${s.shipmentId}" class="btn-icon-action" title="View Live Tracking Timeline">
+                                    <i class="ti ti-map-pin"></i>
                                 </a>
-                                <a href="${pageContext.request.contextPath}/shipments/edit?id=${s.shipmentId}" class="btn-icon-action edit" title="Edit Shipment">
-                                    <i class="ti ti-pencil"></i>
-                                </a>
-                                <button class="btn-icon-action delete" data-bs-toggle="modal" data-bs-target="#deleteModal${s.shipmentId}" title="Delete Shipment">
-                                    <i class="ti ti-trash"></i>
-                                </button>
                             </div>
                         </td>
                     </tr>

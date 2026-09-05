@@ -1,5 +1,6 @@
 package com.nlogistic.controller;
 
+import com.nlogistic.dao.CustomerDAO;
 import com.nlogistic.dao.ProductDAO;
 import com.nlogistic.dao.StockDAO;
 import com.nlogistic.model.Product;
@@ -26,6 +27,7 @@ public class InventoryServlet extends HttpServlet {
 
     private ProductDAO productDAO = new ProductDAO();
     private StockDAO stockDAO = new StockDAO();
+    private CustomerDAO customerDAO = new CustomerDAO();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
@@ -34,9 +36,31 @@ public class InventoryServlet extends HttpServlet {
             request.setAttribute("products", productDAO.getAllProducts());
             request.getRequestDispatcher("/jsp/products.jsp").forward(request, response);
         } else if (pathInfo.equals("/stock")) {
-            request.setAttribute("stocks", stockDAO.getAllStock());
-            request.setAttribute("ledger", stockDAO.getInventoryLedger());
+            // RBAC: warehouse stock is tenant-owned. A Super Admin sees everything;
+            // company staff only their own company's goods and ledger entries.
+            int invRole = com.nlogistic.util.RbacContext.roleId(request);
+            Integer invCompany = com.nlogistic.util.RbacContext.companyId(request);
+            request.setAttribute("stocks", stockDAO.getStockForRole(invRole, invCompany));
+            request.setAttribute("ledger", stockDAO.getLedgerForRole(invRole, invCompany));
             request.setAttribute("products", productDAO.getAllProducts()); // Needed for dropdown
+            request.setAttribute("customers", customerDAO.getAllCustomers()); // FR4.5: needed for Record Sale
+
+            // FR4.3/FR4.4: show the outcome (and any downloadable error report) of a
+            // bulk CSV upload just performed via /inventory/stock/upload.
+            String uploadIdParam = request.getParameter("uploadId");
+            if (uploadIdParam != null) {
+                try {
+                    java.util.Map<String, Object> uploadInfo = stockDAO.getUploadLogById(Integer.parseInt(uploadIdParam));
+                    if (uploadInfo != null) {
+                        Object errPath = uploadInfo.get("errorReportPath");
+                        if (errPath != null) {
+                            uploadInfo.put("errorReportPath", java.net.URLEncoder.encode((String) errPath, "UTF-8"));
+                        }
+                        request.setAttribute("uploadInfo", uploadInfo);
+                    }
+                } catch (NumberFormatException ignore) { }
+            }
+
             request.getRequestDispatcher("/jsp/stock.jsp").forward(request, response);
         }
     }
@@ -134,6 +158,32 @@ public class InventoryServlet extends HttpServlet {
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/inventory/stock?success=true");
             } else {
+                response.sendRedirect(request.getContextPath() + "/inventory/stock?error=true");
+            }
+        } else if (pathInfo != null && pathInfo.equals("/stock/sale")) {
+            // FR4.5: "sale" is one of the three stock-change paths that must create
+            // an inventory_ledger entry. Backed by the existing record_sale stored
+            // procedure (already present in the schema, previously unused by any
+            // reachable page — StockDAO.recordSale() had no caller anywhere).
+            try {
+                int productId = Integer.parseInt(request.getParameter("productId"));
+                int customerId = Integer.parseInt(request.getParameter("customerId"));
+                double quantity = Double.parseDouble(request.getParameter("quantity"));
+                double salePrice = Double.parseDouble(request.getParameter("salePrice"));
+
+                if (quantity <= 0 || salePrice < 0) {
+                    response.sendRedirect(request.getContextPath() + "/inventory/stock?error=true");
+                    return;
+                }
+
+                boolean success = stockDAO.recordSale(productId, customerId, null, quantity, salePrice);
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/inventory/stock?success=true");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/inventory/stock?error=true");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
                 response.sendRedirect(request.getContextPath() + "/inventory/stock?error=true");
             }
         }

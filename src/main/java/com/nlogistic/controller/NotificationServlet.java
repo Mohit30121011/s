@@ -39,7 +39,7 @@ public class NotificationServlet extends HttpServlet {
         } else if ("markRead".equals(action)) {
             try {
                 int notifId = Integer.parseInt(request.getParameter("id"));
-                notifDAO.markAsRead(notifId);
+                notifDAO.markAsRead(userId, notifId);
                 response.setStatus(HttpServletResponse.SC_OK);
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -52,6 +52,9 @@ public class NotificationServlet extends HttpServlet {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
         PrintWriter out = response.getWriter();
 
         // Build simple JSON array manually to avoid adding Jackson/GSON dependencies
@@ -63,7 +66,11 @@ public class NotificationServlet extends HttpServlet {
                 .append("\"id\":").append(n.getNotifId()).append(",")
                 .append("\"title\":\"").append(escapeJson(n.getTitle())).append("\",")
                 .append("\"message\":\"").append(escapeJson(n.getMessage())).append("\",")
-                .append("\"link\":\"").append(escapeJson(n.getLink() != null ? n.getLink() : "")).append("\"")
+                .append("\"link\":\"").append(escapeJson(n.getLink() != null ? n.getLink() : "")).append("\",")
+                .append("\"type\":\"").append(escapeJson(n.getType() != null ? n.getType() : "info")).append("\",")
+                .append("\"icon\":\"").append(escapeJson(n.getIcon() != null ? n.getIcon() : "ti ti-bell")).append("\",")
+                .append("\"category\":\"").append(escapeJson(n.getCategory() != null ? n.getCategory() : "General")).append("\",")
+                .append("\"timeAgo\":\"").append(escapeJson(n.getTimeAgo() != null ? n.getTimeAgo() : "")).append("\"")
                 .append("}");
             if (i < notifs.size() - 1) json.append(",");
         }

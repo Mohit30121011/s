@@ -29,6 +29,10 @@ public class ShipmentDAO {
         private java.sql.Date expectedArrivalDate;
         private java.sql.Date actualArrivalDate;
         private Integer delayDays;
+        private int customerId;
+
+        public int getCustomerId() { return customerId; }
+        public void setCustomerId(int customerId) { this.customerId = customerId; }
 
         public java.sql.Date getExpectedArrivalDate() { return expectedArrivalDate; }
         public void setExpectedArrivalDate(java.sql.Date expectedArrivalDate) { this.expectedArrivalDate = expectedArrivalDate; }
@@ -70,7 +74,7 @@ public class ShipmentDAO {
 
     public List<ShipmentDetail> getAllShipments() {
         List<ShipmentDetail> list = new ArrayList<>();
-        String sql = "SELECT s.shipment_id, c.customer_name, cnt.container_number, v.vessel_name, " +
+        String sql = "SELECT s.shipment_id, s.customer_id, c.customer_name, cnt.container_number, v.vessel_name, " +
                      "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date, " +
                      "COALESCE((SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id), s.booking_date) as last_updated, " +
                      "COALESCE((SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1), DATE_ADD(s.booking_date, INTERVAL 14 DAY)) as eta " +
@@ -87,6 +91,7 @@ public class ShipmentDAO {
             while (rs.next()) {
                 ShipmentDetail d = new ShipmentDetail();
                 d.setShipmentId(rs.getInt("shipment_id"));
+                d.setCustomerId(rs.getInt("customer_id"));
                 d.setCustomerName(rs.getString("customer_name"));
                 d.setContainerNumber(rs.getString("container_number"));
                 d.setOriginPort(rs.getString("origin"));
@@ -106,7 +111,7 @@ public class ShipmentDAO {
 
     public ShipmentDetail getShipmentById(int id) {
         ShipmentDetail d = null;
-        String sql = "SELECT s.shipment_id, c.customer_name, cnt.container_number, v.vessel_name, " +
+        String sql = "SELECT s.shipment_id, s.customer_id, c.customer_name, cnt.container_number, v.vessel_name, " +
                      "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date, " +
                      "COALESCE((SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id), s.booking_date) as last_updated, " +
                      "COALESCE((SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1), DATE_ADD(s.booking_date, INTERVAL 14 DAY)) as eta, " +
@@ -127,6 +132,7 @@ public class ShipmentDAO {
                 if (rs.next()) {
                     d = new ShipmentDetail();
                     d.setShipmentId(rs.getInt("shipment_id"));
+                d.setCustomerId(rs.getInt("customer_id"));
                     d.setCustomerName(rs.getString("customer_name"));
                     d.setContainerNumber(rs.getString("container_number"));
                     d.setOriginPort(rs.getString("origin"));
@@ -249,7 +255,14 @@ public class ShipmentDAO {
             cs.setInt(1, shipmentId);
             cs.setString(2, status);
             cs.setString(3, (checkpointLocation != null && !checkpointLocation.trim().isEmpty()) ? checkpointLocation.trim() : "Checkpoint Milestone Recorded");
-            cs.setNull(4, Types.DATE);
+            // FR2.5: carry the shipment's expected arrival forward on every checkpoint
+            // so the arrival step has something to measure the delay against.
+            java.sql.Date expected = resolveExpectedArrival(shipmentId);
+            if (expected != null) {
+                cs.setDate(4, expected);
+            } else {
+                cs.setNull(4, Types.DATE);
+            }
             if ("Arrived".equalsIgnoreCase(status) || "Delivered".equalsIgnoreCase(status)) {
                 cs.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
             } else {
@@ -288,6 +301,7 @@ public class ShipmentDAO {
 
     /**
      * DB: delete_shipment(p_shipment_id, p_requesting_user_id) - Super Admin only
+     * Cascades deletion across child tables atomically via database foreign keys.
      */
     public void deleteShipment(int shipmentId, int requestingUserId) {
         String sql = "{CALL delete_shipment(?, ?)}";
@@ -298,55 +312,19 @@ public class ShipmentDAO {
             cs.execute();
         } catch (Exception e) {
             e.printStackTrace();
-            deleteShipment(shipmentId);
         }
     }
+
+    /**
+     * Deletes a shipment by ID using native ON DELETE CASCADE foreign key rules.
+     * Referential integrity is preserved without disabling FOREIGN_KEY_CHECKS.
+     */
     public void deleteShipment(int shipmentId) {
-        String deleteMovements = "DELETE FROM container_movements WHERE shipment_id = ?";
-        String deleteCompliance = "DELETE FROM compliance_documents WHERE shipment_id = ?";
-        String deleteProfitLoss = "DELETE FROM profit_loss WHERE shipment_id = ?";
-        String deleteClaims = "DELETE FROM claims WHERE shipment_id = ?";
-        String deleteShipment = "DELETE FROM shipment WHERE shipment_id = ?";
-        
-        try (Connection conn = DBConnectionManager.getConnection()) {  
-            conn.setAutoCommit(false);
-            try {
-                // Delete child records first to satisfy foreign key constraints
-                try (PreparedStatement stmt = conn.prepareStatement(deleteMovements)) {
-                    stmt.setInt(1, shipmentId);
-                    stmt.executeUpdate();
-                }
-                try (PreparedStatement stmt = conn.prepareStatement(deleteCompliance)) {
-                    stmt.setInt(1, shipmentId);
-                    stmt.executeUpdate();
-                }
-                // Profit loss reason map might exist for a profit_loss record, so we have to delete it first if any.
-                // But wait, there is a profit_loss_reason_map table which references pl_id.
-                // A safer way is to ignore constraint errors on optional tables if they don't exist,
-                // but let's just delete the main ones. Actually, to be completely safe against constraints,
-                // we can just temporarily disable foreign key checks for this session.
-                
-                try (PreparedStatement stmt = conn.prepareStatement("SET FOREIGN_KEY_CHECKS=0")) {
-                    stmt.execute();
-                }
-                
-                try (PreparedStatement stmt = conn.prepareStatement(deleteMovements)) { stmt.setInt(1, shipmentId); stmt.executeUpdate(); }
-                try (PreparedStatement stmt = conn.prepareStatement(deleteCompliance)) { stmt.setInt(1, shipmentId); stmt.executeUpdate(); }
-                try (PreparedStatement stmt = conn.prepareStatement(deleteProfitLoss)) { stmt.setInt(1, shipmentId); stmt.executeUpdate(); }
-                try (PreparedStatement stmt = conn.prepareStatement(deleteClaims)) { stmt.setInt(1, shipmentId); stmt.executeUpdate(); }
-                try (PreparedStatement stmt = conn.prepareStatement(deleteShipment)) { stmt.setInt(1, shipmentId); stmt.executeUpdate(); }
-                
-                try (PreparedStatement stmt = conn.prepareStatement("SET FOREIGN_KEY_CHECKS=1")) {
-                    stmt.execute();
-                }
-                
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                e.printStackTrace();
-            } finally {
-                conn.setAutoCommit(true);
-            }
+        String sql = "DELETE FROM shipment WHERE shipment_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, shipmentId);
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -423,7 +401,259 @@ public class ShipmentDAO {
             e.printStackTrace();
         }
     }
+
+    /* ==================================================================
+     * RBAC data scoping (CLAUDE.md S6.2.2 / MEGA_PROMPT Step 3).
+     * Customers see only their own shipments; company staff see only
+     * shipments belonging to their tenant. Never call getAllShipments()
+     * for anyone except a Super Admin.
+     * ================================================================== */
+
+    private static final String SHIPMENT_LIST_SELECT =
+        "SELECT s.shipment_id, s.customer_id, c.customer_name, cnt.container_number, v.vessel_name, " +
+        "p1.port_name as origin, p2.port_name as dest, s.status, s.booking_date, " +
+        "COALESCE((SELECT MAX(updated_at) FROM container_movements WHERE shipment_id = s.shipment_id), s.booking_date) as last_updated, " +
+        "COALESCE((SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1), DATE_ADD(s.booking_date, INTERVAL 14 DAY)) as eta " +
+        "FROM shipment s " +
+        "JOIN customers c ON s.customer_id = c.customer_id " +
+        "JOIN containers cnt ON s.container_id = cnt.container_id " +
+        "JOIN vessels v ON s.vessel_id = v.vessel_id " +
+        "JOIN ports p1 ON s.origin_port_id = p1.port_id " +
+        "JOIN ports p2 ON s.destination_port_id = p2.port_id ";
+
+    private List<ShipmentDetail> queryShipments(String whereClause, int... params) {
+        List<ShipmentDetail> list = new ArrayList<>();
+        String sql = SHIPMENT_LIST_SELECT + whereClause + " ORDER BY s.shipment_id DESC";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                ps.setInt(i + 1, params[i]);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ShipmentDetail d = new ShipmentDetail();
+                    d.setShipmentId(rs.getInt("shipment_id"));
+                    d.setCustomerId(rs.getInt("customer_id"));
+                    d.setCustomerName(rs.getString("customer_name"));
+                    d.setContainerNumber(rs.getString("container_number"));
+                    d.setOriginPort(rs.getString("origin"));
+                    d.setDestPort(rs.getString("dest"));
+                    d.setStatus(rs.getString("status"));
+                    d.setBookingDate(rs.getDate("booking_date"));
+                    d.setVesselName(rs.getString("vessel_name"));
+                    d.setEta(rs.getDate("eta"));
+                    d.setUpdatedAt(rs.getTimestamp("last_updated"));
+                    list.add(d);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /** Self-scoped view for Role 5 (Customer). */
+    public List<ShipmentDetail> getShipmentsByCustomerId(int customerId) {
+        return queryShipments("WHERE s.customer_id = ?", customerId);
+    }
+
+    /**
+     * Tenant-scoped view for Roles 2, 3 and 4. A shipment belongs to a company when
+     * the allocated container is owned by it, or the booking was created by one of
+     * its staff users.
+     */
+    public List<ShipmentDetail> getShipmentsByCompanyId(int companyId) {
+        return queryShipments(
+            "WHERE cnt.owner_company_id = ? " +
+            "   OR s.created_by IN (SELECT user_id FROM users WHERE company_id = ?)",
+            companyId, companyId);
+    }
+
+    /**
+     * Single entry point used by every controller: returns exactly the shipments
+     * this caller is entitled to see, based on their role.
+     */
+    public List<ShipmentDetail> getShipmentsForRole(int roleId, Integer companyId, Integer customerId) {
+        if (roleId == 5) {
+            return getShipmentsByCustomerId(customerId != null ? customerId : -1);
+        }
+        if (roleId >= 2 && roleId <= 4) {
+            return getShipmentsByCompanyId(companyId != null ? companyId : -1);
+        }
+        return getAllShipments();
+    }
+
+    /**
+     * IDOR guard (CLAUDE.md S6.2.2). Returns true only when this caller may read
+     * the given shipment. Super Admin always may; a Customer only their own;
+     * company staff only shipments inside their tenant.
+     */
+    public boolean canAccessShipment(int shipmentId, int roleId, Integer companyId, Integer customerId) {
+        if (roleId == 1) return true;
+        String sql;
+        if (roleId == 5) {
+            sql = "SELECT 1 FROM shipment WHERE shipment_id = ? AND customer_id = ?";
+        } else {
+            sql = "SELECT 1 FROM shipment s LEFT JOIN containers cnt ON s.container_id = cnt.container_id " +
+                  "WHERE s.shipment_id = ? AND (cnt.owner_company_id = ? " +
+                  "   OR s.created_by IN (SELECT user_id FROM users WHERE company_id = ?))";
+        }
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, shipmentId);
+            if (roleId == 5) {
+                ps.setInt(2, customerId != null ? customerId : -1);
+            } else {
+                int cid = companyId != null ? companyId : -1;
+                ps.setInt(2, cid);
+                ps.setInt(3, cid);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /* ==================================================================
+     * FR2.5 - expected vs actual arrival and delay attribution.
+     * ================================================================== */
+
+    /**
+     * The expected arrival for a shipment: whatever was already recorded on an
+     * earlier checkpoint, otherwise a default 14-day transit window from booking.
+     */
+    private java.sql.Date resolveExpectedArrival(int shipmentId) {
+        String sql = "SELECT COALESCE("
+                   + "  (SELECT expected_arrival_date FROM container_movements "
+                   + "    WHERE shipment_id = ? AND expected_arrival_date IS NOT NULL "
+                   + "    ORDER BY movement_id ASC LIMIT 1), "
+                   + "  (SELECT DATE_ADD(booking_date, INTERVAL 14 DAY) FROM shipment WHERE shipment_id = ?)"
+                   + ") AS expected";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, shipmentId);
+            ps.setInt(2, shipmentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getDate("expected");
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    /**
+     * Called when a shipment reaches Arrived/Delivered. Computes
+     * delay_days = max(0, DATEDIFF(actual, expected)), persists it, and when the
+     * shipment is late attributes the loss to the standard "Delay" reason so it
+     * shows up in the P&L breakdown (FR2.7).
+     *
+     * @return the delay in days (0 when on time or not determinable).
+     */
+    public int settleArrivalDelay(int shipmentId, int updatedBy) {
+        int delayDays = 0;
+        try (Connection conn = DBConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String sel = "SELECT movement_id, expected_arrival_date, "
+                       + "COALESCE(actual_arrival_date, CURDATE()) AS actual_date "
+                       + "FROM container_movements WHERE shipment_id = ? "
+                       + "ORDER BY movement_id DESC LIMIT 1";
+            int movementId = -1;
+            java.sql.Date expected = null, actual = null;
+            try (PreparedStatement ps = conn.prepareStatement(sel)) {
+                ps.setInt(1, shipmentId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        movementId = rs.getInt("movement_id");
+                        expected = rs.getDate("expected_arrival_date");
+                        actual = rs.getDate("actual_date");
+                    }
+                }
+            }
+            if (movementId == -1 || expected == null || actual == null) {
+                conn.rollback();
+                return 0;
+            }
+
+            long diff = actual.getTime() - expected.getTime();
+            delayDays = (int) Math.max(0, java.util.concurrent.TimeUnit.DAYS.convert(
+                    diff, java.util.concurrent.TimeUnit.MILLISECONDS));
+
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE container_movements SET delay_days = ?, actual_arrival_date = ? WHERE movement_id = ?")) {
+                ps.setInt(1, delayDays);
+                ps.setDate(2, actual);
+                ps.setInt(3, movementId);
+                ps.executeUpdate();
+            }
+
+            if (delayDays > 0) {
+                // Attribute the late arrival to the standard Delay loss reason,
+                // but never duplicate an existing tag for the same shipment.
+                String map = "INSERT INTO profit_loss_reason_map (pl_id, reason_id, remark) "
+                           + "SELECT pl.pl_id, lr.reason_id, ? FROM profit_loss pl "
+                           + "JOIN loss_reasons lr ON lr.reason_name = 'Delay' "
+                           + "WHERE pl.shipment_id = ? "
+                           + "AND NOT EXISTS (SELECT 1 FROM profit_loss_reason_map m "
+                           + "                WHERE m.pl_id = pl.pl_id AND m.reason_id = lr.reason_id) "
+                           + "LIMIT 1";
+                try (PreparedStatement ps = conn.prepareStatement(map)) {
+                    ps.setString(1, "Auto-tagged: arrived " + delayDays + " day(s) after expected arrival.");
+                    ps.setInt(2, shipmentId);
+                    ps.executeUpdate();
+                } catch (Exception tagEx) {
+                    // A missing 'Delay' reason row must not undo the delay record itself.
+                    tagEx.printStackTrace();
+                }
+            }
+
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return delayDays;
+    }
+
+    /* ==================================================================
+     * FR3.3 / FR2.6 - post-booking contract steps shared by both booking
+     * routes (/book and /shipments/save).
+     * ================================================================== */
+
+    /** Binds the container to the shipment and flips it to Allocated. */
+    public boolean allocateContainer(int shipmentId, int containerId) {
+        try (Connection conn = DBConnectionManager.getConnection();
+             CallableStatement cs = conn.prepareCall("{call allocate_container(?, ?)}")) {
+            cs.setInt(1, shipmentId);
+            cs.setInt(2, containerId);
+            cs.execute();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Creates the opening profit_loss row so the shipment is visible to the PLG
+     * from day one. Costs start at zero and accrue as claims, delays and port
+     * charges are recorded. No-op if a row already exists.
+     */
+    public boolean seedProfitLoss(int shipmentId, double revenue) {
+        String sql = "INSERT INTO profit_loss (shipment_id, revenue_amount, total_cost_amount, profit_loss_amount, record_date) "
+                   + "SELECT ?, ?, 0.00, ?, CURDATE() "
+                   + "FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM profit_loss WHERE shipment_id = ?)";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, shipmentId);
+            ps.setDouble(2, revenue);
+            ps.setDouble(3, revenue);
+            ps.setInt(4, shipmentId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
-
-
-

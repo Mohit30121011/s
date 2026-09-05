@@ -21,19 +21,45 @@ public class PortServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/auth/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         List<Port> ports = portDAO.getAllPorts();
         request.setAttribute("ports", ports);
+
+        // KPI tiles previously computed inside ports.jsp.
+        java.util.List<com.nlogistic.model.Port> portList =
+                (java.util.List<com.nlogistic.model.Port>) request.getAttribute("ports");
+        int totalPorts = (portList != null) ? portList.size() : 0;
+        int geotagged = 0;
+        int unlocode = 0;
+        java.util.Set<String> countries = new java.util.HashSet<>();
+        if (portList != null) {
+            for (com.nlogistic.model.Port pt : portList) {
+                if (pt.getLatitude() != 0 || pt.getLongitude() != 0) geotagged++;
+                if (pt.getPortCode() != null && !pt.getPortCode().trim().isEmpty()) unlocode++;
+                if (pt.getCountry() != null && !pt.getCountry().trim().isEmpty()) countries.add(pt.getCountry().trim());
+            }
+        }
+        request.setAttribute("totalPortsCount", totalPorts);
+        request.setAttribute("geotaggedCount", geotagged);
+        request.setAttribute("unlocodeAssignedCount", unlocode);
+        request.setAttribute("distinctCountriesCount", countries.size());
+        request.setAttribute("geocodePercent", totalPorts > 0 ? (geotagged * 100 / totalPorts) : 0);
         request.getRequestDispatcher("/jsp/ports.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/auth/login");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        // Ports are global master data - Super Admin only (CLAUDE.md S4).
+        if (user.getRoleId() != 1) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "Access Denied: only a Super Admin may modify the port master.");
             return;
         }
 

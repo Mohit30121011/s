@@ -114,4 +114,68 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
+    private String modulePermissions;
+
+    public String getModulePermissions() {
+        return modulePermissions;
+    }
+
+    public void setModulePermissions(String modulePermissions) {
+        this.modulePermissions = modulePermissions;
+    }
+
+    /**
+     * Resolves default permissions if not explicitly customized.
+     */
+    public static String getDefaultPermissionsForRole(int rId) {
+        switch (rId) {
+            case 1: // Super Admin
+                return "dashboard,tracking,shipments,plg,invoicing,inventory,claims,compliance,users,settings";
+            case 2: // Company Admin
+                return "dashboard,tracking,shipments,plg,invoicing,inventory,claims,compliance,users";
+            case 3: // Operations Staff
+                return "dashboard,tracking,shipments,inventory,claims,compliance";
+            case 4: // Finance Staff
+                return "dashboard,plg,invoicing,claims";
+            case 5: // Customer
+                return "dashboard,tracking,shipments,invoicing,claims,compliance";
+            default:
+                return "dashboard";
+        }
+    }
+
+    /**
+     * Checks if this user has access to a specific module key.
+     */
+    public boolean hasPermission(String moduleKey) {
+        if (moduleKey == null || moduleKey.trim().isEmpty()) return true;
+        if (this.roleId == 1) return true; // Super Admin has global override
+        String perms = this.modulePermissions;
+        if (perms == null || perms.trim().isEmpty()) {
+            perms = getDefaultPermissionsForRole(this.roleId);
+        }
+        String cleanKey = moduleKey.trim().toLowerCase();
+        String[] tokens = perms.split(",");
+        for (String t : tokens) {
+            if (t.trim().equalsIgnoreCase(cleanKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns a map of permission keys to boolean for simple EL evaluation: ${userPermissions['tracking']}
+     */
+    public java.util.Map<String, Boolean> getPermissionsMap() {
+        java.util.Map<String, Boolean> map = new java.util.HashMap<>();
+        String[] allKeys = new String[]{
+            "dashboard", "tracking", "shipments", "plg", "invoicing",
+            "inventory", "claims", "compliance", "users", "settings"
+        };
+        for (String k : allKeys) {
+            map.put(k, hasPermission(k));
+        }
+        return map;
+    }
 }

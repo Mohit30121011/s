@@ -42,8 +42,19 @@ public class AnalyticsServlet extends HttpServlet {
         } catch (Exception ignored) {}
         analyticsDAO.computeAllAnalytics(period, analyticsUserId);
 
-        // Read filter params
-        String filterCompany  = request.getParameter("company");
+        // Read filter params.
+        // Only a Super Admin may choose which company to analyse; everyone else is
+        // pinned to their own. Previously ?company=<n> was taken straight off the
+        // URL, so any Company Admin could read a rival's analytics.
+        int aRole = com.nlogistic.util.RbacContext.roleId(request);
+        Integer aOwnCompany = com.nlogistic.util.RbacContext.companyId(request);
+        String filterCompany;
+        if (aRole == com.nlogistic.util.RbacContext.SUPER_ADMIN) {
+            filterCompany = request.getParameter("company");
+        } else {
+            filterCompany = (aOwnCompany != null) ? String.valueOf(aOwnCompany) : null;
+        }
+        request.setAttribute("companyFilterLocked", aRole != com.nlogistic.util.RbacContext.SUPER_ADMIN);
         String filterRoute    = request.getParameter("route");
         String filterCategory = request.getParameter("category");
         String filterDateFrom = request.getParameter("dateFrom");
@@ -82,6 +93,18 @@ public class AnalyticsServlet extends HttpServlet {
                     "WHERE s.origin_port_id = ? AND s.destination_port_id = ?)");
             params.add(portIds[0]);
             params.add(portIds[1]);
+        }
+
+        // Effective company scope for every chart below (null = all companies).
+        Integer chartCompany = null;
+        if (filterCompany != null && !filterCompany.trim().isEmpty()) {
+            try { chartCompany = Integer.parseInt(filterCompany.trim()); } catch (NumberFormatException ignored) {}
+        }
+        String routeOrigin = null, routeDest = null;
+        if (filterRoute != null && filterRoute.contains("-")) {
+            String[] rp = filterRoute.split("-", 2);
+            routeOrigin = rp[0];
+            routeDest = rp[1];
         }
 
         int activeShipments = 0;
@@ -159,15 +182,11 @@ public class AnalyticsServlet extends HttpServlet {
             request.setAttribute("plgJson", plgJson.toString());
 
             // ---- Container Utilization ----
-            int totalContainers = 842, inUseContainers = 643;
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) as total, SUM(CASE WHEN status='In-Transit' THEN 1 ELSE 0 END) as inuse FROM containers")) {
-                ResultSet rs = ps.executeQuery();
-                if (rs.next() && rs.getInt("total") > 0) {
-                    totalContainers  = rs.getInt("total");
-                    inUseContainers  = rs.getInt("inuse");
-                }
-            }
+            // FR6.2: scoped to the selected company; the invented 842/643 fallback
+            // is gone so an empty fleet reads as zero rather than someone else's.
+            double[] util = analyticsDAO.getContainerUtilization(chartCompany);
+            int totalContainers = (int) util[0];
+            int inUseContainers = (int) util[1];
             request.setAttribute("totalContainers", totalContainers);
             request.setAttribute("inUseContainers",  inUseContainers);
             request.setAttribute("idleContainers",   totalContainers - inUseContainers);
@@ -196,9 +215,9 @@ public class AnalyticsServlet extends HttpServlet {
         // instead of the static placeholder chart data the page previously shipped with.)
         StringBuilder abcJson = new StringBuilder("[");
         boolean firstAbc = true;
-        for (AbcResult a : analyticsDAO.getAbcResults(period, analyticsUserId)) {
+        for (java.util.Map<String, Object> a : analyticsDAO.getAbcDistribution(period, filterCategory)) {
             if (!firstAbc) abcJson.append(",");
-            abcJson.append("{\"class\":\"Class ").append(a.getClassName()).append("\",\"count\":").append(a.getProductCount()).append("}");
+            abcJson.append("{\"class\":\"Class ").append(a.get("cls")).append("\",\"count\":").append(a.get("count")).append("}");
             firstAbc = false;
         }
         abcJson.append("]");
@@ -207,11 +226,14 @@ public class AnalyticsServlet extends HttpServlet {
         StringBuilder lossJson = new StringBuilder("[");
         boolean firstLoss = true;
         double totalLossImpact = 0.0;
-        for (LossReasonSummary l : analyticsDAO.getTopLossReasons(7, analyticsUserId)) {
+        for (java.util.Map<String, Object> l : analyticsDAO.getTopLossReasonsFiltered(
+                7, chartCompany, filterDateFrom, filterDateTo, routeOrigin, routeDest)) {
             if (!firstLoss) lossJson.append(",");
-            lossJson.append("{\"reason\":\"").append(l.getReasonName() != null ? l.getReasonName().replace("\"", "\\\"") : "").append("\",")
-                    .append("\"impact\":").append(l.getTotalFinancialImpact()).append("}");
-            totalLossImpact += l.getTotalFinancialImpact();
+            String rn = (l.get("reason") != null) ? String.valueOf(l.get("reason")).replace("\"", "\\\"") : "";
+            double impact = ((Number) l.get("impact")).doubleValue();
+            lossJson.append("{\"reason\":\"").append(rn).append("\",")
+                    .append("\"impact\":").append(impact).append("}");
+            totalLossImpact += impact;
             firstLoss = false;
         }
         lossJson.append("]");
@@ -243,15 +265,39 @@ public class AnalyticsServlet extends HttpServlet {
         stockValJson.append("]");
         request.setAttribute("stockValJson", stockValJson.toString());
 
+        // One point per forecast period (totalled across lanes), not one per row.
+        String forecastType = request.getParameter("forecastType");
         StringBuilder demandJson = new StringBuilder("[");
         boolean firstDf = true;
-        for (DemandForecast df : analyticsDAO.getDemandForecast(null, null)) {
+        for (java.util.Map<String, Object> df : analyticsDAO.getDemandForecastByPeriod(forecastType)) {
             if (!firstDf) demandJson.append(",");
-            demandJson.append("{\"period\":\"").append(df.getForecastPeriod()).append("\",")
-                      .append("\"demand\":").append(df.getForecastedDemand()).append("}");
+            demandJson.append("{\"period\":\"").append(df.get("period")).append("\",")
+                      .append("\"demand\":").append(df.get("demand")).append("}");
             firstDf = false;
         }
         demandJson.append("]");
+        // Gap 4: these two widgets were hardcoded HTML. Real figures now.
+        // Same scope the charts use, so the whole page agrees.
+        Integer agingScope = chartCompany;
+        request.setAttribute("productCategories", analyticsDAO.getProductCategories());
+        java.util.Map<String, Double> agingMap = analyticsDAO.getInvoiceAging(agingScope);
+        java.util.Map<String, Double> turnIn   = analyticsDAO.getTurnoverInputs(agingScope);
+        request.setAttribute("aging", agingMap);
+        request.setAttribute("turnoverInputs", turnIn);
+
+        // Pre-format for display. fmt:formatNumber was leaving large doubles in
+        // scientific notation on this page, so the money strings are built here.
+        java.text.NumberFormat money = java.text.NumberFormat.getIntegerInstance(new java.util.Locale("en", "IN"));
+        double agTotal = agingMap.get("total");
+        request.setAttribute("agingTotalStr",   money.format(Math.round(agTotal)));
+        request.setAttribute("agingOverdueStr", money.format(Math.round(agingMap.get("overdue"))));
+        request.setAttribute("agingOverduePct", agTotal > 0
+                ? Math.round(agingMap.get("overdue") * 100.0 / agTotal) : 0);
+        request.setAttribute("cogsStr",         money.format(Math.round(turnIn.get("cogs"))));
+        request.setAttribute("avgInvValueStr",  money.format(Math.round(turnIn.get("avgInventoryValue"))));
+
+        request.setAttribute("forecastTypes", analyticsDAO.getForecastContainerTypes());
+        request.setAttribute("selectedForecastType", forecastType);
         request.setAttribute("demandJson", demandJson.toString());
 
         TurnoverResult turnover = analyticsDAO.getTurnoverResult(period, analyticsUserId);

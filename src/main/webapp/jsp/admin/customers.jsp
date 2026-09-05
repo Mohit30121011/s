@@ -1,138 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    // Self-contained resilient controller logic: supports direct JSP access or servlet forwarding
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-        String action = request.getParameter("action");
-        String userIdStr = request.getParameter("userId");
-        if (userIdStr != null && action != null) {
-            try {
-                int uid = Integer.parseInt(userIdStr);
-                com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
-                if ("accept".equals(action)) {
-                    uDao.updateUserStatus(uid, "Active");
-                    session.setAttribute("successMessage", "Customer Account Approved & Activated Successfully.");
-                } else if ("reject".equals(action)) {
-                    uDao.updateUserStatus(uid, "Suspended");
-                    session.setAttribute("errorMessage", "Customer Account Suspended / Rejected.");
-                } else if ("delete".equals(action)) {
-                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
-                        conn.setAutoCommit(false);
-                        try {
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE user_id = ?")) {
-                                ps.setInt(1, uid);
-                                ps.executeUpdate();
-                            }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM password_resets WHERE user_id = ?")) {
-                                ps.setInt(1, uid);
-                                ps.executeUpdate();
-                            }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM audit_log WHERE user_id = ?")) {
-                                ps.setInt(1, uid);
-                                ps.executeUpdate();
-                            }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE user_id = ?")) {
-                                ps.setInt(1, uid);
-                                ps.executeUpdate();
-                            }
-                            conn.commit();
-                            session.setAttribute("successMessage", "Customer account #USR-" + uid + " permanently deleted from database.");
-                        } catch(Exception ex) {
-                            conn.rollback();
-                            session.setAttribute("errorMessage", "Failed to delete customer: " + ex.getMessage());
-                            ex.printStackTrace();
-                        } finally {
-                            conn.setAutoCommit(true);
-                        }
-                    }
-                } else if ("update".equals(action)) {
-                    String username = request.getParameter("username");
-                    String email = request.getParameter("email");
-                    String phone = request.getParameter("phone");
-                    String address = request.getParameter("address");
-                    String roleIdStr = request.getParameter("roleId");
-                    int roleId = 5;
-                    if (roleIdStr != null && !roleIdStr.trim().isEmpty()) {
-                        try { roleId = Integer.parseInt(roleIdStr.trim()); } catch(Exception ignored) {}
-                    }
-                    try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
-                        conn.setAutoCommit(false);
-                        try {
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement(
-                                    "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?")) {
-                                ps.setString(1, username != null ? username.trim() : "");
-                                ps.setString(2, email != null ? email.trim() : "");
-                                ps.setString(3, phone != null ? phone.trim() : "");
-                                ps.setInt(4, roleId);
-                                ps.setInt(5, uid);
-                                ps.executeUpdate();
-                            }
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement(
-                                    "UPDATE customers SET customer_name = ?, address = ? WHERE user_id = ?")) {
-                                ps.setString(1, username != null ? username.trim() : "");
-                                ps.setString(2, address != null ? address.trim() : "");
-                                ps.setInt(3, uid);
-                                ps.executeUpdate();
-                            }
-                            conn.commit();
-                            session.setAttribute("successMessage", "Customer #" + uid + " details updated successfully.");
-                        } catch(Exception ex) {
-                            conn.rollback();
-                            session.setAttribute("errorMessage", "Failed to update customer: " + ex.getMessage());
-                            ex.printStackTrace();
-                        } finally {
-                            conn.setAutoCommit(true);
-                        }
-                    }
-                }
-            } catch(Exception ex) { ex.printStackTrace(); }
-            response.sendRedirect(request.getRequestURI());
-            return;
-        }
-    }
-
-    if (request.getAttribute("allUsers") == null) {
-        com.nlogistic.dao.UserDAO uDao = new com.nlogistic.dao.UserDAO();
-        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
-
-        java.util.List<com.nlogistic.model.User> allUsrs = uDao.getAllUsers();
-        java.util.List<com.nlogistic.model.User> pendUsrs = uDao.getPendingUsers();
-        java.util.List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
-
-        java.util.Map<Integer, String> companyNameMap = new java.util.HashMap<>();
-        if (allComps != null) {
-            for (com.nlogistic.model.Company cp : allComps) {
-                companyNameMap.put(cp.getCompanyId(), cp.getCompanyName());
-            }
-        }
-
-        int pendingCount = 0;
-        int activeCount = 0;
-        int inactiveCount = 0;
-        int totalCount = (allUsrs != null) ? allUsrs.size() : 0;
-
-        if (allUsrs != null) {
-            for (com.nlogistic.model.User u : allUsrs) {
-                if ("Active".equalsIgnoreCase(u.getStatus())) {
-                    activeCount++;
-                } else if ("Suspended".equalsIgnoreCase(u.getStatus()) || "Locked".equalsIgnoreCase(u.getStatus()) || "Rejected".equalsIgnoreCase(u.getStatus())) {
-                    inactiveCount++;
-                } else {
-                    pendingCount++;
-                }
-            }
-        }
-
-        request.setAttribute("allUsers", allUsrs);
-        request.setAttribute("pendingUsers", pendUsrs);
-        request.setAttribute("companyNameMap", companyNameMap);
-        request.setAttribute("pendingCount", pendingCount);
-        request.setAttribute("activeCount", activeCount);
-        request.setAttribute("inactiveCount", inactiveCount);
-        request.setAttribute("totalCount", totalCount);
-    }
-%>
+<%-- MVC2: this view renders only. All data and every POST action are
+     handled by AdminUserServlet (/admin/customers). The previous inline
+     controller scriptlet duplicated that logic and bypassed the audited
+     stored procedures. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -663,7 +535,7 @@
     <!-- Toolbar: Filter Tabs & Real-Time Search -->
     <div class="approvals-toolbar">
         <div class="nav-tabs-pill">
-            <button type="button" class="tab-pill-btn active" id="tabPendingBtn" onclick="filterByTab('Pending')">
+            <button type="button" class="tab-pill-btn" id="tabPendingBtn" onclick="filterByTab('Pending')">
                 <i class="ti ti-clock"></i> Pending Review
                 <span class="tab-counter">${not empty pendingCount ? pendingCount : 0}</span>
             </button>
@@ -675,7 +547,7 @@
                 <i class="ti ti-ban"></i> Suspended &amp; Inactive
                 <span class="tab-counter" style="color: #DC2626; background: #FEF2F2;">${not empty inactiveCount ? inactiveCount : 0}</span>
             </button>
-            <button type="button" class="tab-pill-btn" id="tabAllBtn" onclick="filterByTab('All')">
+            <button type="button" class="tab-pill-btn active" id="tabAllBtn" onclick="filterByTab('All')">
                 <i class="ti ti-list"></i> All Accounts
                 <span class="tab-counter">${not empty totalCount ? totalCount : 0}</span>
             </button>
@@ -806,7 +678,7 @@
                                 <div class="actions-flex">
                                     <c:choose>
                                         <c:when test="${u.status == 'Active'}">
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/customers" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="reject">
                                                 <button type="button" class="btn-approval-reject" title="Suspend customer account" onclick="showCustomConfirm({title: 'Suspend Customer Account?', desc: 'Are you sure you want to suspend this customer account? Their portal access will be temporarily restricted.', icon: 'ti ti-ban', type: 'danger', confirmText: 'Yes, Suspend Account', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
@@ -815,7 +687,7 @@
                                             </form>
                                         </c:when>
                                         <c:when test="${u.status == 'Suspended' || u.status == 'Locked' || u.status == 'Rejected'}">
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/customers" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="accept">
                                                 <button type="button" class="btn-approval-accept" title="Reactivate customer account" onclick="showCustomConfirm({title: 'Reactivate Customer Account?', desc: 'Are you sure you want to restore and activate this customer account?', icon: 'ti ti-reload', type: 'success', confirmText: 'Yes, Reactivate', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
@@ -824,14 +696,14 @@
                                             </form>
                                         </c:when>
                                         <c:otherwise>
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/customers" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="accept">
                                                 <button type="submit" class="btn-approval-accept" title="Approve Customer Account" style="padding: 6px 14px; font-size: 11.5px;">
                                                     <i class="ti ti-check"></i> Approve
                                                 </button>
                                             </form>
-                                            <form method="POST" class="d-inline m-0">
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/customers" class="d-inline m-0">
                                                 <input type="hidden" name="userId" value="${u.userId}">
                                                 <input type="hidden" name="action" value="reject">
                                                 <button type="button" class="btn-approval-reject" title="Reject Customer Account" onclick="showCustomConfirm({title: 'Reject Customer Account?', desc: 'Are you sure you want to reject this customer registration request?', icon: 'ti ti-x', type: 'danger', confirmText: 'Yes, Reject', form: this.form});" style="padding: 6px 14px; font-size: 11.5px;">
@@ -847,7 +719,7 @@
                                     </button>
 
                                     <!-- Delete Customer -->
-                                    <form method="POST" class="d-inline m-0" id="deleteCustomerForm_${u.userId}">
+                                    <form method="POST" action="${pageContext.request.contextPath}/admin/customers" class="d-inline m-0" id="deleteCustomerForm_${u.userId}">
                                         <input type="hidden" name="userId" value="${u.userId}">
                                         <input type="hidden" name="action" value="delete">
                                         <button type="button" class="btn-approval-delete" title="Permanently Delete Customer" onclick="showCustomConfirm({title: 'Delete Customer Account?', desc: 'Are you sure you want to permanently delete customer \'${u.username}\' (#USR-${u.userId}) from the database? This action cannot be undone.', icon: 'ti ti-trash', type: 'danger', confirmText: 'Yes, Delete Permanently', form: this.form});">
@@ -930,7 +802,7 @@
                 </div>
             </div>
 
-            <form method="POST" id="editCustomerForm">
+            <form method="POST" action="${pageContext.request.contextPath}/admin/customers" id="editCustomerForm">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="userId" id="editUserId">
 
@@ -1283,7 +1155,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        filterByTab('Pending');
+        filterByTab('All');
     });
 </script>
 

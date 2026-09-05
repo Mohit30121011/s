@@ -212,4 +212,99 @@ public class PricingRuleDAO {
         return list;
     }
 
+
+    /**
+     * FR3.5 + SRS 5.5 - GAP-M3-03.
+     *
+     * demand_multiplier was a static column that nobody ever recomputed, so the
+     * "dynamic" pricing engine was effectively a fixed rate card. This derives the
+     * multiplier from the FORECAST TREND for the lane:
+     *
+     *   growth     = (last forecast period - first forecast period) / first
+     *   multiplier = 1.0 + clamp(growth * 0.15, -0.20, +0.50)
+     *
+     * Comparing a lane against a per-type average (as first drafted) is degenerate
+     * while demand_forecast holds a single route per type - every lane equals its
+     * own baseline and each multiplier collapses to 1.00, wiping the rate card.
+     * The trend reading works with the data that actually exists, and the 0.15
+     * damping keeps a rising lane from repricing violently. Every resulting price
+     * change is written to pricing_audit (FR3.7) so a sync can be rolled back.
+     *
+     * @return number of pricing rules whose price actually moved.
+     */
+    public int syncDemandMultipliers(int changedBy) {
+        int updated = 0;
+        String select =
+            "SELECT pr.pricing_id, pr.container_type, pr.base_price, pr.seasonal_multiplier, "
+          + "       pr.demand_multiplier, pr.final_price, "
+          + "       (SELECT df.forecasted_demand FROM demand_forecast df "
+          + "         WHERE df.container_type = pr.container_type AND df.route_id = pr.route_id "
+          + "         ORDER BY df.forecast_id ASC LIMIT 1) AS first_demand, "
+          + "       (SELECT df2.forecasted_demand FROM demand_forecast df2 "
+          + "         WHERE df2.container_type = pr.container_type AND df2.route_id = pr.route_id "
+          + "         ORDER BY df2.forecast_id DESC LIMIT 1) AS last_demand "
+          + "FROM pricing_rules pr";
+
+        try (Connection conn = DBConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            java.util.List<double[]> changes = new java.util.ArrayList<>();
+            java.util.List<String> reasons = new java.util.ArrayList<>();
+
+            try (PreparedStatement ps = conn.prepareStatement(select);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    double firstDemand = rs.getDouble("first_demand");
+                    if (rs.wasNull() || firstDemand <= 0) continue;
+                    double lastDemand = rs.getDouble("last_demand");
+                    if (rs.wasNull()) continue;
+
+                    double growth = (lastDemand - firstDemand) / firstDemand;
+                    double deviation = growth * 0.15; // damping
+                    if (deviation > 0.50)  deviation = 0.50;
+                    if (deviation < -0.20) deviation = -0.20;
+
+                    double newMultiplier = Math.round((1.0 + deviation) * 100.0) / 100.0;
+                    double basePrice = rs.getDouble("base_price");
+                    double seasonal = rs.getDouble("seasonal_multiplier");
+                    double newPrice = Math.round(basePrice * seasonal * newMultiplier * 100.0) / 100.0;
+                    double oldPrice = rs.getDouble("final_price");
+
+                    if (Math.abs(newPrice - oldPrice) >= 0.01) {
+                        changes.add(new double[]{ rs.getInt("pricing_id"), newMultiplier, newPrice, oldPrice });
+                        reasons.add(String.format(
+                            "Demand sync: %s lane forecast %.0f -> %.0f (%+.1f%% growth), multiplier %.2f",
+                            rs.getString("container_type"), firstDemand, lastDemand,
+                            growth * 100.0, newMultiplier));
+                    }
+                }
+            }
+
+            String upd = "UPDATE pricing_rules SET demand_multiplier = ?, final_price = ? WHERE pricing_id = ?";
+            String aud = "INSERT INTO pricing_audit (pricing_id, old_price, new_price, changed_by, reason) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement psU = conn.prepareStatement(upd);
+                 PreparedStatement psA = conn.prepareStatement(aud)) {
+                for (int i = 0; i < changes.size(); i++) {
+                    double[] c = changes.get(i);
+                    psU.setDouble(1, c[1]);
+                    psU.setDouble(2, c[2]);
+                    psU.setInt(3, (int) c[0]);
+                    psU.addBatch();
+
+                    psA.setInt(1, (int) c[0]);
+                    psA.setDouble(2, c[3]);
+                    psA.setDouble(3, c[2]);
+                    psA.setInt(4, changedBy);
+                    psA.setString(5, reasons.get(i));
+                    psA.addBatch();
+                }
+                psU.executeBatch();
+                psA.executeBatch();
+                updated = changes.size();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return updated;
+    }
 }

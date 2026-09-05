@@ -1,24 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-<%
-int docId = 0;
-String idParam = request.getParameter("id");
-if (idParam != null && !idParam.trim().isEmpty()) {
-    try {
-        docId = Integer.parseInt(idParam.trim());
-    } catch (Exception ignored) {}
-}
-
-com.nlogistic.dao.ComplianceDAO compDao = new com.nlogistic.dao.ComplianceDAO();
-com.nlogistic.model.ComplianceDocument doc = null;
-if (docId > 0) {
-    doc = compDao.getDocumentById(docId);
-}
-request.setAttribute("doc", doc);
-%>
-
+<%-- MVC2 (SRS 10.2): DocumentViewServlet (/compliance-document) loads the document
+     and performs the ownership + review-permission checks. --%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,9 +114,26 @@ request.setAttribute("doc", doc);
             <button class="btn-nl-outline" onclick="window.print()">
                 <i class="fa-solid fa-print"></i> Print Certificate
             </button>
-            <button class="btn-nl-primary" onclick="alert('Document verified against active customs manifest. Cryptographic SHA-256 signature is valid.')">
-                <i class="fa-solid fa-shield-halved"></i> Verify Digital Signature
-            </button>
+            <c:if test="${not empty doc.filePath}">
+                <a class="btn-nl-outline" href="${pageContext.request.contextPath}/${doc.filePath}" download>
+                    <i class="fa-solid fa-download"></i> Download
+                </a>
+            </c:if>
+            <%-- FR5.2: approve / reject is an Admin + Operations decision --%>
+            <c:if test="${canReview and not empty doc}">
+                <c:if test="${doc.status != 'Approved'}">
+                    <button type="button" class="btn-nl-primary" style="background:#16B364;"
+                            onclick="openReview('Approved')">
+                        <i class="fa-solid fa-circle-check"></i> Approve Document
+                    </button>
+                </c:if>
+                <c:if test="${doc.status != 'Rejected'}">
+                    <button type="button" class="btn-nl-outline" style="border-color:#EF4444; color:#EF4444;"
+                            onclick="openReview('Rejected')">
+                        <i class="fa-solid fa-circle-xmark"></i> Reject Document
+                    </button>
+                </c:if>
+            </c:if>
         </div>
     </div>
 
@@ -228,5 +231,68 @@ request.setAttribute("doc", doc);
     </c:otherwise>
     </c:choose>
 
+    <%-- The document itself, not just its metadata --%>
+    <c:if test="${not empty doc}">
+        <div class="certificate-container" style="margin-top:18px;">
+            <div class="detail-card-title" style="margin-bottom:12px;">
+                <i class="fa-solid fa-file-lines"></i> Document Preview
+            </div>
+            <c:choose>
+                <c:when test="${empty doc.filePath}">
+                    <div style="padding:40px; text-align:center; color:#94A3B8; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px;">
+                        <i class="fa-solid fa-file-circle-question" style="font-size:26px; display:block; margin-bottom:10px;"></i>
+                        No file was attached when this document was recorded.
+                    </div>
+                </c:when>
+                <c:when test="${fn:toLowerCase(doc.filePath).endsWith('.pdf')}">
+                    <iframe src="${pageContext.request.contextPath}/${doc.filePath}"
+                            style="width:100%; height:640px; border:1px solid #E2E8F0; border-radius:10px;"
+                            title="Compliance document"></iframe>
+                </c:when>
+                <c:otherwise>
+                    <img src="${pageContext.request.contextPath}/${doc.filePath}"
+                         alt="Compliance document"
+                         style="max-width:100%; border:1px solid #E2E8F0; border-radius:10px;">
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </c:if>
+
+    <c:if test="${canReview and not empty doc}">
+        <!-- Review confirmation (branded, never window.confirm) -->
+        <div id="reviewOverlay"
+             style="display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:9999; align-items:center; justify-content:center;">
+            <div style="background:#fff; border-radius:14px; width:min(440px,92vw); padding:26px; box-shadow:0 16px 40px rgba(15,23,42,.18);">
+                <h5 id="reviewTitle" style="font-weight:800; margin:0 0 8px; color:#0F172A;"></h5>
+                <p id="reviewBody" style="color:#64748B; font-size:.88rem; line-height:1.5;"></p>
+                <form method="POST" action="${pageContext.request.contextPath}/compliance/review">
+                    <input type="hidden" name="docId" value="${doc.docId}">
+                    <input type="hidden" name="status" id="reviewStatus">
+                    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
+                        <button type="button" class="btn-nl-outline" onclick="closeReview()">Cancel</button>
+                        <button type="submit" class="btn-nl-primary" id="reviewConfirmBtn"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            function openReview(status) {
+                document.getElementById('reviewStatus').value = status;
+                var approving = (status === 'Approved');
+                document.getElementById('reviewTitle').textContent =
+                    approving ? 'Approve this document?' : 'Reject this document?';
+                document.getElementById('reviewBody').textContent = approving
+                    ? 'Marking DOC-${doc.docId} as Approved counts towards the departure clearance precondition for Shipment #${doc.shipmentId}.'
+                    : 'Marking DOC-${doc.docId} as Rejected will block Shipment #${doc.shipmentId} from departing until a valid document is supplied.';
+                var btn = document.getElementById('reviewConfirmBtn');
+                btn.textContent = approving ? 'Yes, Approve' : 'Yes, Reject';
+                btn.style.background = approving ? '#16B364' : '#EF4444';
+                document.getElementById('reviewOverlay').style.display = 'flex';
+            }
+            function closeReview() {
+                document.getElementById('reviewOverlay').style.display = 'none';
+            }
+        </script>
+    </c:if>
 </body>
 </html>

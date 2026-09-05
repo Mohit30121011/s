@@ -575,13 +575,21 @@
                     <td>${doc.expiryDate}</td>
                     <td>
                         <div class="action-cell">
-                            <button class="btn-icon btn-view" title="View Document" onclick="window.open('${pageContext.request.contextPath}/jsp/doc-viewer.jsp?id=${doc.docId}', '_blank')"><i class="fi fi-rr-eye"></i></button>
-                            <button class="btn-icon btn-edit" title="Update Status" onclick="document.getElementById('updateDocId').value='${doc.docId}'; document.getElementById('updateDocStatus').value='${doc.status}'; openModal('docUpdateModal');"><i class="fi fi-rr-edit"></i></button>
+                            <%-- View & Verify: opens the document with Approve/Reject for staff --%>
+                            <button class="btn-icon btn-view"
+                                    title="${sessionScope.user.roleId <= 3 ? 'View &amp; Review Document' : 'View Document'}"
+                                    onclick="window.open('${pageContext.request.contextPath}/compliance-document?id=${doc.docId}', '_blank')"><i class="fi fi-rr-eye"></i></button>
+                            <%-- Quick status change + delete: Admins and Operations only --%>
+                            <c:if test="${sessionScope.user.roleId <= 3}">
+                                <button class="btn-icon btn-edit" title="Update Status" onclick="document.getElementById('updateDocId').value='${doc.docId}'; document.getElementById('updateDocStatus').value='${doc.status}'; openModal('docUpdateModal');"><i class="fi fi-rr-edit"></i></button>
+                            </c:if>
                             <div class="dropdown-container">
                                 <button class="btn-icon action-dropdown" onclick="toggleDropdown(this)"><i class="fi fi-rr-menu-dots-vertical"></i></button>
                                 <div class="dropdown-menu-custom">
                                     <a href="${pageContext.request.contextPath}/${doc.filePath}" download class="dropdown-item"><i class="fi fi-rr-download"></i> Download</a>
-                                    <a href="#" class="dropdown-item text-danger" onclick="document.getElementById('deleteDocId').value='${doc.docId}'; openModal('docDeleteModal'); return false;"><i class="fi fi-rr-trash"></i> Delete</a>
+                                    <c:if test="${sessionScope.user.roleId <= 2}">
+                                        <a href="#" class="dropdown-item text-danger" onclick="document.getElementById('deleteDocId').value='${doc.docId}'; openModal('docDeleteModal'); return false;"><i class="fi fi-rr-trash"></i> Delete</a>
+                                    </c:if>
                                 </div>
                             </div>
                         </div>
@@ -704,7 +712,8 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/nl-chart-theme.js"></script>
 
 <script>
 
@@ -783,5 +792,8 @@
 
     paginateTable('docsTable', 15);
 </script>
+
+<%-- Export + Fullscreen controls on every card --%>
+<script src="${pageContext.request.contextPath}/assets/js/nl-card-tools.js"></script>
 </body>
 </html>

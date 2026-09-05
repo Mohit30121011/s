@@ -70,21 +70,43 @@ public class AdminCompanyServlet extends HttpServlet {
             return;
         }
 
+        com.nlogistic.model.User admin = (com.nlogistic.model.User) request.getSession().getAttribute("user");
+        int adminUserId = admin.getUserId();
+
         String action = request.getParameter("action");
         int companyId = Integer.parseInt(request.getParameter("companyId"));
 
-        if ("accept".equals(action)) {
-            companyDAO.updateCompanyStatus(companyId, "Active");
-            // Find all users tied to this company and activate them
-            try (java.sql.Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
-                 java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE users SET status = 'Active' WHERE company_id = ?")) {
-                ps.setInt(1, companyId);
-                ps.executeUpdate();
-            } catch(Exception e) { e.printStackTrace(); }
-            request.getSession().setAttribute("successMessage", "Company Approved Successfully.");
-        } else if ("reject".equals(action)) {
-            companyDAO.updateCompanyStatus(companyId, "Suspended");
-            request.getSession().setAttribute("errorMessage", "Company Rejected.");
+        // FR1.2 / GAP-M1-03: route approvals through the audited stored procedures
+        // (approve_company / suspend_company) instead of raw UPDATE statements, so
+        // the cascade to linked users and the audit_log entry are written by the DB.
+        if ("accept".equals(action) || "approve".equals(action)) {
+            companyDAO.approveCompany(companyId, adminUserId);
+            request.getSession().setAttribute("successMessage",
+                    "Company #" + companyId + " approved and activated. Linked staff accounts are now active.");
+
+        } else if ("reject".equals(action) || "suspend".equals(action)) {
+            String reason = request.getParameter("reason");
+            if (reason == null || reason.trim().isEmpty()) {
+                reason = "No reason supplied by approver.";
+            }
+            companyDAO.suspendCompany(companyId, adminUserId, reason.trim());
+            request.getSession().setAttribute("successMessage",
+                    "Company #" + companyId + " suspended. Reason recorded in the audit trail.");
+
+        } else if ("delete".equals(action)) {
+            companyDAO.deleteCompany(companyId, adminUserId);
+            request.getSession().setAttribute("successMessage", "Company #" + companyId + " deleted.");
+
+        } else if ("update".equals(action)) {
+            companyDAO.updateCompany(companyId, adminUserId,
+                    request.getParameter("companyName"), request.getParameter("licenseNo"),
+                    request.getParameter("gstNo"), request.getParameter("address"),
+                    request.getParameter("contactEmail"), request.getParameter("contactPhone"),
+                    request.getParameter("approvalStatus"));
+            request.getSession().setAttribute("successMessage", "Company #" + companyId + " updated.");
+
+        } else {
+            request.getSession().setAttribute("errorMessage", "Unknown company approval action: " + action);
         }
         
         response.sendRedirect(request.getContextPath() + "/admin/companies");

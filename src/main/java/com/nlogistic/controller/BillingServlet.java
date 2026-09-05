@@ -6,6 +6,7 @@ import com.nlogistic.dao.ShipmentDAO;
 import com.nlogistic.model.Invoice;
 import com.nlogistic.model.InvoiceLineItem;
 import com.nlogistic.model.Payment;
+import com.nlogistic.model.User;
 import com.nlogistic.util.DBConnectionManager;
 
 import java.io.IOException;
@@ -98,8 +99,11 @@ public class BillingServlet extends HttpServlet {
         // 1. Auto-flag overdue invoices (FR5.8)
         billingDAO.flagOverdueInvoices();
 
-        // 2. Fetch all invoices with complete details
-        List<Invoice> invoices = billingDAO.getAllInvoices();
+        // 2. Fetch invoices the caller is entitled to see (RBAC scoped).
+        int rbacRole = com.nlogistic.util.RbacContext.roleId(request);
+        Integer rbacCompany = com.nlogistic.util.RbacContext.companyId(request);
+        Integer rbacCustomer = com.nlogistic.util.RbacContext.customerId(request);
+        List<Invoice> invoices = billingDAO.getInvoicesForRole(rbacRole, rbacCompany, rbacCustomer);
 
         // 3. Compute Financial Analytics KPIs
         int invTotal = invoices.size();
@@ -161,7 +165,7 @@ public class BillingServlet extends HttpServlet {
 
         request.setAttribute("eligibleShipments", eligibleShipments);
         request.setAttribute("customers", customerDAO.getAllCustomers());
-        request.setAttribute("shipments", shipmentDAO.getAllShipments());
+        request.setAttribute("shipments", shipmentDAO.getShipmentsForRole(rbacRole, rbacCompany, rbacCustomer));
 
         request.getRequestDispatcher("/jsp/billing.jsp").forward(request, response);
     }
@@ -192,6 +196,10 @@ public class BillingServlet extends HttpServlet {
                 int invoiceId = billingDAO.generateInvoice(customerId, shipmentId, freight, service, taxRate, invoiceDate, dueDate);
                 if (invoiceId > 0) {
                     session.setAttribute("successMessage", "Tax Invoice INV-" + invoiceId + " generated successfully with freight, handling, and GST line items.");
+
+                    // FR8.1: auto-generate a barcode for every newly generated invoice (this is the 2nd invoice-creation path)
+                    User billingUser = (User) session.getAttribute("user");
+                    com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Invoice", invoiceId, billingUser != null ? billingUser.getUserId() : 1);
                 } else {
                     session.setAttribute("errorMessage", "Failed to generate invoice. Please verify shipment and customer data.");
                 }

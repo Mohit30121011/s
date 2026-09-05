@@ -155,3 +155,6 @@
     </script>
 </body>
 </html>
+
+<%-- Export + Fullscreen controls on every card (sitewide) --%>
+<script src="${pageContext.request.contextPath}/assets/js/nl-card-tools.js"></script>

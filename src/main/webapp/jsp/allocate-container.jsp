@@ -349,6 +349,21 @@
                         <input type="hidden" id="maxVolume" value="${container.goodsCapacityCbm}">
 
                         <div class="row g-4 mb-4">
+                            <%-- GAP-M3-02: staff book on behalf of a shipper. Without this the
+                                 booking reached /book with no customer at all. --%>
+                            <c:if test="${sessionScope.user.roleId <= 3}">
+                            <div class="col-md-12">
+                                <label class="allocate-form-label">Customer / Shipper <span style="color:#FC8019;">*</span></label>
+                                <div class="select-wrapper">
+                                    <select name="customerId" class="form-input-themed" required>
+                                        <option value="" disabled selected>Select customer account</option>
+                                        <c:forEach var="cust" items="${customers}">
+                                            <option value="${cust.customerId}" ${param.customerId == cust.customerId ? 'selected' : ''}>${cust.customerName} (CUST-${cust.customerId})</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                            </div>
+                            </c:if>
                             <div class="col-md-12">
                                 <label class="allocate-form-label">Cargo Description</label>
                                 <input type="text" class="form-input-themed" name="cargoDesc" value="${cargoDesc}" required placeholder="e.g. Electronics, Garments, Auto Parts">

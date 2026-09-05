@@ -28,6 +28,15 @@ public class PredictiveGraphServlet extends HttpServlet {
         if (containerType == null) {
             containerType = "Dry";
         }
+        // FR3.6: the forecast is per container type AND route. Ignoring route_id
+        // produced one blended curve across every corridor in the world.
+        Integer routeId = null;
+        String routeParam = request.getParameter("routeId");
+        if (routeParam != null && !routeParam.trim().isEmpty() && !"all".equalsIgnoreCase(routeParam)) {
+            try { routeId = Integer.parseInt(routeParam.trim()); } catch (NumberFormatException ignored) {}
+        }
+        request.setAttribute("selectedRoute", routeId);
+        request.setAttribute("routes", new com.nlogistic.dao.PortDAO().getAllPorts());
 
         List<String> labels = new ArrayList<>();
         List<Double> demandData = new ArrayList<>();
@@ -37,11 +46,17 @@ public class PredictiveGraphServlet extends HttpServlet {
         StringBuilder demandJson = new StringBuilder("[");
         StringBuilder priceJson = new StringBuilder("[");
 
-        String sql = "SELECT forecast_period, forecasted_demand, forecasted_price FROM demand_forecast WHERE container_type = ? ORDER BY forecast_id ASC LIMIT 6";
-        
+        String sql = "SELECT forecast_period, forecasted_demand, forecasted_price FROM demand_forecast "
+                   + "WHERE container_type = ? "
+                   + (routeId != null ? "AND route_id = ? " : "")
+                   + "AND algorithm_version = (SELECT algorithm_version FROM demand_forecast "
+                   + "                            ORDER BY generated_at DESC, forecast_id DESC LIMIT 1) "
+                   + "ORDER BY forecast_id ASC LIMIT 6";
+
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, containerType);
+            if (routeId != null) ps.setInt(2, routeId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     if (labelsJson.length() > 1) { labelsJson.append(","); demandJson.append(","); priceJson.append(","); }

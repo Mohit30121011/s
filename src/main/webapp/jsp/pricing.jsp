@@ -1,79 +1,11 @@
-<%
-    // Only calculate governance KPIs if we are not in booking summary quote mode
-    if (request.getAttribute("finalPrice") == null) {
-        if (request.getAttribute("rules") == null || request.getAttribute("auditHistory") == null) {
-            try {
-                com.nlogistic.dao.PricingRuleDAO pDao = new com.nlogistic.dao.PricingRuleDAO();
-                if (request.getAttribute("rules") == null) {
-                    request.setAttribute("rules", pDao.getAllPricingRules());
-                }
-                if (request.getAttribute("auditHistory") == null) {
-                    request.setAttribute("auditHistory", pDao.getAuditHistory());
-                }
-            } catch (Exception ignored) {}
-        }
-
-        java.util.List<com.nlogistic.model.PricingRule> rList = (java.util.List<com.nlogistic.model.PricingRule>) request.getAttribute("rules");
-        java.util.List<com.nlogistic.model.PricingAudit> aList = (java.util.List<com.nlogistic.model.PricingAudit>) request.getAttribute("auditHistory");
-
-        int totalRulesCount = (rList != null) ? rList.size() : 0;
-        double maxBasePrice = 0.0;
-        double sumFinalPrice = 0.0;
-        if (rList != null) {
-            for (com.nlogistic.model.PricingRule r : rList) {
-                if (r.getBasePrice() > maxBasePrice) maxBasePrice = r.getBasePrice();
-                sumFinalPrice += r.getFinalPrice();
-            }
-        }
-        double avgFinalPrice = (totalRulesCount > 0) ? (sumFinalPrice / totalRulesCount) : 0.0;
-        int totalAuditCount = (aList != null) ? aList.size() : 0;
-
-        request.setAttribute("kpiTotalRules", totalRulesCount);
-        request.setAttribute("kpiMaxBasePrice", maxBasePrice);
-        request.setAttribute("kpiAvgFinalPrice", avgFinalPrice);
-        request.setAttribute("kpiTotalAudit", totalAuditCount);
-    }
-%>
+<%-- MVC2 (SRS 10.2): PricingServlet (/pricing) supplies rules, audit history
+     and the booking quote. --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
-<%
-    // Resilient self-contained fallback: ensure rules and auditHistory are populated even if accessed directly
-    if (request.getAttribute("rules") == null || request.getAttribute("auditHistory") == null) {
-        try {
-            com.nlogistic.dao.PricingRuleDAO pDao = new com.nlogistic.dao.PricingRuleDAO();
-            if (request.getAttribute("rules") == null) {
-                request.setAttribute("rules", pDao.getAllPricingRules());
-            }
-            if (request.getAttribute("auditHistory") == null) {
-                request.setAttribute("auditHistory", pDao.getAuditHistory());
-            }
-        } catch (Exception ignored) {}
-    }
-
-    // Compute live KPI metrics
-    java.util.List<com.nlogistic.model.PricingRule> rList = (java.util.List<com.nlogistic.model.PricingRule>) request.getAttribute("rules");
-    java.util.List<com.nlogistic.model.PricingAudit> aList = (java.util.List<com.nlogistic.model.PricingAudit>) request.getAttribute("auditHistory");
-
-    int totalRulesCount = (rList != null) ? rList.size() : 0;
-    double maxBasePrice = 0.0;
-    double sumFinalPrice = 0.0;
-    if (rList != null) {
-        for (com.nlogistic.model.PricingRule r : rList) {
-            if (r.getBasePrice() > maxBasePrice) maxBasePrice = r.getBasePrice();
-            sumFinalPrice += r.getFinalPrice();
-        }
-    }
-    double avgFinalPrice = (totalRulesCount > 0) ? (sumFinalPrice / totalRulesCount) : 0.0;
-    int totalAuditCount = (aList != null) ? aList.size() : 0;
-
-    request.setAttribute("kpiTotalRules", totalRulesCount);
-    request.setAttribute("kpiMaxBasePrice", maxBasePrice);
-    request.setAttribute("kpiAvgFinalPrice", avgFinalPrice);
-    request.setAttribute("kpiTotalAudit", totalAuditCount);
-%>
-
+<%-- MVC2 (SRS 10.2): PricingServlet (/pricing) supplies rules, audit history
+     and the booking quote. --%>
 <style>
     /* ==========================================================================
        PRICING RULES & RATE GOVERNANCE THEME (SWIGGY ORANGE ENTERPRISE)
@@ -1090,6 +1022,9 @@
                                     <input type="hidden" name="finalPrice" value="${finalPrice}">
                                     <input type="hidden" name="origin" value="${origin}">
                                     <input type="hidden" name="destination" value="${destination}">
+                                    <input type="hidden" name="vesselId" value="${vesselId}">
+                                    <input type="hidden" name="customerId" value="${customerId}">
+                                    <input type="hidden" name="cargoValue" value="${cargoValue}">
                                     
                                     <button type="submit" class="btn-confirm-booking-cta">
                                         <i class="ti ti-circle-check"></i> Confirm Booking &amp; Allocate Container
@@ -1128,6 +1063,15 @@
                     Active freight rate profiles, dynamic multiplier policies, and immutable price-change audit logs (FR3.5 / FR3.7)
                 </p>
             </div>
+            <%-- FR3.5 / SRS 5.5: recalibrate demand multipliers from the forecast --%>
+            <c:if test="${sessionScope.user.roleId <= 2}">
+                <form method="POST" action="${pageContext.request.contextPath}/pricing/syncDemand" style="margin-left:auto;">
+                    <button type="submit" class="btn-adjust-rate"
+                            title="Recompute every demand multiplier from the latest demand forecast">
+                        <i class="ti ti-refresh"></i> Recalibrate Demand Multipliers
+                    </button>
+                </form>
+            </c:if>
         </div>
         <a href="${pageContext.request.contextPath}/predictive-graph" class="btn-predictive-nav">
             <i class="ti ti-chart-line"></i> Advance Predictive Graph

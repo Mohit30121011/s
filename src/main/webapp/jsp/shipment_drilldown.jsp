@@ -1,22 +1,8 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-if (request.getAttribute("drilldown") == null) {
-    try {
-        com.nlogistic.dao.ProfitLossDAO plDao = new com.nlogistic.dao.ProfitLossDAO();
-        String idStr = request.getParameter("id");
-        int sId = 1;
-        if (idStr != null && !idStr.isEmpty()) {
-            try { sId = Integer.parseInt(idStr.replace("SHP-", "")); } catch (Exception ignored) {}
-        }
-        com.nlogistic.model.ShipmentDrilldown sd = plDao.getShipmentDrilldownDetails(sId);
-        if (sd == null && sId != 1) sd = plDao.getShipmentDrilldownDetails(1);
-        request.setAttribute("drilldown", sd);
-        request.setAttribute("allLossReasons", plDao.getAllLossReasons());
-    } catch (Exception ignored) {}
-}
-%>
+<%-- Data is supplied exclusively by FinanceServlet (/finance/shipment-drilldown).
+     The previous inline fallback loaded any shipment id with no ownership check. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 <!-- Flaticons UIcons -->
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>

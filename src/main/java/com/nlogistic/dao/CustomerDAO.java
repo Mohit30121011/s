@@ -82,4 +82,44 @@ public class CustomerDAO {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
+
+    private Customer mapCustomer(ResultSet rs) throws java.sql.SQLException {
+        Customer c = new Customer();
+        c.setCustomerId(rs.getInt("customer_id"));
+        c.setUserId(rs.getInt("user_id"));
+        c.setCustomerName(rs.getString("customer_name"));
+        c.setAddress(rs.getString("address"));
+        c.setKycDocPath(rs.getString("kyc_doc_path"));
+        c.setCreditLimit(rs.getDouble("credit_limit"));
+        c.setCreatedAt(rs.getTimestamp("created_at"));
+        return c;
+    }
+
+    /**
+     * RBAC identity resolution (MEGA_PROMPT Step 1). Maps a logged-in Role 5 user
+     * to their customers row so every downstream query can be scoped by customer_id.
+     */
+    public Customer getCustomerByUserId(int userId) {
+        String sql = "SELECT * FROM customers WHERE user_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapCustomer(rs);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public Customer getCustomerById(int customerId) {
+        String sql = "SELECT * FROM customers WHERE customer_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapCustomer(rs);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
 }

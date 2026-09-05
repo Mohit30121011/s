@@ -20,6 +20,14 @@
         border-radius: 12px;
         text-align: center;
     }
+    .entity-field-row { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
+    .entity-field-row:last-child { border-bottom: none; }
+
+    @media print {
+        body * { visibility: hidden; }
+        #printableResult, #printableResult * { visibility: visible; }
+        #printableResult { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; }
+    }
 </style>
 
 <!-- HTML5 QR Code Scanner Library -->
@@ -86,34 +94,42 @@
                 <div class="card-body p-4 p-lg-5 text-center d-flex flex-column justify-content-center align-items-center">
                     <c:choose>
                         <c:when test="${not empty entityDetails}">
-                            <!-- Success Result (FR8.4) -->
-                            <div class="mb-4">
-                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 40px;">
-                                    <i class="fa-solid fa-check"></i>
+                            <!-- Success Result (FR8.3 full record retrieval) -->
+                            <div id="printableResult" class="w-100">
+                                <div class="mb-4">
+                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 40px;">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-success">Valid Code</h3>
+                                    <p class="text-muted">Barcode <strong>${scannedBarcode}</strong> verified and logged successfully (FR8.5).</p>
                                 </div>
-                                <h3 class="fw-bold text-success">Valid Code</h3>
-                                <p class="text-muted">Barcode <strong>${scannedBarcode}</strong> verified and logged successfully.</p>
-                            </div>
-                            
-                            <div class="card bg-light border-0 w-100 text-start">
-                                <div class="card-body p-4">
-                                    <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 12px; letter-spacing: 1px;">Entity Details</h6>
-                                    
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">Type:</span>
-                                        <span class="fw-bold">${entityType}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">System ID:</span>
-                                        <span class="fw-bold">#${entityId}</span>
-                                    </div>
-                                    <hr>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">Information:</span>
-                                        <span class="fw-bold text-primary">${entityDetails}</span>
+
+                                <div class="card bg-light border-0 w-100 text-start">
+                                    <div class="card-body p-4">
+                                        <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 12px; letter-spacing: 1px;">${entityType} Details &nbsp;&bull;&nbsp; System ID #${entityId}</h6>
+
+                                        <c:choose>
+                                            <c:when test="${not empty entityFields}">
+                                                <c:forEach var="f" items="${entityFields}">
+                                                    <div class="d-flex justify-content-between entity-field-row">
+                                                        <span class="text-muted">${f.key}:</span>
+                                                        <span class="fw-bold text-end">${f.value}</span>
+                                                    </div>
+                                                </c:forEach>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Information:</span>
+                                                    <span class="fw-bold text-primary">${entityDetails}</span>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
                             </div>
+                            <button type="button" class="btn btn-outline-primary mt-3 no-print" onclick="window.print()">
+                                <i class="fa-solid fa-print me-2"></i> Print / Export as PDF
+                            </button>
                         </c:when>
                         <c:otherwise>
                             <!-- Waiting State -->

@@ -21,19 +21,36 @@ public class VesselServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/auth/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         List<Vessel> vessels = vesselDAO.getAllVessels();
         request.setAttribute("vessels", vessels);
+
+        // Fleet KPI tiles previously computed inside vessels.jsp.
+        java.util.List<com.nlogistic.model.Vessel> fleet =
+                (java.util.List<com.nlogistic.model.Vessel>) request.getAttribute("vessels");
+        int fleetCount = (fleet != null) ? fleet.size() : 0;
+        long totalTeu = 0;
+        int ulcv = 0;
+        if (fleet != null) {
+            for (com.nlogistic.model.Vessel v : fleet) {
+                totalTeu += v.getCapacityTeu();
+                if (v.getCapacityTeu() >= 14000) ulcv++; // Ultra Large Container Vessel
+            }
+        }
+        request.setAttribute("totalFleetCount", fleetCount);
+        request.setAttribute("totalTeuCapacity", totalTeu);
+        request.setAttribute("ulcvCount", ulcv);
+        request.setAttribute("avgCapacity", fleetCount > 0 ? (totalTeu / fleetCount) : 0);
         request.getRequestDispatcher("/jsp/vessels.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/auth/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

@@ -77,14 +77,17 @@
         <a href="${pageContext.request.contextPath}/dashboard" class="nav-link active">
             <i class="fa-solid fa-house"></i> Dashboard Home
         </a>
-        <a href="#" class="nav-link">
+        <a href="${pageContext.request.contextPath}/shipments/create" class="nav-link">
             <i class="fa-solid fa-ship"></i> Book Shipment
         </a>
-        <a href="#" class="nav-link">
+        <a href="${pageContext.request.contextPath}/containers" class="nav-link">
             <i class="fa-solid fa-box"></i> Book Container
         </a>
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-user"></i> My Profile
+        <a href="${pageContext.request.contextPath}/shipments" class="nav-link">
+            <i class="fa-solid fa-truck"></i> My Shipments
+        </a>
+        <a href="${pageContext.request.contextPath}/invoices" class="nav-link">
+            <i class="fa-solid fa-receipt"></i> My Invoices
         </a>
     </div>
 </div>
@@ -93,6 +96,6 @@
     <div class="topbar mb-4">
         <div class="d-flex align-items-center">
             <span class="me-3 fw-medium">${sessionScope.username}</span>
-            <a href="${pageContext.request.contextPath}/auth/logout" class="btn btn-sm btn-outline-danger">Logout</a>
+            <a href="${pageContext.request.contextPath}/logout" class="btn btn-sm btn-outline-danger">Logout</a>
         </div>
     </div>

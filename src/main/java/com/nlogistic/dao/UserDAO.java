@@ -51,6 +51,7 @@ public class UserDAO {
                     u.setLastLoginAt(rs.getTimestamp("last_login_at"));
                     u.setCreatedAt(rs.getTimestamp("created_at"));
                     u.setUpdatedAt(rs.getTimestamp("updated_at"));
+                    u.setModulePermissions(rs.getString("module_permissions"));
                     return u;
                 }
             }
@@ -74,6 +75,7 @@ public User getUserByUsername(String username) {
                     u.setCompanyId(rs.getInt("company_id"));
                     u.setStatus(rs.getString("status"));
                     u.setPhone(rs.getString("phone"));
+                    u.setModulePermissions(rs.getString("module_permissions"));
                     return u;
                 }
             }
@@ -461,4 +463,182 @@ public User getUserByUsername(String username) {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
+
+    /** Looks up a user by email address - used by the password reset flow (FR1.6). */
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ? LIMIT 1";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User();
+                    u.setUserId(rs.getInt("user_id"));
+                    u.setUsername(rs.getString("username"));
+                    u.setEmail(rs.getString("email"));
+                    u.setRoleId(rs.getInt("role_id"));
+                    u.setCompanyId(rs.getInt("company_id"));
+                    u.setStatus(rs.getString("status"));
+                    u.setModulePermissions(rs.getString("module_permissions"));
+                    return u;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    /* ==================================================================
+     * Staff directory support for /admin/users. This SQL previously lived
+     * inside users.jsp as a scriptlet (SRS 10.2 forbids that).
+     * ================================================================== */
+
+    /** Staff rows with presentation fields resolved. companyId null = all tenants. */
+    public List<java.util.Map<String, Object>> getStaffDirectory(Integer companyId) {
+        List<java.util.Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT u.user_id, u.username, u.email, u.phone, u.role_id, r.role_name, "
+                   + "r.description AS role_desc, u.company_id, c.company_name, u.status, "
+                   + "u.failed_login_count, u.last_login_at, u.created_at, u.updated_at, u.module_permissions "
+                   + "FROM users u "
+                   + "LEFT JOIN roles r ON u.role_id = r.role_id "
+                   + "LEFT JOIN companies c ON u.company_id = c.company_id "
+                   + (companyId != null ? "WHERE u.company_id = ? " : "")
+                   + "ORDER BY u.user_id ASC";
+        java.text.SimpleDateFormat sdfJoined = new java.text.SimpleDateFormat("dd MMM yyyy");
+        java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a");
+        long now = System.currentTimeMillis();
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (companyId != null) ps.setInt(1, companyId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.HashMap<>();
+                    int rId = rs.getInt("role_id");
+                    String compName = rs.getString("company_name");
+                    String dept = (rId == 1) ? "Administration"
+                            : ((compName != null && !compName.trim().isEmpty()) ? compName.trim() : "Fleet Operations");
+
+                    Timestamp lastLogin = rs.getTimestamp("last_login_at");
+                    String lastActive = "Never logged in";
+                    if (lastLogin != null) {
+                        long diffSec = (now - lastLogin.getTime()) / 1000;
+                        if (diffSec < 120)        lastActive = "Just now";
+                        else if (diffSec < 3600)  lastActive = (diffSec / 60) + " min ago";
+                        else if (diffSec < 86400) lastActive = (diffSec / 3600) + " hours ago";
+                        else if (diffSec < 172800) lastActive = "Yesterday";
+                        else                       lastActive = sdfFull.format(lastLogin);
+                    }
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    String joined = (createdAt != null) ? sdfJoined.format(createdAt) : "-";
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+
+                    String ph = rs.getString("phone");
+                    String rDesc = rs.getString("role_desc");
+
+                    m.put("userId", rs.getInt("user_id"));
+                    m.put("username", rs.getString("username"));
+                    m.put("email", rs.getString("email"));
+                    m.put("phone", (ph != null && !ph.trim().isEmpty() && !"N/A".equalsIgnoreCase(ph.trim())) ? ph.trim() : "-");
+                    m.put("roleId", rId);
+                    m.put("roleName", rs.getString("role_name"));
+                    m.put("roleDesc", rDesc != null ? rDesc : "Authorized logistics operations account");
+                    m.put("dept", dept);
+                    m.put("companyId", rs.getInt("company_id"));
+                    m.put("status", rs.getString("status"));
+                    m.put("failedLoginCount", rs.getInt("failed_login_count"));
+                    m.put("lastActive", lastActive);
+                    m.put("lastLoginFull", (lastLogin != null) ? sdfFull.format(lastLogin) : "Never logged in");
+                    m.put("joinedDate", joined);
+                    m.put("updatedDate", (updatedAt != null) ? sdfJoined.format(updatedAt) : joined);
+                    String perms = rs.getString("module_permissions");
+                    m.put("modulePermissions", (perms != null && !perms.trim().isEmpty()) ? perms.trim() : User.getDefaultPermissionsForRole(rId));
+                    list.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /** Recent audit events grouped by user, capped per user. */
+    public java.util.Map<Integer, List<java.util.Map<String, String>>> getUserAuditEvents(int maxPerUser) {
+        java.util.Map<Integer, List<java.util.Map<String, String>>> out = new java.util.HashMap<>();
+        String sql = "SELECT user_id, action, entity_name, entity_id, ip_address, timestamp "
+                   + "FROM audit_log ORDER BY timestamp DESC";
+        java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a");
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int uid = rs.getInt("user_id");
+                List<java.util.Map<String, String>> evs = out.get(uid);
+                if (evs == null) { evs = new ArrayList<>(); out.put(uid, evs); }
+                if (evs.size() >= maxPerUser) continue;
+                java.util.Map<String, String> ev = new java.util.HashMap<>();
+                String ent = rs.getString("entity_name");
+                int entId = rs.getInt("entity_id");
+                String ip = rs.getString("ip_address");
+                Timestamp ts = rs.getTimestamp("timestamp");
+                ev.put("action", rs.getString("action"));
+                ev.put("entity", (ent != null ? ent : "system") + (entId > 0 ? " #" + entId : ""));
+                ev.put("ip", ip != null ? ip : "-");
+                ev.put("time", ts != null ? sdfFull.format(ts) : "-");
+                evs.add(ev);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** Full profile update from the Edit Staff modal. */
+    public boolean updateUserProfile(int userId, String username, String email, String phone,
+                                     int roleId, Integer companyId, String status) {
+        String sql = "UPDATE users SET username = ?, email = ?, phone = ?, role_id = ?, company_id = ?, status = ? "
+                   + "WHERE user_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, email);
+            ps.setString(3, phone);
+            ps.setInt(4, roleId);
+            if (companyId != null) ps.setInt(5, companyId); else ps.setNull(5, Types.INTEGER);
+            ps.setString(6, status);
+            ps.setInt(7, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    /** Role assignment from the Permissions modal. */
+    public boolean assignRole(int userId, int roleId) {
+        String sql = "UPDATE users SET role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roleId);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    /**
+     * Updates granular module permissions for a user.
+     */
+    public boolean updateUserPermissions(int userId, String permissionsCsv, int adminUserId) {
+        String sql = "UPDATE users SET module_permissions = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (permissionsCsv != null && !permissionsCsv.trim().isEmpty()) {
+                ps.setString(1, permissionsCsv.trim());
+            } else {
+                ps.setNull(1, Types.VARCHAR);
+            }
+            ps.setInt(2, userId);
+            boolean ok = ps.executeUpdate() > 0;
+            if (ok) {
+                logAuditEvent(userId, "PERMISSIONS_UPDATED",
+                        "Modules: " + (permissionsCsv != null ? permissionsCsv : "RESET_TO_ROLE_DEFAULT"), "127.0.0.1");
+            }
+            return ok;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

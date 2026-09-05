@@ -1,5 +1,9 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%-- A flash message left over from a previous session must not surface on the
+     login page; clear both before anything renders. --%>
+<c:remove var="successMessage" scope="session"/>
+<c:remove var="errorMessage" scope="session"/>
 <c:set var="hideSidebar" value="true" scope="request" />
 <c:set var="hideTopHeader" value="true" scope="request" />
 <jsp:include page="/jsp/layout/header.jsp" />

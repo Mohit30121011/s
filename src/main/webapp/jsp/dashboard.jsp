@@ -1,10 +1,11 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/nl-chart-theme.js"></script>
 <style>
 :root {
     --primary: #FC8019; --primary-light: #FFF2EB; --primary-mid: #FFD4C2;
@@ -66,6 +67,14 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .period-select { font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text-sub); background: #fff; cursor: pointer; outline: none; }
 
 /* Chart containers */
+.nl-dash-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; min-height: 140px; width: 100%; gap: 6px; text-align: center;
+    color: var(--nl-text-light, #94A3B8);
+}
+.nl-dash-empty i { font-size: 26px; opacity: .55; margin-bottom: 2px; }
+.nl-dash-empty-title { font-size: 13px; font-weight: 700; color: var(--nl-text-muted, #64748B); }
+.nl-dash-empty-sub { font-size: 11.5px; font-weight: 500; line-height: 1.45; max-width: 240px; }
 .chart-wrap { position: relative; height: 260px; flex: 1; }
 .chart-wrap-sm { position: relative; height: 200px; }
 
@@ -122,13 +131,13 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .container-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
 }
 .cont-card {
     background: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 10px 12px;
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
@@ -155,45 +164,45 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 .cont-icon-wrap {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 15px;
 }
 .cont-share-badge {
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 6px;
+    padding: 1px 6px;
+    border-radius: 5px;
     background: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.08);
     color: #4B5563;
 }
 .cont-type-title {
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #64748B;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 .cont-val-number {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
     color: #0F172A;
     line-height: 1.1;
 }
 .cont-prog-track {
-    height: 5px;
+    height: 4px;
     background: rgba(0, 0, 0, 0.05);
     border-radius: 99px;
     overflow: hidden;
-    margin-top: 10px;
-    margin-bottom: 6px;
+    margin-top: 6px;
+    margin-bottom: 4px;
 }
 .cont-prog-bar {
     height: 100%;
@@ -203,7 +212,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: 10.5px;
     color: #64748B;
 }
 .cont-status-pill {
@@ -405,7 +414,22 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     <!-- Page Header -->
     <div class="dash-header">
         <div class="dash-header-left">
-            <h1>Dashboard</h1>
+
+<c:if test="${not empty sessionScope.errorMessage}">
+    <div class="nl-alert-banner error" style="border-radius:12px; margin-bottom:20px; display:flex; align-items:flex-start; gap:10px; padding:14px 16px; background:#FEF2F2; border:1px solid #FECACA; color:#991B1B;">
+        <i class="ti ti-alert-circle" style="flex-shrink:0; margin-top:1px;"></i>
+        <div style="font-size:13.5px; font-weight:500;">${sessionScope.errorMessage}</div>
+    </div>
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
+<c:if test="${not empty sessionScope.successMessage}">
+    <div class="nl-alert-banner success" style="border-radius:12px; margin-bottom:20px; display:flex; align-items:flex-start; gap:10px; padding:14px 16px; background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46;">
+        <i class="ti ti-circle-check" style="flex-shrink:0; margin-top:1px;"></i>
+        <div style="font-size:13.5px; font-weight:500;">${sessionScope.successMessage}</div>
+    </div>
+    <c:remove var="successMessage" scope="session"/>
+</c:if>
+<h1>Dashboard</h1>
             <p>Welcome back! Here's what's happening with your logistics operations.</p>
         </div>
         <div class="dash-header-right">
@@ -525,6 +549,13 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                 
             </div>
             <div class="card-body scrollable-card-body" style="padding-top:8px;">
+                <c:if test="${empty recentShipments}">
+                    <div class="nl-dash-empty" style="height:180px;">
+                        <i class="ti ti-package-off"></i>
+                        <div class="nl-dash-empty-title">No shipments yet</div>
+                        <div class="nl-dash-empty-sub">Your most recent bookings will be listed here.</div>
+                    </div>
+                </c:if>
                 <ul class="ship-list">
                     <c:forEach var="s" items="${recentShipments}">
                     <li class="ship-item">
@@ -568,7 +599,14 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                 </div>
             </div>
             <div class="card-body scrollable-card-body" style="padding-top:12px;">
-                <table class="route-table">
+                <c:if test="${empty topRoutes}">
+                    <div class="nl-dash-empty" style="height:160px;">
+                        <i class="ti ti-route-off"></i>
+                        <div class="nl-dash-empty-title">No routes yet</div>
+                        <div class="nl-dash-empty-sub">Your busiest trade lanes will appear here.</div>
+                    </div>
+                </c:if>
+                <table class="route-table" <c:if test="${empty topRoutes}">style="display:none;"</c:if>>
                     <thead>
                         <tr>
                             <th>Route</th>
@@ -595,25 +633,30 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         </div>
 
         <!-- Containers Overview (Revamped Visual Design) -->
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 32px; height: 32px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 17px;">
-                        <i class="ti ti-boxes"></i>
+        <div class="card no-card-tools" data-no-tools="true">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+                    <div style="width: 32px; height: 32px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 17px; flex-shrink: 0;">
+                        <i class="ti ti-packages"></i>
                     </div>
-                    <div>
-                        <h3 class="card-title" style="margin: 0; font-size: 14.5px; font-weight: 700;">Containers Overview</h3>
-                        <div style="font-size: 11.5px; color: var(--text-sub);">Active fleet inventory by container type</div>
+                    <div style="min-width: 0;">
+                        <h3 class="card-title" style="margin: 0; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Containers Overview</h3>
+                        <div style="font-size: 11px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <c:choose>
+                                <c:when test="${sessionScope.user.roleId == 5}">Available to book, by type</c:when>
+                                <c:otherwise>Active fleet inventory by type</c:otherwise>
+                            </c:choose>
+                        </div>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="background: #FFF2EB; color: #FC8019; font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 1px solid #FFD4C2;">Total: ${totalContainers}</span>
-                    <a href="${pageContext.request.contextPath}/containers" title="View Container Catalog" style="color: #64748B; font-size: 16px; padding: 4px; display: inline-flex; align-items: center; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='#FC8019'" onmouseout="this.style.color='#64748B'">
+                <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                    <span style="background: #FFF2EB; color: #FC8019; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 20px; border: 1px solid #FFD4C2; white-space: nowrap;">Total: ${totalContainers}</span>
+                    <a href="${pageContext.request.contextPath}/containers" title="View Container Catalog" style="color: #64748B; font-size: 15px; padding: 2px 4px; display: inline-flex; align-items: center; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='#FC8019'" onmouseout="this.style.color='#64748B'">
                         <i class="ti ti-arrow-right"></i>
                     </a>
                 </div>
             </div>
-            <div class="card-body scrollable-card-body" style="padding-top: 14px;">
+            <div class="card-body" style="padding: 12px 16px 14px; display: flex; flex-direction: column; justify-content: space-between; overflow: visible;">
                 <div class="container-grid">
                     <c:forEach var="ct" items="${containerTypes}">
                         <c:set var="cardTheme" value="dry" />
@@ -674,11 +717,11 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                     </c:forEach>
                 </div>
 
-                <div style="margin-top: 14px; padding: 10px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="font-size: 12px; color: #64748B;">
+                <div style="margin-top: 10px; padding: 8px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="font-size: 11.5px; color: #64748B;">
                         <i class="ti ti-info-circle" style="color: #FC8019; margin-right: 4px;"></i> Monitored across all <strong>30</strong> ports
                     </div>
-                    <a href="${pageContext.request.contextPath}/containers" style="font-size: 12px; color: #FC8019; font-weight: 600; text-decoration: none;">
+                    <a href="${pageContext.request.contextPath}/containers" style="font-size: 11.5px; color: #FC8019; font-weight: 600; text-decoration: none;">
                         Manage Catalog &rarr;
                     </a>
                 </div>
@@ -739,11 +782,36 @@ var STATUS_COLORS = {
     'Cancelled':            '#9CA3AF'
 };
 
+/**
+ * Replaces a chart canvas with a centred empty state. Used wherever the
+ * account genuinely has no rows, so the dashboard never shows placeholder
+ * numbers that look like real activity.
+ */
+function nlShowEmpty(canvas, icon, title, subtitle) {
+    if (!canvas || !canvas.parentNode) return;
+    var box = document.createElement('div');
+    box.className = 'nl-dash-empty';
+    box.innerHTML = '<i class="ti ' + icon + '"></i>'
+                  + '<div class="nl-dash-empty-title">' + title + '</div>'
+                  + '<div class="nl-dash-empty-sub">' + subtitle + '</div>';
+    canvas.parentNode.replaceChild(box, canvas);
+}
+
 // --- Trend Chart ---
 (function() {
-    var labels = trendJson.length > 0 ? trendJson.map(function(d){return d.d;}) : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    var data   = trendJson.length > 0 ? trendJson.map(function(d){return d.cnt;}) : [2,4,3,6,5,3,4];
-    new Chart(document.getElementById('trendChart'), {
+    var trendCanvas = document.getElementById('trendChart');
+    if (!trendCanvas) return;
+
+    // No invented numbers: an account with no shipments gets an empty state.
+    if (!trendJson.length) {
+        nlShowEmpty(trendCanvas, 'ti-chart-line', 'No shipment activity yet',
+                    'Your booking trend will appear here once you book a shipment.');
+        return;
+    }
+
+    var labels = trendJson.map(function(d){return d.d;});
+    var data   = trendJson.map(function(d){return d.cnt;});
+    new Chart(trendCanvas, {
         type: 'line',
         data: {
             labels: labels,
@@ -775,7 +843,19 @@ var STATUS_COLORS = {
     var colors = labels.map(function(l){return STATUS_COLORS[l] || '#9CA3AF';});
     var total  = data.reduce(function(a,b){return a+b;}, 0);
 
-    new Chart(document.getElementById('statusChart'), {
+    var statusCanvas = document.getElementById('statusChart');
+    if (!statusCanvas || !statusJson.length) {
+        if (statusCanvas) {
+            nlShowEmpty(statusCanvas, 'ti-chart-donut', 'No shipments yet', '');
+        }
+        var legendEl = document.getElementById('statusLegend');
+        if (legendEl && !statusJson.length) {
+            legendEl.innerHTML = '<div class="nl-dash-empty-sub" style="padding:4px 0;">'
+                               + 'Status breakdown appears once you have shipments.</div>';
+        }
+    }
+    if (statusCanvas && statusJson.length)
+    new Chart(statusCanvas, {
         type: 'doughnut',
         data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0, cutout: '72%' }] },
         options: {

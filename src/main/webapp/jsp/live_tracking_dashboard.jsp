@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:include page="/jsp/layout/header.jsp" />
@@ -18,6 +18,13 @@
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         padding: 24px 28px;
         margin-bottom: 24px;
+    }
+
+    .no-card-tools .nl-card-tools,
+    [data-no-tools="true"] .nl-card-tools,
+    .stats-container ~ .nl-card-tools,
+    .card-panel:has(.stats-container) .nl-card-tools {
+        display: none !important;
     }
 
     /* Top Stats Card */
@@ -319,7 +326,7 @@
 </div>
 
 <!-- Top Stats Card (100% Real Database Analytics) -->
-<div class="card-panel">
+<div class="card-panel no-card-tools" data-no-tools="true">
     <div class="stats-container">
         <div class="stats-left">
             <div class="stats-icon-box">

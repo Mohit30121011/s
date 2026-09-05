@@ -3,38 +3,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<%
-    // Resilient self-contained controller logic for Audit Logins & Security
-    com.nlogistic.model.User currentUser = (com.nlogistic.model.User) session.getAttribute("user");
-    if (currentUser == null) {
-        response.sendRedirect(request.getContextPath() + "/login");
-        return;
-    }
-
-    // Role check: Only Super Admin (1) or Company Admin (2) can view audit logs
-    if (currentUser.getRoleId() != 1 && currentUser.getRoleId() != 2) {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: You do not have permission to view security audit trails.");
-        return;
-    }
-
-    AuditDAO auditDAO = new AuditDAO();
-
-    // Query parameters
-    String actionFilter = request.getParameter("action");
-    if (actionFilter == null) actionFilter = "ALL";
-
-    String searchKeyword = request.getParameter("q");
-
-    // Fetch all real logs from database (up to 500 records)
-    List<AuditEntry> auditLogs = auditDAO.getAuditLogs(actionFilter, searchKeyword, 500);
-    Map<String, Integer> kpis = auditDAO.getAuditKPIs();
-
-    request.setAttribute("auditLogs", auditLogs);
-    request.setAttribute("kpis", kpis);
-    request.setAttribute("currentAction", actionFilter);
-    request.setAttribute("searchKeyword", searchKeyword != null ? searchKeyword : "");
-%>
-
+<%-- MVC2: this view renders only. All data and every POST action are
+     handled by AuditLogServlet (/admin/audit-logs). The previous inline
+     controller scriptlet duplicated that logic and bypassed the audited
+     stored procedures. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <style>
@@ -327,7 +299,7 @@
             <div>
                 <div class="kpi-label">Failed Logins</div>
                 <div class="kpi-value text-danger">${kpis.failedLogins}</div>
-                <div class="kpi-hint"><i class="ti ti-shield-alert"></i> Monitored for 5-attempt lockout</div>
+                <div class="kpi-hint"><i class="ti ti-shield-x"></i> Monitored for 5-attempt lockout</div>
             </div>
             <div class="kpi-metric-icon red">
                 <i class="ti ti-alert-triangle"></i>

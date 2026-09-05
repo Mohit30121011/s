@@ -1121,26 +1121,46 @@
         
         .header-icon {
             position: relative;
-            color: var(--text-muted);
-            font-size: 18px;
+            color: var(--text-muted, #64748B);
+            font-size: 19px;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .header-icon:hover {
+            color: var(--text-main, #0F172A);
+            background: #F1F5F9;
         }
         
         .badge-notification {
             position: absolute;
-            top: -6px;
-            right: -6px;
-            background: var(--brand-orange);
-            color: white;
-            font-size: 10px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border: 2px solid white;
+            top: -3px;
+            right: -5px;
+            background: #FC8019 !important;
+            color: #FFFFFF !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            line-height: 1 !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            padding: 0 4px !important;
+            border-radius: 9px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            border: 2px solid #FFFFFF !important;
+            box-shadow: 0 2px 4px rgba(252, 128, 25, 0.4) !important;
+            pointer-events: none !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            letter-spacing: -0.02em !important;
         }
         
         .notif-bell-wrap { position: relative; }
@@ -1148,43 +1168,403 @@
             position: absolute;
             top: calc(100% + 14px);
             right: -10px;
-            width: 340px;
-            max-height: 420px;
-            overflow-y: auto;
+            width: 410px;
+            max-height: 520px;
             background: #FFFFFF;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
-            z-index: 99999;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.05);
+            z-index: 999999;
             display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: notifPanelFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .notif-dropdown-panel.show { display: block; }
+        @keyframes notifPanelFadeIn {
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .notif-dropdown-panel.show { display: flex; }
         .notif-dropdown-header {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 13px;
-            font-weight: 700;
-            color: #0F172A;
+            padding: 16px 18px;
+            background: #FAFAFC;
+            border-bottom: 1px solid #E2E8F0;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .notif-dropdown-list { padding: 6px; }
-        .notif-item {
+        .notif-head-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0F172A;
+            letter-spacing: -0.01em;
+        }
+        .notif-badge-pill {
+            font-size: 11px;
+            font-weight: 700;
+            color: #FC8019;
+            background: #FFF7ED;
+            border: 1px solid #FFEDD5;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .notif-mark-read-btn {
+            background: transparent;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748B;
+            cursor: pointer;
             display: flex;
-            gap: 10px;
-            padding: 10px 10px;
-            border-radius: 8px;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.15s ease;
+            padding: 4px 6px;
+            border-radius: 6px;
+        }
+        .notif-mark-read-btn:hover {
+            color: #FC8019;
+            background: rgba(252, 128, 25, 0.06);
+        }
+        .notif-dropdown-list {
+            padding: 10px;
+            overflow-y: auto;
+            max-height: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .notif-dropdown-list::-webkit-scrollbar { width: 5px; }
+        .notif-dropdown-list::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        .notif-card-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
             text-decoration: none;
             color: inherit;
+            background: #FFFFFF;
+            border: 1px solid #F1F5F9;
+            transition: all 0.18s ease;
+            position: relative;
         }
-        .notif-item:hover { background: #F9FAFB; }
-        .notif-item .notif-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: var(--brand-orange); margin-top: 6px; flex-shrink: 0;
+        .notif-card-item:hover {
+            background: #F8FAFC;
+            border-color: #E2E8F0;
+            box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+            transform: translateY(-1px);
         }
-        .notif-item .notif-title { font-size: 12.5px; font-weight: 600; color: #1E293B; margin-bottom: 2px; }
-        .notif-item .notif-message { font-size: 12px; color: #64748B; line-height: 1.4; }
-        .notif-empty { padding: 30px 16px; text-align: center; color: #94A3B8; font-size: 12.5px; }
+        .notif-card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .notif-card-icon.warning {
+            background: #FFFBEB;
+            color: #D97706;
+            border: 1px solid #FDE68A;
+        }
+        .notif-card-icon.danger {
+            background: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FECACA;
+        }
+        .notif-card-icon.info {
+            background: #EFF6FF;
+            color: #2563EB;
+            border: 1px solid #BFDBFE;
+        }
+        .notif-card-icon.success {
+            background: #ECFDF5;
+            color: #059669;
+            border: 1px solid #A7F3D0;
+        }
+        .notif-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .notif-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+        .notif-cat-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 1px 7px;
+            border-radius: 6px;
+        }
+        .notif-cat-tag.compliance {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        .notif-cat-tag.billing {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .notif-cat-tag.claims {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        .notif-cat-tag.general {
+            background: #F1F5F9;
+            color: #475569;
+        }
+        .notif-time-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748B;
+        }
+        .notif-item-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1E293B;
+            line-height: 1.35;
+            margin-bottom: 3px;
+        }
+        .notif-item-msg {
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+        .notif-action-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #FC8019;
+            margin-top: 4px;
+            transition: gap 0.15s ease;
+        }
+        .notif-card-item:hover .notif-action-arrow {
+            gap: 6px;
+        }
+        .notif-empty {
+            padding: 36px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .notif-empty-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        .notif-empty-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 4px;
+        }
+        .notif-empty-sub {
+            font-size: 12px;
+            color: #64748B;
+            max-width: 250px;
+            line-height: 1.4;
+        }
+        .notif-dropdown-footer {
+            padding: 10px 16px;
+            background: #FAFAFC;
+            border-top: 1px solid #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .notif-footer-link {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #64748B;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.15s ease;
+        }
+        .notif-footer-link:hover { color: #FC8019; }
+
+        /* Sidebar Alerts Dropdown Panel */
+        .sidebar-alerts-menu {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 10px 0;
+            animation: fadeInSubnav 0.2s ease-in-out;
+        }
+        .sidebar-alerts-box {
+            background: #FAFAFC;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sidebar-alerts-box::-webkit-scrollbar { width: 4px; }
+        .sidebar-alerts-box::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        .sidebar-alerts-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        .sidebar-alerts-header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sidebar-alerts-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .sidebar-alerts-pill {
+            font-size: 10px;
+            font-weight: 700;
+            color: #FC8019;
+            background: #FFF7ED;
+            border: 1px solid #FFEDD5;
+            padding: 1px 6px;
+            border-radius: 12px;
+        }
+        .sidebar-alerts-read-btn {
+            background: transparent;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748B;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        .sidebar-alerts-read-btn:hover {
+            color: #FC8019;
+            background: rgba(252, 128, 25, 0.08);
+        }
+        .sidebar-alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sidebar-alert-card {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            background: #FFFFFF;
+            border: 1px solid #F1F5F9;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.18s ease;
+        }
+        .sidebar-alert-card:hover {
+            background: #F8FAFC;
+            border-color: #FED7AA;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            transform: translateY(-1px);
+        }
+        .sidebar-alert-card-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-alert-card-top .notif-card-icon {
+            width: 26px;
+            height: 26px;
+            font-size: 13px;
+            border-radius: 6px;
+            margin-top: 0;
+        }
+        .sidebar-alert-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            min-width: 0;
+        }
+        .sidebar-alert-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .sidebar-alert-card-content .notif-item-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #1E293B;
+            line-height: 1.3;
+            margin-bottom: 2px;
+        }
+        .sidebar-alert-card-content .notif-item-msg {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.35;
+        }
+        .sidebar-alert-card-content .notif-action-arrow {
+            font-size: 10.5px;
+            margin-top: 2px;
+        }
+        .sidebar-alert-empty {
+            padding: 16px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .sidebar-alert-empty-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+        .sidebar-alert-empty-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #1E293B;
+        }
+        .sidebar-alert-empty-sub {
+            font-size: 10.5px;
+            color: #64748B;
+        }
 
         .user-profile {
             display: flex;
@@ -1869,6 +2249,9 @@
             font-weight: 500 !important;
             color: #1F2937 !important;
             background-color: #FFFFFF !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
             background-repeat: no-repeat !important;
             background-position: right 14px center !important;
@@ -2032,6 +2415,185 @@
             overflow: hidden !important;
         }
 
+
+        /* ==========================================================
+           MODERN CHART SURFACES  (presentation only — no data logic)
+           Paired with /assets/js/nl-chart-theme.js
+           ========================================================== */
+        .chart-card,
+        .nl-chart-card {
+            position: relative;
+        }
+        /* Subtle brand wash behind every chart panel */
+        .chart-card::before,
+        .nl-chart-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 120px;
+            background: linear-gradient(180deg, rgba(252, 128, 25, 0.045) 0%, rgba(252, 128, 25, 0) 100%);
+            border-radius: var(--nl-radius-md) var(--nl-radius-md) 0 0;
+            pointer-events: none;
+        }
+        .chart-card > *,
+        .nl-chart-card > * { position: relative; z-index: 1; }
+
+        /* Canvases: crisp, never squashed, never overflowing their card */
+        .chart-card canvas,
+        .nl-chart-card canvas,
+        .card-body > canvas,
+        .chart-wrap > canvas,
+        .chart-wrap-sm > canvas,
+        .status-canvas-wrap > canvas {
+            max-width: 100% !important;
+            display: block;
+        }
+
+        /* Default responsive height when a page gives a canvas no wrapper */
+        .nl-chart-box {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        .nl-chart-box-sm { height: 220px; }
+        .nl-chart-box-lg { height: 380px; }
+
+        /* Chart panel headers — tighter, more editorial */
+        .chart-card .card-header,
+        .nl-chart-card .card-header {
+            background: transparent !important;
+            border-bottom: 1px solid var(--nl-border-subtle) !important;
+        }
+        .chart-card .card-header h5,
+        .chart-card .card-header h6,
+        .nl-chart-card .card-header h5,
+        .nl-chart-card .card-header h6 {
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--nl-text);
+            margin: 0;
+        }
+
+        /* Legend chips rendered as HTML next to charts */
+        .nl-chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            padding: 10px 2px 0;
+        }
+        .nl-chart-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--nl-text-secondary);
+        }
+        .nl-chart-legend span::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Empty-state overlay for charts with no rows yet */
+        .nl-chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--nl-text-light);
+            font-size: 12.5px;
+            font-weight: 600;
+            background: var(--nl-surface);
+            border-radius: var(--nl-radius-sm);
+        }
+
+        @media (max-width: 767.98px) {
+            .nl-chart-box { height: 240px; }
+            .nl-chart-box-lg { height: 280px; }
+        }
+
+
+        /* ==========================================================
+           CARD TOOLBAR — Export + Fullscreen on every card
+           Paired with /assets/js/nl-card-tools.js
+           ========================================================== */
+        .nl-card-tools {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .nl-card-anchor { position: relative; }
+        .no-card-tools .nl-card-tools,
+        [data-no-tools="true"] .nl-card-tools,
+        .stats-container ~ .nl-card-tools,
+        .card-panel:has(.stats-container) .nl-card-tools {
+            display: none !important;
+        }
+        .nl-card-tools-floating {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 3;
+        }
+        .nl-card-tool {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--nl-radius-xs, 6px);
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--nl-text-light, #94A3B8);
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 1;
+            padding: 0;
+            transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+        }
+        .nl-card-tool:hover {
+            background: var(--nl-primary-subtle, #FFF2EB);
+            border-color: var(--nl-primary-border, #FFD4C2);
+            color: var(--nl-primary, #FC8019);
+        }
+        .nl-card-tool:focus-visible {
+            outline: 2px solid var(--nl-primary, #FC8019);
+            outline-offset: 1px;
+        }
+
+        /* Fallback "maximised" mode when the Fullscreen API is unavailable */
+        .nl-card-maximised {
+            position: fixed !important;
+            inset: 16px !important;
+            z-index: 10000 !important;
+            margin: 0 !important;
+            overflow: auto !important;
+            box-shadow: var(--nl-shadow-modal, 0 16px 40px rgba(15,23,42,.18)) !important;
+        }
+        body.nl-card-maximised-open { overflow: hidden; }
+
+        /* Native fullscreen: cards are transparent by default, so paint a ground */
+        .card:fullscreen, .nl-card:fullscreen, .card-panel:fullscreen,
+        .chart-card:fullscreen, .table-card:fullscreen, .nl-chart-card:fullscreen {
+            background: var(--nl-surface, #FFFFFF);
+            padding: 24px;
+            overflow: auto;
+        }
+        .card:fullscreen canvas, .chart-card:fullscreen canvas,
+        .nl-chart-card:fullscreen canvas, .card-panel:fullscreen canvas {
+            max-height: 78vh !important;
+        }
+
+        @media print { .nl-card-tools { display: none !important; } }
+
     </style>
 </head>
 <body>
@@ -2054,20 +2616,108 @@
         </div>
 
         <div class="nav-section">
+        <c:choose>
+
+        <%-- ============================================================
+             ROLE 5 - DEDICATED CUSTOMER PORTAL (CLAUDE.md S6.1.1)
+             Every internal operations, finance, stock, pricing, barcode
+             and governance menu is suppressed entirely.
+             ============================================================ --%>
+        <c:when test="${sessionScope.user.roleId == 5}">
+
+            <div class="nav-item mb-2">
+                <a href="${pageContext.request.contextPath}/dashboard" class="nav-link dashboard-link">
+                    <i class="ti ti-smart-home main-icon"></i>
+                    <span>My Dashboard</span>
+                </a>
+            </div>
+
+            <div class="sidebar-section-header">
+                <span>SHIPPING &amp; CARGO</span>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/containers" class="nav-link ${pageContext.request.requestURI.contains('/containers') ? 'active' : ''}">
+                    <i class="ti ti-box main-icon"></i>
+                    <span>Container Catalog</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/shipments/create" class="nav-link ${pageContext.request.requestURI.contains('/create') ? 'active' : ''}">
+                    <i class="ti ti-plus main-icon"></i>
+                    <span>Book Shipment</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/shipments" class="nav-link ${pageContext.request.requestURI.endsWith('/shipments') ? 'active' : ''}">
+                    <i class="ti ti-truck main-icon"></i>
+                    <span>My Shipments</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/shipments/tracking" class="nav-link ${pageContext.request.requestURI.contains('/tracking') ? 'active' : ''}">
+                    <i class="ti ti-map-pin main-icon"></i>
+                    <span>Live Tracking</span>
+                </a>
+            </div>
+
+            <div class="sidebar-section-header">
+                <span>BILLING &amp; CLAIMS</span>
+            </div>
+
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/invoices" class="nav-link ${pageContext.request.requestURI.contains('/invoices') ? 'active' : ''}">
+                    <i class="ti ti-receipt main-icon"></i>
+                    <span>Invoices &amp; Payments</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/claims" class="nav-link ${pageContext.request.requestURI.contains('/claims') ? 'active' : ''}">
+                    <i class="ti ti-shield main-icon"></i>
+                    <span>Loss &amp; Damage Claims</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/compliance" class="nav-link ${pageContext.request.requestURI.contains('/compliance') ? 'active' : ''}">
+                    <i class="ti ti-file-check main-icon"></i>
+                    <span>My Documents</span>
+                </a>
+            </div>
+
+            <!-- Customer Alerts -->
+            <div class="nav-item">
+                <a href="${pageContext.request.contextPath}/alerts" class="nav-link ${pageContext.request.requestURI.contains('/alerts') ? 'active' : ''}">
+                    <i class="ti ti-bell main-icon"></i>
+                    <span>Alerts</span>
+                    <span class="badge-alerts" id="sidebarCustAlertsBadge" style="display:none;">0</span>
+                </a>
+            </div>
+        </c:when>
+
+        <%-- ============================================================
+             ROLES 1-4 - INTERNAL MANAGEMENT CONSOLE
+             ============================================================ --%>
+        <c:otherwise>
+
             <!-- Dashboard Link (Top Pill Card) -->
+            <c:if test="${empty sessionScope.user || sessionScope.user.hasPermission('dashboard')}">
             <div class="nav-item mb-2">
                 <a href="${pageContext.request.contextPath}/dashboard" class="nav-link dashboard-link">
                     <i class="ti ti-smart-home main-icon"></i>
                     <span>Dashboard</span>
                 </a>
             </div>
+            </c:if>
 
             <!-- SECTION 1: OPERATIONS -->
+            <c:if test="${sessionScope.user.hasPermission('shipments') || sessionScope.user.hasPermission('tracking')}">
             <div class="sidebar-section-header">
                 <span>OPERATIONS</span>
             </div>
+            </c:if>
 
             <!-- Shipments Dropdown -->
+            <c:if test="${sessionScope.user.hasPermission('shipments')}">
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="shipmentsSubmenu" class="nav-link sidebar-dropdown-toggle ${pageContext.request.requestURI.contains('/shipment') || pageContext.request.requestURI.contains('/finance') ? 'active' : 'collapsed'}">
                     <i class="ti ti-truck main-icon"></i>
@@ -2076,14 +2726,23 @@
                 </a>
                 <ul class="sub-nav" id="shipmentsSubmenu" style="${pageContext.request.requestURI.contains('/shipment') || pageContext.request.requestURI.contains('/finance') ? 'display: block;' : 'display: none;'}">
                     <li><a href="${pageContext.request.contextPath}/shipments" class="${pageContext.request.requestURI.endsWith('/shipments') || pageContext.request.requestURI.contains('/shipments.jsp') ? 'active' : ''}">All Shipments</a></li>
-                    <li><a href="${pageContext.request.contextPath}/shipments/create" class="${pageContext.request.requestURI.contains('/create') ? 'active' : ''}">Create Shipment</a></li>
-                    <li><a href="${pageContext.request.contextPath}/shipments/tracking" class="${pageContext.request.requestURI.contains('/tracking') ? 'active' : ''}">Live Tracking</a></li>
-                    <li><a href="${pageContext.request.contextPath}/finance/profit-loss" class="${pageContext.request.requestURI.contains('/profit-loss') ? 'active' : ''}">Profit &amp; Loss Analytics</a></li>
-                    <li><a href="${pageContext.request.contextPath}/finance/shipment-drilldown?id=1" class="${pageContext.request.requestURI.contains('/shipment-drilldown') ? 'active' : ''}">Financial Drilldown</a></li>
+                    <%-- Finance staff do not create bookings --%>
+                    <c:if test="${sessionScope.user.roleId <= 3}">
+                        <li><a href="${pageContext.request.contextPath}/shipments/create" class="${pageContext.request.requestURI.contains('/create') ? 'active' : ''}">Create Shipment</a></li>
+                    </c:if>
+                    <c:if test="${sessionScope.user.hasPermission('tracking')}">
+                        <li><a href="${pageContext.request.contextPath}/shipments/tracking" class="${pageContext.request.requestURI.contains('/tracking') ? 'active' : ''}">Live Tracking</a></li>
+                    </c:if>
+                    <%-- Cost structure and margins: Admins + Finance only + PLG permission --%>
+                    <c:if test="${(sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 4) && sessionScope.user.hasPermission('plg')}">
+                        <li><a href="${pageContext.request.contextPath}/finance/profit-loss" class="${pageContext.request.requestURI.contains('/profit-loss') ? 'active' : ''}">Profit &amp; Loss Analytics</a></li>
+                    </c:if>
                 </ul>
             </div>
+            </c:if>
 
             <!-- Containers Dropdown -->
+            <c:if test="${sessionScope.user.hasPermission('tracking')}">
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="containersSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="ti ti-box main-icon"></i>
@@ -2092,8 +2751,11 @@
                 </a>
                 <ul class="sub-nav" id="containersSubmenu" style="display: none;">
                     <li><a href="${pageContext.request.contextPath}/containers">All Containers</a></li>
-                    <li><a href="${pageContext.request.contextPath}/pricing">Pricing &amp; Rate Governance</a></li>
-                    <li><a href="${pageContext.request.contextPath}/predictive-graph">Predictive Pricing Graph</a></li>
+                    <%-- Pricing engine internals are hidden from Operations --%>
+                    <c:if test="${(sessionScope.user.roleId <= 2 || sessionScope.user.roleId == 4) && sessionScope.user.hasPermission('settings')}">
+                        <li><a href="${pageContext.request.contextPath}/pricing">Pricing &amp; Rate Governance</a></li>
+                        <li><a href="${pageContext.request.contextPath}/predictive-graph">Predictive Pricing Graph</a></li>
+                    </c:if>
                 </ul>
             </div>
 
@@ -2112,15 +2774,18 @@
                     <span>Ports</span>
                 </a>
             </div>
+            </c:if>
 
 
             <!-- SECTION 2: MANAGEMENT -->
+            <c:if test="${sessionScope.user.hasPermission('claims') || sessionScope.user.hasPermission('compliance') || sessionScope.user.hasPermission('invoicing') || sessionScope.user.hasPermission('inventory') || (sessionScope.user.roleId == 1 && sessionScope.user.hasPermission('users'))}">
             <div class="sidebar-section-header">
                 <span>MANAGEMENT</span>
             </div>
+            </c:if>
 
             <!-- Approvals Dropdown (Super Admin Only) -->
-            <c:if test="${sessionScope.user.roleId == 1}">
+            <c:if test="${sessionScope.user.roleId == 1 && sessionScope.user.hasPermission('users')}">
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="approvalsSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="ti ti-clipboard-check main-icon"></i>
@@ -2128,39 +2793,51 @@
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="approvalsSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/jsp/admin/companies.jsp">Company</a></li>
-                    <li><a href="${pageContext.request.contextPath}/jsp/admin/customers.jsp">Customer</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/companies">Company</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/customers">Customer</a></li>
                 </ul>
             </div>
             </c:if>
 
             <!-- Claims Management -->
+            <c:if test="${sessionScope.user.hasPermission('claims')}">
             <div class="nav-item">
                 <a href="${pageContext.request.contextPath}/claims" class="nav-link ${pageContext.request.requestURI.contains('/claims') ? 'active' : ''}">
                     <i class="ti ti-shield main-icon"></i>
                     <span>Claims Management</span>
                 </a>
             </div>
+            </c:if>
 
             <!-- Compliance & Billing Dropdown -->
+            <c:if test="${sessionScope.user.hasPermission('compliance') || sessionScope.user.hasPermission('invoicing')}">
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="complianceSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="ti ti-shield-check main-icon"></i>
-                    <span>Compliance & Billing</span>
+                    <span>Compliance &amp; Billing</span>
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="complianceSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/compliance">Government Compliance</a></li>
-                    <li><a href="${pageContext.request.contextPath}/billing">Billing & Invoices</a></li>
-                    <li><a href="${pageContext.request.contextPath}/invoices">Invoices &amp; Statements</a></li>
+                    <%-- Document handling is an Operations duty --%>
+                    <c:if test="${sessionScope.user.roleId <= 3 && sessionScope.user.hasPermission('compliance')}">
+                        <li><a href="${pageContext.request.contextPath}/compliance">Government Compliance</a></li>
+                    </c:if>
+                    <%-- Billing is an Admin/Finance duty --%>
+                    <c:if test="${(sessionScope.user.roleId <= 2 || sessionScope.user.roleId == 4) && sessionScope.user.hasPermission('invoicing')}">
+                        <li><a href="${pageContext.request.contextPath}/billing">Billing &amp; Invoices</a></li>
+                        <li><a href="${pageContext.request.contextPath}/invoices">Invoices &amp; Statements</a></li>
+                    </c:if>
                 </ul>
             </div>
+            </c:if>
 
+            <%-- Stock, inventory and dock scanning: Admins + Operations only --%>
+            <c:if test="${sessionScope.user.roleId <= 3 && sessionScope.user.hasPermission('inventory')}">
             <!-- Stock & Inventory Dropdown -->
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="stockSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="ti ti-packages main-icon"></i>
-                    <span>Stock & Inventory</span>
+                    <span>Stock &amp; Inventory</span>
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="stockSubmenu" style="display: none;">
@@ -2170,12 +2847,14 @@
                     <li><a href="${pageContext.request.contextPath}/ledger">Inventory Ledger</a></li>
                 </ul>
             </div>
+            </c:if>
 
             <!-- Tracking & Scanning Dropdown -->
+            <c:if test="${sessionScope.user.roleId <= 3 && sessionScope.user.hasPermission('tracking')}">
             <div class="nav-item">
                 <a href="javascript:void(0);" data-target="barcodeSubmenu" class="nav-link sidebar-dropdown-toggle collapsed">
                     <i class="ti ti-barcode main-icon"></i>
-                    <span>Tracking & Scanning</span>
+                    <span>Tracking &amp; Scanning</span>
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="barcodeSubmenu" style="display: none;">
@@ -2183,34 +2862,38 @@
                     <li><a href="${pageContext.request.contextPath}/scan-barcode">Scan Barcodes</a></li>
                 </ul>
             </div>
+            </c:if>
 
             <!-- SECTION 3: INSIGHTS & CONFIGURATION -->
+            <c:if test="${sessionScope.user.hasPermission('dashboard') || sessionScope.user.hasPermission('users') || sessionScope.user.hasPermission('settings')}">
             <div class="sidebar-section-header">
-                <span>INSIGHTS & CONFIGURATION</span>
+                <span>INSIGHTS &amp; CONFIGURATION</span>
             </div>
+            </c:if>
 
-
-            <!-- Analytics -->
+            <%-- The 5 analytical engines are managerial decision support --%>
+            <c:if test="${sessionScope.user.roleId <= 2 && sessionScope.user.hasPermission('dashboard')}">
             <div class="nav-item">
                 <a href="${pageContext.request.contextPath}/analytics" class="nav-link ${pageContext.request.requestURI.contains('/analytics') ? 'active' : ''}">
                     <i class="ti ti-chart-pie main-icon"></i>
                     <span>Analytics</span>
                 </a>
             </div>
+            </c:if>
 
             <!-- Alerts -->
             <div class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="${pageContext.request.contextPath}/alerts" class="nav-link ${pageContext.request.requestURI.contains('/alerts') ? 'active' : ''}">
                     <i class="ti ti-bell main-icon"></i>
                     <span>Alerts</span>
-                    <span class="badge-alerts">12</span>
+                    <span class="badge-alerts" id="sidebarAlertsBadge" style="display:none;">0</span>
                 </a>
             </div>
 
             <!-- Staff & Roles Governance -->
-            <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2}">
+            <c:if test="${(sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2) && sessionScope.user.hasPermission('users')}">
             <div class="nav-item">
-                <a href="${pageContext.request.contextPath}/jsp/admin/users.jsp" class="nav-link">
+                <a href="${pageContext.request.contextPath}/admin/users" class="nav-link">
                     <i class="ti ti-users main-icon"></i>
                     <span>Users &amp; Roles</span>
                 </a>
@@ -2224,11 +2907,12 @@
                     <i class="ti ti-chevron-down caret"></i>
                 </a>
                 <ul class="sub-nav" id="auditSubmenu" style="display: none;">
-                    <li><a href="${pageContext.request.contextPath}/jsp/admin/audit_logins.jsp">Logins &amp; Security</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/audit-logs">Logins &amp; Security</a></li>
                 </ul>
             </div>
             </c:if>
 
+            <c:if test="${sessionScope.user.hasPermission('settings')}">
             <!-- Settings -->
             <div class="nav-item">
                 <a href="#" class="nav-link">
@@ -2236,6 +2920,9 @@
                     <span>Settings</span>
                 </a>
             </div>
+            </c:if>
+        </c:otherwise>
+        </c:choose>
         </div>
 
         <!-- Need Help? Card -->
@@ -2389,10 +3076,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="notif-dropdown-panel" id="notifDropdownPanel">
                         <div class="notif-dropdown-header">
-                            <span>Notifications</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="notif-head-title">Notifications</span>
+                                <span class="notif-badge-pill" id="notifCountPill">0 New</span>
+                            </div>
+                            <button type="button" class="notif-mark-read-btn" onclick="markAllNotificationsRead(event)" title="Mark all notifications as read">
+                                <i class="ti ti-checks"></i> Mark all read
+                            </button>
                         </div>
                         <div class="notif-dropdown-list" id="notifDropdownList">
-                            <div class="notif-empty">No new notifications</div>
+                            <div class="notif-empty">
+                                <div class="notif-empty-icon"><i class="ti ti-bell-off"></i></div>
+                                <div class="notif-empty-title">All Caught Up</div>
+                                <div class="notif-empty-sub">No pending alerts, compliance expirations, or actions.</div>
+                            </div>
+                        </div>
+                        <div class="notif-dropdown-footer">
+                            <a href="${pageContext.request.contextPath}/alerts" class="notif-footer-link" style="color:#FC8019; font-weight:700;"><i class="ti ti-list-details"></i> View All Alerts Page</a>
+                            <a href="${pageContext.request.contextPath}/compliance" class="notif-footer-link"><i class="ti ti-shield-check"></i> Compliance</a>
                         </div>
                     </div>
                 </div>
@@ -2432,38 +3133,173 @@ document.addEventListener('DOMContentLoaded', function() {
         if (str == null) return '';
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+
+    let dismissedNotifIds = new Set();
+    try {
+        const stored = sessionStorage.getItem('nl_dismissed_notifs');
+        if (stored) dismissedNotifIds = new Set(JSON.parse(stored));
+    } catch(e) {}
+
+    window.markAllNotificationsRead = function(e) {
+        if (e) e.stopPropagation();
+        const badge = document.getElementById('notifBadge');
+        const pill = document.getElementById('notifCountPill');
+        const list = document.getElementById('notifDropdownList');
+        const sbBadges = [document.getElementById('sidebarAlertsBadge'), document.getElementById('sidebarCustAlertsBadge')].filter(Boolean);
+        const sbPills = [document.getElementById('sidebarAlertsPill'), document.getElementById('sidebarCustAlertsPill')].filter(Boolean);
+        const sbLists = [document.getElementById('sidebarAlertsList'), document.getElementById('sidebarCustAlertsList')].filter(Boolean);
+
+        if (window._currentNotifs && window._currentNotifs.length > 0) {
+            window._currentNotifs.forEach(function(n) { dismissedNotifIds.add(n.id); });
+            try { sessionStorage.setItem('nl_dismissed_notifs', JSON.stringify(Array.from(dismissedNotifIds))); } catch(err) {}
+        }
+        if (badge) badge.style.display = 'none';
+        if (pill) pill.textContent = '0 New';
+        sbBadges.forEach(function(b) { b.style.display = 'none'; b.textContent = '0'; });
+        sbPills.forEach(function(p) { p.textContent = '0'; });
+
+        if (list) {
+            list.innerHTML = 
+                '<div class="notif-empty">' +
+                    '<div class="notif-empty-icon" style="background:#ECFDF5; color:#059669;"><i class="ti ti-circle-check"></i></div>' +
+                    '<div class="notif-empty-title">All Caught Up</div>' +
+                    '<div class="notif-empty-sub">All alerts have been marked as read.</div>' +
+                '</div>';
+        }
+        const sbEmptyHtml = 
+            '<div class="sidebar-alert-empty">' +
+                '<div class="sidebar-alert-empty-icon" style="background:#ECFDF5; color:#059669;"><i class="ti ti-circle-check"></i></div>' +
+                '<div class="sidebar-alert-empty-title">All Caught Up</div>' +
+                '<div class="sidebar-alert-empty-sub">All alerts marked as read.</div>' +
+            '</div>';
+        sbLists.forEach(function(l) { l.innerHTML = sbEmptyHtml; });
+
+        fetch(ctx + '/notifications?action=markAllRead', { credentials: 'same-origin' }).catch(function() {});
+    };
+
     function renderNotifications(notifs) {
         const badge = document.getElementById('notifBadge');
+        const pill = document.getElementById('notifCountPill');
         const list = document.getElementById('notifDropdownList');
-        if (!badge || !list) return;
-        if (!notifs || notifs.length === 0) {
-            badge.style.display = 'none';
-            list.innerHTML = '<div class="notif-empty">No new notifications</div>';
+        const sbBadges = [document.getElementById('sidebarAlertsBadge'), document.getElementById('sidebarCustAlertsBadge')].filter(Boolean);
+        const sbPills = [document.getElementById('sidebarAlertsPill'), document.getElementById('sidebarCustAlertsPill')].filter(Boolean);
+        const sbLists = [document.getElementById('sidebarAlertsList'), document.getElementById('sidebarCustAlertsList')].filter(Boolean);
+
+        window._currentNotifs = notifs || [];
+        const activeNotifs = (notifs || []).filter(function(n) { return !dismissedNotifIds.has(n.id); });
+        const countText = activeNotifs.length > 9 ? '9+' : String(activeNotifs.length);
+
+        if (activeNotifs.length === 0) {
+            if (badge) badge.style.display = 'none';
+            if (pill) pill.textContent = '0 New';
+            sbBadges.forEach(function(b) { b.style.display = 'none'; b.textContent = '0'; });
+            sbPills.forEach(function(p) { p.textContent = '0'; });
+
+            if (list) {
+                list.innerHTML = 
+                    '<div class="notif-empty">' +
+                        '<div class="notif-empty-icon"><i class="ti ti-bell-off"></i></div>' +
+                        '<div class="notif-empty-title">All Caught Up</div>' +
+                        '<div class="notif-empty-sub">No pending alerts, compliance expirations, or actions.</div>' +
+                    '</div>';
+            }
+            const sbEmptyHtml = 
+                '<div class="sidebar-alert-empty">' +
+                    '<div class="sidebar-alert-empty-icon"><i class="ti ti-bell-off"></i></div>' +
+                    '<div class="sidebar-alert-empty-title">All Caught Up</div>' +
+                    '<div class="sidebar-alert-empty-sub">No pending alerts.</div>' +
+                '</div>';
+            sbLists.forEach(function(l) { l.innerHTML = sbEmptyHtml; });
             return;
         }
-        badge.style.display = 'flex';
-        badge.textContent = notifs.length > 9 ? '9+' : notifs.length;
-        list.innerHTML = notifs.map(function(n) {
-            const link = n.link ? (ctx + n.link) : '#';
-            return '<a class="notif-item" href="' + link + '">' +
-                   '<div class="notif-dot"></div>' +
-                   '<div><div class="notif-title">' + escapeHtml(n.title) + '</div>' +
-                   '<div class="notif-message">' + escapeHtml(n.message) + '</div></div>' +
-                   '</a>';
-        }).join('');
+
+        if (badge) {
+            badge.style.display = 'flex';
+            badge.textContent = countText;
+        }
+        if (pill) pill.textContent = activeNotifs.length + ' New';
+
+        sbBadges.forEach(function(b) {
+            b.style.display = 'inline-block';
+            b.textContent = countText;
+        });
+        sbPills.forEach(function(p) { p.textContent = String(activeNotifs.length); });
+
+        if (list) {
+            list.innerHTML = activeNotifs.map(function(n) {
+                const link = n.link ? (ctx + n.link) : '#';
+                const typeClass = escapeHtml(n.type || 'info');
+                const iconClass = escapeHtml(n.icon || 'ti ti-bell');
+                const cat = escapeHtml(n.category || 'General');
+                const catClass = cat.toLowerCase();
+                const timeAgo = escapeHtml(n.timeAgo || '');
+
+                return '<a class="notif-card-item" href="' + link + '">' +
+                       '  <div class="notif-card-icon ' + typeClass + '">' +
+                       '    <i class="' + iconClass + '"></i>' +
+                       '  </div>' +
+                       '  <div class="notif-card-body">' +
+                       '    <div class="notif-meta-row">' +
+                       '      <span class="notif-cat-tag ' + catClass + '">' + cat + '</span>' +
+                       (timeAgo ? '      <span class="notif-time-text">' + timeAgo + '</span>' : '') +
+                       '    </div>' +
+                       '    <div class="notif-item-title">' + escapeHtml(n.title) + '</div>' +
+                       '    <div class="notif-item-msg">' + escapeHtml(n.message) + '</div>' +
+                       '    <div class="notif-action-arrow">Review now <i class="ti ti-arrow-right"></i></div>' +
+                       '  </div>' +
+                       '</a>';
+            }).join('');
+        }
+
+        if (sbLists.length > 0) {
+            const sbHtml = activeNotifs.map(function(n) {
+                const link = n.link ? (ctx + n.link) : '#';
+                const typeClass = escapeHtml(n.type || 'info');
+                const iconClass = escapeHtml(n.icon || 'ti ti-bell');
+                const cat = escapeHtml(n.category || 'General');
+                const catClass = cat.toLowerCase();
+                const timeAgo = escapeHtml(n.timeAgo || '');
+
+                return '<a class="sidebar-alert-card" href="' + link + '">' +
+                       '  <div class="sidebar-alert-card-top">' +
+                       '    <div class="notif-card-icon ' + typeClass + '">' +
+                       '      <i class="' + iconClass + '"></i>' +
+                       '    </div>' +
+                       '    <div class="sidebar-alert-card-meta">' +
+                       '      <span class="notif-cat-tag ' + catClass + '">' + cat + '</span>' +
+                       (timeAgo ? '      <span class="notif-time-text">' + timeAgo + '</span>' : '') +
+                       '    </div>' +
+                       '  </div>' +
+                       '  <div class="sidebar-alert-card-content">' +
+                       '    <div class="notif-item-title">' + escapeHtml(n.title) + '</div>' +
+                       '    <div class="notif-item-msg">' + escapeHtml(n.message) + '</div>' +
+                       '    <div class="notif-action-arrow">Review now <i class="ti ti-arrow-right"></i></div>' +
+                       '  </div>' +
+                       '</a>';
+            }).join('');
+            sbLists.forEach(function(l) { l.innerHTML = sbHtml; });
+        }
     }
-    function pollNotifications() {
-        fetch(ctx + '/notifications', { credentials: 'same-origin' })
+    window.pollNotifications = function(onComplete) {
+        fetch(ctx + '/notifications?_t=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
             .then(function(res) { return res.ok ? res.json() : []; })
-            .then(function(data) { renderNotifications(data); })
-            .catch(function() { /* silently ignore - bell just stays empty */ });
-    }
+            .then(function(data) {
+                renderNotifications(data);
+                if (typeof window.onNotificationsPolled === 'function') {
+                    try { window.onNotificationsPolled(data); } catch(err) { console.warn(err); }
+                }
+                if (typeof onComplete === 'function') onComplete(data);
+            })
+            .catch(function(err) {
+                if (typeof onComplete === 'function') onComplete([]);
+            });
+    };
     window.toggleNotifDropdown = function(e) {
         if (e) e.stopPropagation();
         const panel = document.getElementById('notifDropdownPanel');
         if (!panel) return;
         panel.classList.toggle('show');
-        if (panel.classList.contains('show')) pollNotifications();
+        if (panel.classList.contains('show')) window.pollNotifications();
     };
     document.addEventListener('click', function(e) {
         const wrap = document.getElementById('notifBellWrap');
@@ -2472,10 +3308,9 @@ document.addEventListener('DOMContentLoaded', function() {
             panel.classList.remove('show');
         }
     });
-    if (document.getElementById('notifBellWrap')) {
-        pollNotifications();
-        setInterval(pollNotifications, 30000);
-    }
+    // Auto-poll every 15s so notifications arrive and leave dynamically in background
+    window.pollNotifications();
+    setInterval(window.pollNotifications, 15000);
 
     const OMNIBOX_DATA = [
         // Shipments Module
@@ -2603,7 +3438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Governance & Administration
         {
             title: "Company Approvals",
-            url: ctx + "/jsp/admin/companies.jsp",
+            url: ctx + "/admin/companies",
             category: "Administration",
             subtitle: "Super Admin verification & activation portal for new companies",
             keywords: "approvals approve company pending verification activate super admin app comp",
@@ -2613,7 +3448,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         {
             title: "Customer Approvals",
-            url: ctx + "/jsp/admin/users.jsp",
+            url: ctx + "/admin/users",
             category: "Administration",
             subtitle: "Super Admin customer account clearance & KYC verification portal",
             keywords: "customer approvals customer verify activate approve user client onboarding kyc super admin cus",
@@ -2623,7 +3458,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         {
             title: "Audit Logs (Logins & Security)",
-            url: ctx + "/jsp/admin/audit_logins.jsp",
+            url: ctx + "/admin/audit-logs",
             category: "Administration",
             subtitle: "Forensic audit trail of all logins, logouts, password resets and security events (FR1.9)",
             keywords: "audit logs security logins logouts forensic history authentication trail fr1.9",
@@ -2662,6 +3497,70 @@ document.addEventListener('DOMContentLoaded', function() {
             badge: "Profile"
         }
     ];
+
+    /* ------------------------------------------------------------------
+       RBAC omnibox filter (CLAUDE.md S6.1.2).
+       The command palette indexes every route in the app, so without this
+       a Customer could search "profit" and jump straight to the P&L page.
+       These rules mirror AuthenticationFilter.isAllowed() exactly - the
+       server still enforces them; this only stops forbidden routes from
+       ever being offered.
+       ------------------------------------------------------------------ */
+    (function filterOmniboxByRole() {
+        if (typeof OMNIBOX_DATA === 'undefined') return;
+
+        var role = parseInt('${sessionScope.user.roleId}', 10);
+        if (isNaN(role)) return;
+
+        var SUPER_ADMIN = 1, COMPANY_ADMIN = 2, OPERATIONS = 3, FINANCE = 4, CUSTOMER = 5;
+
+        function allowed(url) {
+            // Strip the context path and any query/hash so we compare bare routes.
+            var path = String(url || '').replace(ctx, '').split('?')[0].split('#')[0];
+
+            if (path.indexOf('/admin') === 0 || path.indexOf('/jsp/admin') === 0) {
+                return role === SUPER_ADMIN;
+            }
+            if (path.indexOf('/dashboard/executive') === 0 || path.indexOf('/executive') === 0
+                    || path.indexOf('/analytics') === 0) {
+                return role <= COMPANY_ADMIN;
+            }
+            if (path.indexOf('/finance') === 0 || path.indexOf('/drilldown') > -1
+                    || path.indexOf('/profit-loss') > -1) {
+                return role === SUPER_ADMIN || role === COMPANY_ADMIN || role === FINANCE;
+            }
+            if (path.indexOf('/pricing') === 0 || path.indexOf('/predictive-graph') === 0) {
+                return role <= COMPANY_ADMIN || role === FINANCE;
+            }
+            if (path.indexOf('/upload-stock') === 0 || path.indexOf('/stock') === 0
+                    || path.indexOf('/manual-stock') === 0 || path.indexOf('/adjust-stock') === 0
+                    || path.indexOf('/inventory') === 0 || path.indexOf('/ledger') === 0
+                    || path.indexOf('/barcodes') === 0 || path.indexOf('/scan-barcode') === 0
+                    || path.indexOf('/allocate') === 0) {
+                return role <= OPERATIONS;
+            }
+            if (path.indexOf('/vessel') === 0 || path.indexOf('/ports') === 0
+                    || path.indexOf('/customers') === 0) {
+                return role <= FINANCE;
+            }
+            if (path.indexOf('/billing') === 0 || path.indexOf('/generate-invoice') === 0) {
+                return role <= COMPANY_ADMIN || role === FINANCE;
+            }
+            if (path.indexOf('/invoices') === 0 || path.indexOf('/view-invoice') === 0) {
+                return role !== OPERATIONS;
+            }
+            if (path.indexOf('/shipments/create') === 0) {
+                return role !== FINANCE;
+            }
+            return true;
+        }
+
+        for (var i = OMNIBOX_DATA.length - 1; i >= 0; i--) {
+            if (!allowed(OMNIBOX_DATA[i].url)) {
+                OMNIBOX_DATA.splice(i, 1);
+            }
+        }
+    })();
 
     function initOmnibox() {
 

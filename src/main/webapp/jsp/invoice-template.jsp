@@ -2,20 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<%
-if (request.getAttribute("invoice") == null && request.getParameter("id") != null) {
-    try {
-        int invId = Integer.parseInt(request.getParameter("id").trim());
-        com.nlogistic.dao.BillingDAO bdao = new com.nlogistic.dao.BillingDAO();
-        com.nlogistic.model.Invoice inv = bdao.getInvoiceById(invId);
-        if (inv != null) {
-            request.setAttribute("invoice", inv);
-            request.setAttribute("lineItems", inv.getLineItems());
-            request.setAttribute("payments", inv.getPayments());
-        }
-    } catch (Exception ignored) {}
-}
-%>
+<%-- MVC2 (SRS 10.2): data and actions come from InvoiceServlet (/invoices?action=view).
+     The inline controller block that used to live here re-queried the DAO
+     with no tenant scope whenever the JSP was opened directly. --%>
 <!DOCTYPE html>
 <html lang="en">
 <head>

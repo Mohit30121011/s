@@ -32,10 +32,20 @@ public class FinanceServlet extends HttpServlet {
             return;
         } else if (pathInfo.equals("/profit-loss")) {
             
-            Integer companyId = null;
-            if (request.getParameter("companyId") != null && !request.getParameter("companyId").isEmpty()) {
-                companyId = Integer.parseInt(request.getParameter("companyId"));
+            // Tenant isolation: only a Super Admin may choose which company to view.
+            // Everyone else is pinned to their own company regardless of the URL.
+            int plRole = com.nlogistic.util.RbacContext.roleId(request);
+            Integer companyId;
+            if (plRole == com.nlogistic.util.RbacContext.SUPER_ADMIN) {
+                companyId = null;
+                String req = request.getParameter("companyId");
+                if (req != null && !req.isEmpty()) {
+                    try { companyId = Integer.parseInt(req); } catch (NumberFormatException ignored) {}
+                }
+            } else {
+                companyId = com.nlogistic.util.RbacContext.companyId(request);
             }
+            request.setAttribute("companyFilterLocked", plRole != com.nlogistic.util.RbacContext.SUPER_ADMIN);
             
             Integer routeId = null;
             if (request.getParameter("routeId") != null && !request.getParameter("routeId").isEmpty()) {
@@ -53,7 +63,16 @@ public class FinanceServlet extends HttpServlet {
                 }
             }
 
-            request.setAttribute("companies", companyDAO.getAllCompanies());
+            // Only a Super Admin needs the full company list; others would just be
+            // reading a directory of other tenants.
+            if (plRole == com.nlogistic.util.RbacContext.SUPER_ADMIN) {
+                request.setAttribute("companies", companyDAO.getAllCompanies());
+            } else {
+                com.nlogistic.model.Company own = (companyId != null) ? companyDAO.getCompanyById(companyId) : null;
+                request.setAttribute("companies", own != null
+                        ? java.util.Collections.singletonList(own)
+                        : java.util.Collections.emptyList());
+            }
             request.setAttribute("ports", portDAO.getAllPorts());
             
             request.setAttribute("selectedCompany", companyId);
@@ -83,10 +102,18 @@ public class FinanceServlet extends HttpServlet {
                     shipmentId = 1;
                 }
             }
-            com.nlogistic.model.ShipmentDrilldown sd = profitLossDAO.getShipmentDrilldownDetails(shipmentId);
-            if (sd == null && shipmentId != 1) {
-                sd = profitLossDAO.getShipmentDrilldownDetails(1);
+            // IDOR guard: the drilldown exposes full cost structure, so verify the
+            // caller owns this shipment before loading it. Previously any id worked,
+            // and a missing shipment silently fell back to shipment #1.
+            int ddRole = com.nlogistic.util.RbacContext.roleId(request);
+            if (!new com.nlogistic.dao.ShipmentDAO().canAccessShipment(shipmentId, ddRole,
+                    com.nlogistic.util.RbacContext.companyId(request),
+                    com.nlogistic.util.RbacContext.customerId(request))) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "Access Denied: this shipment does not belong to your company.");
+                return;
             }
+            com.nlogistic.model.ShipmentDrilldown sd = profitLossDAO.getShipmentDrilldownDetails(shipmentId);
             request.setAttribute("drilldown", sd);
             request.setAttribute("allLossReasons", profitLossDAO.getAllLossReasons());
             request.getRequestDispatcher("/jsp/shipment_drilldown.jsp").forward(request, response);

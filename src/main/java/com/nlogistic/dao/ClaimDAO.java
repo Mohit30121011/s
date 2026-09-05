@@ -155,8 +155,29 @@ public class ClaimDAO {
         return -1;
     }
 
-    /** Move claim Filed -> Under Review. DB: review_claim(claim_id, new_status, approved_amount, changed_by, remark) */
-    public void startReview(int claimId, int changedBy, String remark) {
+    /**
+     * Reduce a database failure to the message worth showing a user.
+     *
+     * The claims table carries BEFORE UPDATE triggers that refuse illegal
+     * transitions (SQLSTATE 45000). Those refusals used to be caught and
+     * discarded here, so the servlet went on to report "Claim settled" for a
+     * change the database had rejected outright.
+     */
+    private String failureReason(Exception e, String fallback) {
+        String m = (e != null && e.getMessage() != null) ? e.getMessage() : "";
+        int cut = m.lastIndexOf(": ");
+        if (cut >= 0 && cut + 2 < m.length()) m = m.substring(cut + 2);
+        m = m.trim();
+        if (m.isEmpty() || m.length() > 220) return fallback;
+        return m;
+    }
+
+    /**
+     * Move claim Filed -> Under Review.
+     * DB: review_claim(claim_id, new_status, approved_amount, changed_by, remark)
+     * @return null when applied, otherwise why the database refused it.
+     */
+    public String startReview(int claimId, int changedBy, String remark) {
         String sql = "{CALL review_claim(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
@@ -166,11 +187,15 @@ public class ClaimDAO {
             cs.setInt(4, changedBy);
             cs.setString(5, remark != null && !remark.isEmpty() ? remark : "Claim taken under review");
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failureReason(e, "The claim could not be moved to Under Review.");
+        }
     }
 
     /** Move claim Under Review -> Approved with approved amount. */
-    public void approveClaim(int claimId, double approvedAmount, int changedBy, String remark) {
+    public String approveClaim(int claimId, double approvedAmount, int changedBy, String remark) {
         String sql = "{CALL review_claim(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
@@ -180,7 +205,11 @@ public class ClaimDAO {
             cs.setInt(4, changedBy);
             cs.setString(5, remark != null && !remark.isEmpty() ? remark : "Claim approved");
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failureReason(e, "The claim could not be approved.");
+        }
     }
 
     /** Backward-compatible alias matching the original review_claim(claimId, newStatus, approvedAmount, changedBy, remark) call shape. */
@@ -198,7 +227,7 @@ public class ClaimDAO {
     }
 
     /** Move claim Under Review -> Rejected. DB: reject_claim(claim_id, rejected_by, remark) */
-    public void rejectClaim(int claimId, int rejectedBy, String remark) {
+    public String rejectClaim(int claimId, int rejectedBy, String remark) {
         String sql = "{CALL reject_claim(?, ?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
@@ -206,18 +235,26 @@ public class ClaimDAO {
             cs.setInt(2, rejectedBy);
             cs.setString(3, remark != null && !remark.isEmpty() ? remark : "Claim rejected");
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failureReason(e, "The claim could not be rejected.");
+        }
     }
 
     /** Move claim Approved -> Settled. DB: settle_claim(claim_id, resolved_by) */
-    public void settleClaim(int claimId, int resolvedBy) {
+    public String settleClaim(int claimId, int resolvedBy) {
         String sql = "{CALL settle_claim(?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
             cs.setInt(1, claimId);
             cs.setInt(2, resolvedBy);
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failureReason(e, "The claim could not be settled.");
+        }
     }
 
     /** DB signature: add_claim_document(p_claim_id, p_doc_type, p_file_path, p_uploaded_by). Returns false (instead of silently swallowing) on failure so the caller can surface a real error. */
@@ -374,23 +411,43 @@ public class ClaimDAO {
      * Customers see only their own shipments; staff sees all.
      */
     public List<Object[]> getShipmentsForUser(int userId, int roleId, Integer customerId) {
+        return getShipmentsForUser(userId, roleId, customerId, null);
+    }
+
+    /**
+     * Shipments the caller may file a claim against.
+     *
+     * The company branch used to have no WHERE clause at all, so the "File a
+     * Claim" dropdown listed every shipment on the platform together with the
+     * owning customer's name - a directory of rival tenants' customers, and the
+     * exact ids needed for the cross-tenant filing this module also allowed.
+     */
+    public List<Object[]> getShipmentsForUser(int userId, int roleId, Integer customerId, Integer companyId) {
         List<Object[]> list = new ArrayList<>();
         String sql;
         boolean restrictToCustomer = (roleId == 5 && customerId != null && customerId > 0);
+        boolean restrictToCompany  = (roleId >= 2 && roleId <= 4);
+        String base = "SELECT s.shipment_id, s.cargo_description, s.status, s.customer_id, cu.customer_name, s.container_id " +
+                      "FROM SHIPMENT s " +
+                      "LEFT JOIN CUSTOMERS cu ON s.customer_id = cu.customer_id " +
+                      "LEFT JOIN CONTAINERS cnt ON cnt.container_id = s.container_id ";
         if (restrictToCustomer) {
-            sql = "SELECT s.shipment_id, s.cargo_description, s.status, s.customer_id, cu.customer_name, s.container_id " +
-                  "FROM SHIPMENT s " +
-                  "LEFT JOIN CUSTOMERS cu ON s.customer_id = cu.customer_id " +
-                  "WHERE s.customer_id = ? ORDER BY s.shipment_id DESC";
+            sql = base + "WHERE s.customer_id = ? ORDER BY s.shipment_id DESC";
+        } else if (restrictToCompany) {
+            sql = base + "WHERE (cnt.owner_company_id = ? OR s.created_by IN "
+                       + "(SELECT user_id FROM users WHERE company_id = ?)) ORDER BY s.shipment_id DESC";
         } else {
-            sql = "SELECT s.shipment_id, s.cargo_description, s.status, s.customer_id, cu.customer_name, s.container_id " +
-                  "FROM SHIPMENT s " +
-                  "LEFT JOIN CUSTOMERS cu ON s.customer_id = cu.customer_id " +
-                  "ORDER BY s.shipment_id DESC";
+            sql = base + "ORDER BY s.shipment_id DESC";
         }
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            if (restrictToCustomer) ps.setInt(1, customerId);
+            if (restrictToCustomer) {
+                ps.setInt(1, customerId);
+            } else if (restrictToCompany) {
+                int cid = (companyId != null) ? companyId : -1;
+                ps.setInt(1, cid);
+                ps.setInt(2, cid);
+            }
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(new Object[]{
@@ -422,5 +479,135 @@ public class ClaimDAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+
+    /* ==================================================================
+     * FR7.7 - "The claims register shall be filterable and scoped to the
+     * caller's tenant."
+     *
+     * The register previously loaded every claim in the system and then
+     * dropped the ones the caller could not see with a per-row
+     * canAccessShipment() query - one round trip per claim, and a full
+     * cross-tenant read before any filtering. Scoping now happens in SQL,
+     * alongside the status / type / date / customer filters the SRS asks for
+     * and which the old query had no support for at all.
+     * ================================================================== */
+    public List<Claim> getClaimsFiltered(int roleId, Integer companyId, Integer customerId,
+                                         String status, String type,
+                                         String dateFrom, String dateTo,
+                                         Integer filterCustomerId, Integer filterCompanyId) {
+        List<Claim> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+              "SELECT c.*, cu.customer_name, lr.reason_name "
+            + "FROM CLAIMS c "
+            + "LEFT JOIN CUSTOMERS cu ON c.customer_id = cu.customer_id "
+            + "LEFT JOIN LOSS_REASONS lr ON c.reason_id = lr.reason_id "
+            + "LEFT JOIN SHIPMENT s ON s.shipment_id = c.shipment_id "
+            + "LEFT JOIN CONTAINERS cnt ON cnt.container_id = s.container_id "
+            + "WHERE 1=1 ");
+        List<Object> args = new ArrayList<>();
+
+        // Tenant / self scoping. A Super Admin sees everything unless they pick
+        // a company; everyone else is pinned to their own regardless of input.
+        if (roleId == 5) {
+            sql.append("AND c.customer_id = ? ");
+            args.add(customerId != null ? customerId : -1);
+        } else if (roleId >= 2 && roleId <= 4) {
+            sql.append("AND (cnt.owner_company_id = ? OR s.created_by IN "
+                     + "(SELECT user_id FROM users WHERE company_id = ?)) ");
+            int cid = (companyId != null) ? companyId : -1;
+            args.add(cid); args.add(cid);
+        } else if (roleId == 1 && filterCompanyId != null) {
+            sql.append("AND (cnt.owner_company_id = ? OR s.created_by IN "
+                     + "(SELECT user_id FROM users WHERE company_id = ?)) ");
+            args.add(filterCompanyId); args.add(filterCompanyId);
+        }
+
+        if (status != null && !status.trim().isEmpty()) { sql.append("AND c.status = ? "); args.add(status.trim()); }
+        if (type   != null && !type.trim().isEmpty())   { sql.append("AND c.claim_type = ? "); args.add(type.trim()); }
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) { sql.append("AND c.incident_date >= ? "); args.add(dateFrom.trim()); }
+        if (dateTo   != null && !dateTo.trim().isEmpty())   { sql.append("AND c.incident_date <= ? "); args.add(dateTo.trim()); }
+        // A customer may never filter to somebody else's account.
+        if (roleId != 5 && filterCustomerId != null) { sql.append("AND c.customer_id = ? "); args.add(filterCustomerId); }
+
+        sql.append("ORDER BY c.claim_id DESC");
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < args.size(); i++) ps.setObject(i + 1, args.get(i));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapClaim(rs));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * May this caller open / act on this claim?
+     *
+     * Gap 4: only customers were checked. Company staff could read, approve and
+     * settle a rival tenant's claim just by putting its id in the URL, because
+     * the single-claim path did no company check at all.
+     */
+    public boolean canAccessClaim(int claimId, int roleId, Integer companyId, Integer customerId) {
+        if (roleId == 1) return true;
+        String sql;
+        if (roleId == 5) {
+            sql = "SELECT 1 FROM CLAIMS WHERE claim_id = ? AND customer_id = ?";
+        } else {
+            sql = "SELECT 1 FROM CLAIMS c "
+                + "LEFT JOIN SHIPMENT s ON s.shipment_id = c.shipment_id "
+                + "LEFT JOIN CONTAINERS cnt ON cnt.container_id = s.container_id "
+                + "WHERE c.claim_id = ? AND (cnt.owner_company_id = ? OR s.created_by IN "
+                + "(SELECT user_id FROM users WHERE company_id = ?))";
+        }
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, claimId);
+            if (roleId == 5) {
+                ps.setInt(2, customerId != null ? customerId : -1);
+            } else {
+                int cid = (companyId != null) ? companyId : -1;
+                ps.setInt(2, cid);
+                ps.setInt(3, cid);
+            }
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    /** Distinct customers appearing in the register, for the FR7.7 customer filter. */
+    public List<Object[]> getFilterCustomers(int roleId, Integer companyId) {
+        List<Object[]> out = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+              "SELECT DISTINCT cu.customer_id, cu.customer_name FROM CLAIMS c "
+            + "JOIN CUSTOMERS cu ON cu.customer_id = c.customer_id "
+            + "LEFT JOIN SHIPMENT s ON s.shipment_id = c.shipment_id "
+            + "LEFT JOIN CONTAINERS cnt ON cnt.container_id = s.container_id WHERE 1=1 ");
+        if (roleId >= 2 && roleId <= 4) {
+            sql.append("AND (cnt.owner_company_id = ? OR s.created_by IN "
+                     + "(SELECT user_id FROM users WHERE company_id = ?)) ");
+        }
+        sql.append("ORDER BY cu.customer_name");
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            if (roleId >= 2 && roleId <= 4) {
+                int cid = (companyId != null) ? companyId : -1;
+                ps.setInt(1, cid); ps.setInt(2, cid);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) out.add(new Object[]{ rs.getInt(1), rs.getString(2) });
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** Current status of one claim, for server-side state machine checks. */
+    public String getClaimStatus(int claimId) {
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT status FROM CLAIMS WHERE claim_id = ?")) {
+            ps.setInt(1, claimId);
+            try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getString(1); }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 }

@@ -48,8 +48,27 @@ public class BookShipmentServlet extends HttpServlet {
                         + "booking_date, cargo_description, cargo_weight_kg, cargo_volume_cbm, freight_cost, status, created_by) "
                         + "VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?, ?, 'Booked', ?)";
                         
+                // Resolve the true customers.customer_id. `user_id` is NOT a customer id -
+                // writing it here silently attached bookings to an unrelated customer.
+                Integer bookCustomerId = null;
+                if (user.getRoleId() == 5) {
+                    bookCustomerId = com.nlogistic.util.RbacContext.customerId(request);
+                } else {
+                    String custParam = request.getParameter("customerId");
+                    if (custParam != null && !custParam.trim().isEmpty()) {
+                        try { bookCustomerId = Integer.parseInt(custParam.trim()); } catch (NumberFormatException ignored) {}
+                    }
+                }
+                if (bookCustomerId == null) {
+                    conn.rollback();
+                    request.getSession().setAttribute("errorMessage",
+                            "Booking failed: no customer account could be resolved for this request.");
+                    response.sendRedirect(request.getContextPath() + "/shipments");
+                    return;
+                }
+
                 try (PreparedStatement ps = conn.prepareStatement(insertShipment, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setInt(1, user.getUserId()); // Assuming the creator is the customer or staff acting for them
+                    ps.setInt(1, bookCustomerId);
                     ps.setInt(2, containerId);
                     ps.setInt(3, originPortId);
                     ps.setInt(4, destPortId);
@@ -87,8 +106,37 @@ public class BookShipmentServlet extends HttpServlet {
                 }
                 
                 conn.commit();
-                request.getSession().setAttribute("successMessage", "Shipment #" + shipmentId + " booked and Container Allocated successfully!");
-                response.sendRedirect(request.getContextPath() + "/containers");
+
+                // FR8.1: auto-generate a barcode for every newly booked shipment
+                if (shipmentId != -1) {
+                    com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Shipment", shipmentId, user.getUserId());
+                }
+
+                // FR5.5: the invoice is raised automatically on booking - the customer
+                // never asks for one. Failure here must not roll back a valid booking,
+                // so it is reported separately.
+                String invoiceNote = "";
+                if (shipmentId != -1) {
+                    try {
+                        int invoiceId = new com.nlogistic.dao.BillingDAO()
+                                .generateInvoice(bookCustomerId, shipmentId);
+                        if (invoiceId > 0) {
+                            invoiceNote = " Invoice INV-" + invoiceId + " has been raised and is available under Invoices & Payments.";
+                        } else {
+                            invoiceNote = " (Invoice will be raised shortly.)";
+                        }
+                    } catch (Exception invEx) {
+                        invEx.printStackTrace();
+                        invoiceNote = " (Invoice could not be raised automatically - Finance has been notified.)";
+                    }
+                }
+
+                request.getSession().setAttribute("successMessage",
+                        "Shipment #" + shipmentId + " booked and container allocated." + invoiceNote);
+
+                // Customers land on their own shipment list; staff go back to the catalog.
+                response.sendRedirect(request.getContextPath()
+                        + (user.getRoleId() == 5 ? "/shipments" : "/containers"));
                 
             } catch (Exception ex) {
                 ex.printStackTrace();

@@ -10,7 +10,10 @@ import com.nlogistic.model.User;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -56,11 +59,23 @@ public class ComplianceServlet extends HttpServlet {
         // Automatic batch check: flag expired documents
         complianceDAO.flagExpiredDocuments();
 
-        // 1. Fetch All Compliance Documents
-        List<ComplianceDocument> docs = complianceDAO.getAllDocuments();
+        // 1. Fetch compliance documents, then reduce to what this caller may see.
+        //    CLAUDE.md S4: a Customer sees only the documents of their own
+        //    shipments; company staff only their own tenant's.
+        final int cmplRole = com.nlogistic.util.RbacContext.roleId(request);
+        final Integer cmplCompany = com.nlogistic.util.RbacContext.companyId(request);
+        final Integer cmplCustomer = com.nlogistic.util.RbacContext.customerId(request);
 
-        // 2. Fetch Expiring Documents Alert List (FR5.4 - within 15 days)
+        List<ComplianceDocument> docs = complianceDAO.getAllDocuments();
         List<ComplianceDocument> expiringDocs = complianceDAO.getExpiringDocuments(15);
+
+        if (cmplRole != com.nlogistic.util.RbacContext.SUPER_ADMIN) {
+            final ShipmentDAO scopeDao = shipmentDAO;
+            java.util.function.Predicate<ComplianceDocument> notMine = d ->
+                    !scopeDao.canAccessShipment(d.getShipmentId(), cmplRole, cmplCompany, cmplCustomer);
+            docs.removeIf(notMine);
+            expiringDocs.removeIf(notMine);
+        }
 
         // 3. Compute KPI Counts
         int docTotal = docs.size();
@@ -91,7 +106,8 @@ public class ComplianceServlet extends HttpServlet {
         request.setAttribute("docExpiringCount", expiringDocs.size());
         request.setAttribute("docExpiring", expiringDocs.size());
         request.setAttribute("shipmentComplianceList", shipmentComplianceList);
-        request.setAttribute("shipments", shipmentDAO.getAllShipments());
+        request.setAttribute("shipments", shipmentDAO.getShipmentsForRole(
+                com.nlogistic.util.RbacContext.roleId(request), com.nlogistic.util.RbacContext.companyId(request), com.nlogistic.util.RbacContext.customerId(request)));
         request.setAttribute("users", userDAO.getAllUsers());
 
         request.getRequestDispatcher("/jsp/compliance.jsp").forward(request, response);
@@ -136,6 +152,22 @@ public class ComplianceServlet extends HttpServlet {
                 boolean success = complianceDAO.uploadDocument(shipmentId, docType, docNumber, issuer, issueDate, expiryDate, dbFilePath, userId);
                 if (success) {
                     session.setAttribute("successMessage", "Compliance document " + docNumber + " (" + docType + ") successfully uploaded.");
+
+                    // FR8.1: auto-generate a barcode for every newly uploaded compliance document
+                    try (Connection conn = com.nlogistic.util.DBConnectionManager.getConnection();
+                         PreparedStatement psFind = conn.prepareStatement(
+                                 "SELECT doc_id FROM compliance_documents WHERE shipment_id = ? AND doc_number <=> ? ORDER BY doc_id DESC LIMIT 1")) {
+                        psFind.setInt(1, shipmentId);
+                        psFind.setString(2, docNumber);
+                        try (ResultSet rsDoc = psFind.executeQuery()) {
+                            if (rsDoc.next()) {
+                                int newDocId = rsDoc.getInt("doc_id");
+                                com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "ComplianceDocument", newDocId, userId);
+                            }
+                        }
+                    } catch (Exception bex) {
+                        bex.printStackTrace();
+                    }
                 } else {
                     session.setAttribute("errorMessage", "Could not upload document. Please check the provided values.");
                 }
@@ -146,6 +178,13 @@ public class ComplianceServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/compliance");
 
         } else if (pathInfo != null && pathInfo.equals("/review")) {
+            // FR5.2 / CLAUDE.md S4: approving or rejecting a compliance document is
+            // an Admin + Operations decision. Finance and Customers may only view.
+            if (com.nlogistic.util.RbacContext.roleId(request) > 3) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "Access Denied: your role cannot approve or reject compliance documents.");
+                return;
+            }
             try {
                 int docId = Integer.parseInt(request.getParameter("docId"));
                 String status = request.getParameter("status"); // Approved or Rejected
@@ -162,6 +201,13 @@ public class ComplianceServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/compliance");
 
         } else if (pathInfo != null && pathInfo.equals("/delete")) {
+            // Deleting a compliance document destroys departure-clearance evidence.
+            // Restrict to Super Admin / Company Admin (CLAUDE.md S6 deletion rules).
+            if (com.nlogistic.util.RbacContext.roleId(request) > 2) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "Access Denied: only an administrator may delete compliance documents.");
+                return;
+            }
             try {
                 int docId = Integer.parseInt(request.getParameter("docId"));
                 boolean success = complianceDAO.deleteDocument(docId);

@@ -1,29 +1,15 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="en_US" scope="session"/>
-<%
-if (request.getAttribute("kpi") == null) {
-    try {
-        com.nlogistic.dao.ProfitLossDAO plDao = new com.nlogistic.dao.ProfitLossDAO();
-        com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
-        com.nlogistic.dao.PortDAO pDao = new com.nlogistic.dao.PortDAO();
-        request.setAttribute("companies", cDao.getAllCompanies());
-        request.setAttribute("ports", pDao.getAllPorts());
-        request.setAttribute("kpi", plDao.getOverallKPIs(null, null, null, null));
-        request.setAttribute("monthlyTrend", plDao.getMonthlyTrend(null, null, null, null));
-        request.setAttribute("quarterlyTrend", plDao.getQuarterlyTrend(null, null, null, null));
-        request.setAttribute("yearlyTrend", plDao.getYearlyTrend(null, null, null, null));
-        request.setAttribute("lossBreakdown", plDao.getLossReasonBreakdown(null, null, null, null));
-        request.setAttribute("companySummary", plDao.getCompanyProfitLossSummary(null, null, null, null));
-        request.setAttribute("customerProfitability", plDao.getCustomerProfitability(null, null, null, null));
-    } catch (Exception ignored) {}
-}
-%>
+<%-- Data is supplied exclusively by FinanceServlet (/finance/profit-loss).
+     The previous inline fallback re-queried the DAO with null filters, which
+     served UNSCOPED global P&L to any role that opened this JSP directly. --%>
 <jsp:include page="/jsp/layout/header.jsp" />
 
 <!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/nl-chart-theme.js"></script>
 <!-- html2pdf CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -134,17 +120,19 @@ if (request.getAttribute("kpi") == null) {
         display: flex;
         align-items: center;
         gap: 12px;
-        border: 1px solid transparent;
+        border: none;
         border-radius: 10px;
-        padding: 10px 16px;
+        padding: 4px 10px;
         background: #F9FAFB;
         transition: all 0.2s ease;
     }
 
     .filter-input-wrap:focus-within {
-        background: white;
-        border-color: var(--orange-brand);
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15);
+        background: #F9FAFB;
+        border: none !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
     }
 
     .filter-input-wrap i {
@@ -155,6 +143,14 @@ if (request.getAttribute("kpi") == null) {
 
     .filter-input-wrap:focus-within i {
         color: var(--orange-brand);
+    }
+
+    .filter-input-wrap .ts-wrapper.focus .ts-control,
+    .filter-input-wrap .ts-wrapper.dropdown-active .ts-control,
+    .filter-input-wrap .ts-wrapper.input-active .ts-control,
+    .filter-input-wrap .ts-control.focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
     }
 
         .filter-input-wrap select, .filter-input-wrap input {

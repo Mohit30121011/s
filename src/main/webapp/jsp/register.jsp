@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="hideSidebar" value="true" scope="request" />
 <c:set var="hideTopHeader" value="true" scope="request" />
@@ -758,7 +758,7 @@
 
                 <!-- Super Admin Approval Requirement Notice  -->
                 <div class="nl-approval-notice" id="approvalNotice">
-                    <i class="ti ti-shield-alert"></i>
+                    <i class="ti ti-shield-lock"></i>
                     <div>
                         <strong>Super Admin Approval Required:</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.
                     </div>
@@ -863,7 +863,7 @@
 
             // Show Super Admin Approval Notice
             approvalNotice.style.display = 'flex';
-            approvalNotice.innerHTML = '<i class="ti ti-shield-alert"></i><div><strong>Super Admin Approval Required:</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.</div>';
+            approvalNotice.innerHTML = '<i class="ti ti-shield-lock"></i><div><strong>Super Admin Approval Required:</strong> As required by system governance, company registration creates an account with <strong>Pending</strong> status. Terminal access will be activated once verified and approved by the Super Admin.</div>';
         } else {
             custCard.classList.add('active');
             compCard.classList.remove('active');
