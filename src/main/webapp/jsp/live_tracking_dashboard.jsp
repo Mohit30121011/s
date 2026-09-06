@@ -27,81 +27,211 @@
         display: none !important;
     }
 
-    /* Top Stats Card */
-    .stats-container {
+    /* Redesigned Premium Tracking KPI Strip */
+    .tracking-kpi-strip {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        gap: 10px;
         flex-wrap: wrap;
-        gap: 24px;
+        align-items: center;
     }
-    .stats-left {
+    .tracking-kpi-chip {
         display: flex;
         align-items: center;
-        gap: 16px;
-        flex: 2;
-        min-width: 280px;
-    }
-    .stats-icon-box {
-        width: 54px;
-        height: 54px;
-        background: #FFF2EB;
-        color: #FC8019;
+        gap: 10px;
+        padding: 7px 14px 7px 9px;
         border-radius: 12px;
+        background: #FFFFFF;
+        border: 1.5px solid #E5E7EB;
+        cursor: pointer;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .tracking-kpi-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .kpi-chip-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
+        font-size: 17px;
         flex-shrink: 0;
+        transition: transform 0.2s ease;
     }
-    .stats-title {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--nl-text);
-        margin-bottom: 2px;
-        letter-spacing: -0.3px;
+    .tracking-kpi-chip:hover .kpi-chip-icon {
+        transform: scale(1.1);
     }
-    .stats-subtitle {
-        font-size: 13px;
-        color: var(--nl-text-muted);
-    }
-
-    .stats-items {
-        display: flex;
-        gap: 36px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-    }
-    .stat-block {
+    .kpi-chip-body {
         display: flex;
         flex-direction: column;
     }
-    .stat-label {
-        font-size: 12px;
-        color: var(--nl-text-muted);
-        font-weight: 600;
-        margin-bottom: 4px;
+    .kpi-chip-label {
+        font-size: 10px;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        color: #64748B;
+        line-height: 1.1;
+        margin-bottom: 2px;
+        white-space: nowrap;
     }
-    .stat-value {
-        font-size: 26px;
+    .kpi-chip-num {
+        font-size: 18px;
         font-weight: 800;
-        color: var(--nl-text);
         line-height: 1;
+        letter-spacing: -0.4px;
     }
-    .stat-value.primary { color: #FC8019; }
-    .stat-value.blue { color: #2563EB; }
-    .stat-value.amber { color: #D97706; }
-    .stat-value.danger { color: #DC2626; }
+
+    /* Light Theme Semantic Variants */
+    .tracking-kpi-chip.kpi-active {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F3 100%);
+        border-color: rgba(252, 128, 25, 0.28);
+    }
+    .tracking-kpi-chip.kpi-active .kpi-chip-icon {
+        background: rgba(252, 128, 25, 0.12);
+        color: #FC8019;
+    }
+    .tracking-kpi-chip.kpi-active .kpi-chip-num {
+        color: #FC8019;
+    }
+    .tracking-kpi-chip.kpi-active:hover,
+    .tracking-kpi-chip.kpi-active.is-filtered {
+        border-color: #FC8019;
+        box-shadow: 0 4px 14px rgba(252, 128, 25, 0.22);
+    }
+
+    .tracking-kpi-chip.kpi-transit {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F0F6FF 100%);
+        border-color: rgba(37, 99, 235, 0.25);
+    }
+    .tracking-kpi-chip.kpi-transit .kpi-chip-icon {
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563EB;
+    }
+    .tracking-kpi-chip.kpi-transit .kpi-chip-num {
+        color: #2563EB;
+    }
+    .tracking-kpi-chip.kpi-transit:hover,
+    .tracking-kpi-chip.kpi-transit.is-filtered {
+        border-color: #2563EB;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+    }
+
+    .tracking-kpi-chip.kpi-customs {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFFBF0 100%);
+        border-color: rgba(217, 119, 6, 0.25);
+    }
+    .tracking-kpi-chip.kpi-customs .kpi-chip-icon {
+        background: rgba(217, 119, 6, 0.1);
+        color: #D97706;
+    }
+    .tracking-kpi-chip.kpi-customs .kpi-chip-num {
+        color: #D97706;
+    }
+    .tracking-kpi-chip.kpi-customs:hover,
+    .tracking-kpi-chip.kpi-customs.is-filtered {
+        border-color: #D97706;
+        box-shadow: 0 4px 14px rgba(217, 119, 6, 0.2);
+    }
+
+    .tracking-kpi-chip.kpi-delayed {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+        border-color: rgba(220, 38, 38, 0.25);
+    }
+    .tracking-kpi-chip.kpi-delayed .kpi-chip-icon {
+        background: rgba(220, 38, 38, 0.1);
+        color: #DC2626;
+    }
+    .tracking-kpi-chip.kpi-delayed .kpi-chip-num {
+        color: #DC2626;
+    }
+    .tracking-kpi-chip.kpi-delayed:hover,
+    .tracking-kpi-chip.kpi-delayed.is-filtered {
+        border-color: #DC2626;
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
+    }
+
+    /* Dark Mode Theme Rules - Unified Sleek Graphite Tokens */
+    [data-theme="dark"] .tracking-kpi-chip {
+        background: #141E28 !important;
+        border: 1px solid #243445 !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
+    }
+    [data-theme="dark"] .kpi-chip-label {
+        color: #94A3B8 !important;
+    }
+
+    [data-theme="dark"] .tracking-kpi-chip.kpi-active .kpi-chip-icon {
+        background: rgba(252, 128, 25, 0.15) !important;
+        border: 1px solid rgba(252, 128, 25, 0.35) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-active .kpi-chip-num {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-active:hover,
+    [data-theme="dark"] .tracking-kpi-chip.kpi-active.is-filtered {
+        border-color: #FC8019 !important;
+        box-shadow: 0 4px 18px rgba(252, 128, 25, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    [data-theme="dark"] .tracking-kpi-chip.kpi-transit .kpi-chip-icon {
+        background: rgba(59, 130, 246, 0.15) !important;
+        border: 1px solid rgba(59, 130, 246, 0.35) !important;
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-transit .kpi-chip-num {
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-transit:hover,
+    [data-theme="dark"] .tracking-kpi-chip.kpi-transit.is-filtered {
+        border-color: #3B82F6 !important;
+        box-shadow: 0 4px 18px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    [data-theme="dark"] .tracking-kpi-chip.kpi-customs .kpi-chip-icon {
+        background: rgba(245, 158, 11, 0.15) !important;
+        border: 1px solid rgba(245, 158, 11, 0.35) !important;
+        color: #FBBF24 !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-customs .kpi-chip-num {
+        color: #FBBF24 !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-customs:hover,
+    [data-theme="dark"] .tracking-kpi-chip.kpi-customs.is-filtered {
+        border-color: #F59E0B !important;
+        box-shadow: 0 4px 18px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    [data-theme="dark"] .tracking-kpi-chip.kpi-delayed .kpi-chip-icon {
+        background: rgba(239, 68, 68, 0.15) !important;
+        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+        color: #F87171 !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-delayed .kpi-chip-num {
+        color: #F87171 !important;
+    }
+    [data-theme="dark"] .tracking-kpi-chip.kpi-delayed:hover,
+    [data-theme="dark"] .tracking-kpi-chip.kpi-delayed.is-filtered {
+        border-color: #EF4444 !important;
+        box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
 
     /* Filter Row */
+    /* Filter Row - Clean seamless bar without clunky card container */
     .filter-card {
-        background: #FFFFFF;
-        border-radius: 12px;
-        border: 1px solid var(--nl-border);
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-        padding: 14px 18px;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
         margin-bottom: 24px;
         display: flex;
         align-items: center;
@@ -115,18 +245,18 @@
     }
     .filter-search i {
         position: absolute;
-        left: 14px;
+        left: 16px;
         top: 50%;
         transform: translateY(-50%);
         color: var(--nl-text-muted);
-        font-size: 14px;
+        font-size: 15px;
         pointer-events: none;
     }
     .filter-search input {
         width: 100%;
-        padding: 9px 16px 9px 38px;
-        border: 1px solid #E2E5EA;
-        border-radius: 8px;
+        padding: 10px 18px 10px 44px;
+        border: 1.5px solid #E2E5EA;
+        border-radius: 50px !important;
         font-size: 13.5px;
         outline: none;
         background: #FFFFFF;
@@ -135,38 +265,40 @@
     }
     .filter-search input:focus {
         border-color: #FC8019;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.14);
     }
     .filter-select {
         min-width: 170px;
     }
     .filter-select select {
-        padding: 9px 14px;
-        border: 1px solid #E2E5EA;
-        border-radius: 8px;
-        font-size: 13.5px;
+        padding: 10px 36px 10px 18px;
+        border: 1.5px solid #E2E5EA;
+        border-radius: 50px !important;
+        font-size: 13px;
+        font-weight: 500;
         background: #FFFFFF;
         color: #374151;
         outline: none;
         cursor: pointer;
         width: 100%;
-        transition: border-color 0.15s ease;
+        min-height: 42px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .filter-select select:focus {
         border-color: #FC8019;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.14);
     }
     .filter-reset-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 8px;
-        border: 1px solid #E2E5EA;
+        width: 42px;
+        height: 42px;
+        border-radius: 50% !important;
+        border: 1.5px solid #E2E5EA;
         background: #FFFFFF;
         color: var(--nl-text-muted);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 15px;
+        font-size: 16px;
         cursor: pointer;
         transition: all 0.15s ease;
         margin-left: auto;
@@ -175,6 +307,89 @@
         background: #F8FAFC;
         color: var(--nl-primary);
         border-color: #CBD5E1;
+    }
+
+    /* Dark Mode Enhancements */
+    [data-theme="dark"] .card-panel {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .stats-icon-box {
+        background: rgba(252, 128, 25, 0.18) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .filter-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    [data-theme="dark"] .filter-search input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .filter-search i {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .filter-select select {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .filter-reset-btn {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .filter-reset-btn:hover {
+        background: #1C2A37 !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .table-panel {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .table-header {
+        border-bottom-color: #1A252E !important;
+    }
+    [data-theme="dark"] .tracking-table th {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .tracking-table td {
+        border-bottom-color: #1A252E !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+    }
+    [data-theme="dark"] .vessel-name-cell {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-tracking-details {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-tracking-details:hover {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .page-header-flex .btn-light {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .page-header-flex .btn-light:hover {
+        background: #1C2A37 !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
     }
 
     /* Data Table */
@@ -187,8 +402,13 @@
         margin-bottom: 24px;
     }
     .table-header {
-        padding: 20px 24px 16px 24px;
+        padding: 16px 24px;
         border-bottom: 1px solid #F1F3F6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
     }
     .table-title {
         font-size: 17px;
@@ -307,6 +527,428 @@
         gap: 5px;
         white-space: nowrap;
     }
+
+    /* =========================================================
+       DARK THEME COMPLETE OVERRIDES FOR LIVE TRACKING
+       ========================================================= */
+    [data-theme="dark"] .page-header-flex .btn-light {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .page-header-flex .btn-light:hover {
+        background: #1C2A37 !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .card-panel {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .stats-icon-box {
+        background: rgba(252, 128, 25, 0.18) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .stats-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .stats-subtitle {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .stat-label {
+        color: #94A3B8 !important;
+    }
+
+    [data-theme="dark"] .filter-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    [data-theme="dark"] .filter-search input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .filter-search i {
+        color: #94A3B8 !important;
+    }
+    /* Filter Select Pill Styling & Inner/Outer Border Removal */
+    .filter-select .ts-wrapper,
+    .filter-select .ts-wrapper.form-select,
+    .filter-select .ts-wrapper.form-select-custom,
+    .filter-select .ts-wrapper.single,
+    [data-theme="dark"] .filter-select .ts-wrapper,
+    [data-theme="dark"] .filter-select .ts-wrapper.form-select,
+    [data-theme="dark"] .filter-select .ts-wrapper.form-select-custom,
+    [data-theme="dark"] .filter-select .ts-wrapper.single {
+        border: none !important;
+        border-width: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .filter-select {
+        width: 175px;
+        min-width: 175px;
+        max-width: 175px;
+    }
+    .filter-select .ts-wrapper,
+    .filter-select .ts-wrapper.single {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    .filter-select .ts-control,
+    .filter-select .ts-wrapper.single .ts-control,
+    .filter-select .ts-wrapper.single.focus .ts-control,
+    .filter-select .ts-wrapper.single.input-active .ts-control,
+    .filter-select .ts-wrapper.single.dropdown-active .ts-control {
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+        padding: 0 34px 0 16px !important;
+        border-radius: 50px !important;
+        border: 1.5px solid #E2E5EA !important;
+        background: #FFFFFF !important;
+        color: #374151 !important;
+        display: flex !important;
+        align-items: center !important;
+        box-shadow: none !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        cursor: pointer !important;
+    }
+    .filter-select .ts-control .item,
+    .filter-select .ts-wrapper.single .ts-control .item,
+    [data-theme="dark"] .filter-select .ts-control .item,
+    [data-theme="dark"] .filter-select .ts-wrapper.single .ts-control .item {
+        border: none !important;
+        border-width: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 38px !important;
+        height: 38px !important;
+        max-height: 38px !important;
+        font-size: 13px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    /* Auto-hide placeholder and selected item text on click/focus so input box is clean for typing */
+    .filter-search input:focus::placeholder,
+    .filter-select .ts-control input:focus::placeholder,
+    .filter-select .ts-wrapper.focus .ts-control input::placeholder,
+    .filter-select .ts-wrapper.input-active .ts-control input::placeholder,
+    .filter-select .ts-wrapper.dropdown-active .ts-control input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+    .filter-select .ts-wrapper.single.focus .ts-control .item,
+    .filter-select .ts-wrapper.single.input-active .ts-control .item,
+    .filter-select .ts-wrapper.single.dropdown-active .ts-control .item,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.focus .ts-control .item,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.input-active .ts-control .item,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.dropdown-active .ts-control .item {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+    }
+
+    .filter-select .ts-control input,
+    .filter-select .ts-control > input,
+    .filter-select .ts-wrapper .ts-control input,
+    .filter-select .ts-wrapper.single.input-active .ts-control input,
+    [data-theme="dark"] .filter-select .ts-control input,
+    [data-theme="dark"] .filter-select .ts-control > input,
+    [data-theme="dark"] .filter-select .ts-wrapper .ts-control input,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.input-active .ts-control input {
+        border: none !important;
+        border-width: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        min-height: 0 !important;
+        height: 38px !important;
+        max-height: 38px !important;
+        line-height: 38px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 13px !important;
+        color: #374151 !important;
+        caret-color: #FC8019 !important;
+    }
+    .filter-select .ts-wrapper.single.focus .ts-control input,
+    .filter-select .ts-wrapper.single.input-active .ts-control input,
+    .filter-select .ts-wrapper.single.dropdown-active .ts-control input {
+        flex: 1 1 auto !important;
+        min-width: 60px !important;
+        width: 100% !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    [data-theme="dark"] .filter-select .ts-control input,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.focus .ts-control input,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.input-active .ts-control input,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.dropdown-active .ts-control input {
+        color: #F8FAFC !important;
+        caret-color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .filter-select select,
+    [data-theme="dark"] .filter-select .ts-control,
+    [data-theme="dark"] .filter-select .ts-wrapper.single .ts-control,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.focus .ts-control,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.input-active .ts-control,
+    [data-theme="dark"] .filter-select .ts-wrapper.single.dropdown-active .ts-control {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+        box-shadow: none !important;
+    }
+    .filter-select .ts-wrapper.focus .ts-control,
+    .filter-select .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .filter-select .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .filter-select .ts-wrapper.dropdown-active .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: none !important;
+    }
+    [data-theme="dark"] .filter-select .ts-control .item {
+        color: #F8FAFC !important;
+    }
+
+    /* Clean Dropdown Options (No Muddy Brown) */
+    [data-theme="dark"] .filter-select .ts-dropdown {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+        border-radius: 12px !important;
+        padding: 6px !important;
+    }
+    [data-theme="dark"] .filter-select .ts-dropdown .option {
+        color: #94A3B8 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        background: transparent !important;
+        transition: all 0.12s ease !important;
+    }
+    [data-theme="dark"] .filter-select .ts-dropdown .option:hover,
+    [data-theme="dark"] .filter-select .ts-dropdown .option.active,
+    [data-theme="dark"] .filter-select .ts-dropdown .active {
+        background: #1E2D3D !important;
+        background-color: #1E2D3D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .filter-select .ts-dropdown .option.selected {
+        background: #FC8019 !important;
+        background-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+    [data-theme="dark"] .filter-select .ts-dropdown .option.selected:hover,
+    [data-theme="dark"] .filter-select .ts-dropdown .option.selected.active {
+        background: #E66F0F !important;
+        background-color: #E66F0F !important;
+        color: #FFFFFF !important;
+    }
+    /* Eliminate ugly olive search highlight (Brand Orange) */
+    .filter-select .ts-dropdown .highlight,
+    [data-theme="dark"] .filter-select .ts-dropdown .highlight,
+    [data-theme="dark"] .ts-dropdown .highlight {
+        background: rgba(252, 128, 25, 0.22) !important;
+        color: #FC8019 !important;
+        font-weight: 700 !important;
+        border-radius: 3px !important;
+        padding: 1px 3px !important;
+    }
+    [data-theme="dark"] .filter-select .ts-dropdown .option.selected .highlight {
+        background: transparent !important;
+        color: #FFFFFF !important;
+        text-decoration: underline !important;
+    }
+    [data-theme="dark"] .filter-reset-btn {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .filter-reset-btn:hover {
+        background: #1C2A37 !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .table-panel {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .table-header {
+        background: #101820 !important;
+        border-bottom-color: #1A252E !important;
+    }
+    [data-theme="dark"] .table-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .table-subtitle {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .table-responsive {
+        background: #101820 !important;
+    }
+    [data-theme="dark"] .tracking-table {
+        background: #101820 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .tracking-table th {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .tracking-table td {
+        background: transparent !important;
+        border-bottom-color: #1A252E !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr {
+        background: transparent !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr:hover,
+    [data-theme="dark"] .tracking-row:hover {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+    }
+    [data-theme="dark"] .tracking-table td span {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .customer-name-cell,
+    [data-theme="dark"] .tracking-table td span.customer-name-cell,
+    [data-theme="dark"] .tracking-table td span[style*="color: #1F2937"] {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .eta-cell,
+    [data-theme="dark"] .tracking-table td[style*="color: #374151"] {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .tracking-table td span.shipment-id-cell {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .status-badge.status-booked,
+    [data-theme="dark"] .status-badge:has(.ti-bookmark),
+    [data-theme="dark"] .status-badge[style*="background: #F8FAFC"],
+    [data-theme="dark"] .status-badge[style*="background: #F1F5F9"] {
+        background: rgba(148, 163, 184, 0.16) !important;
+        border-color: rgba(148, 163, 184, 0.3) !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .tracking-table td div {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .vessel-name-cell {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-tracking-details,
+    [data-theme="dark"] .tracking-row:hover .btn-tracking-details {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-tracking-details:hover,
+    [data-theme="dark"] .tracking-row:hover .btn-tracking-details:hover {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Status Badges in Dark Mode */
+    [data-theme="dark"] .status-badge {
+        background: rgba(148, 163, 184, 0.16) !important;
+        border-color: rgba(148, 163, 184, 0.3) !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .status-badge:has(.ti-circle-check) {
+        background: rgba(16, 185, 129, 0.18) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .status-badge:has(.ti-navigation) {
+        background: rgba(59, 130, 246, 0.18) !important;
+        border-color: rgba(59, 130, 246, 0.35) !important;
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .status-badge:has(.ti-clock) {
+        background: rgba(245, 158, 11, 0.18) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        color: #FBBF24 !important;
+    }
+    [data-theme="dark"] .status-badge:has(.ti-anchor) {
+        background: rgba(139, 92, 246, 0.18) !important;
+        border-color: rgba(139, 92, 246, 0.35) !important;
+        color: #C084FC !important;
+    }
+    [data-theme="dark"] .status-badge:has(.ti-box) {
+        background: rgba(16, 185, 129, 0.18) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .status-badge:has(.ti-alert-triangle) {
+        background: rgba(239, 68, 68, 0.18) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+        color: #F87171 !important;
+    }
+    /* Refined Pagination Page Size Dropdown */
+    .ts-wrapper.nl-page-size-ts .ts-control .item,
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-control .item {
+        border: none !important;
+        border-width: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+        padding: 4px !important;
+        border-radius: 10px !important;
+    }
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown .option {
+        color: #94A3B8 !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        padding: 6px 8px !important;
+        border-radius: 6px !important;
+        background: transparent !important;
+        transition: all 0.15s ease !important;
+    }
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown .option:hover,
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown .option.active {
+        background: #1E2D3D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown .option.selected {
+        background: #FC8019 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown .option.selected:hover,
+    [data-theme="dark"] .ts-wrapper.nl-page-size-ts .ts-dropdown .option.selected.active {
+        background: #E66F0F !important;
+        color: #FFFFFF !important;
+    }
 </style>
 
 <div class="page-header-flex">
@@ -325,39 +967,6 @@
     </a>
 </div>
 
-<!-- Top Stats Card (100% Real Database Analytics) -->
-<div class="card-panel no-card-tools" data-no-tools="true">
-    <div class="stats-container">
-        <div class="stats-left">
-            <div class="stats-icon-box">
-                <i class="ti ti-radar"></i>
-            </div>
-            <div>
-                <div class="stats-title">Real-Time Logistics Telemetry</div>
-                <div class="stats-subtitle"><strong style="color: var(--nl-text);">${not empty activeCount ? activeCount : 0}</strong> active shipments currently being monitored</div>
-            </div>
-        </div>
-        <div class="stats-items">
-            <div class="stat-block">
-                <span class="stat-label">Active Shipments</span>
-                <span class="stat-value primary">${not empty activeCount ? activeCount : 0}</span>
-            </div>
-            <div class="stat-block">
-                <span class="stat-label">In Transit</span>
-                <span class="stat-value blue">${not empty inTransitCount ? inTransitCount : 0}</span>
-            </div>
-            <div class="stat-block">
-                <span class="stat-label">Customs Hold</span>
-                <span class="stat-value amber">${not empty customsHoldCount ? customsHoldCount : 0}</span>
-            </div>
-            <div class="stat-block">
-                <span class="stat-label">Delayed</span>
-                <span class="stat-value danger">${not empty delayedCount ? delayedCount : 0}</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Interactive Live Filter Bar -->
 <div class="filter-card">
     <div class="filter-search">
@@ -365,7 +974,7 @@
         <input type="text" id="searchInput" placeholder="Search by shipment ID, port, vessel...">
     </div>
     <div class="filter-select">
-        <select id="statusFilter" class="form-select form-select-custom">
+        <select id="statusFilter" class="filter-dropdown-select">
             <option value="" selected>All Statuses</option>
             <option value="Booked">Booked</option>
             <option value="Container Allocated">Container Allocated</option>
@@ -377,7 +986,7 @@
         </select>
     </div>
     <div class="filter-select">
-        <select id="vesselFilter" class="form-select form-select-custom">
+        <select id="vesselFilter" class="filter-dropdown-select">
             <option value="" selected>All Vessels</option>
             <c:forEach var="v" items="${vessels}">
                 <option value="${v.vesselName}">${v.vesselName}</option>
@@ -392,8 +1001,40 @@
 <!-- Table Card -->
 <div class="table-panel">
     <div class="table-header">
-        <div class="table-title">Active Monitoring Fleet</div>
-        <div class="table-subtitle">Live tracking updates, vessel assignments, and estimated arrival milestones</div>
+        <div>
+            <div class="table-title">Active Monitoring Fleet</div>
+            <div class="table-subtitle">Live tracking updates, vessel assignments, and estimated arrival milestones</div>
+        </div>
+        <div class="tracking-kpi-strip">
+            <div class="tracking-kpi-chip kpi-active" data-status-filter="" title="Click to show all active shipments">
+                <div class="kpi-chip-icon"><i class="ti ti-box"></i></div>
+                <div class="kpi-chip-body">
+                    <span class="kpi-chip-label">Active Shipments</span>
+                    <span class="kpi-chip-num">${not empty activeCount ? activeCount : 0}</span>
+                </div>
+            </div>
+            <div class="tracking-kpi-chip kpi-transit" data-status-filter="In Transit" title="Click to filter by In Transit">
+                <div class="kpi-chip-icon"><i class="ti ti-ship"></i></div>
+                <div class="kpi-chip-body">
+                    <span class="kpi-chip-label">In Transit</span>
+                    <span class="kpi-chip-num">${not empty inTransitCount ? inTransitCount : 0}</span>
+                </div>
+            </div>
+            <div class="tracking-kpi-chip kpi-customs" data-status-filter="Customs Hold" title="Click to filter by Customs Hold">
+                <div class="kpi-chip-icon"><i class="ti ti-shield-lock"></i></div>
+                <div class="kpi-chip-body">
+                    <span class="kpi-chip-label">Customs Hold</span>
+                    <span class="kpi-chip-num">${not empty customsHoldCount ? customsHoldCount : 0}</span>
+                </div>
+            </div>
+            <div class="tracking-kpi-chip kpi-delayed" data-status-filter="Delayed" title="Click to filter by Delayed">
+                <div class="kpi-chip-icon"><i class="ti ti-alert-triangle"></i></div>
+                <div class="kpi-chip-body">
+                    <span class="kpi-chip-label">Delayed</span>
+                    <span class="kpi-chip-num">${not empty delayedCount ? delayedCount : 0}</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -421,7 +1062,7 @@
                             <span class="shipment-id-cell">#SHP-${shipment.shipmentId}</span>
                         </td>
                         <td>
-                            <span style="font-weight: 600; color: #1F2937;">${shipment.customerName}</span>
+                            <span class="customer-name-cell" style="font-weight: 600;">${shipment.customerName}</span>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
@@ -468,6 +1109,11 @@
                                         <i class="ti ti-alert-triangle"></i> Delayed
                                     </span>
                                 </c:when>
+                                <c:when test="${shipment.status == 'Booked'}">
+                                    <span class="status-badge status-booked" style="background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;">
+                                        <i class="ti ti-bookmark"></i> Booked
+                                    </span>
+                                </c:when>
                                 <c:otherwise>
                                     <span class="status-badge" style="background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0;">
                                         ${shipment.status}
@@ -475,7 +1121,7 @@
                                 </c:otherwise>
                             </c:choose>
                         </td>
-                        <td style="color: #374151; font-weight: 500;">
+                        <td class="eta-cell" style="color: #374151; font-weight: 500;">
                             <c:choose>
                                 <c:when test="${not empty shipment.eta}">
                                     <fmt:formatDate value="${shipment.eta}" pattern="MMM dd, yyyy" />
@@ -698,6 +1344,23 @@ document.addEventListener("DOMContentLoaded", function() {
         vesselFilter.addEventListener('change', filterRows);
     }
 
+    // Interactive KPI Chips click filtering
+    const kpiChips = document.querySelectorAll('.tracking-kpi-chip');
+    kpiChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            const filterVal = this.getAttribute('data-status-filter');
+            if (statusFilter) {
+                statusFilter.value = filterVal;
+                if (statusFilter.tomselect) statusFilter.tomselect.setValue(filterVal);
+                filterRows();
+            }
+            kpiChips.forEach(c => c.classList.remove('is-filtered'));
+            if (filterVal) {
+                this.classList.add('is-filtered');
+            }
+        });
+    });
+
     if (resetBtn) {
         resetBtn.addEventListener('click', function() {
             if (searchInput) searchInput.value = '';
@@ -709,6 +1372,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 vesselFilter.value = '';
                 if (vesselFilter.tomselect) vesselFilter.tomselect.setValue('');
             }
+            kpiChips.forEach(c => c.classList.remove('is-filtered'));
             filterRows();
         });
     }

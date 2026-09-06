@@ -795,4 +795,260 @@ public class AnalyticsDAO {
             }
         }
     }
+
+    /* ==================================================================
+     * Company scoping for the widgets that were still reading globally.
+     *
+     * A newly registered carrier with one container opened /analytics and saw
+     * 200 ABC-classified products, a six-quarter demand forecast and a COGS of
+     * 20.5 million - the whole platform's data, presented as its own. These
+     * queries take the same company scope the rest of the page already uses.
+     * ================================================================== */
+
+    /** ABC distribution over the products this company actually holds. */
+    public java.util.List<java.util.Map<String, Object>> getAbcDistribution(String period, String category, Integer companyId) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        boolean byCat = category != null && !category.trim().isEmpty() && !"All".equalsIgnoreCase(category.trim());
+        StringBuilder sql = new StringBuilder(
+              "SELECT r.class AS cls, COUNT(DISTINCT r.product_id) AS n "
+            + "FROM abc_classification_result r "
+            + "JOIN products p ON p.product_id = r.product_id ");
+        if (companyId != null) sql.append("JOIN stock st ON st.product_id = r.product_id AND st.company_id = ? ");
+        sql.append("WHERE r.computed_period = ? ");
+        if (byCat) sql.append("AND p.category = ? ");
+        sql.append("GROUP BY r.class ORDER BY r.class");
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int i = 1;
+            if (companyId != null) ps.setInt(i++, companyId);
+            ps.setString(i++, period);
+            if (byCat) ps.setString(i, category.trim());
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("cls", rs.getString("cls"));
+                    m.put("count", rs.getInt("n"));
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /**
+     * Demand forecast limited to the lanes and container types this company
+     * actually ships on. A carrier that has never sailed a route has no demand
+     * to forecast on it, and showing the platform-wide curve implied otherwise.
+     */
+    public java.util.List<java.util.Map<String, Object>> getDemandForecastByPeriod(String containerType, Integer companyId) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        boolean byType = containerType != null && !containerType.trim().isEmpty()
+                      && !"All".equalsIgnoreCase(containerType.trim());
+        StringBuilder sql = new StringBuilder(
+              "SELECT f.forecast_period AS period, ROUND(SUM(f.forecasted_demand)) AS demand "
+            + "FROM demand_forecast f WHERE 1=1 ");
+        if (byType) sql.append("AND f.container_type = ? ");
+        if (companyId != null) {
+            sql.append("AND EXISTS (SELECT 1 FROM shipment s "
+                     + "  JOIN containers c ON c.container_id = s.container_id "
+                     + "  WHERE c.owner_company_id = ? AND c.type = f.container_type "
+                     + "    AND COALESCE(s.origin_port_id, 1) = f.route_id) ");
+        }
+        sql.append("GROUP BY f.forecast_period ORDER BY f.forecast_period");
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int i = 1;
+            if (byType) ps.setString(i++, containerType.trim());
+            if (companyId != null) ps.setInt(i, companyId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("period", rs.getString("period"));
+                    m.put("demand", rs.getInt("demand"));
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /**
+     * Turnover inputs. Cost of goods sold was read across the whole platform
+     * while average inventory value was already scoped, so a company with no
+     * stock showed a multi-million COGS against zero inventory.
+     */
+    public java.util.Map<String, Double> getTurnoverInputs(Integer companyId, boolean scoped) {
+        java.util.Map<String, Double> out = new java.util.LinkedHashMap<>();
+        out.put("cogs", 0.0);
+        out.put("avgInventoryValue", 0.0);
+
+        String cogsSql = "SELECT COALESCE(SUM(st.quantity_sold * p.unit_cost), 0) AS cogs "
+                       + "FROM sales_transactions st JOIN products p ON p.product_id = st.product_id "
+                       + (companyId != null
+                          ? "LEFT JOIN shipment sh ON sh.shipment_id = st.shipment_id "
+                          + "LEFT JOIN containers c ON c.container_id = sh.container_id "
+                          + "WHERE c.owner_company_id = ? " : "");
+        String invSql  = "SELECT COALESCE(SUM(s.quantity_on_hand * p.unit_cost), 0) AS inv "
+                       + "FROM stock s JOIN products p ON p.product_id = s.product_id"
+                       + (companyId != null ? " WHERE s.company_id = ?" : "");
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection()) {
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(cogsSql)) {
+                if (companyId != null) ps.setInt(1, companyId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) out.put("cogs", rs.getDouble("cogs"));
+                }
+            }
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(invSql)) {
+                if (companyId != null) ps.setInt(1, companyId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) out.put("avgInventoryValue", rs.getDouble("inv"));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** On-time delivery rate over this company's own movements. */
+    public double getOnTimeRate(Integer companyId) {
+        String sql = "SELECT COUNT(*) AS total, "
+                   + "SUM(CASE WHEN m.actual_arrival_date <= m.expected_arrival_date OR m.delay_days <= 0 THEN 1 ELSE 0 END) AS on_time "
+                   + "FROM container_movements m "
+                   + (companyId != null
+                      ? "JOIN shipment s ON s.shipment_id = m.shipment_id "
+                      + "LEFT JOIN containers c ON c.container_id = s.container_id " : "")
+                   + "WHERE m.actual_arrival_date IS NOT NULL "
+                   + (companyId != null ? "AND c.owner_company_id = ? " : "");
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (companyId != null) ps.setInt(1, companyId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total");
+                    if (total > 0) return rs.getInt("on_time") * 100.0 / total;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+
+    /**
+     * FR2.6 profit & loss trend at a chosen granularity.
+     *
+     * Only the Month tab was ever real. Day, Week, Quarter and Year returned
+     * arrays typed into the JSP - the same invented curve on every account,
+     * including one that had never shipped anything.
+     *
+     * @param granularity day | week | month | quarter | year
+     */
+    public java.util.List<java.util.Map<String, Object>> getPlgSeries(String granularity, Integer companyId) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+
+        String label, group, order, window;
+        String g = (granularity == null) ? "month" : granularity.trim().toLowerCase();
+        switch (g) {
+            case "day":
+                label = "DATE_FORMAT(pl.record_date, '%d %b')";
+                group = "DATE(pl.record_date)";
+                window = "AND pl.record_date >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) ";
+                break;
+            case "week":
+                label = "CONCAT('Wk ', WEEK(pl.record_date, 3))";
+                group = "YEARWEEK(pl.record_date, 3)";
+                window = "AND pl.record_date >= DATE_SUB(CURDATE(), INTERVAL 8 WEEK) ";
+                break;
+            case "quarter":
+                label = "CONCAT('Q', QUARTER(pl.record_date), ' ', YEAR(pl.record_date))";
+                group = "YEAR(pl.record_date), QUARTER(pl.record_date)";
+                window = "AND pl.record_date >= DATE_SUB(CURDATE(), INTERVAL 8 QUARTER) ";
+                break;
+            case "year":
+                label = "YEAR(pl.record_date)";
+                group = "YEAR(pl.record_date)";
+                window = "";
+                break;
+            default:
+                label = "DATE_FORMAT(pl.record_date, '%b %Y')";
+                group = "YEAR(pl.record_date), MONTH(pl.record_date)";
+                window = "AND pl.record_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) ";
+                break;
+        }
+        order = group;
+
+        String sql = "SELECT " + label + " AS lbl, "
+                   + "COALESCE(SUM(pl.revenue_amount), 0) AS revenue, "
+                   + "COALESCE(SUM(pl.total_cost_amount), 0) AS cost "
+                   + "FROM profit_loss pl "
+                   + (companyId != null
+                      ? "LEFT JOIN shipment s ON s.shipment_id = pl.shipment_id "
+                      + "LEFT JOIN containers c ON c.container_id = s.container_id " : "")
+                   + "WHERE 1=1 " + window
+                   + (companyId != null
+                      ? "AND (c.owner_company_id = ? OR s.created_by IN "
+                      + "(SELECT user_id FROM users WHERE company_id = ?)) " : "")
+                   + "GROUP BY " + group + " ORDER BY " + order;
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (companyId != null) { ps.setInt(1, companyId); ps.setInt(2, companyId); }
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("label", rs.getString("lbl"));
+                    m.put("revenue", rs.getDouble("revenue"));
+                    m.put("cost", rs.getDouble("cost"));
+                    out.add(m);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /**
+     * Month-over-month change for the KPI cards.
+     *
+     * The five badges under the headline figures read "12% / 18% / 9% / 32% /
+     * 4.2% vs Apr 2025" on every account and in every month, because those
+     * numbers were literals in the markup.
+     */
+    public java.util.Map<String, Double> getKpiDeltas(Integer companyId) {
+        java.util.Map<String, Double> out = new java.util.LinkedHashMap<>();
+        String scope = (companyId != null)
+                ? "LEFT JOIN shipment s ON s.shipment_id = pl.shipment_id "
+                + "LEFT JOIN containers c ON c.container_id = s.container_id "
+                + "WHERE (c.owner_company_id = ? OR s.created_by IN (SELECT user_id FROM users WHERE company_id = ?)) AND "
+                : "WHERE ";
+
+        String sql = "SELECT "
+                + "COALESCE(SUM(CASE WHEN pl.record_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN pl.revenue_amount END), 0) AS rev_now, "
+                + "COALESCE(SUM(CASE WHEN pl.record_date >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01') "
+                + "                   AND pl.record_date <  DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN pl.revenue_amount END), 0) AS rev_prev, "
+                + "COALESCE(SUM(CASE WHEN pl.record_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN pl.total_cost_amount END), 0) AS cost_now, "
+                + "COALESCE(SUM(CASE WHEN pl.record_date >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01') "
+                + "                   AND pl.record_date <  DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN pl.total_cost_amount END), 0) AS cost_prev "
+                + "FROM profit_loss pl " + scope + " 1=1";
+
+        try (java.sql.Connection conn = DBConnectionManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (companyId != null) { ps.setInt(1, companyId); ps.setInt(2, companyId); }
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double revNow = rs.getDouble("rev_now"), revPrev = rs.getDouble("rev_prev");
+                    double costNow = rs.getDouble("cost_now"), costPrev = rs.getDouble("cost_prev");
+                    out.put("revenue", pctChange(revNow, revPrev));
+                    out.put("cost", pctChange(costNow, costPrev));
+                    out.put("profit", pctChange(revNow - costNow, revPrev - costPrev));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
+
+    /** null when there is no prior period to compare against, so the view can stay silent. */
+    private static Double pctChange(double now, double prev) {
+        if (prev == 0) return null;
+        return Math.round((now - prev) / Math.abs(prev) * 1000.0) / 10.0;
+    }
 }

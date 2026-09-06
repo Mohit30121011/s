@@ -20,6 +20,8 @@ public class Invoice {
     private String customerEmail;
     private String customerPhone;
     private String cargoDescription;
+    private String shipmentStatus;
+    private String containerNumber;
     private String originPort;
     private String destinationPort;
     private List<InvoiceLineItem> lineItems = new ArrayList<>();
@@ -61,6 +63,12 @@ public class Invoice {
 
     public String getCargoDescription() { return cargoDescription; }
     public void setCargoDescription(String cargoDescription) { this.cargoDescription = cargoDescription; }
+
+    public String getShipmentStatus() { return shipmentStatus; }
+    public void setShipmentStatus(String shipmentStatus) { this.shipmentStatus = shipmentStatus; }
+
+    public String getContainerNumber() { return containerNumber; }
+    public void setContainerNumber(String containerNumber) { this.containerNumber = containerNumber; }
 
     public String getOriginPort() { return originPort; }
     public void setOriginPort(String originPort) { this.originPort = originPort; }

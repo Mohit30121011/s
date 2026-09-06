@@ -40,13 +40,13 @@
         font-weight: 600;
     }
 
-    /* Page Hero Header */
+    /* Page Hero Header - Clean transparent container */
     .governance-header-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 16px;
-        padding: 24px 28px;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 4px 0 20px 0 !important;
+        box-shadow: none !important;
         margin-bottom: 24px;
         display: flex;
         align-items: center;
@@ -270,49 +270,78 @@
         white-space: nowrap;
     }
 
-    /* Table Styles */
+    /* Suppress card toolbar (Export/Fullscreen icons) */
+    .nl-card-tools,
+    .no-card-tools .nl-card-tools,
+    [data-no-tools="true"] .nl-card-tools {
+        display: none !important;
+    }
+
+    /* Standard Tracking Table Styling (Matching All Shipments) */
+    .tracking-table,
     .governance-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         margin: 0;
     }
+    .tracking-table th,
     .governance-table th {
-        background: #F8FAFC;
-        padding: 13px 20px;
-        font-size: 11.5px;
-        font-weight: 700;
+        font-size: 12px;
         color: #64748B;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-weight: 600;
+        padding: 16px 24px;
         border-bottom: 1px solid #E2E8F0;
         text-align: left;
+        background: #F9FAFB;
+        vertical-align: middle;
         white-space: nowrap;
     }
+    .tracking-table th:first-child,
+    .governance-table th:first-child { border-top-left-radius: 8px; }
+    .tracking-table th:last-child,
+    .governance-table th:last-child { border-top-right-radius: 8px; }
+
+    .tracking-table th.sortable-th,
     .governance-table th.sortable-th {
         cursor: pointer;
         user-select: none;
         transition: color 0.15s ease;
     }
+    .tracking-table th.sortable-th:hover,
     .governance-table th.sortable-th:hover {
         color: #FC8019;
     }
+    .tracking-table th.sortable-th i,
     .governance-table th.sortable-th i {
         font-size: 11px;
         margin-left: 4px;
         color: #94A3B8;
     }
+
+    .tracking-table td,
     .governance-table td {
-        padding: 14px 20px;
-        border-bottom: 1px solid #F1F5F9;
-        vertical-align: middle;
-        font-size: 13.5px;
+        padding: 16px 24px;
+        font-size: 14px;
         color: #1E293B;
+        font-weight: 500;
+        border-bottom: 1px solid #E2E8F0;
+        vertical-align: middle;
+        background: transparent;
+        transition: background-color 0.15s ease;
     }
-    .governance-table tr:last-child td {
+    .tracking-table tbody tr,
+    .governance-table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+    .tracking-table tbody tr:hover,
+    .governance-table tbody tr:hover {
+        background-color: #F9FAFB;
+        cursor: pointer;
+    }
+    .tracking-table tbody tr:last-child td,
+    .governance-table tbody tr:last-child td {
         border-bottom: none;
-    }
-    .governance-table tr:hover td {
-        background: #FBFDFE;
     }
 
     /* Badges & Cell Components */
@@ -371,11 +400,11 @@
 
     /* Action Buttons */
     .btn-adjust-rate {
-        height: 34px;
-        padding: 0 14px;
+        height: 36px;
+        padding: 0 16px;
         border-radius: 50px;
         border: 1.5px solid #FFD4C2;
-        background: #FFFFFF;
+        background: #FFF2EB;
         color: #FC8019;
         font-size: 12.5px;
         font-weight: 700;
@@ -386,9 +415,11 @@
         transition: all 0.15s ease;
     }
     .btn-adjust-rate:hover {
-        background: #FFF0E5;
+        background: #FC8019;
         border-color: #FC8019;
+        color: #FFFFFF !important;
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.25);
     }
 
     /* Audit Table Specifics */
@@ -491,6 +522,26 @@
         opacity: 0.45;
         cursor: not-allowed;
     }
+    .nl-page-size-select {
+        height: 32px;
+        border-radius: 50px;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        color: #475569;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 0 16px;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .nl-page-size-select:focus {
+        border-color: #FC8019;
+    }
+
+    .kpi-value.kpi-val-green { color: #059669; }
+    .kpi-value.kpi-val-amber { color: #D97706; }
+    .kpi-value.kpi-val-blue { color: #2563EB; }
 
     /* Modal Styling */
     .adjust-modal-header {
@@ -767,6 +818,24 @@
         font-size: 13.5px;
         display: inline-block;
     }
+    .booking-bill-preview {
+        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px;
+        padding: 14px 16px; margin: 14px 0 16px 0;
+    }
+    .booking-bill-preview .bbp-title {
+        font-size: 12px; font-weight: 700; color: #0F172A; text-transform: uppercase;
+        letter-spacing: 0.04em; margin-bottom: 10px;
+    }
+    .booking-bill-preview .bbp-row {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+        font-size: 13px; color: #475569; padding: 5px 0;
+    }
+    .booking-bill-preview .bbp-row strong { color: #0F172A; font-weight: 600; }
+    .booking-bill-preview .bbp-total {
+        border-top: 1px solid #E2E8F0; margin-top: 6px; padding-top: 10px; font-size: 14px;
+    }
+    .booking-bill-preview .bbp-total strong { color: #FC8019; font-weight: 800; font-size: 16px; }
+    .booking-bill-preview .bbp-note { font-size: 11.5px; color: #94A3B8; margin-top: 8px; }
     .hero-price-card {
         background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
         border: 1.5px solid #334155;
@@ -849,6 +918,437 @@
         background: #F8FAFC;
         border-color: #CBD5E1;
         color: #0F172A !important;
+    }
+
+    /* ==========================================================================
+       ENTERPRISE DARK THEME COMPATIBILITY FOR PRICING & RATE GOVERNANCE
+       ========================================================================== */
+    [data-theme="dark"] .pricing-governance-container {
+        color: #F8FAFC;
+    }
+
+    /* Breadcrumbs in Dark Mode */
+    [data-theme="dark"] .custom-breadcrumb a {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb a:hover {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb i {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb span {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb .current {
+        color: #FC8019 !important;
+    }
+
+    /* Page Header */
+    [data-theme="dark"] .governance-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .governance-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .governance-icon-box {
+        background: rgba(252, 128, 25, 0.16) !important;
+        border-color: rgba(252, 128, 25, 0.3) !important;
+        color: #FC8019 !important;
+        box-shadow: 0 2px 10px rgba(252, 128, 25, 0.2) !important;
+    }
+
+    /* Buttons in Dark Mode */
+    [data-theme="dark"] .btn-adjust-rate {
+        background: #151F28 !important;
+        border-color: #334756 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .btn-adjust-rate:hover {
+        background: #1E293B !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.18) !important;
+    }
+    [data-theme="dark"] .btn-predictive-nav {
+        box-shadow: 0 4px 16px rgba(252, 128, 25, 0.35) !important;
+    }
+
+    /* 4 KPI Metric Cards in Dark Mode */
+    [data-theme="dark"] .kpi-card {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .kpi-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45) !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .kpi-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .kpi-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .kpi-value.kpi-val-green {
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .kpi-value.kpi-val-amber {
+        color: #FBBF24 !important;
+    }
+    [data-theme="dark"] .kpi-value.kpi-val-blue {
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .kpi-subtext {
+        color: #64748B !important;
+    }
+
+    /* KPI Icon Badges in Dark Mode */
+    [data-theme="dark"] .kpi-icon-pill.orange {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FB923C !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.green {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.amber {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.blue {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+
+    /* Table Panels (Matching All Shipments) in Dark Mode */
+    [data-theme="dark"] .tracking-card,
+    [data-theme="dark"] .governance-panel {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .governance-toolbar {
+        background: #101820 !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .toolbar-title-text {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .toolbar-subtitle-text {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .toolbar-title-icon {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .governance-search-box i {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .governance-search-input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .governance-search-input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.18) !important;
+    }
+    [data-theme="dark"] .records-count-badge {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+
+    /* Table Rows, Cells & Typography (Matching All Shipments) in Dark Mode */
+    [data-theme="dark"] .tracking-table th,
+    [data-theme="dark"] .governance-table th {
+        background-color: #0E151C !important;
+        color: #94A3B8 !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .tracking-table td,
+    [data-theme="dark"] .governance-table td {
+        background-color: transparent !important;
+        color: #F8FAFC !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr:hover,
+    [data-theme="dark"] .governance-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr:last-child td,
+    [data-theme="dark"] .governance-table tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    [data-theme="dark"] .sortable-th:hover {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .sortable-th i {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .sortable-th.sorted-asc,
+    [data-theme="dark"] .sortable-th.sorted-desc {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .sortable-th.sorted-asc i,
+    [data-theme="dark"] .sortable-th.sorted-desc i {
+        color: #FC8019 !important;
+    }
+
+    /* Badges & Icons in Table Cells in Dark Mode */
+    [data-theme="dark"] .id-tag {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .profile-pill {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .profile-avatar {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .multiplier-tag.seasonal {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] .multiplier-tag.demand {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FB923C !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .multiplier-tag.surcharge {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+    [data-theme="dark"] .final-price-pill {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .price-strike {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .price-updated {
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .variance-badge.up {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .variance-badge.down {
+        background: rgba(239, 68, 68, 0.16) !important;
+        color: #F87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .variance-badge.same {
+        background: #151F28 !important;
+        color: #94A3B8 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .reason-text {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .reason-text i {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .officer-badge {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .officer-badge i {
+        color: #34D399 !important;
+    }
+
+    /* Pagination Footer in Dark Mode */
+    [data-theme="dark"] .nl-pagination-wrapper {
+        background: #101820 !important;
+        border-top: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .nl-pagination-info {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-pagination-info strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .nl-page-btn:hover:not(.disabled):not(.active) {
+        background: #1E293B !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .nl-page-btn.active {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .nl-page-size-select {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Modal Styling in Dark Mode */
+    [data-theme="dark"] #adjustPriceModal .modal-content {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+    }
+    [data-theme="dark"] .adjust-modal-header {
+        background: #151F28 !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .adjust-modal-body {
+        background: #101820 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .adjust-modal-body div[style*="background: #FFF9F5"],
+    [data-theme="dark"] .adjust-modal-body div[style*="background:#FFF9F5"] {
+        background: rgba(252, 128, 25, 0.12) !important;
+        border-color: rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .adjust-modal-body span[style*="color: #7C2D12"],
+    [data-theme="dark"] .adjust-modal-body span[style*="color:#7C2D12"] {
+        color: #FDBA74 !important;
+    }
+    [data-theme="dark"] .adjust-modal-body label {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .adjust-modal-body .form-control {
+        background-color: #151F28 !important;
+        border: 1px solid #334756 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .adjust-modal-body .form-control:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+    }
+    [data-theme="dark"] .adjust-modal-footer {
+        background: #151F28 !important;
+        border-top: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .adjust-modal-footer .btn-light {
+        background: #1E293B !important;
+        border-color: #334756 !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .adjust-modal-footer .btn-light:hover {
+        background: #253346 !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Booking Summary (FR3.5) in Dark Mode */
+    [data-theme="dark"] .booking-header-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    [data-theme="dark"] .booking-header-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .booking-header-subtitle {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .booking-header-icon {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .booking-status-badge {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .summary-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .summary-card-header {
+        background: #151F28 !important;
+        border-bottom-color: #22303A !important;
+    }
+    [data-theme="dark"] .summary-card-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .spec-item {
+        border-bottom-color: #22303A !important;
+    }
+    [data-theme="dark"] .spec-item-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .spec-item-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .route-visual-box {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .route-step-circle {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FB923C !important;
+    }
+    [data-theme="dark"] .route-step-circle.dest {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .route-step-port {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .route-step-line {
+        background: #334756 !important;
+    }
+    [data-theme="dark"] .breakdown-table tr {
+        border-bottom-color: #22303A !important;
+    }
+    [data-theme="dark"] .breakdown-line-name {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .breakdown-line-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .breakdown-line-val {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .booking-bill-preview {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .booking-bill-preview .bbp-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .booking-bill-preview .bbp-row {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .booking-bill-preview .bbp-row strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .booking-bill-preview .bbp-total {
+        border-top-color: #22303A !important;
+    }
+    [data-theme="dark"] .btn-back-allocation {
+        background: #151F28 !important;
+        border-color: #334756 !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-back-allocation:hover {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
     }
 
 </style>
@@ -1013,8 +1513,30 @@
                                     <div class="hero-price-value">$<fmt:formatNumber value="${finalPrice}" minFractionDigits="2" maxFractionDigits="2"/></div>
                                 </div>
 
-                                <!-- Booking Action Form -->
-                                <form action="<c:url value='/book'/>" method="POST">
+                                <%-- What the invoice will actually say.
+                                     The rate above is the freight only, while the invoice adds
+                                     18% GST - so a customer accepted one number and was billed
+                                     another. generate_invoice now bills exactly this freight,
+                                     and this panel shows the same arithmetic up front. --%>
+                                <div class="booking-bill-preview">
+                                    <div class="bbp-title"><i class="ti ti-receipt"></i> What you will be invoiced</div>
+                                    <div class="bbp-row">
+                                        <span>Freight (rate calculated above)</span>
+                                        <strong>$<fmt:formatNumber value="${finalPrice}" minFractionDigits="2" maxFractionDigits="2"/></strong>
+                                    </div>
+                                    <div class="bbp-row">
+                                        <span>GST @ 18%</span>
+                                        <strong>$<fmt:formatNumber value="${finalPrice * 0.18}" minFractionDigits="2" maxFractionDigits="2"/></strong>
+                                    </div>
+                                    <div class="bbp-row bbp-total">
+                                        <span>Invoice total</span>
+                                        <strong>$<fmt:formatNumber value="${finalPrice * 1.18}" minFractionDigits="2" maxFractionDigits="2"/></strong>
+                                    </div>
+                                    <div class="bbp-note">This is the amount that will appear on your invoice. Payable within 30 days.</div>
+                                </div>
+
+                                <!-- Booking Action Form: Initiates Payment Gateway -->
+                                <form id="bookingDataForm">
                                     <input type="hidden" name="containerId" value="${container.containerId}">
                                     <input type="hidden" name="cargoWeight" value="${cargoWeight}">
                                     <input type="hidden" name="cargoVolume" value="${cargoVolume}">
@@ -1026,8 +1548,8 @@
                                     <input type="hidden" name="customerId" value="${customerId}">
                                     <input type="hidden" name="cargoValue" value="${cargoValue}">
                                     
-                                    <button type="submit" class="btn-confirm-booking-cta">
-                                        <i class="ti ti-circle-check"></i> Confirm Booking &amp; Allocate Container
+                                    <button type="button" class="btn-confirm-booking-cta" id="btnOpenPaymentGateway" onclick="launchPaymentGateway()">
+                                        <i class="ti ti-credit-card"></i> Proceed to Payment &amp; Allocate Container
                                     </button>
                                 </form>
 
@@ -1039,6 +1561,1027 @@
                     </div>
                 </div>
             </div>
+            <!-- ========================================================================= -->
+            <!-- N-LOGISTIC ENTERPRISE MOCK PAYMENT GATEWAY MODAL (CROSS-DEVICE SYNC)       -->
+            <!-- ========================================================================= -->
+            <div class="modal fade" id="nlogisticPaymentModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                    <div class="modal-content payment-modal-content">
+                        
+                        <!-- Modal Header -->
+                        <div class="payment-modal-header">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="payment-brand-icon">
+                                    <i class="ti ti-shield-lock-filled"></i>
+                                </div>
+                                <div>
+                                    <div class="payment-brand-title">N-LOGISTIC SECURE CHECKOUT</div>
+                                    <div class="payment-brand-sub">
+                                        <span id="displayTxnRef">Order Ref: Generating...</span> &bull; 256-bit TLS Encrypted
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="payment-header-amount">
+                                    <span class="label">Total Amount:</span>
+                                    <span class="val">$<fmt:formatNumber value="${finalPrice * 1.18}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" onclick="closePaymentGateway()"></button>
+                            </div>
+                        </div>
+
+                        <!-- Modal Body: 2-Column Grid -->
+                        <div class="payment-modal-body">
+                            <div class="row g-0">
+                                <!-- Left Column: Order Breakdown & Protection -->
+                                <div class="col-lg-5 payment-summary-col">
+                                    <div class="payment-col-title">
+                                        <i class="ti ti-receipt-2"></i> Shipment &amp; Invoice Breakdown
+                                    </div>
+
+                                    <div class="order-spec-card">
+                                        <div class="order-spec-row">
+                                            <span class="text-muted">Allocated Asset</span>
+                                            <strong>Container #${container.containerId} (${container.type} ${container.size})</strong>
+                                        </div>
+                                        <div class="order-spec-row">
+                                            <span class="text-muted">Origin &rarr; Destination</span>
+                                            <strong>${not empty originPort ? originPort.portName : 'Origin Port'} &rarr; ${not empty destPort ? destPort.portName : 'Destination Port'}</strong>
+                                        </div>
+                                        <div class="order-spec-row">
+                                            <span class="text-muted">Cargo Payload</span>
+                                            <span>${cargoDesc} (${cargoWeight} kg / ${cargoVolume} CBM)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="payment-calc-list">
+                                        <div class="calc-row">
+                                            <span>Base Ocean Freight Tariff</span>
+                                            <span>$<fmt:formatNumber value="${finalPrice - 270.0 > 0 ? finalPrice - 270.0 : finalPrice}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                        </div>
+                                        <div class="calc-row">
+                                            <span>Port &amp; Environmental Surcharges</span>
+                                            <span>$270.00</span>
+                                        </div>
+                                        <div class="calc-row">
+                                            <span>Calculated Freight Total</span>
+                                            <strong>$<fmt:formatNumber value="${finalPrice}" minFractionDigits="2" maxFractionDigits="2"/></strong>
+                                        </div>
+                                        <div class="calc-row">
+                                            <span>Goods &amp; Services Tax (GST @ 18%)</span>
+                                            <span>$<fmt:formatNumber value="${finalPrice * 0.18}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                        </div>
+                                        <div class="calc-divider"></div>
+                                        <div class="calc-row calc-total">
+                                            <span>Net Payable Invoice Total</span>
+                                            <span class="total-highlight">$<fmt:formatNumber value="${finalPrice * 1.18}" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                        </div>
+                                        <div class="calc-inr-equiv">
+                                            &approx; &#8377;<fmt:formatNumber value="${finalPrice * 1.18 * 84.0}" minFractionDigits="2" maxFractionDigits="2"/> INR
+                                        </div>
+                                    </div>
+
+                                    <div class="security-guarantee-box">
+                                        <div class="sec-item"><i class="ti ti-lock-check"></i> PCI DSS Compliant</div>
+                                        <div class="sec-item"><i class="ti ti-shield-check"></i> NPCI Certified UPI</div>
+                                        <div class="sec-item"><i class="ti ti-certificate"></i> Escrow Secured</div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Payment Options & Interactive Tabs -->
+                                <div class="col-lg-7 payment-interactive-col">
+                                    <!-- Tabs Navigation -->
+                                    <div class="payment-tabs-header">
+                                        <button type="button" class="tab-btn active" onclick="switchPayTab('upi')">
+                                            <i class="ti ti-qrcode"></i>
+                                            <span>UPI / QR Scan</span>
+                                            <span class="tab-badge">Instant Sync</span>
+                                        </button>
+                                        <button type="button" class="tab-btn" onclick="switchPayTab('card')">
+                                            <i class="ti ti-credit-card"></i>
+                                            <span>Credit / Debit Card</span>
+                                        </button>
+                                        <button type="button" class="tab-btn" onclick="switchPayTab('netbank')">
+                                            <i class="ti ti-building-bank"></i>
+                                            <span>Net Banking</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Tab 1: UPI / QR Code -->
+                                    <div class="tab-pane-content" id="tabPaneUpi">
+                                        <div class="qr-scan-zone">
+                                            <div class="qr-box-wrapper">
+                                                <div class="qr-corner top-left"></div>
+                                                <div class="qr-corner top-right"></div>
+                                                <div class="qr-corner bottom-left"></div>
+                                                <div class="qr-corner bottom-right"></div>
+                                                <div class="qr-scan-line"></div>
+                                                <img id="gwQrImage" src="" alt="Scan to Pay via UPI" class="qr-image-tag">
+                                                <div id="qrLoadingSpinner" class="qr-spinner-overlay">
+                                                    <div class="spinner-border text-warning" role="status"></div>
+                                                    <span class="mt-2 text-muted font-monospace" style="font-size: 11px;">Generating Dynamic QR...</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="qr-instructions">
+                                                <h6>Scan with Any Phone Camera or UPI App</h6>
+                                                <p>Works with Google Pay, PhonePe, Paytm, BHIM or mobile browser.</p>
+                                                
+                                                <div class="mobile-direct-link-box">
+                                                    <i class="ti ti-device-mobile"></i>
+                                                    <span class="label">Direct Mobile URL:</span>
+                                                    <a id="gwMobileDirectLink" href="#" target="_blank" class="mobile-link-text">Open Mobile Simulator &nearr;</a>
+                                                    <button type="button" class="btn-copy-url" onclick="copyMobileUrl()" title="Copy Mobile Link">
+                                                        <i class="ti ti-copy"></i>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Instant Demo Trigger -->
+                                                <div class="mt-3">
+                                                    <button type="button" class="btn-demo-pay" id="btnDesktopDemoPay" onclick="triggerMockPayment('UPI_QR (Desktop Simulation)')">
+                                                        <i class="ti ti-bolt"></i> Simulate Instant Payment (Desktop Test Mode)
+                                                    </button>
+                                                </div>
+
+                                                <div class="live-listener-status">
+                                                    <span class="radar-pulse"></span>
+                                                    <span>Listening for mobile approval in real time...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tab 2: Credit / Debit Card -->
+                                    <div class="tab-pane-content d-none" id="tabPaneCard">
+                                        <div class="card-payment-container">
+                                            <div class="interactive-card-mock">
+                                                <div class="card-chip"></div>
+                                                <div class="card-number-display" id="mockCardNum">•••• •••• •••• 4242</div>
+                                                <div class="card-meta-row">
+                                                    <div>
+                                                        <div class="card-meta-label">CARD HOLDER</div>
+                                                        <div class="card-meta-val" id="mockCardHolder">${sessionScope.user.username != null ? sessionScope.user.username : 'AYUSH SINGH'}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="card-meta-label">EXPIRES</div>
+                                                        <div class="card-meta-val" id="mockCardExp">12/28</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mt-1">
+                                                <div class="col-12">
+                                                    <label class="form-label font-weight-bold" style="font-size: 12px;">Card Number</label>
+                                                    <input type="text" class="form-control form-control-custom" id="inputCardNumber" value="4532 8921 4452 4242" maxlength="19" oninput="updateMockCardNum(this.value)">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label font-weight-bold" style="font-size: 12px;">Expiry (MM/YY)</label>
+                                                    <input type="text" class="form-control form-control-custom" id="inputCardExp" value="12/28" maxlength="5" oninput="updateMockCardExp(this.value)">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label font-weight-bold" style="font-size: 12px;">CVV / CVC</label>
+                                                    <input type="password" class="form-control form-control-custom" id="inputCardCvv" value="892" maxlength="4">
+                                                </div>
+                                            </div>
+
+                                            <button type="button" class="btn-pay-action mt-4" onclick="triggerMockPayment('Credit Card (Visa / Master)')">
+                                                <i class="ti ti-lock"></i> Authorize &amp; Pay $<fmt:formatNumber value="${finalPrice * 1.18}" minFractionDigits="2" maxFractionDigits="2"/>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tab 3: Net Banking -->
+                                    <div class="tab-pane-content d-none" id="tabPaneNetbank">
+                                        <div class="netbanking-container">
+                                            <div class="text-muted mb-3" style="font-size: 13px;">Select your bank to authenticate through corporate netbanking:</div>
+                                            <div class="bank-grid">
+                                                <div class="bank-card active" onclick="selectBank(this, 'HDFC')">
+                                                    <div class="bank-icon-circle"><i class="ti ti-building-bank"></i></div>
+                                                    <span>HDFC Bank</span>
+                                                </div>
+                                                <div class="bank-card" onclick="selectBank(this, 'ICICI')">
+                                                    <div class="bank-icon-circle"><i class="ti ti-building-bank"></i></div>
+                                                    <span>ICICI Bank</span>
+                                                </div>
+                                                <div class="bank-card" onclick="selectBank(this, 'SBI')">
+                                                    <div class="bank-icon-circle"><i class="ti ti-building-bank"></i></div>
+                                                    <span>State Bank of India</span>
+                                                </div>
+                                                <div class="bank-card" onclick="selectBank(this, 'AXIS')">
+                                                    <div class="bank-icon-circle"><i class="ti ti-building-bank"></i></div>
+                                                    <span>Axis Bank</span>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" class="btn-pay-action mt-4" onclick="triggerMockPayment('Net Banking')">
+                                                <i class="ti ti-lock"></i> Authorize with Selected Bank
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Full Success Overlay Inside Modal -->
+                        <div class="payment-success-overlay" id="paymentSuccessOverlay">
+                            <div class="success-celebration-box">
+                                <div class="success-icon-anim">
+                                    <i class="ti ti-circle-check-filled"></i>
+                                </div>
+                                <h3 class="success-heading">Payment Verified &amp; Booking Confirmed!</h3>
+                                <p class="success-subheading">
+                                    Freight authorization completed successfully. Your shipment is officially booked &mdash; container allocation is underway by Operations Dispatch.
+                                </p>
+
+                                <div class="success-receipt-card">
+                                    <div class="receipt-row">
+                                        <span class="r-label">Shipment Tracking ID</span>
+                                        <strong class="r-val" id="resShipmentTag" style="color: #FC8019; font-size: 16px;">#SHP-PND</strong>
+                                    </div>
+                                    <div class="receipt-row">
+                                        <span class="r-label">Invoice Reference</span>
+                                        <strong class="r-val" id="resInvoiceTag">INV-PND (PAID)</strong>
+                                    </div>
+                                    <div class="receipt-row">
+                                        <span class="r-label">Payment Mode</span>
+                                        <span class="r-val" id="resMethodTag">UPI QR Code</span>
+                                    </div>
+                                    <div class="receipt-row">
+                                        <span class="r-label">Container Allocation</span>
+                                        <span class="r-val" style="color: #D97706; font-weight: 600; font-size: 13px;">
+                                            <i class="ti ti-clock me-1"></i> Pending Operations Dispatch
+                                        </span>
+                                    </div>
+                                    <div class="receipt-row">
+                                        <span class="r-label">Amount Paid</span>
+                                        <strong class="r-val text-success">$<fmt:formatNumber value="${finalPrice * 1.18}" minFractionDigits="2" maxFractionDigits="2"/></strong>
+                                    </div>
+                                </div>
+
+                                <div class="success-nav-actions">
+                                    <a id="btnNavLiveTracking" href="${pageContext.request.contextPath}/shipments" class="btn-success-action primary">
+                                        <i class="ti ti-map-pin"></i> Track Shipment Live
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/shipments" class="btn-success-action secondary">
+                                        <i class="ti ti-truck-delivery"></i> View in My Shipments
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/invoices" class="btn-success-action secondary">
+                                        <i class="ti ti-receipt"></i> View Invoices &amp; Payments
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Styles for Mock Payment Gateway Modal -->
+            <style>
+                .payment-modal-content {
+                    border-radius: 24px;
+                    border: none;
+                    overflow: hidden;
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+                    background: #FFFFFF;
+                    position: relative;
+                }
+                [data-theme="dark"] .payment-modal-content {
+                    background: #101820;
+                    border: 1px solid #22303A;
+                }
+                .payment-modal-header {
+                    background: linear-gradient(135deg, #101820 0%, #1A2530 100%);
+                    color: #FFFFFF;
+                    padding: 20px 28px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .payment-brand-icon {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 12px;
+                    background: rgba(252, 128, 25, 0.2);
+                    color: #FC8019;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                }
+                .payment-brand-title {
+                    font-size: 16px;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                }
+                .payment-brand-sub {
+                    font-size: 12px;
+                    color: #94A3B8;
+                }
+                .payment-header-amount {
+                    text-align: right;
+                }
+                .payment-header-amount .label {
+                    display: block;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    color: #94A3B8;
+                    font-weight: 600;
+                }
+                .payment-header-amount .val {
+                    font-size: 20px;
+                    font-weight: 800;
+                    color: #10B981;
+                }
+
+                .payment-modal-body {
+                    padding: 0;
+                }
+                .payment-summary-col {
+                    background: #F8FAFC;
+                    padding: 30px;
+                    border-right: 1px solid #E2E8F0;
+                }
+                [data-theme="dark"] .payment-summary-col {
+                    background: #151F28;
+                    border-color: #22303A;
+                }
+                .payment-col-title {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #1E293B;
+                    margin-bottom: 18px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                [data-theme="dark"] .payment-col-title {
+                    color: #F8FAFC;
+                }
+                .order-spec-card {
+                    background: #FFFFFF;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 14px;
+                    padding: 16px;
+                    margin-bottom: 20px;
+                }
+                [data-theme="dark"] .order-spec-card {
+                    background: #101820;
+                    border-color: #22303A;
+                }
+                .order-spec-row {
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: 10px;
+                    font-size: 12.5px;
+                }
+                .order-spec-row:last-child { margin-bottom: 0; }
+                .order-spec-row strong { color: #1E293B; }
+                [data-theme="dark"] .order-spec-row strong { color: #F8FAFC; }
+
+                .payment-calc-list {
+                    background: #FFFFFF;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 14px;
+                    padding: 18px;
+                    margin-bottom: 20px;
+                }
+                [data-theme="dark"] .payment-calc-list {
+                    background: #101820;
+                    border-color: #22303A;
+                }
+                .calc-row {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 13px;
+                    padding: 6px 0;
+                    color: #475569;
+                }
+                [data-theme="dark"] .calc-row { color: #94A3B8; }
+                .calc-divider {
+                    height: 1px;
+                    background: #E2E8F0;
+                    margin: 10px 0;
+                }
+                [data-theme="dark"] .calc-divider { background: #22303A; }
+                .calc-total {
+                    font-size: 14.5px;
+                    font-weight: 700;
+                    color: #0F172A;
+                }
+                [data-theme="dark"] .calc-total { color: #F8FAFC; }
+                .total-highlight {
+                    color: #FC8019;
+                    font-size: 18px;
+                    font-weight: 800;
+                }
+                .calc-inr-equiv {
+                    font-size: 12px;
+                    color: #059669;
+                    font-weight: 600;
+                    text-align: right;
+                    margin-top: 2px;
+                }
+
+                .security-guarantee-box {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 11.5px;
+                    color: #64748B;
+                    padding: 10px;
+                }
+
+                /* Interactive Column */
+                .payment-interactive-col {
+                    padding: 30px;
+                    background: #FFFFFF;
+                }
+                [data-theme="dark"] .payment-interactive-col {
+                    background: #101820;
+                }
+                .payment-tabs-header {
+                    display: flex;
+                    gap: 10px;
+                    border-bottom: 2px solid #E2E8F0;
+                    padding-bottom: 14px;
+                    margin-bottom: 24px;
+                }
+                [data-theme="dark"] .payment-tabs-header {
+                    border-color: #22303A;
+                }
+                .tab-btn {
+                    background: none;
+                    border: none;
+                    font-size: 13.5px;
+                    font-weight: 600;
+                    color: #64748B;
+                    padding: 8px 14px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .tab-btn:hover {
+                    color: #FC8019;
+                    background: #FFF7ED;
+                }
+                [data-theme="dark"] .tab-btn:hover {
+                    background: #1A2530;
+                }
+                .tab-btn.active {
+                    color: #FC8019;
+                    background: #FFF7ED;
+                }
+                [data-theme="dark"] .tab-btn.active {
+                    background: #1A2530;
+                }
+                .tab-badge {
+                    background: #DCFCE7;
+                    color: #16A34A;
+                    font-size: 10px;
+                    font-weight: 700;
+                    padding: 2px 8px;
+                    border-radius: 50px;
+                }
+
+                /* QR Zone */
+                .qr-scan-zone {
+                    display: flex;
+                    gap: 28px;
+                    align-items: center;
+                }
+                @media (max-width: 768px) {
+                    .qr-scan-zone { flex-direction: column; text-align: center; }
+                }
+                .qr-box-wrapper {
+                    position: relative;
+                    width: 220px;
+                    height: 220px;
+                    padding: 12px;
+                    background: #FFFFFF;
+                    border-radius: 20px;
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid #E2E8F0;
+                    flex-shrink: 0;
+                }
+                .qr-image-tag {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 12px;
+                    display: block;
+                }
+                .qr-corner {
+                    position: absolute;
+                    width: 16px;
+                    height: 16px;
+                    border: 3px solid #FC8019;
+                }
+                .qr-corner.top-left { top: 6px; left: 6px; border-right: none; border-bottom: none; border-top-left-radius: 8px; }
+                .qr-corner.top-right { top: 6px; right: 6px; border-left: none; border-bottom: none; border-top-right-radius: 8px; }
+                .qr-corner.bottom-left { bottom: 6px; left: 6px; border-right: none; border-top: none; border-bottom-left-radius: 8px; }
+                .qr-corner.bottom-right { bottom: 6px; right: 6px; border-left: none; border-top: none; border-bottom-right-radius: 8px; }
+                
+                .qr-scan-line {
+                    position: absolute;
+                    left: 12px;
+                    right: 12px;
+                    height: 2px;
+                    background: linear-gradient(90deg, transparent, #FC8019, transparent);
+                    animation: scanAnim 2.2s ease-in-out infinite;
+                    pointer-events: none;
+                }
+                @keyframes scanAnim {
+                    0% { top: 12px; opacity: 0; }
+                    50% { opacity: 1; }
+                    100% { top: 200px; opacity: 0; }
+                }
+
+                .qr-spinner-overlay {
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(255, 255, 255, 0.9);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 20px;
+                }
+
+                .qr-instructions h6 {
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: #1E293B;
+                    margin-bottom: 6px;
+                }
+                [data-theme="dark"] .qr-instructions h6 { color: #F8FAFC; }
+                .qr-instructions p {
+                    font-size: 13px;
+                    color: #64748B;
+                    line-height: 1.4;
+                    margin-bottom: 12px;
+                }
+                .mobile-direct-link-box {
+                    background: #F8FAFC;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 10px;
+                    padding: 8px 12px;
+                    font-size: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                [data-theme="dark"] .mobile-direct-link-box {
+                    background: #151F28;
+                    border-color: #22303A;
+                }
+                .mobile-link-text {
+                    color: #FC8019;
+                    font-weight: 600;
+                    text-decoration: underline;
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .btn-copy-url {
+                    background: none;
+                    border: none;
+                    color: #64748B;
+                    cursor: pointer;
+                    padding: 4px;
+                }
+                .btn-demo-pay {
+                    background: #FEF3C7;
+                    border: 1px solid #FCD34D;
+                    color: #B45309;
+                    font-size: 13px;
+                    font-weight: 700;
+                    padding: 10px 18px;
+                    border-radius: 12px;
+                    width: 100%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    transition: all 0.2s;
+                }
+                .btn-demo-pay:hover {
+                    background: #FDE68A;
+                }
+
+                .live-listener-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    color: #059669;
+                    font-weight: 600;
+                    margin-top: 14px;
+                }
+                .radar-pulse {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    background: #10B981;
+                    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                    animation: pulseRing 1.6s infinite;
+                }
+                @keyframes pulseRing {
+                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+                }
+
+                /* Interactive Card UI */
+                .interactive-card-mock {
+                    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+                    color: #FFFFFF;
+                    border-radius: 16px;
+                    padding: 22px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    margin-bottom: 18px;
+                }
+                .card-chip {
+                    width: 38px;
+                    height: 28px;
+                    border-radius: 6px;
+                    background: linear-gradient(135deg, #FCD34D, #D97706);
+                    margin-bottom: 20px;
+                }
+                .card-number-display {
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 18px;
+                    letter-spacing: 3px;
+                    margin-bottom: 20px;
+                }
+                .card-meta-row {
+                    display: flex;
+                    justify-content: space-between;
+                }
+                .card-meta-label {
+                    font-size: 9px;
+                    color: #94A3B8;
+                    letter-spacing: 0.8px;
+                }
+                .card-meta-val {
+                    font-size: 13px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                }
+                .btn-pay-action {
+                    width: 100%;
+                    background: linear-gradient(135deg, #FC8019 0%, #E06C11 100%);
+                    color: #FFFFFF;
+                    border: none;
+                    padding: 14px;
+                    border-radius: 14px;
+                    font-size: 15px;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    box-shadow: 0 8px 24px rgba(252, 128, 25, 0.35);
+                }
+
+                /* NetBanking Grid */
+                .bank-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 12px;
+                }
+                .bank-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 12px 14px;
+                    border: 1.5px solid #E2E8F0;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #334155;
+                    transition: all 0.2s;
+                }
+                [data-theme="dark"] .bank-card {
+                    border-color: #22303A;
+                    color: #F8FAFC;
+                }
+                .bank-card.active {
+                    border-color: #FC8019;
+                    background: #FFF7ED;
+                }
+                [data-theme="dark"] .bank-card.active {
+                    background: #1A2530;
+                }
+                .bank-icon-circle {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    background: #EFF6FF;
+                    color: #2563EB;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Success Overlay */
+                .payment-success-overlay {
+                    position: absolute;
+                    inset: 0;
+                    background: #FFFFFF;
+                    display: none;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 40px;
+                    z-index: 1050;
+                    animation: fadeIn 0.3s ease;
+                }
+                [data-theme="dark"] .payment-success-overlay {
+                    background: #101820;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: scale(0.98); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .success-celebration-box {
+                    max-width: 520px;
+                    width: 100%;
+                    text-align: center;
+                }
+                .success-icon-anim {
+                    font-size: 72px;
+                    color: #10B981;
+                    margin-bottom: 12px;
+                    animation: popScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                @keyframes popScale {
+                    0% { transform: scale(0); }
+                    100% { transform: scale(1); }
+                }
+                .success-heading {
+                    font-size: 24px;
+                    font-weight: 800;
+                    color: #0F172A;
+                    margin-bottom: 8px;
+                }
+                [data-theme="dark"] .success-heading { color: #F8FAFC; }
+                .success-subheading {
+                    font-size: 14px;
+                    color: #64748B;
+                    line-height: 1.5;
+                    margin-bottom: 24px;
+                }
+                .success-receipt-card {
+                    background: #F8FAFC;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 16px;
+                    padding: 18px 24px;
+                    margin-bottom: 28px;
+                    text-align: left;
+                }
+                [data-theme="dark"] .success-receipt-card {
+                    background: #151F28;
+                    border-color: #22303A;
+                }
+                .receipt-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 8px 0;
+                    font-size: 13.5px;
+                }
+                .receipt-row:not(:last-child) {
+                    border-bottom: 1px dashed #E2E8F0;
+                }
+                [data-theme="dark"] .receipt-row:not(:last-child) {
+                    border-bottom-color: #22303A;
+                }
+                .r-label { color: #64748B; font-weight: 500; }
+                .r-val { color: #1E293B; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+                [data-theme="dark"] .r-val { color: #F8FAFC; }
+
+                .success-nav-actions {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                .btn-success-action {
+                    padding: 13px 20px;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    font-size: 14px;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    transition: all 0.2s;
+                }
+                .btn-success-action.primary {
+                    background: linear-gradient(135deg, #FC8019 0%, #E06C11 100%);
+                    color: #FFFFFF;
+                    box-shadow: 0 8px 20px rgba(252, 128, 25, 0.3);
+                }
+                .btn-success-action.secondary {
+                    background: #F1F5F9;
+                    color: #334155;
+                    border: 1px solid #E2E8F0;
+                }
+                [data-theme="dark"] .btn-success-action.secondary {
+                    background: #1A2530;
+                    color: #F8FAFC;
+                    border-color: #2D3F4D;
+                }
+            </style>
+
+            <!-- Script for Mock Payment Gateway & Cross-Device Polling -->
+            <script>
+                var activeTxnId = null;
+                var pollInterval = null;
+                var paymentModalInstance = null;
+
+                function launchPaymentGateway() {
+                    var modalEl = document.getElementById('nlogisticPaymentModal');
+                    if (!modalEl) return;
+
+                    if (!paymentModalInstance) {
+                        paymentModalInstance = new bootstrap.Modal(modalEl);
+                    }
+                    paymentModalInstance.show();
+
+                    // Reset state
+                    document.getElementById('paymentSuccessOverlay').style.display = 'none';
+                    document.getElementById('qrLoadingSpinner').style.display = 'flex';
+                    document.getElementById('gwQrImage').src = '';
+                    document.getElementById('displayTxnRef').innerText = 'Order Ref: Initializing...';
+
+                    // Collect booking form parameters
+                    var form = document.getElementById('bookingDataForm');
+                    var formData = new FormData(form);
+                    var params = new URLSearchParams();
+                    formData.forEach(function(val, key) { params.append(key, val); });
+
+                    // Initiate payment transaction
+                    fetch('${pageContext.request.contextPath}/payment/initiate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            activeTxnId = data.txnId;
+                            document.getElementById('displayTxnRef').innerText = 'Order Ref: ' + activeTxnId;
+                            
+                            // Load QR code image
+                            var qrImg = document.getElementById('gwQrImage');
+                            qrImg.onload = function() {
+                                document.getElementById('qrLoadingSpinner').style.display = 'none';
+                            };
+                            qrImg.src = data.qrUrl;
+
+                            // Set direct mobile link
+                            var mLink = document.getElementById('gwMobileDirectLink');
+                            mLink.href = data.mobilePayUrl;
+
+                            // Start polling for cross-device approval
+                            startPollingPaymentStatus();
+                        } else {
+                            alert('Could not initialize gateway: ' + (data.error || 'Server error'));
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error(err);
+                        alert('Network error initializing payment gateway: ' + err);
+                    });
+                }
+
+                function closePaymentGateway() {
+                    stopPollingPaymentStatus();
+                    if (paymentModalInstance) {
+                        paymentModalInstance.hide();
+                    }
+                }
+
+                function switchPayTab(tabName) {
+                    document.querySelectorAll('.payment-tabs-header .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                    document.querySelectorAll('.tab-pane-content').forEach(function(p) { p.classList.add('d-none'); });
+
+                    if (tabName === 'upi') {
+                        document.querySelectorAll('.payment-tabs-header .tab-btn')[0].classList.add('active');
+                        document.getElementById('tabPaneUpi').classList.remove('d-none');
+                    } else if (tabName === 'card') {
+                        document.querySelectorAll('.payment-tabs-header .tab-btn')[1].classList.add('active');
+                        document.getElementById('tabPaneCard').classList.remove('d-none');
+                    } else if (tabName === 'netbank') {
+                        document.querySelectorAll('.payment-tabs-header .tab-btn')[2].classList.add('active');
+                        document.getElementById('tabPaneNetbank').classList.remove('d-none');
+                    }
+                }
+
+                function selectBank(el, bank) {
+                    document.querySelectorAll('.bank-card').forEach(function(c) { c.classList.remove('active'); });
+                    el.classList.add('active');
+                }
+
+                function updateMockCardNum(val) {
+                    document.getElementById('mockCardNum').innerText = val || '•••• •••• •••• 4242';
+                }
+
+                function updateMockCardExp(val) {
+                    document.getElementById('mockCardExp').innerText = val || '12/28';
+                }
+
+                function copyMobileUrl() {
+                    var mLink = document.getElementById('gwMobileDirectLink');
+                    if (mLink && mLink.href) {
+                        navigator.clipboard.writeText(mLink.href).then(function() {
+                            alert('Mobile payment URL copied! You can paste it into your phone browser or test tab.');
+                        });
+                    }
+                }
+
+                function startPollingPaymentStatus() {
+                    stopPollingPaymentStatus();
+                    pollInterval = setInterval(function() {
+                        if (!activeTxnId) return;
+
+                        fetch('${pageContext.request.contextPath}/payment/status?txn=' + encodeURIComponent(activeTxnId))
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            if (data.status === 'SUCCESS') {
+                                stopPollingPaymentStatus();
+                                onPaymentSuccess(data);
+                            }
+                        })
+                        .catch(function(e) {
+                            console.log('Poll poll error:', e);
+                        });
+                    }, 1500);
+                }
+
+                function stopPollingPaymentStatus() {
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+                    }
+                }
+
+                function triggerMockPayment(methodName) {
+                    if (!activeTxnId) {
+                        alert('No active transaction initialized.');
+                        return;
+                    }
+
+                    var params = new URLSearchParams();
+                    params.append('txn', activeTxnId);
+                    params.append('paymentMethod', methodName || 'UPI_QR');
+
+                    fetch('${pageContext.request.contextPath}/payment/pay-mock', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            stopPollingPaymentStatus();
+                            onPaymentSuccess(data, methodName);
+                        } else {
+                            alert('Payment processing failed: ' + (data.error || 'Unknown error'));
+                        }
+                    })
+                    .catch(function(err) {
+                        alert('Error submitting payment: ' + err);
+                    });
+                }
+
+                function onPaymentSuccess(data, method) {
+                    var overlay = document.getElementById('paymentSuccessOverlay');
+                    if (overlay) {
+                        document.getElementById('resShipmentTag').innerText = '#SHP-' + (data.shipmentId || 'CONFIRMED');
+                        document.getElementById('resInvoiceTag').innerText = 'INV-' + (data.invoiceId || 'PAID') + ' (PAID)';
+                        document.getElementById('resMethodTag').innerText = method || data.method || 'UPI / QR Code';
+
+                        // Set tracking direct button link
+                        var trackBtn = document.getElementById('btnNavLiveTracking');
+                        if (trackBtn && data.shipmentId) {
+                            trackBtn.href = '${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-' + data.shipmentId;
+                        }
+
+                        overlay.style.display = 'flex';
+                    }
+                }
+            </script>
         </c:when>
         <c:otherwise>
 
@@ -1063,19 +2606,21 @@
                     Active freight rate profiles, dynamic multiplier policies, and immutable price-change audit logs (FR3.5 / FR3.7)
                 </p>
             </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             <%-- FR3.5 / SRS 5.5: recalibrate demand multipliers from the forecast --%>
             <c:if test="${sessionScope.user.roleId <= 2}">
-                <form method="POST" action="${pageContext.request.contextPath}/pricing/syncDemand" style="margin-left:auto;">
+                <form method="POST" action="${pageContext.request.contextPath}/pricing/syncDemand" class="m-0">
                     <button type="submit" class="btn-adjust-rate"
                             title="Recompute every demand multiplier from the latest demand forecast">
                         <i class="ti ti-refresh"></i> Recalibrate Demand Multipliers
                     </button>
                 </form>
             </c:if>
+            <a href="${pageContext.request.contextPath}/predictive-graph" class="btn-predictive-nav">
+                <i class="ti ti-chart-line"></i> Advance Predictive Graph
+            </a>
         </div>
-        <a href="${pageContext.request.contextPath}/predictive-graph" class="btn-predictive-nav">
-            <i class="ti ti-chart-line"></i> Advance Predictive Graph
-        </a>
     </div>
 
     <!-- 4 KPI Metric Cards -->
@@ -1091,7 +2636,7 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Average Final Rate</div>
-                <div class="kpi-value" style="color: #059669;">
+                <div class="kpi-value kpi-val-green">
                     $<fmt:formatNumber value="${kpiAvgFinalPrice}" pattern="#,##0.00"/>
                 </div>
                 <div class="kpi-subtext">All active routes &amp; profiles</div>
@@ -1101,7 +2646,7 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Highest Base Tariff</div>
-                <div class="kpi-value" style="color: #D97706;">
+                <div class="kpi-value kpi-val-amber">
                     $<fmt:formatNumber value="${kpiMaxBasePrice}" pattern="#,##0.00"/>
                 </div>
                 <div class="kpi-subtext">Peak tier standard rate</div>
@@ -1111,7 +2656,7 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Total Audit Adjustments</div>
-                <div class="kpi-value" style="color: #2563EB;">${kpiTotalAudit}</div>
+                <div class="kpi-value kpi-val-blue">${kpiTotalAudit}</div>
                 <div class="kpi-subtext">Historical FR3.7 log events</div>
             </div>
             <div class="kpi-icon-pill blue"><i class="ti ti-history"></i></div>
@@ -1119,7 +2664,7 @@
     </div>
 
     <!-- TABLE 1: Active Freight Pricing Rules -->
-    <div class="governance-panel">
+    <div class="governance-panel card tracking-card no-card-tools" data-no-tools="true" style="padding: 0; overflow: hidden; border-radius: 16px;">
         <div class="governance-toolbar">
             <div class="toolbar-title-box">
                 <div class="toolbar-title-icon"><i class="ti ti-table"></i></div>
@@ -1139,8 +2684,8 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="governance-table" id="rulesTable">
+        <div class="table-responsive tracking-table-responsive">
+            <table class="governance-table tracking-table" id="rulesTable">
                 <thead>
                     <tr>
                         <th class="sortable-th" data-col="0" data-type="num" style="width: 80px;">ID <i class="ti ti-selector"></i></th>
@@ -1213,7 +2758,7 @@
     </div>
 
     <!-- TABLE 2: Price Change Audit Trail (FR3.7) -->
-    <div class="governance-panel">
+    <div class="governance-panel card tracking-card no-card-tools" data-no-tools="true" style="padding: 0; overflow: hidden; border-radius: 16px;">
         <div class="governance-toolbar">
             <div class="toolbar-title-box">
                 <div class="toolbar-title-icon"><i class="ti ti-clock-hour-4"></i></div>
@@ -1233,8 +2778,8 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="governance-table" id="auditTable">
+        <div class="table-responsive tracking-table-responsive">
+            <table class="governance-table tracking-table" id="auditTable">
                 <thead>
                     <tr>
                         <th class="sortable-th" data-col="0" data-type="num" style="width: 90px;">Audit ID <i class="ti ti-selector"></i></th>

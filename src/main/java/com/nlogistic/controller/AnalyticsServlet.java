@@ -193,18 +193,10 @@ public class AnalyticsServlet extends HttpServlet {
             double utilPct = totalContainers > 0 ? (inUseContainers * 100.0 / totalContainers) : 0;
             request.setAttribute("utilizationPct", String.format("%.1f", utilPct));
 
-            // ---- On-Time Delivery Rate (was previously hardcoded to 78.6) ----
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) as total_delivered, " +
-                    "SUM(CASE WHEN actual_arrival_date <= expected_arrival_date OR delay_days <= 0 THEN 1 ELSE 0 END) as on_time " +
-                    "FROM container_movements WHERE actual_arrival_date IS NOT NULL")) {
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    int totalDelivered = rs.getInt("total_delivered");
-                    int onTime = rs.getInt("on_time");
-                    if (totalDelivered > 0) onTimePct = (onTime * 100.0 / totalDelivered);
-                }
-            }
+            // ---- On-Time Delivery Rate ----
+            // Was counted across every carrier's movements, so a new company
+            // inherited the platform average as if it were its own record.
+            onTimePct = analyticsDAO.getOnTimeRate(chartCompany);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -215,13 +207,40 @@ public class AnalyticsServlet extends HttpServlet {
         // instead of the static placeholder chart data the page previously shipped with.)
         StringBuilder abcJson = new StringBuilder("[");
         boolean firstAbc = true;
-        for (java.util.Map<String, Object> a : analyticsDAO.getAbcDistribution(period, filterCategory)) {
+        for (java.util.Map<String, Object> a : analyticsDAO.getAbcDistribution(period, filterCategory, chartCompany)) {
             if (!firstAbc) abcJson.append(",");
             abcJson.append("{\"class\":\"Class ").append(a.get("cls")).append("\",\"count\":").append(a.get("count")).append("}");
             firstAbc = false;
         }
         abcJson.append("]");
         request.setAttribute("abcJson", abcJson.toString());
+
+        // FR2.6: every granularity comes from profit_loss now. Day / Week /
+        // Quarter / Year used to be literal arrays in the JSP, identical on
+        // every account, which is what made an empty company look busy.
+        StringBuilder plgSeries = new StringBuilder("{");
+        String[] grains = {"day", "week", "month", "quarter", "year"};
+        for (int gi = 0; gi < grains.length; gi++) {
+            if (gi > 0) plgSeries.append(",");
+            plgSeries.append("\"").append(grains[gi]).append("\":[");
+            boolean firstPt = true;
+            for (java.util.Map<String, Object> row : analyticsDAO.getPlgSeries(grains[gi], chartCompany)) {
+                if (!firstPt) plgSeries.append(",");
+                plgSeries.append("{\"label\":\"").append(String.valueOf(row.get("label")).replace("\"", ""))
+                         .append("\",\"revenue\":").append(row.get("revenue"))
+                         .append(",\"cost\":").append(row.get("cost")).append("}");
+                firstPt = false;
+            }
+            plgSeries.append("]");
+        }
+        plgSeries.append("}");
+        request.setAttribute("plgSeriesJson", plgSeries.toString());
+
+        // Real month-over-month movement for the KPI badges.
+        java.util.Map<String, Double> deltas = analyticsDAO.getKpiDeltas(chartCompany);
+        request.setAttribute("deltaRevenue", deltas.get("revenue"));
+        request.setAttribute("deltaCost",    deltas.get("cost"));
+        request.setAttribute("deltaProfit",  deltas.get("profit"));
 
         StringBuilder lossJson = new StringBuilder("[");
         boolean firstLoss = true;
@@ -269,7 +288,7 @@ public class AnalyticsServlet extends HttpServlet {
         String forecastType = request.getParameter("forecastType");
         StringBuilder demandJson = new StringBuilder("[");
         boolean firstDf = true;
-        for (java.util.Map<String, Object> df : analyticsDAO.getDemandForecastByPeriod(forecastType)) {
+        for (java.util.Map<String, Object> df : analyticsDAO.getDemandForecastByPeriod(forecastType, chartCompany)) {
             if (!firstDf) demandJson.append(",");
             demandJson.append("{\"period\":\"").append(df.get("period")).append("\",")
                       .append("\"demand\":").append(df.get("demand")).append("}");
@@ -281,7 +300,7 @@ public class AnalyticsServlet extends HttpServlet {
         Integer agingScope = chartCompany;
         request.setAttribute("productCategories", analyticsDAO.getProductCategories());
         java.util.Map<String, Double> agingMap = analyticsDAO.getInvoiceAging(agingScope);
-        java.util.Map<String, Double> turnIn   = analyticsDAO.getTurnoverInputs(agingScope);
+        java.util.Map<String, Double> turnIn   = analyticsDAO.getTurnoverInputs(agingScope, true);
         request.setAttribute("aging", agingMap);
         request.setAttribute("turnoverInputs", turnIn);
 
@@ -293,6 +312,12 @@ public class AnalyticsServlet extends HttpServlet {
         request.setAttribute("agingOverdueStr", money.format(Math.round(agingMap.get("overdue"))));
         request.setAttribute("agingOverduePct", agTotal > 0
                 ? Math.round(agingMap.get("overdue") * 100.0 / agTotal) : 0);
+        // The headline ratio came from a global stored procedure while the two
+        // figures printed under it were company-scoped, so they disagreed - and it
+        // rendered raw ("0.0306312"). Derive it from the same scoped inputs.
+        double invVal = turnIn.get("avgInventoryValue");
+        request.setAttribute("turnoverRatioStr",
+                invVal > 0 ? String.format("%.2f", turnIn.get("cogs") / invVal) : null);
         request.setAttribute("cogsStr",         money.format(Math.round(turnIn.get("cogs"))));
         request.setAttribute("avgInvValueStr",  money.format(Math.round(turnIn.get("avgInventoryValue"))));
 

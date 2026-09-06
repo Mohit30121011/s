@@ -135,16 +135,19 @@
         border-radius: 20px;
         margin-bottom: 10px;
     }
-    .nl-reg-heading {
+    .nl-reg-heading,
+    [data-theme="dark"] .nl-reg-card .nl-reg-heading,
+    [data-theme="dark"] h1.nl-reg-heading {
         font-size: 26px;
         font-weight: 800;
-        color: #0F172A;
+        color: #0F172A !important;
         letter-spacing: -0.5px;
         margin-bottom: 4px;
     }
-    .nl-reg-subheading {
+    .nl-reg-subheading,
+    [data-theme="dark"] .nl-reg-card .nl-reg-subheading {
         font-size: 13.5px;
-        color: #64748B;
+        color: #64748B !important;
     }
 
     /* Account Type Switcher Cards */
@@ -304,16 +307,22 @@
         transition: color 0.15s ease;
         z-index: 2;
     }
-    .nl-form-control {
+    .nl-form-control,
+    [data-theme="dark"] .nl-reg-card input[type="text"],
+    [data-theme="dark"] .nl-reg-card input[type="email"],
+    [data-theme="dark"] .nl-reg-card input[type="password"],
+    [data-theme="dark"] .nl-reg-card input[type="tel"],
+    [data-theme="dark"] .nl-reg-card .nl-form-control {
         width: 100%;
         height: 46px;
         padding-left: 44px !important;
         padding-right: 14px;
         font-size: 13.5px;
         font-weight: 500;
-        color: #0F172A;
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
+        color: #0F172A !important;
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
         border-radius: 50px !important;
         transition: all 0.15s ease;
         outline: none;

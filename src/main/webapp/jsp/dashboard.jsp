@@ -17,6 +17,146 @@
     --text-main: #1F2937; --text-sub: #64748B; --border: #E7E9ED;
     --bg: #F1F3F7; --card: #FFFFFF;
 }
+
+[data-theme="dark"] {
+    --text-main: #F8FAFC;
+    --text-sub: #94A3B8;
+    --border: #22303A;
+    --bg: #080D12;
+    --card: #101820;
+    --primary-light: rgba(252, 128, 25, 0.14);
+    --success-light: rgba(16, 185, 129, 0.14);
+    --danger-light: rgba(239, 68, 68, 0.14);
+    --warning-light: rgba(245, 158, 11, 0.14);
+    --info-light: rgba(59, 130, 246, 0.14);
+    --purple-light: rgba(139, 92, 246, 0.14);
+}
+
+[data-theme="dark"] .date-badge,
+[data-theme="dark"] .period-select,
+[data-theme="dark"] .date-badge-form select {
+    background-color: #151F28 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    color: #F8FAFC !important;
+    border-color: #22303A !important;
+}
+[data-theme="dark"] .period-select:hover,
+[data-theme="dark"] .date-badge-form select:hover {
+    background-color: #1C2A37 !important;
+    border-color: #2D3F4D !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-dropdown,
+[data-theme="dark"] .btn-dropdown-pill {
+    background: #151F28 !important;
+    border-color: #22303A !important;
+    color: #F8FAFC !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .btn-dropdown:hover,
+[data-theme="dark"] .btn-dropdown-pill:hover,
+[data-theme="dark"] .btn-dropdown:focus,
+[data-theme="dark"] .btn-dropdown-pill:focus,
+[data-theme="dark"] .btn-dropdown[aria-expanded="true"],
+[data-theme="dark"] .btn-dropdown-pill[aria-expanded="true"] {
+    background: #1C2A37 !important;
+    border-color: #2D3F4D !important;
+    color: #FFFFFF !important;
+}
+[data-theme="dark"] .btn-dropdown i,
+[data-theme="dark"] .btn-dropdown-pill i {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background: #101820 !important;
+    border-color: #22303A !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .dropdown-item {
+    color: #CBD5E1 !important;
+}
+[data-theme="dark"] .dropdown-item:hover {
+    background: #182430 !important;
+    color: #FC8019 !important;
+}
+[data-theme="dark"] .dropdown-item.active {
+    background: rgba(252, 128, 25, 0.15) !important;
+    color: #FC8019 !important;
+}
+
+/* Shipments Status Badges (Dark Mode SaaS Subtle Glow) */
+[data-theme="dark"] .badge-transit   { background: rgba(59, 130, 246, 0.15) !important; color: #60A5FA !important; border: 1px solid rgba(59, 130, 246, 0.28) !important; }
+[data-theme="dark"] .badge-delivered { background: rgba(16, 185, 129, 0.15) !important; color: #34D399 !important; border: 1px solid rgba(16, 185, 129, 0.28) !important; }
+[data-theme="dark"] .badge-pending   { background: rgba(245, 158, 11, 0.15) !important; color: #FBBF24 !important; border: 1px solid rgba(245, 158, 11, 0.28) !important; }
+[data-theme="dark"] .badge-hold      { background: rgba(239, 68, 68, 0.15) !important; color: #F87171 !important; border: 1px solid rgba(239, 68, 68, 0.28) !important; }
+[data-theme="dark"] .badge-booked    { background: rgba(139, 92, 246, 0.15) !important; color: #C084FC !important; border: 1px solid rgba(139, 92, 246, 0.28) !important; }
+[data-theme="dark"] .badge-arrived   { background: rgba(20, 184, 166, 0.15) !important; color: #2DD4BF !important; border: 1px solid rgba(20, 184, 166, 0.28) !important; }
+[data-theme="dark"] .badge-departed  { background: rgba(56, 189, 248, 0.15) !important; color: #38BDF8 !important; border: 1px solid rgba(56, 189, 248, 0.28) !important; }
+[data-theme="dark"] .badge-allocated { background: rgba(252, 128, 25, 0.15) !important; color: #FB923C !important; border: 1px solid rgba(252, 128, 25, 0.28) !important; }
+[data-theme="dark"] .badge-cancelled { background: rgba(148, 163, 184, 0.15) !important; color: #94A3B8 !important; border: 1px solid rgba(148, 163, 184, 0.28) !important; }
+
+/* Containers Overview specific dark styles */
+[data-theme="dark"] .cont-overview-icon {
+    background: rgba(252, 128, 25, 0.15) !important;
+    border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    color: #FC8019 !important;
+}
+[data-theme="dark"] .cont-total-badge {
+    background: rgba(252, 128, 25, 0.15) !important;
+    border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    color: #FC8019 !important;
+}
+[data-theme="dark"] .cont-units-text {
+    color: #94A3B8 !important;
+}
+[data-theme="dark"] .cont-catalog-banner {
+    background: #151F28 !important;
+    border-color: #22303A !important;
+}
+[data-theme="dark"] .cont-catalog-banner-text {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .cont-card {
+    background: #151F28 !important;
+    border-color: #22303A !important;
+}
+[data-theme="dark"] .cont-card:hover {
+    border-color: #2D3F4D !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+}
+[data-theme="dark"] .cont-val-number {
+    color: #F8FAFC !important;
+}
+[data-theme="dark"] .cont-share-badge {
+    background: #101820 !important;
+    color: #94A3B8 !important;
+    border-color: #22303A !important;
+}
+[data-theme="dark"] .cont-prog-track {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .cont-card.flat-rack { background: rgba(252, 128, 25, 0.08) !important; border-color: rgba(252, 128, 25, 0.25) !important; }
+[data-theme="dark"] .cont-card.dry       { background: rgba(59, 130, 246, 0.08) !important; border-color: rgba(59, 130, 246, 0.25) !important; }
+[data-theme="dark"] .cont-card.reefer    { background: rgba(2, 132, 199, 0.08) !important; border-color: rgba(2, 132, 199, 0.25) !important; }
+[data-theme="dark"] .cont-card.open-top  { background: rgba(16, 185, 129, 0.08) !important; border-color: rgba(16, 185, 129, 0.25) !important; }
+[data-theme="dark"] .cont-card.tank      { background: rgba(139, 92, 246, 0.08) !important; border-color: rgba(139, 92, 246, 0.25) !important; }
+[data-theme="dark"] .scrollable-card-body::-webkit-scrollbar-thumb {
+    background: #22303A;
+}
+[data-theme="dark"] .card-header {
+    border-bottom: 1px solid #1A252E !important;
+}
+[data-theme="dark"] .ship-item,
+[data-theme="dark"] .alert-item {
+    border-bottom-color: #1A252E !important;
+}
+[data-theme="dark"] .route-table td {
+    border-top-color: #1A252E !important;
+}
+
 body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .dash-wrap { padding: 0; max-width: 100%; margin: 0; }
 
@@ -57,9 +197,10 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 
 /* Cards */
 .card { background: var(--card); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); border-radius: 12px; overflow: hidden; }
-.card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F0F2F5; background: transparent; }
-.card-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 0; letter-spacing: -0.2px; }
-.card-action { font-size: 12.5px; color: var(--primary); font-weight: 500; text-decoration: none; cursor: pointer; }
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; border-bottom: 1px solid #F0F2F5; background: transparent; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 0; letter-spacing: -0.2px; margin-right: auto; white-space: nowrap; }
+.card-header .dropdown { margin-left: auto; flex-shrink: 0; }
+.card-action { font-size: 12.5px; color: var(--primary); font-weight: 500; text-decoration: none; cursor: pointer; margin-left: auto; flex-shrink: 0; }
 .card-action:hover { color: #E66F0F; text-decoration: underline; }
 .card-body { padding: 18px 20px; }
 
@@ -112,8 +253,15 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 .badge-booked   { background: var(--purple-light); color: var(--purple); }
 .badge-arrived  { background: #F0FDF4; color: #16A34A; }
 .badge-departed { background: #EFF6FF; color: #2563EB; }
+.badge-allocated{ background: #FFF7ED; color: #EA580C; }
 .badge-cancelled{ background: #F3F4F6; color: #6B7280; }
 .ship-arrow { color: var(--border); font-size: 12px; }
+
+.cont-overview-icon { background: #FFF2EB; }
+.cont-total-badge { background: #FFF2EB; color: #FC8019; border: 1px solid #FFD4C2; }
+.cont-units-text { color: #1F2937; }
+.cont-catalog-banner { background: #F8FAFC; border: 1px solid #E2E8F0; }
+.cont-catalog-banner-text { color: #64748B; }
 
 /* Top Routes */
 .route-table { width: 100%; border-collapse: collapse; }
@@ -408,6 +556,126 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     margin-left: 8px;
 }
 
+/* ===== Chart Card Tools (Fullscreen & Download) ===== */
+.card-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.card-header-actions .dropdown {
+    margin-left: 0 !important;
+}
+.dash-chart-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 0;
+}
+.dash-tool-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border, #E7E9ED);
+    background: var(--card, #FFFFFF);
+    color: var(--text-sub, #64748B);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.18s ease;
+    padding: 0;
+    line-height: 1;
+}
+.dash-tool-btn:hover {
+    background: var(--primary-light, rgba(252,128,25,0.12));
+    border-color: var(--primary, #FC8019);
+    color: var(--primary, #FC8019);
+}
+[data-theme="dark"] .dash-tool-btn {
+    background: var(--nl-surface-elevated, #101820) !important;
+    border-color: var(--nl-border, #22303A) !important;
+    color: var(--nl-muted, #94A3B8) !important;
+}
+[data-theme="dark"] .dash-tool-btn:hover {
+    background: rgba(252,128,25,0.18) !important;
+    border-color: #FB923C !important;
+    color: #FB923C !important;
+}
+
+/* Remove duplicate right-side tools injected by nl-card-tools.js */
+.card .nl-card-tools,
+.nl-card-tools {
+    display: none !important;
+}
+/* Fullscreen overlay */
+.nl-fs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    backdrop-filter: blur(4px);
+    animation: nlFsIn2 0.22s ease;
+}
+@keyframes nlFsIn2 {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+.nl-fs-card {
+    background: var(--card, #fff);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 1100px;
+    max-height: calc(100vh - 64px);
+    overflow: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.nl-fs-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+.nl-fs-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-sub);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.nl-fs-close:hover { background: #EF4444; color: #fff; border-color: #EF4444; }
+.nl-fs-canvas-wrap {
+    flex: 1;
+    min-height: 420px;
+    position: relative;
+}
+[data-theme="dark"] .nl-fs-card {
+    background: #101820;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+}
+
 </style>
 
 <div class="dash-wrap">
@@ -503,25 +771,35 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     <!-- Row 2: Trend + Doughnut + Recent -->
     <div class="grid-3col-side">
         <!-- Shipment Overview -->
-        <div class="card">
+        <div class="card no-card-tools" data-no-tools="true">
             <div class="card-header">
                 <h3 class="card-title">Shipment Overview</h3>
-                <div class="dropdown">
-                    <button class="btn-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span>
-                            <c:choose>
-                                <c:when test="${currentTrendPeriod == 'month'}">This Month</c:when>
-                                <c:when test="${currentTrendPeriod == 'year'}">This Year</c:when>
-                                <c:otherwise>This Week</c:otherwise>
-                            </c:choose>
-                        </span>
-                        <i class="ti ti-chevron-down"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li><a class="dropdown-item ${empty currentTrendPeriod || currentTrendPeriod == 'week' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=week">This Week</a></li>
-                        <li><a class="dropdown-item ${currentTrendPeriod == 'month' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=month">This Month</a></li>
-                        <li><a class="dropdown-item ${currentTrendPeriod == 'year' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=year">This Year</a></li>
-                    </ul>
+                <div class="card-header-actions">
+                    <div class="dropdown">
+                        <button class="btn-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>
+                                <c:choose>
+                                    <c:when test="${currentTrendPeriod == 'month'}">This Month</c:when>
+                                    <c:when test="${currentTrendPeriod == 'year'}">This Year</c:when>
+                                    <c:otherwise>This Week</c:otherwise>
+                                </c:choose>
+                            </span>
+                            <i class="ti ti-chevron-down"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item ${empty currentTrendPeriod || currentTrendPeriod == 'week' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=week">This Week</a></li>
+                            <li><a class="dropdown-item ${currentTrendPeriod == 'month' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=month">This Month</a></li>
+                            <li><a class="dropdown-item ${currentTrendPeriod == 'year' ? 'active' : ''}" href="${pageContext.request.contextPath}/dashboard?period=${currentPeriod}&trendPeriod=year">This Year</a></li>
+                        </ul>
+                    </div>
+                    <div class="dash-chart-tools">
+                        <button class="dash-tool-btn" title="Download PNG" onclick="nlDashDownload('trendChart','Shipment Overview')">
+                            <i class="fi fi-rr-download"></i>
+                        </button>
+                        <button class="dash-tool-btn" title="Fullscreen" onclick="nlDashFullscreen('trendChart','Shipment Overview')">
+                            <i class="fi fi-rr-expand"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -530,9 +808,19 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         </div>
 
         <!-- Shipments by Status -->
-        <div class="card">
+        <div class="card no-card-tools" data-no-tools="true">
             <div class="card-header">
                 <h3 class="card-title">Shipments by Status</h3>
+                <div class="card-header-actions">
+                    <div class="dash-chart-tools">
+                        <button class="dash-tool-btn" title="Download PNG" onclick="nlDashDownload('statusChart','Shipments by Status')">
+                            <i class="fi fi-rr-download"></i>
+                        </button>
+                        <button class="dash-tool-btn" title="Fullscreen" onclick="nlDashFullscreen('statusChart','Shipments by Status')">
+                            <i class="fi fi-rr-expand"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div class="status-chart-wrap">
@@ -543,10 +831,9 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         </div>
 
         <!-- Recent Shipments -->
-        <div class="card">
+        <div class="card no-card-tools" data-no-tools="true">
             <div class="card-header">
                 <h3 class="card-title">Recent Shipments</h3>
-                
             </div>
             <div class="card-body scrollable-card-body" style="padding-top:8px;">
                 <c:if test="${empty recentShipments}">
@@ -565,6 +852,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                             <div class="ship-sub">${s.customer} &bull; ${s.route}</div>
                         </div>
                         <c:set var="badgeClass" value="badge-cancelled"/>
+                        <c:if test="${s.status == 'Container Allocated'}"><c:set var="badgeClass" value="badge-allocated"/></c:if>
                         <c:if test="${s.status == 'In Transit'}"><c:set var="badgeClass" value="badge-transit"/></c:if>
                         <c:if test="${s.status == 'Delivered'}"><c:set var="badgeClass" value="badge-delivered"/></c:if>
                         <c:if test="${s.status == 'Booked'}"><c:set var="badgeClass" value="badge-booked"/></c:if>
@@ -583,19 +871,21 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
     <!-- Row 3: Routes + Containers + Alerts -->
     <div class="grid-3col">
         <!-- Top Routes -->
-        <div class="card" id="top-routes-card">
+        <div class="card no-card-tools" data-no-tools="true" id="top-routes-card">
             <div class="card-header">
                 <h3 class="card-title">Top Shipping Routes</h3>
-                <div class="dropdown">
-                    <button class="btn-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span>All Time</span>
-                        <i class="ti ti-chevron-down"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li><a class="dropdown-item active" href="javascript:void(0);">All Time</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">This Year</a></li>
-                    </ul>
+                <div class="card-header-actions">
+                    <div class="dropdown">
+                        <button class="btn-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>All Time</span>
+                            <i class="ti ti-chevron-down"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item active" href="javascript:void(0);">All Time</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);">This Year</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="card-body scrollable-card-body" style="padding-top:12px;">
@@ -636,7 +926,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
         <div class="card no-card-tools" data-no-tools="true">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
-                    <div style="width: 32px; height: 32px; background: #FFF2EB; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 17px; flex-shrink: 0;">
+                    <div class="cont-overview-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 17px; flex-shrink: 0;">
                         <i class="ti ti-packages"></i>
                     </div>
                     <div style="min-width: 0;">
@@ -650,7 +940,7 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                    <span style="background: #FFF2EB; color: #FC8019; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 20px; border: 1px solid #FFD4C2; white-space: nowrap;">Total: ${totalContainers}</span>
+                    <span class="cont-total-badge" style="font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 20px; white-space: nowrap;">Total: ${totalContainers}</span>
                     <a href="${pageContext.request.contextPath}/containers" title="View Container Catalog" style="color: #64748B; font-size: 15px; padding: 2px 4px; display: inline-flex; align-items: center; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='#FC8019'" onmouseout="this.style.color='#64748B'">
                         <i class="ti ti-arrow-right"></i>
                     </a>
@@ -710,15 +1000,15 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
                                 </div>
                                 <div class="cont-status-row">
                                     <span class="cont-status-pill"><i class="ti ti-circle-check"></i> Active</span>
-                                    <span style="font-weight: 600; color: #1F2937;">${ct.value} units</span>
+                                    <span class="cont-units-text" style="font-weight: 600;">${ct.value} units</span>
                                 </div>
                             </div>
                         </div>
                     </c:forEach>
                 </div>
 
-                <div style="margin-top: 10px; padding: 8px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="font-size: 11.5px; color: #64748B;">
+                <div class="cont-catalog-banner" style="margin-top: 10px; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <div class="cont-catalog-banner-text" style="font-size: 11.5px;">
                         <i class="ti ti-info-circle" style="color: #FC8019; margin-right: 4px;"></i> Monitored across all <strong>30</strong> ports
                     </div>
                     <a href="${pageContext.request.contextPath}/containers" style="font-size: 11.5px; color: #FC8019; font-weight: 600; text-decoration: none;">
@@ -730,10 +1020,9 @@ body { background: var(--bg); font-family: 'Inter', sans-serif; }
 
 
         <!-- Alerts & Notifications -->
-        <div class="card">
+        <div class="card no-card-tools" data-no-tools="true">
             <div class="card-header">
                 <h3 class="card-title">Alerts &amp; Notifications</h3>
-                
             </div>
             <div class="card-body scrollable-card-body" style="padding-top:8px;">
                 <ul class="alert-list">
@@ -811,6 +1100,8 @@ function nlShowEmpty(canvas, icon, title, subtitle) {
 
     var labels = trendJson.map(function(d){return d.d;});
     var data   = trendJson.map(function(d){return d.cnt;});
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var ptBg   = isDark ? '#151F28' : '#FFFFFF';
     new Chart(trendCanvas, {
         type: 'line',
         data: {
@@ -820,15 +1111,24 @@ function nlShowEmpty(canvas, icon, title, subtitle) {
                 data: data,
                 borderColor: '#FC8019',
                 backgroundColor: 'rgba(249,115,22,0.1)',
-                borderWidth: 2, tension: 0.4, fill: true, pointRadius: 4,
-                pointBackgroundColor: '#FC8019', pointBorderColor: '#fff', pointBorderWidth: 2
+                borderWidth: 2.5,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4.5,
+                pointBackgroundColor: ptBg,
+                pointBorderColor: '#FC8019',
+                pointBorderWidth: 2.5,
+                pointHoverRadius: 6.5,
+                pointHoverBackgroundColor: ptBg,
+                pointHoverBorderColor: '#FC8019',
+                pointHoverBorderWidth: 3
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1, font: {size:10} }, grid: { color: '#F3F4F6' }, border: { display: false } },
+                y: { beginAtZero: true, ticks: { stepSize: 1, font: {size:10} }, grid: { color: isDark ? 'rgba(255,255,255,0.07)' : '#F3F4F6' }, border: { display: false } },
                 x: { grid: { display: false }, ticks: { font: {size:10} }, border: { display: false } }
             }
         }
@@ -867,11 +1167,12 @@ function nlShowEmpty(canvas, icon, title, subtitle) {
             beforeDraw: function(chart) {
                 var ctx = chart.ctx, ca = chart.chartArea;
                 var cx = (ca.left + ca.right)/2, cy = (ca.top + ca.bottom)/2;
+                var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                 ctx.save();
-                ctx.font = '700 22px Inter, sans-serif'; ctx.fillStyle = '#111827';
+                ctx.font = '700 22px Inter, sans-serif'; ctx.fillStyle = isDark ? '#F8FAFC' : '#111827';
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillText(total, cx, cy - 8);
-                ctx.font = '500 11px Inter, sans-serif'; ctx.fillStyle = '#6B7280';
+                ctx.font = '500 11px Inter, sans-serif'; ctx.fillStyle = isDark ? '#94A3B8' : '#6B7280';
                 ctx.fillText('Total', cx, cy + 12);
                 ctx.restore();
             }
@@ -894,6 +1195,76 @@ function nlShowEmpty(canvas, icon, title, subtitle) {
         legend.appendChild(item);
     });
 })();
+</script>
+
+<script>
+    // ===== Dashboard Chart Tool Utilities =====
+
+    /** Download a chart canvas as PNG (respects dark/light mode background) */
+    function nlDashDownload(canvasId, title) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var tmp = document.createElement('canvas');
+        tmp.width  = canvas.width;
+        tmp.height = canvas.height;
+        var ctx = tmp.getContext('2d');
+        ctx.fillStyle = isDark ? '#101820' : '#ffffff';
+        ctx.fillRect(0, 0, tmp.width, tmp.height);
+        ctx.drawImage(canvas, 0, 0);
+        var a = document.createElement('a');
+        a.download = (title || 'chart').replace(/[^a-z0-9]/gi, '_') + '.png';
+        a.href = tmp.toDataURL('image/png');
+        a.click();
+    }
+
+    /** Open a chart canvas fullscreen in a blurred overlay (image snapshot) */
+    function nlDashFullscreen(canvasId, title) {
+        var src = document.getElementById(canvasId);
+        if (!src) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var bgColor = isDark ? '#101820' : '#ffffff';
+
+        // Use Chart.js toBase64Image for best quality; fallback to raw canvas copy
+        var chartInst = (typeof Chart !== 'undefined') ? Chart.getChart(src) : null;
+        var imgSrc;
+        if (chartInst && typeof chartInst.toBase64Image === 'function') {
+            imgSrc = chartInst.toBase64Image('image/png', 1);
+        } else {
+            var tmp = document.createElement('canvas');
+            tmp.width  = src.width  || 800;
+            tmp.height = src.height || 400;
+            var tCtx = tmp.getContext('2d');
+            tCtx.fillStyle = bgColor;
+            tCtx.fillRect(0, 0, tmp.width, tmp.height);
+            tCtx.drawImage(src, 0, 0);
+            imgSrc = tmp.toDataURL('image/png');
+        }
+
+        var overlay = document.createElement('div');
+        overlay.className = 'nl-fs-overlay';
+        overlay.innerHTML =
+            '<div class="nl-fs-card">' +
+                '<h3 class="nl-fs-title">' + (title || '') + '</h3>' +
+                '<button class="nl-fs-close" title="Close (Esc)"><i class="fi fi-rr-cross"></i></button>' +
+                '<div style="flex:1;overflow:hidden;border-radius:8px;background:' + bgColor + ';display:flex;align-items:center;justify-content:center;min-height:360px;">' +
+                    '<img src="' + imgSrc + '" style="width:100%;height:auto;display:block;border-radius:8px;">' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+
+        function close() {
+            overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') close(); }
+        overlay.querySelector('.nl-fs-close').addEventListener('click', close);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+        document.addEventListener('keydown', onKey);
+    }
 </script>
 
 <style>

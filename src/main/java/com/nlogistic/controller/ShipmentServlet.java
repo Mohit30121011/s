@@ -1,9 +1,10 @@
 package com.nlogistic.controller;
 
 import com.nlogistic.dao.*;
+import com.nlogistic.model.Container;
 import com.nlogistic.model.Shipment;
-import java.util.List;
 import com.nlogistic.model.User;
+import com.nlogistic.util.DBConnectionManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,9 +13,54 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.List;
 
 @WebServlet("/shipments/*")
 public class ShipmentServlet extends HttpServlet {
+
+    /**
+     * Shipment movement order. Customs Hold sits alongside In Transit rather than
+     * after it, because a hold is something that happens during the voyage.
+     */
+    private static final java.util.List<String> MOVEMENT_FLOW = java.util.Arrays.asList(
+            "Booked", "Container Allocated", "Departed", "In Transit", "Customs Hold", "Arrived", "Delivered");
+
+    private static int movementRank(String status) {
+        if (status == null) return -1;
+        for (int i = 0; i < MOVEMENT_FLOW.size(); i++) {
+            if (MOVEMENT_FLOW.get(i).equalsIgnoreCase(status.trim())) {
+                // Customs Hold shares In Transit's position.
+                return "Customs Hold".equalsIgnoreCase(MOVEMENT_FLOW.get(i)) ? 3 : i;
+            }
+        }
+        return -1;
+    }
+
+    /** True once the cargo is considered to have left, which is what FR5.3 protects. */
+    private static boolean isAtOrBeyondDeparture(String status) {
+        return movementRank(status) >= movementRank("Departed");
+    }
+
+    /**
+     * @return null when the move is allowed, otherwise why it is not.
+     */
+    private String checkMovement(String current, String target) {
+        if ("Cancelled".equalsIgnoreCase(target)) return null;
+        if ("Cancelled".equalsIgnoreCase(current)) return "This shipment was cancelled; its status can no longer change.";
+        if ("Delivered".equalsIgnoreCase(current)) return "This shipment is already delivered; its status can no longer change.";
+
+        int from = movementRank(current), to = movementRank(target);
+        if (to < 0) return "Unknown status: " + target;
+        if (from >= 0 && to < from) {
+            return "A shipment cannot move backwards from '" + current + "' to '" + target + "'.";
+        }
+        return null;
+    }
+
       															  
     private ShipmentDAO shipmentDAO = new ShipmentDAO();
     private PortDAO portDAO = new PortDAO();      				        
@@ -132,6 +178,9 @@ public class ShipmentServlet extends HttpServlet {
             }
 
             request.getRequestDispatcher("/jsp/create_shipment.jsp").forward(request, response);
+        } else if (pathInfo.equals("/availableContainers")) {
+            handleAvailableContainersJson(request, response);
+            return;
         }
     }
 
@@ -226,7 +275,10 @@ public class ShipmentServlet extends HttpServlet {
 
             // FR5.3: block transition to Departed until all mandatory compliance documents
             // are Approved and none are expired (contract precondition).
-            if ("Departed".equalsIgnoreCase(s.getStatus()) && !complianceDAO.canShipmentDepart(s.getShipmentId())) {
+            com.nlogistic.dao.ShipmentDAO.ShipmentDetail prior = shipmentDAO.getShipmentById(s.getShipmentId());
+            if (isAtOrBeyondDeparture(s.getStatus())
+                    && !isAtOrBeyondDeparture(prior != null ? prior.getStatus() : null)
+                    && !complianceDAO.canShipmentDepart(s.getShipmentId())) {
                 session.setAttribute("errorMessage", "Cannot move Shipment #SHP-" + s.getShipmentId()
                         + " to Departed: one or more compliance documents are missing, not Approved, or expired. "
                         + "Resolve them on the Compliance page first.");
@@ -317,17 +369,20 @@ public class ShipmentServlet extends HttpServlet {
             String status = request.getParameter("status");
             String remarks = request.getParameter("remarks");
             String redirectUrl = request.getParameter("redirectUrl");
-            // GAP-M2-02: recording movement is an Operations duty. Finance staff and
-            // Customers previously could advance any shipment to Departed/Delivered.
+            // GAP-M2-02: recording movement is an Operations & Admin duty. Company Admin (Role 2),
+            // Operations staff (Role 3), and Super Admin (Role 1) can record checkpoints.
             int csRole = com.nlogistic.util.RbacContext.roleId(request);
             if (csRole > 3) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "Access Denied: only Operations staff and Admins may record movement checkpoints.");
-                return;
+                User currU = (User) session.getAttribute("user");
+                if (currU == null || !currU.hasPermission("tracking")) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                            "Access Denied: only Operations staff and Admins may record movement checkpoints.");
+                    return;
+                }
             }
             try {
                 int shipmentId = Integer.parseInt(shipmentIdStr);
-                int userId = (currentUser != null) ? currentUser.getUserId() : 1;
+                int userId = (currentUser != null) ? currentUser.getUserId() : (session.getAttribute("user") != null ? ((User) session.getAttribute("user")).getUserId() : 1);
 
                 // Tenant guard: never move a shipment outside your own company.
                 if (!shipmentDAO.canAccessShipment(shipmentId, csRole,
@@ -337,11 +392,32 @@ public class ShipmentServlet extends HttpServlet {
                     return;
                 }
 
+                // Movement order. Without this a shipment could jump from Container
+                // Allocated straight to In Transit or Delivered, which is precisely
+                // how the FR5.3 gate below was being walked around.
+                com.nlogistic.dao.ShipmentDAO.ShipmentDetail cur = shipmentDAO.getShipmentById(shipmentId);
+                String currentStatus = (cur != null) ? cur.getStatus() : null;
+                String blocked = checkMovement(currentStatus, status);
+                if (blocked != null) {
+                    session.setAttribute("errorMessage", blocked);
+                    if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+                        response.sendRedirect(redirectUrl);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/shipments/tracking/detail?id=SHP-" + shipmentId);
+                    }
+                    return;
+                }
+
                 // GAP-M2-03 / FR5.3: the departure gate was enforced only in
                 // /updateFull, while dock staff use this route. A DB trigger also
                 // blocks it, but checking here yields a readable message instead of
                 // a raw SQL error.
-                if ("Departed".equalsIgnoreCase(status) && !complianceDAO.canShipmentDepart(shipmentId)) {
+                //
+                // It now covers every status from Departed onward. Guarding the word
+                // "Departed" alone let the same request reach In Transit, Arrived or
+                // Delivered with no approved paperwork at all.
+                if (isAtOrBeyondDeparture(status) && !isAtOrBeyondDeparture(currentStatus)
+                        && !complianceDAO.canShipmentDepart(shipmentId)) {
                     session.setAttribute("errorMessage",
                             "Departure Blocked: Shipment #SHP-" + shipmentId + " still has compliance documents "
                           + "that are missing, not Approved, or expired (FR5.3).");
@@ -383,6 +459,220 @@ public class ShipmentServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/shipments");
                 }
             }
+        } else if (pathInfo != null && pathInfo.equals("/allocateContainer")) {
+            handleAllocateContainer(request, response);
+            return;
         }
     }
+
+    /**
+     * FR3.3 / FR3.4: JSON provider for available containers matching shipment cargo specifications.
+     * Accessible by Super Admin (Role 1), Company Admin (Role 2), and Operations Staff (Role 3).
+     */
+    private void handleAvailableContainersJson(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int roleId = com.nlogistic.util.RbacContext.roleId(request);
+        if (roleId > 3) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"error\":\"Forbidden: Only Operations staff and Admins may allocate containers.\"}");
+            return;
+        }
+
+        Integer companyId = (roleId == 1) ? null : com.nlogistic.util.RbacContext.companyId(request);
+        String shipmentIdParam = request.getParameter("shipmentId");
+        ShipmentDAO.ShipmentDetail shipment = null;
+        Shipment fullShipment = null;
+
+        if (shipmentIdParam != null && !shipmentIdParam.trim().isEmpty()) {
+            try {
+                int shipmentId = Integer.parseInt(shipmentIdParam.trim());
+                if (shipmentDAO.canAccessShipment(shipmentId, roleId, companyId, null)) {
+                    shipment = shipmentDAO.getShipmentById(shipmentId);
+                    fullShipment = shipmentDAO.getFullShipmentById(shipmentId);
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+
+        List<Container> containers = containerDAO.getContainersPaged("Available", 1000, 0, companyId);
+
+        response.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+
+        if (shipment != null && fullShipment != null) {
+            sb.append("\"shipment\":{");
+            sb.append("\"shipmentId\":").append(shipment.getShipmentId()).append(",");
+            sb.append("\"customerName\":\"").append(escapeJson(shipment.getCustomerName())).append("\",");
+            sb.append("\"originPort\":\"").append(escapeJson(shipment.getOriginPort())).append("\",");
+            sb.append("\"destPort\":\"").append(escapeJson(shipment.getDestPort())).append("\",");
+            sb.append("\"originPortId\":").append(fullShipment.getOriginPortId()).append(",");
+            sb.append("\"destPortId\":").append(fullShipment.getDestinationPortId()).append(",");
+            sb.append("\"cargoDesc\":\"").append(escapeJson(fullShipment.getCargoDescription())).append("\",");
+            sb.append("\"cargoWeight\":").append(fullShipment.getCargoWeightKg()).append(",");
+            sb.append("\"cargoVolume\":").append(fullShipment.getCargoVolumeCbm()).append(",");
+            sb.append("\"status\":\"").append(escapeJson(shipment.getStatus())).append("\"");
+            sb.append("},");
+        }
+
+        sb.append("\"containers\":[");
+        for (int i = 0; i < containers.size(); i++) {
+            Container c = containers.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("{");
+            sb.append("\"containerId\":").append(c.getContainerId()).append(",");
+            sb.append("\"containerNumber\":\"").append(escapeJson(c.getContainerNumber())).append("\",");
+            sb.append("\"type\":\"").append(escapeJson(c.getType())).append("\",");
+            sb.append("\"size\":\"").append(escapeJson(c.getSize())).append("\",");
+            sb.append("\"currentPortId\":").append(c.getCurrentPortId()).append(",");
+            sb.append("\"portName\":\"").append(escapeJson(c.getPortName() != null ? c.getPortName() : "Container Depot")).append("\",");
+            sb.append("\"portCountry\":\"").append(escapeJson(c.getPortCountry() != null ? c.getPortCountry() : "")).append("\",");
+            sb.append("\"ownerCompanyName\":\"").append(escapeJson(c.getOwnerCompanyName() != null ? c.getOwnerCompanyName() : "")).append("\",");
+            sb.append("\"maxGrossWeightKg\":").append(c.getMaxGrossWeightKg()).append(",");
+            sb.append("\"goodsCapacityKg\":").append(c.getGoodsCapacityKg()).append(",");
+            sb.append("\"goodsCapacityCbm\":").append(c.getGoodsCapacityCbm()).append(",");
+
+            double weight = (fullShipment != null) ? fullShipment.getCargoWeightKg() : 0;
+            double volume = (fullShipment != null) ? fullShipment.getCargoVolumeCbm() : 0;
+            double maxW = c.getGoodsCapacityKg() > 0 ? c.getGoodsCapacityKg() : c.getMaxGrossWeightKg();
+            boolean fitsW = maxW <= 0 || weight <= maxW;
+            boolean fitsV = c.getGoodsCapacityCbm() <= 0 || volume <= c.getGoodsCapacityCbm();
+            boolean matchesOrigin = fullShipment != null && fullShipment.getOriginPortId() == c.getCurrentPortId();
+
+            sb.append("\"fitsWeight\":").append(fitsW).append(",");
+            sb.append("\"fitsVolume\":").append(fitsV).append(",");
+            sb.append("\"fitsAll\":").append(fitsW && fitsV).append(",");
+            sb.append("\"matchesOrigin\":").append(matchesOrigin);
+            sb.append("}");
+        }
+        sb.append("]}");
+        out.print(sb.toString());
+        out.flush();
+    }
+
+    /**
+     * FR3.3 & FR3.4: Formally allocates an Available container to a Booked shipment.
+     * Enforces contract preconditions and advances status to 'Container Allocated'.
+     */
+    private void handleAllocateContainer(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
+        int roleId = com.nlogistic.util.RbacContext.roleId(request);
+
+        if (roleId > 3) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: only Operations staff and Admins may allocate containers.");
+            return;
+        }
+
+        String redirectUrl = request.getParameter("redirectUrl");
+
+        try {
+            int shipmentId = Integer.parseInt(request.getParameter("shipmentId"));
+            int containerId = Integer.parseInt(request.getParameter("containerId"));
+            int userId = (currentUser != null) ? currentUser.getUserId() : 1;
+            Integer companyId = com.nlogistic.util.RbacContext.companyId(request);
+
+            // Tenant guard
+            if (!shipmentDAO.canAccessShipment(shipmentId, roleId, companyId, null)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: this shipment does not belong to your company.");
+                return;
+            }
+
+            // Invariant: Container must be Available (FR3.3)
+            Container container = containerDAO.getContainerById(containerId);
+            if (container == null || !"Available".equalsIgnoreCase(container.getStatus())) {
+                session.setAttribute("errorMessage", "Allocation Failed: Selected container is no longer Available.");
+                safeRedirect(request, response, redirectUrl);
+                return;
+            }
+
+            // Tenancy check on container
+            if (roleId != 1 && companyId != null && container.getOwnerCompanyId() != companyId) {
+                session.setAttribute("errorMessage", "Allocation Failed: You cannot allocate a container owned by another company.");
+                safeRedirect(request, response, redirectUrl);
+                return;
+            }
+
+            // Precondition: Shipment must be Booked
+            ShipmentDAO.ShipmentDetail shipment = shipmentDAO.getShipmentById(shipmentId);
+            if (shipment == null || !"Booked".equalsIgnoreCase(shipment.getStatus())) {
+                session.setAttribute("errorMessage", "Allocation Failed: Shipment #SHP-" + shipmentId + " is not in 'Booked' status (Current: " 
+                        + (shipment != null ? shipment.getStatus() : "Not Found") + ").");
+                safeRedirect(request, response, redirectUrl);
+                return;
+            }
+
+            // Precondition FR3.4: Weight and Volume check
+            Shipment fullShipment = shipmentDAO.getFullShipmentById(shipmentId);
+            if (fullShipment != null) {
+                double maxWeight = container.getGoodsCapacityKg() > 0 ? container.getGoodsCapacityKg() : container.getMaxGrossWeightKg();
+                if (maxWeight > 0 && fullShipment.getCargoWeightKg() > maxWeight) {
+                    session.setAttribute("errorMessage", "Allocation Failed: Cargo weight (" + fullShipment.getCargoWeightKg() 
+                            + " kg) exceeds container capacity (" + maxWeight + " kg).");
+                    safeRedirect(request, response, redirectUrl);
+                    return;
+                }
+                if (container.getGoodsCapacityCbm() > 0 && fullShipment.getCargoVolumeCbm() > container.getGoodsCapacityCbm()) {
+                    session.setAttribute("errorMessage", "Allocation Failed: Cargo volume (" + fullShipment.getCargoVolumeCbm() 
+                            + " CBM) exceeds container capacity (" + container.getGoodsCapacityCbm() + " CBM).");
+                    safeRedirect(request, response, redirectUrl);
+                    return;
+                }
+            }
+
+            String remark = request.getParameter("remarks");
+            if (remark == null || remark.trim().isEmpty()) {
+                remark = "Container Depot - Allocated " + container.getContainerNumber() + " (" + container.getSize() + " " + container.getType() + ")";
+            }
+
+            boolean ok = shipmentDAO.allocateContainer(shipmentId, containerId, userId, remark);
+            if (ok) {
+                session.setAttribute("successMessage", "Container " + container.getContainerNumber() + " successfully allocated to Shipment #SHP-" 
+                        + shipmentId + ". Milestone advanced to 'Container Allocated'.");
+            } else {
+                session.setAttribute("errorMessage", "Allocation Failed: Database error while linking container.");
+            }
+
+            safeRedirect(request, response, redirectUrl);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.setAttribute("errorMessage", "Allocation Failed: " + e.getMessage());
+            safeRedirect(request, response, redirectUrl);
+        }
+    }
+
+    private void safeRedirect(HttpServletRequest request, HttpServletResponse response, String redirectUrl) throws IOException {
+        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+            response.sendRedirect(redirectUrl);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/shipments");
+        }
+    }
+
+    private static String escapeJson(String str) {
+        if (str == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            switch (c) {
+                case '"': sb.append("\\\""); break;
+                case '\\': sb.append("\\\\"); break;
+                case '\b': sb.append("\\b"); break;
+                case '\f': sb.append("\\f"); break;
+                case '\n': sb.append("\\n"); break;
+                case '\r': sb.append("\\r"); break;
+                case '\t': sb.append("\\t"); break;
+                default:
+                    if (c < ' ') {
+                        String t = "000" + Integer.toHexString(c);
+                        sb.append("\\u").append(t.substring(t.length() - 4));
+                    } else {
+                        sb.append(c);
+                    }
+            }
+        }
+        return sb.toString();
+    }
 }
+

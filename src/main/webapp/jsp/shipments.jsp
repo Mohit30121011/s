@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 
@@ -15,19 +15,25 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.02); padding: 24px; margin-bottom: 24px;
     }
 
-    /* Filter Row */
+    /* Filter Row - Clean seamless bar with no clunky card background */
     .filter-card {
-        background: #fff; border-radius: 12px; border: 1px solid var(--border-color);
-        padding: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     
     .filter-search {
         position: relative;
-        width: 400px;
+        width: 420px;
     }
     .filter-search .search-icon {
         position: absolute;
-        left: 14px;
+        left: 16px;
         top: 50%;
         transform: translateY(-50%);
         color: var(--text-muted);
@@ -36,9 +42,9 @@
     }
     .filter-search input {
         width: 100%;
-        padding: 10px 36px 10px 38px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        padding: 11px 38px 11px 44px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 50px !important;
         font-size: 13.5px;
         outline: none;
         background: #FFFFFF;
@@ -47,11 +53,11 @@
     }
     .filter-search input:focus {
         border-color: var(--brand-orange);
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.14);
     }
     .filter-search .clear-icon {
         position: absolute;
-        right: 12px;
+        right: 14px;
         top: 50%;
         transform: translateY(-50%);
         color: #9CA3AF;
@@ -64,10 +70,31 @@
         color: #1F2937;
     }
 
+    [data-theme="dark"] .filter-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    [data-theme="dark"] .filter-search input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .filter-search .search-icon {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .filter-search .clear-icon {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .filter-search .clear-icon:hover {
+        color: #F8FAFC !important;
+    }
+
     /* Action Button */
     .btn-book {
         background: var(--brand-orange); color: white; border: none; padding: 10px 20px;
-        border-radius: 8px; font-size: 13px; font-weight: 600; display: inline-flex;
+        border-radius: 50px !important; font-size: 13px; font-weight: 600; display: inline-flex;
         align-items: center; gap: 8px; transition: background 0.2s; cursor: pointer;
         text-decoration: none;
     }
@@ -271,9 +298,9 @@
         background: #FFF2EB;
         color: #FC8019 !important;
         border: 1.5px solid #FFD4C2;
-        padding: 10px 18px;
-        border-radius: 8px;
-        font-size: 13.5px;
+        padding: 10px 20px;
+        border-radius: 50px !important;
+        font-size: 13px;
         font-weight: 600;
         text-decoration: none;
         display: inline-flex;
@@ -288,6 +315,17 @@
         box-shadow: 0 4px 12px rgba(252, 128, 25, 0.25);
         transform: translateY(-1px);
     }
+    [data-theme="dark"] .btn-profit-loss {
+        background: rgba(252, 128, 25, 0.15) !important;
+        color: #FC8019 !important;
+        border-color: rgba(252, 128, 25, 0.35) !important;
+        border-radius: 50px !important;
+    }
+    [data-theme="dark"] .btn-profit-loss:hover {
+        background: #FC8019 !important;
+        color: #FFFFFF !important;
+        border-color: #FC8019 !important;
+    }
     .btn-icon-action.drilldown {
         background: #EFF6FF;
         color: #2563EB;
@@ -298,6 +336,45 @@
         box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
 
+    /* Container Allocation Workbench Modal */
+    [data-theme="dark"] #allocateContainerModal .modal-content {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .modal-footer {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] #allocateContainerModal table thead th {
+        background: #1B2733 !important;
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] #allocateContainerModal table td {
+        border-color: #243240 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .form-control {
+        background: #18232F !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .status-badge.Booked {
+        background: rgba(2, 132, 199, 0.18) !important;
+        color: #38BDF8 !important;
+        border: 1px solid rgba(2, 132, 199, 0.35) !important;
+    }
+    [data-theme="dark"] .status-badge.Container-Allocated {
+        background: rgba(245, 158, 11, 0.18) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .badge.bg-light {
+        background: #243240 !important;
+        color: #E2E8F0 !important;
+        border-color: #33475B !important;
+    }
 </style>
 
 <div class="main-content">
@@ -340,13 +417,13 @@
             <%-- Cost structure & margins: Super Admin, Company Admin, Finance only --%>
             <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 4}">
                 <a href="${pageContext.request.contextPath}/finance/profit-loss" class="btn-profit-loss" title="View Profit &amp; Loss Trend Graph &amp; Cost Attribution">
-                    <i class="ti ti-chart-line"></i> Profit &amp; Loss Analytics
+                    Profit &amp; Loss Analytics
                 </a>
             </c:if>
             <%-- Finance staff do not create bookings --%>
             <c:if test="${sessionScope.user.roleId != 4}">
                 <a href="${pageContext.request.contextPath}/shipments/create" class="btn-book">
-                    <i class="fa-solid fa-plus"></i> Book Shipment
+                    Book Shipment
                 </a>
             </c:if>
         </div>
@@ -371,7 +448,20 @@
                     <tr>
                         <td style="color: var(--text-muted);">#${s.shipmentId}</td>
                         <td style="font-weight: 700;">${s.customerName}</td>
-                        <td style="font-family: monospace; color: var(--brand-orange);">${s.containerNumber}</td>
+                        <td style="font-family: monospace;">
+                            <c:choose>
+                                <c:when test="${s.status == 'Booked'}">
+                                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.35); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 600;">
+                                        <i class="ti ti-clock me-1"></i> Pending Allocation
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge" style="background: rgba(252, 128, 25, 0.12); color: #FC8019; border: 1px solid rgba(252, 128, 25, 0.25); font-size: 11.5px; font-family: monospace, monospace; padding: 4px 8px; border-radius: 6px; font-weight: 700;">
+                                        <i class="ti ti-box me-1"></i>#${not empty s.containerNumber ? s.containerNumber : 'ALLOCATED'}
+                                    </span>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
                         <td>
                             <div style="display: flex; align-items: center;">
                                 <span>${s.originPort}</span>
@@ -384,15 +474,22 @@
                             <span class="status-badge ${s.status.replace(' ', '-')}">${s.status}</span>
                         </td>
                         <td style="text-align: center;">
-                            <div style="display: flex; gap: 8px; justify-content: center;">
+                            <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                <%-- Container Allocation Workbench: Role 1, 2, 3 only, for Booked shipments (FR3.3 / FR3.4) --%>
+                                <c:if test="${(sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3 || sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 3) && s.status == 'Booked'}">
+                                    <button type="button" class="btn btn-sm btn-warning text-dark fw-bold px-2 py-1 d-inline-flex align-items-center gap-1" style="border-radius: 6px; font-size: 11.5px; background: #F59E0B; border: none; box-shadow: 0 2px 4px rgba(245,158,11,0.25);" onclick="openAllocationWorkbench(${s.shipmentId})" title="Allocate Container (FR3.3 / FR3.4)">
+                                        <i class="ti ti-box"></i> Allocate
+                                    </button>
+                                </c:if>
+
                                 <%-- Financial Drilldown: Admins & Finance only (CLAUDE.md S3.5.6) --%>
                                 <c:if test="${sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 4}">
                                     <a href="${pageContext.request.contextPath}/finance/shipment-drilldown?id=${s.shipmentId}" class="btn-icon-action drilldown" title="Financial Drilldown &amp; Loss Attribution">
                                         <i class="ti ti-chart-arrows-vertical"></i>
                                     </a>
                                 </c:if>
-                                <%-- Edit & checkpoint updates: Admins & Operations only --%>
-                                <c:if test="${sessionScope.user.roleId <= 3}">
+                                <%-- Edit & checkpoint updates: Admins (Super & Company) & Operations only --%>
+                                <c:if test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3 || sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.roleId == 1 || sessionScope.roleId == 2 || sessionScope.user.hasPermission('tracking')}">
                                     <a href="${pageContext.request.contextPath}/shipments/edit?id=${s.shipmentId}" class="btn-icon-action edit" title="Edit Shipment">
                                         <i class="ti ti-pencil"></i>
                                     </a>
@@ -507,6 +604,111 @@
             <div class="nl-pagination-nav" id="shipmentPageNav">
                 <!-- Dynamically generated buttons -->
             </div>
+        </div>
+    </div>
+<!-- Container Allocation Workbench Modal (FR3.3 / FR3.4) -->
+<div class="modal fade" id="allocateContainerModal" tabindex="-1" aria-labelledby="allocateContainerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1E293B, #0F172A); color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 18px 24px;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 42px; height: 42px; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #F59E0B; font-size: 20px;">
+                        <i class="ti ti-box"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0" id="allocateContainerModalLabel" style="font-weight: 700; font-size: 17px; color: #FFFFFF;">Container Allocation Workbench</h5>
+                        <small style="color: #94A3B8; font-size: 12px;">SRS FR3.3 &amp; FR3.4 &bull; Physical fleet assignment &amp; capacity verification</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="${pageContext.request.contextPath}/shipments/allocateContainer" method="POST" id="allocateForm">
+                <input type="hidden" name="shipmentId" id="allocShipmentId" value="">
+                
+                <div class="modal-body" style="padding: 24px; max-height: 75vh; overflow-y: auto;">
+                    <!-- Loading state -->
+                    <div id="allocLoading" class="text-center py-5">
+                        <div class="spinner-border text-warning mb-3" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
+                        <div style="font-weight: 600; color: var(--text-dark);">Inspecting Fleet Availability...</div>
+                        <div style="font-size: 12.5px; color: var(--text-muted);">Fetching certified containers and capacity gates</div>
+                    </div>
+
+                    <!-- Content container -->
+                    <div id="allocContent" style="display: none;">
+                        <!-- Shipment Cargo Specs Card -->
+                        <div class="p-3 mb-4" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                <span style="font-weight: 700; font-size: 14px; color: var(--text-dark);">
+                                    Shipment <span id="allocShipmentBadge" class="badge bg-warning text-dark px-2 py-1 ms-1">#SHP-</span>
+                                </span>
+                                <span id="allocCustomerName" style="font-size: 13px; font-weight: 600; color: var(--text-dark);">Customer</span>
+                            </div>
+                            <div class="row g-2 pt-2 border-top" style="border-color: rgba(245,158,11,0.2) !important; font-size: 13px;">
+                                <div class="col-sm-6">
+                                    <span style="color: var(--text-muted);"><i class="ti ti-map-pin me-1" style="color: #FC8019;"></i>Route:</span>
+                                    <strong id="allocRoute" class="ms-1" style="color: var(--text-dark);">Origin &rarr; Dest</strong>
+                                </div>
+                                <div class="col-sm-3">
+                                    <span style="color: var(--text-muted);"><i class="ti ti-weight me-1" style="color: #3B82F6;"></i>Weight:</span>
+                                    <strong id="allocWeight" class="ms-1" style="color: var(--text-dark);">0 kg</strong>
+                                </div>
+                                <div class="col-sm-3">
+                                    <span style="color: var(--text-muted);"><i class="ti ti-dimensions me-1" style="color: #10B981;"></i>Volume:</span>
+                                    <strong id="allocVolume" class="ms-1" style="color: var(--text-dark);">0 CBM</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Available Container Fleet Section -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold mb-0" style="font-size: 13.5px; color: var(--text-dark);">
+                                Select Available Physical Container <span class="text-danger">*</span>
+                            </label>
+                            <span id="allocContainerCount" class="badge bg-secondary" style="font-size: 11px;">0 Available</span>
+                        </div>
+
+                        <div class="table-responsive mb-3" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 10px;">
+                            <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
+                                <thead style="background: #F8FAFC; position: sticky; top: 0; z-index: 2;">
+                                    <tr>
+                                        <th style="width: 45px; text-align: center;">Pick</th>
+                                        <th>Container No</th>
+                                        <th>Type &amp; Size</th>
+                                        <th>Current Depot</th>
+                                        <th>Capacity Limits</th>
+                                        <th style="text-align: center;">FR3.4 Gate</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allocContainerTbody">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Operational Remarks -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px; color: var(--text-dark);">
+                                Dispatch Remarks / Depot Inspection Note (Optional)
+                            </label>
+                            <input type="text" name="remarks" id="allocRemarks" class="form-control" placeholder="e.g. Assigned from Nhava Sheva Yard 3 &bull; Visual inspection verified" style="font-size: 13px; border-radius: 8px;">
+                        </div>
+                    </div>
+
+                    <div id="allocEmpty" class="text-center py-4" style="display: none;">
+                        <i class="ti ti-alert-circle text-danger mb-2" style="font-size: 32px;"></i>
+                        <div class="fw-bold text-danger">No Available Containers Found</div>
+                        <div class="text-muted" style="font-size: 12.5px;">All fleet units are currently Allocated or In-Transit. Please add or free up containers first.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="background: #F8FAFC; border-top: 1px solid var(--border-color); padding: 14px 24px;">
+                    <button type="button" class="btn btn-outline-secondary px-3 py-2" data-bs-dismiss="modal" style="font-size: 13px; border-radius: 50px;">Cancel</button>
+                    <button type="submit" id="allocSubmitBtn" class="btn btn-warning text-dark fw-bold px-4 py-2" style="font-size: 13px; border-radius: 50px; background: #F59E0B; border: none;" disabled>
+                        <i class="ti ti-check me-1"></i> Confirm &amp; Allocate Container
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -736,6 +938,101 @@ function sortTable(columnIndex) {
 
     rows.forEach(row => table.appendChild(row));
     if (window.refreshPaginationAfterSort) window.refreshPaginationAfterSort();
+}
+
+function openAllocationWorkbench(shipmentId) {
+    const modalEl = document.getElementById('allocateContainerModal');
+    if (!modalEl) return;
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+
+    document.getElementById('allocShipmentId').value = shipmentId;
+    document.getElementById('allocLoading').style.display = 'block';
+    document.getElementById('allocContent').style.display = 'none';
+    document.getElementById('allocEmpty').style.display = 'none';
+    document.getElementById('allocSubmitBtn').disabled = true;
+
+    fetch('${pageContext.request.contextPath}/shipments/availableContainers?shipmentId=' + shipmentId)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('allocLoading').style.display = 'none';
+
+            if (data.shipment) {
+                const s = data.shipment;
+                document.getElementById('allocShipmentBadge').textContent = '#SHP-' + s.shipmentId;
+                document.getElementById('allocCustomerName').textContent = s.customerName || 'Customer';
+                document.getElementById('allocRoute').textContent = (s.originPort || 'Origin') + ' → ' + (s.destPort || 'Destination');
+                document.getElementById('allocWeight').textContent = (s.cargoWeight || 0).toLocaleString() + ' kg';
+                document.getElementById('allocVolume').textContent = (s.cargoVolume || 0) + ' CBM';
+            }
+
+            const containers = data.containers || [];
+            document.getElementById('allocContainerCount').textContent = containers.length + ' Available';
+
+            if (containers.length === 0) {
+                document.getElementById('allocEmpty').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('allocContent').style.display = 'block';
+            const tbody = document.getElementById('allocContainerTbody');
+            tbody.innerHTML = '';
+
+            let firstValidSelected = false;
+
+            containers.forEach(c => {
+                const tr = document.createElement('tr');
+                const fits = c.fitsAll;
+                const matchesOrigin = c.matchesOrigin;
+
+                let badgeHtml = '';
+                if (fits) {
+                    badgeHtml += '<span class="badge bg-success text-white px-2 py-1"><i class="ti ti-check me-1"></i>Fits Cargo</span>';
+                } else {
+                    badgeHtml += '<span class="badge bg-danger text-white px-2 py-1"><i class="ti ti-x me-1"></i>Over Capacity</span>';
+                }
+
+                if (matchesOrigin) {
+                    badgeHtml += '<span class="badge bg-info text-dark px-2 py-1 ms-1"><i class="ti ti-map-pin me-1"></i>At Origin</span>';
+                }
+
+                const radioAttr = fits ? '' : 'disabled';
+                const isChecked = (fits && !firstValidSelected) ? 'checked' : '';
+                if (fits && !firstValidSelected) {
+                    firstValidSelected = true;
+                    document.getElementById('allocSubmitBtn').disabled = false;
+                }
+
+                tr.innerHTML = '<td style="text-align: center;">' +
+                        '<input type="radio" name="containerId" value="' + c.containerId + '" class="form-check-input" ' + radioAttr + ' ' + isChecked + ' onchange="document.getElementById(\'allocSubmitBtn\').disabled = false;">' +
+                    '</td>' +
+                    '<td>' +
+                        '<strong style="font-family: monospace; color: #FC8019;">#' + c.containerNumber + '</strong>' +
+                        '<div style="font-size: 11px; color: var(--text-muted);">' + (c.ownerCompanyName || '') + '</div>' +
+                    '</td>' +
+                    '<td>' +
+                        '<span class="badge bg-light text-dark border">' + c.type + '</span> ' +
+                        '<span class="badge bg-light text-dark border">' + c.size + '</span>' +
+                    '</td>' +
+                    '<td>' +
+                        '<div><i class="ti ti-building-warehouse text-secondary me-1"></i>' + c.portName + '</div>' +
+                        '<div style="font-size: 11px; color: var(--text-muted);">' + (c.portCountry || '') + '</div>' +
+                    '</td>' +
+                    '<td>' +
+                        '<div>Max: <strong>' + (c.goodsCapacityKg || c.maxGrossWeightKg || 0).toLocaleString() + ' kg</strong></div>' +
+                        '<div style="font-size: 11.5px; color: var(--text-muted);">Vol: <strong>' + (c.goodsCapacityCbm || 0) + ' CBM</strong></div>' +
+                    '</td>' +
+                    '<td style="text-align: center;">' +
+                        badgeHtml +
+                    '</td>';
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById('allocLoading').style.display = 'none';
+            alert('Failed to load available containers: ' + err.message);
+        });
 }
 </script>
 

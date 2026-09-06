@@ -30,6 +30,16 @@ public class AuditDAO {
 
         public int getRoleId() { return roleId; }
         public void setRoleId(int roleId) { this.roleId = roleId; }
+        private String entityType;
+
+        public String getEntityType() {
+            if (entityType != null) return entityType;
+            String act = getAction();
+            if (act != null && act.toUpperCase().contains("COMPANY")) return "Company";
+            if (act != null && (act.toUpperCase().contains("USER") || act.toUpperCase().contains("CUSTOMER"))) return "Customer / User";
+            return "Entity";
+        }
+        public void setEntityType(String entityType) { this.entityType = entityType; }
     }
 
     /**
@@ -167,6 +177,165 @@ public class AuditDAO {
                     kpis.put("securityAlerts", kpis.get("securityAlerts") + cnt);
                 }
             }
+            kpis.put("totalLogs", total);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return kpis;
+    }
+
+    /**
+     * Retrieve all approval & rejection audit logs for companies and customers/users
+     */
+    public List<AuditEntry> getApprovalAuditLogs(String filter, String searchKeyword, int limit) {
+        List<AuditEntry> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT a.log_id, a.user_id, a.action, a.entity_name, a.entity_id, ");
+        sql.append("       a.old_value, a.new_value, a.ip_address, a.timestamp, ");
+        sql.append("       u.username, u.email, r.role_name, u.role_id ");
+        sql.append("FROM audit_log a ");
+        sql.append("LEFT JOIN users u ON a.user_id = u.user_id ");
+        sql.append("LEFT JOIN roles r ON u.role_id = r.role_id ");
+        sql.append("WHERE (a.action LIKE '%APPROVE%' OR a.action LIKE '%SUSPEND%' ");
+        sql.append("   OR a.action LIKE '%REJECT%' OR a.action LIKE '%DEACTIVAT%' ");
+        sql.append("   OR a.action = 'STATUS_CHANGE' OR a.action = 'UNLOCK_USER') ");
+
+        List<Object> params = new ArrayList<>();
+
+        if (filter != null && !filter.trim().isEmpty() && !"ALL".equalsIgnoreCase(filter)) {
+            if ("COMPANIES".equalsIgnoreCase(filter) || "APPROVE_COMPANY".equalsIgnoreCase(filter)) {
+                sql.append("AND a.action LIKE '%COMPANY%' ");
+            } else if ("USERS".equalsIgnoreCase(filter) || "APPROVE_USER".equalsIgnoreCase(filter)) {
+                sql.append("AND (a.action LIKE '%USER%' OR a.action LIKE '%CUSTOMER%') ");
+            } else if ("APPROVED".equalsIgnoreCase(filter)) {
+                sql.append("AND a.action LIKE '%APPROVE%' ");
+            } else if ("REJECTIONS".equalsIgnoreCase(filter) || "REJECTED".equalsIgnoreCase(filter)) {
+                sql.append("AND (a.action LIKE '%SUSPEND%' OR a.action LIKE '%REJECT%' OR a.action LIKE '%DEACTIVAT%') ");
+            } else {
+                sql.append("AND a.action = ? ");
+                params.add(filter.trim());
+            }
+        }
+
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql.append("AND (u.username LIKE ? OR u.email LIKE ? OR a.action LIKE ? OR a.entity_name LIKE ? OR a.old_value LIKE ? OR a.new_value LIKE ?) ");
+            String like = "%" + searchKeyword.trim() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        sql.append("ORDER BY a.timestamp DESC, a.log_id DESC ");
+        if (limit > 0) {
+            sql.append("LIMIT ?");
+            params.add(limit);
+        }
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    AuditEntry entry = new AuditEntry();
+                    entry.setLogId(rs.getInt("log_id"));
+                    entry.setUserId(rs.getInt("user_id"));
+                    entry.setAction(rs.getString("action"));
+                    entry.setEntityName(rs.getString("entity_name"));
+                    entry.setEntityId(rs.getInt("entity_id"));
+                    entry.setOldValue(rs.getString("old_value"));
+                    entry.setNewValue(rs.getString("new_value"));
+                    entry.setIpAddress(rs.getString("ip_address"));
+                    entry.setTimestamp(rs.getTimestamp("timestamp"));
+
+                    String act = entry.getAction();
+                    if (act != null && act.contains("COMPANY")) {
+                        entry.setEntityType("Company");
+                    } else if (act != null && (act.contains("USER") || act.contains("CUSTOMER"))) {
+                        entry.setEntityType("Customer / User");
+                    } else {
+                        entry.setEntityType("Account / Role");
+                    }
+
+                    String uname = rs.getString("username");
+                    if (uname != null && !uname.trim().isEmpty()) {
+                        entry.setUsername(uname);
+                    } else if (entry.getUserId() > 0) {
+                        entry.setUsername("Admin #" + entry.getUserId());
+                    } else {
+                        entry.setUsername("System Gateway");
+                    }
+
+                    String mail = rs.getString("email");
+                    entry.setEmail((mail != null && !mail.trim().isEmpty()) ? mail : "admin@nlogistic.com");
+
+                    String rName = rs.getString("role_name");
+                    if (rName != null && !rName.trim().isEmpty()) {
+                        entry.setRoleName(rName);
+                    } else {
+                        entry.setRoleName("Super Admin");
+                    }
+
+                    entry.setRoleId(rs.getInt("role_id"));
+                    list.add(entry);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Telemetry KPIs for Approvals & Rejections
+     */
+    public Map<String, Integer> getApprovalKPIs() {
+        Map<String, Integer> kpis = new HashMap<>();
+        kpis.put("totalApprovals", 0);
+        kpis.put("companiesApproved", 0);
+        kpis.put("usersApproved", 0);
+        kpis.put("totalRejections", 0);
+        kpis.put("totalLogs", 0);
+
+        String sql = "SELECT action, COUNT(*) as cnt FROM audit_log "
+                   + "WHERE action LIKE '%APPROVE%' OR action LIKE '%SUSPEND%' "
+                   + "   OR action LIKE '%REJECT%' OR action LIKE '%DEACTIVAT%' "
+                   + "   OR action = 'STATUS_CHANGE' OR action = 'UNLOCK_USER' "
+                   + "GROUP BY action";
+
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            int total = 0;
+            int approved = 0;
+            int rejections = 0;
+
+            while (rs.next()) {
+                String act = rs.getString("action");
+                int cnt = rs.getInt("cnt");
+                total += cnt;
+
+                if ("APPROVE_COMPANY".equalsIgnoreCase(act)) {
+                    kpis.put("companiesApproved", kpis.get("companiesApproved") + cnt);
+                    approved += cnt;
+                } else if ("APPROVE_USER".equalsIgnoreCase(act)) {
+                    kpis.put("usersApproved", kpis.get("usersApproved") + cnt);
+                    approved += cnt;
+                } else if (act != null && act.toUpperCase().contains("APPROVE")) {
+                    approved += cnt;
+                } else if (act != null && (act.toUpperCase().contains("SUSPEND") || act.toUpperCase().contains("REJECT") || act.toUpperCase().contains("DEACTIVAT"))) {
+                    rejections += cnt;
+                }
+            }
+            kpis.put("totalApprovals", approved);
+            kpis.put("totalRejections", rejections);
             kpis.put("totalLogs", total);
         } catch (Exception e) {
             e.printStackTrace();

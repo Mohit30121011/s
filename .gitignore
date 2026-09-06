@@ -1,3 +1,9 @@
 .agents/
 target/
 *.log
+scratch/
+src/main/webapp/scratch/
+ck.txt
+cookie.txt
+javac.*.args
+build/classes/InspectSchema.class

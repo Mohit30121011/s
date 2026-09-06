@@ -52,6 +52,7 @@ public class AuthenticationFilter implements Filter {
                 || path.startsWith("/login") || path.startsWith("/register")
                 || path.startsWith("/forgot-password") || path.startsWith("/reset-password")
                 || path.startsWith("/barcode-pdf")
+                || path.startsWith("/pay-mobile") || path.startsWith("/payment/")
                 || path.contains("/assets/") || path.endsWith("login.jsp") || path.endsWith("register.jsp")
                 || path.endsWith("forgot-password.jsp") || path.endsWith("reset-password.jsp");
 
@@ -67,7 +68,32 @@ public class AuthenticationFilter implements Filter {
         }
 
         User user = (User) session.getAttribute("user");
+
+        // The session holds the User loaded at login, so a role or permission
+        // change made in the admin console did nothing until that person logged
+        // out - revoking someone's Billing access left them using Billing all
+        // day. The console marks the user; we reload just them, just once.
+        if (com.nlogistic.util.AccessRefresh.consume(user.getUserId())) {
+            User refreshed = new com.nlogistic.dao.UserDAO().getUserById(user.getUserId());
+            if (refreshed != null) {
+                user = refreshed;
+                session.setAttribute("user", refreshed);
+                session.setAttribute("roleId", refreshed.getRoleId());
+                session.setAttribute("userPermissions", refreshed.getPermissionsMap());
+            }
+        }
+
         int roleId = user.getRoleId();
+
+        // Support /admin/audit-approvals with role enforcement
+        if (path.equals("/admin/audit-approvals") || path.equals("/admin/audit-approvals/")) {
+            if (roleId > COMPANY_ADMIN) {
+                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: administrative privileges required to view approval audit logs.");
+                return;
+            }
+            req.getRequestDispatcher("/jsp/admin/audit_approvals.jsp").forward(request, response);
+            return;
+        }
 
         // MVC2: these views hold no logic of their own any more, so a direct hit
         // would render an empty page. Send it through the controller that scopes
@@ -110,63 +136,74 @@ public class AuthenticationFilter implements Filter {
             return isRoleAllowed(path, roleId);
         }
 
-        // Granular Module Permissions for Internal Staff
-        if (path.startsWith("/admin/users") || path.startsWith("/admin/companies") || path.startsWith("/admin/customers")
-                || path.startsWith("/admin/audit-logs") || path.endsWith("/jsp/admin/users.jsp") || path.endsWith("/jsp/admin/audit_logins.jsp")) {
-            return user.hasPermission("users");
-        }
+        // Two gates, both of which must pass.
+        //
+        // The role baseline decides what this kind of user may ever reach; the
+        // module permissions then switch parts of that off for one individual.
+        // Previously only the second gate ran once a path matched a module, so a
+        // ticked checkbox could hand an Operations user the pricing engine or the
+        // P&L - permissions widened the role instead of narrowing it.
+        if (!isRoleAllowed(path, roleId)) return false;
 
+        String module = moduleFor(path);
+        return module == null || user.hasPermission(module);
+    }
+
+    /**
+     * Which module checkbox governs this path, or null when the path is covered
+     * by the role baseline alone.
+     *
+     * Ordered most-specific first: /admin/audit-logs must be matched before the
+     * generic /admin prefix, and the finance routes before the dashboard ones.
+     */
+    private String moduleFor(String path) {
+        if (path.startsWith("/admin/users") || path.startsWith("/admin/companies") || path.startsWith("/admin/customers")
+                || path.startsWith("/admin/audit-logs") || path.startsWith("/admin/audit-approvals")
+                || path.endsWith("/jsp/admin/users.jsp") || path.endsWith("/jsp/admin/audit_logins.jsp")
+                || path.endsWith("/jsp/admin/audit_approvals.jsp")) {
+            return "users";
+        }
         if (path.startsWith("/finance") || path.contains("/profit-loss") || path.endsWith("/profit_loss_analytics.jsp")
                 || path.endsWith("/shipment_drilldown.jsp")) {
-            return user.hasPermission("plg");
+            return "plg";
         }
-
         if (path.startsWith("/pricing") || path.startsWith("/predictive-graph") || path.endsWith("/pricing.jsp")
                 || path.endsWith("/predictive-graph.jsp") || path.startsWith("/settings")) {
-            return user.hasPermission("settings");
+            return "settings";
         }
-
         if (path.startsWith("/upload-stock") || path.startsWith("/stock") || path.startsWith("/manual-stock")
                 || path.startsWith("/adjust-stock") || path.startsWith("/download-errors") || path.startsWith("/inventory")
                 || path.startsWith("/ledger") || path.endsWith("/stock.jsp") || path.endsWith("/upload-stock.jsp")
                 || path.endsWith("/ledger.jsp") || path.endsWith("/products.jsp")) {
-            return user.hasPermission("inventory");
+            return "inventory";
         }
-
         if (path.startsWith("/barcodes") || path.startsWith("/scan-barcode") || path.endsWith("/barcodes.jsp")
                 || path.endsWith("/barcode-management.jsp") || path.endsWith("/scan-barcode.jsp")
                 || path.startsWith("/containers") || path.endsWith("/containers.jsp") || path.startsWith("/vessel")
                 || path.startsWith("/ports") || path.endsWith("/vessels.jsp") || path.endsWith("/ports.jsp")
                 || path.contains("/tracking")) {
-            return user.hasPermission("tracking");
+            return "tracking";
         }
-
         if (path.startsWith("/shipments") || path.startsWith("/allocate") || path.endsWith("/create_shipment.jsp")
                 || path.endsWith("/shipments.jsp") || path.endsWith("/allocate-container.jsp") || path.startsWith("/book")) {
-            return user.hasPermission("shipments");
+            return "shipments";
         }
-
         if (path.startsWith("/billing") || path.startsWith("/generate-invoice") || path.startsWith("/invoices")
                 || path.startsWith("/record-payment") || path.startsWith("/payment") || path.startsWith("/view-invoice")
                 || path.startsWith("/invoice-view") || path.endsWith("/billing.jsp") || path.endsWith("/invoices.jsp")) {
-            return user.hasPermission("invoicing");
+            return "invoicing";
         }
-
         if (path.startsWith("/claims") || path.endsWith("/claims.jsp") || path.endsWith("/claim-details.jsp")) {
-            return user.hasPermission("claims");
+            return "claims";
         }
-
         if (path.startsWith("/compliance") || path.endsWith("/compliance.jsp") || path.contains("/document")) {
-            return user.hasPermission("compliance");
+            return "compliance";
         }
-
         if (path.startsWith("/analytics") || path.startsWith("/dashboard/executive") || path.startsWith("/executive")
                 || path.endsWith("/analytics.jsp") || path.endsWith("/executive_dashboard.jsp")) {
-            return user.hasPermission("dashboard");
+            return "dashboard";
         }
-
-        // Remaining system routes check role baseline table
-        return isRoleAllowed(path, roleId);
+        return null;
     }
 
     /**
@@ -180,7 +217,9 @@ public class AuthenticationFilter implements Filter {
         // which would otherwise sidestep every servlet-path rule below. Sensitive
         // views are therefore matched on their file name as well as their route.
         if (path.startsWith("/admin/users") || path.startsWith("/admin/audit-logs")
-                || path.endsWith("/jsp/admin/users.jsp") || path.endsWith("/jsp/admin/audit_logins.jsp")) {
+                || path.startsWith("/admin/audit-approvals")
+                || path.endsWith("/jsp/admin/users.jsp") || path.endsWith("/jsp/admin/audit_logins.jsp")
+                || path.endsWith("/jsp/admin/audit_approvals.jsp")) {
             // Staff governance + audit trail: Super Admin globally, Company Admin
             // scoped to their own tenant (enforced inside the servlets).
             return roleId <= COMPANY_ADMIN;
@@ -205,8 +244,14 @@ public class AuthenticationFilter implements Filter {
         if (path.endsWith("/billing.jsp")) {
             return roleId <= COMPANY_ADMIN || roleId == FINANCE;
         }
-        if (path.endsWith("/vessels.jsp") || path.endsWith("/ports.jsp")
-                || path.endsWith("/customers.jsp")) {
+        // Ports and vessels are operational master data. The role table used to
+        // admit Finance here while the sidebar and the default permission set both
+        // withheld it, so the codebase disagreed with itself; Finance is billing,
+        // P&L and claims. Customers (billing counterparties) stay available to them.
+        if (path.endsWith("/vessels.jsp") || path.endsWith("/ports.jsp")) {
+            return roleId <= OPERATIONS;
+        }
+        if (path.endsWith("/customers.jsp")) {
             return roleId <= FINANCE;
         }
 
@@ -246,7 +291,7 @@ public class AuthenticationFilter implements Filter {
 
         // ---- 6. Master data: vessels & ports ----------------------------------
         if (path.startsWith("/vessel") || path.startsWith("/ports")) {
-            return roleId <= FINANCE; // all internal staff may view; Customers blocked
+            return roleId <= OPERATIONS; // Admins and Operations; Finance and Customers blocked
         }
 
         // ---- 7. Billing administration: Admins + Finance ----------------------
@@ -302,12 +347,19 @@ public class AuthenticationFilter implements Filter {
         if (path.endsWith("/jsp/admin/customers.jsp"))       return "/admin/customers";
         if (path.endsWith("/jsp/admin/companies.jsp"))       return "/admin/companies";
         if (path.endsWith("/jsp/admin/audit_logins.jsp"))    return "/admin/audit-logs";
+        if (path.endsWith("/jsp/admin/audit_approvals.jsp")) return "/admin/audit-approvals";
         if (path.endsWith("/jsp/doc-viewer.jsp"))            return "/compliance-document";
         if (path.endsWith("/jsp/ports.jsp"))                 return "/ports";
         if (path.endsWith("/jsp/vessels.jsp"))               return "/vessels";
         if (path.endsWith("/jsp/products.jsp"))              return "/inventory/products";
         if (path.endsWith("/jsp/containers.jsp"))            return "/containers";
         if (path.endsWith("/jsp/claims.jsp"))                return "/claims";
+        // "Billing & Invoices" and "Invoices & Statements" were two pages doing the
+        // same job. /invoices is the superset - it adds PDF output and statements,
+        // and its payment form offers only modes the database accepts - so /billing
+        // now lands there. Only the exact path redirects; /billing/generate and
+        // /billing/pay still reach BillingServlet.
+        if (path.equals("/billing") || path.endsWith("/jsp/billing.jsp")) return "/invoices";
         // barcodes.jsp is an early prototype that still answered on its own URL,
         // rendering an unstyled, unscoped shell outside the servlet.
         if (path.endsWith("/jsp/barcodes.jsp"))              return "/barcodes";

@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%-- A flash message left over from a previous session must not surface on the
      login page; clear both before anything renders. --%>
@@ -414,16 +414,18 @@
     .nl-form-icon-circle:hover {
         transform: scale(1.08) rotate(5deg);
     }
-    .nl-form-title {
+    .nl-form-title,
+    [data-theme="dark"] .nl-split-right .nl-form-title {
         font-size: 28px;
         font-weight: 800;
-        color: #0F172A;
+        color: #0F172A !important;
         letter-spacing: -0.5px;
         margin-bottom: 6px;
     }
-    .nl-form-subtitle {
+    .nl-form-subtitle,
+    [data-theme="dark"] .nl-split-right .nl-form-subtitle {
         font-size: 14px;
-        color: #64748B;
+        color: #64748B !important;
         line-height: 1.45;
     }
 
@@ -519,7 +521,9 @@
         transition: color 0.2s ease, transform 0.2s ease;
         z-index: 2;
     }
-    .nl-text-input {
+    .nl-text-input,
+    [data-theme="dark"] .nl-split-right input[type="text"],
+    [data-theme="dark"] .nl-split-right input[type="password"] {
         width: 100%;
         height: 48px;
         padding-left: 48px !important;
@@ -528,17 +532,22 @@
         padding-bottom: 0 !important;
         font-size: 14.5px;
         font-weight: 500;
-        color: #0F172A;
-        background: #F8FAFC;
-        border: 1.5px solid #E2E8F0;
+        color: #0F172A !important;
+        background: #F8FAFC !important;
+        background-color: #F8FAFC !important;
+        border: 1.5px solid #E2E8F0 !important;
         border-radius: 50px !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         outline: none;
     }
-    .nl-text-input:focus {
-        background: #FFFFFF;
-        border-color: #FC8019;
-        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.15);
+    .nl-text-input:focus,
+    [data-theme="dark"] .nl-split-right input[type="text"]:focus,
+    [data-theme="dark"] .nl-split-right input[type="password"]:focus {
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        border-color: #FC8019 !important;
+        color: #0F172A !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.15) !important;
     }
     .nl-input-box:focus-within .nl-input-lead-icon {
         color: #FC8019;

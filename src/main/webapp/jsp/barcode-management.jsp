@@ -264,6 +264,21 @@
         border: 1px solid #FFE0D1;
     }
 
+    /* KPI Sub Pill Badges */
+    .barcode-kpi-pill {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        letter-spacing: 0.3px;
+    }
+    .barcode-kpi-pill.pill-purple { background: #EEF2FF; color: #4F46E5; border: 1px solid #E0E7FF; }
+    .barcode-kpi-pill.pill-blue   { background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; }
+    .barcode-kpi-pill.pill-green  { background: #ECFDF5; color: #10B981; border: 1px solid #D1FAE5; }
+    .barcode-kpi-pill.pill-orange { background: #FFF7ED; color: #EA580C; border: 1px solid #FFEDD5; }
+
     /* Barcode Display Frame */
     .barcode-display-frame {
         background: #FAFBFD;
@@ -430,8 +445,8 @@
     }
     .nl-scanlog-scroll {
         overflow-x: auto;
-        max-height: 420px;
-        overflow-y: auto;
+        max-height: none;
+        overflow-y: visible;
         border-radius: 10px;
         border: 1px solid #F1F5F9;
     }
@@ -468,6 +483,77 @@
         font-weight: 600;
     }
 
+    .breadcrumb-active {
+        color: #0F172A;
+    }
+
+    .btn-nlog {
+        background: #FC8019;
+        color: #FFFFFF !important;
+        border: none;
+        font-weight: 600;
+        transition: all 0.15s ease;
+    }
+    .btn-nlog:hover {
+        background: #E8730F;
+        color: #FFFFFF !important;
+    }
+
+    /* Pagination */
+    .nl-pagination-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid #E2E8F0;
+    }
+    .nl-pagination-info {
+        font-size: 13px;
+        color: #64748B;
+    }
+    .nl-pagination-info strong {
+        color: #0F172A;
+    }
+    .nl-pagination-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .nl-page-btn {
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12.5px;
+        font-weight: 600;
+        background-color: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        color: #475569;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+    }
+    .nl-page-btn:hover:not(.disabled) {
+        border-color: #FC8019;
+        color: #FC8019;
+        background-color: #FFF5EC;
+    }
+    .nl-page-btn.active {
+        background-color: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.35);
+    }
+    .nl-page-btn.disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
     /* Suppress card tools completely */
     .nl-card-tools,
     .no-card-tools .nl-card-tools,
@@ -476,6 +562,347 @@
     .barcode-main-card .nl-card-tools,
     .nl-scanlog-card .nl-card-tools {
         display: none !important;
+    }
+
+    /* ==========================================================================
+       ENTERPRISE DARK THEME PARITY (FR8.1 - FR8.8)
+       ========================================================================== */
+    [data-theme="dark"] .barcode-page-wrapper {
+        background-color: transparent !important;
+    }
+    [data-theme="dark"] .barcode-page-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .barcode-breadcrumb,
+    [data-theme="dark"] .barcode-breadcrumb span {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .breadcrumb-active {
+        color: #F8FAFC !important;
+    }
+
+    /* Dark Mode KPI Cards */
+    [data-theme="dark"] .barcode-kpi-card {
+        background: #101820 !important;
+        border-color: #223447 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .barcode-kpi-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .barcode-kpi-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .barcode-kpi-sub {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .barcode-kpi-icon.total {
+        background: rgba(99, 102, 241, 0.16) !important;
+        color: #818CF8 !important;
+        border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-icon.container {
+        background: rgba(37, 99, 235, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(37, 99, 235, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-icon.shipment {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-icon.scans {
+        background: rgba(234, 88, 12, 0.16) !important;
+        color: #FB923C !important;
+        border: 1px solid rgba(234, 88, 12, 0.35) !important;
+    }
+
+    /* Dark Mode KPI Sub Pill Badges */
+    [data-theme="dark"] .barcode-kpi-pill.pill-purple {
+        background: rgba(99, 102, 241, 0.16) !important;
+        color: #818CF8 !important;
+        border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-pill.pill-blue {
+        background: rgba(37, 99, 235, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(37, 99, 235, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-pill.pill-green {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-kpi-pill.pill-orange {
+        background: rgba(234, 88, 12, 0.16) !important;
+        color: #FB923C !important;
+        border: 1px solid rgba(234, 88, 12, 0.35) !important;
+    }
+
+    /* Dark Mode Barcode Type Pills (QR and Code128) */
+    [data-theme="dark"] .barcode-type-pill.QR {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.35) !important;
+    }
+    [data-theme="dark"] .barcode-type-pill.Code128 {
+        background: rgba(37, 99, 235, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(37, 99, 235, 0.35) !important;
+    }
+
+    /* Filter & Search Toolbar Dark Mode */
+    [data-theme="dark"] .barcode-filter-toolbar {
+        background: #101820 !important;
+        border-color: #223447 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    [data-theme="dark"] .barcode-search-wrap i.search-icon {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .barcode-search-input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .barcode-search-input::placeholder {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .barcode-search-input:focus {
+        background: #101820 !important;
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+    }
+    [data-theme="dark"] .barcode-filter-toolbar select.form-select {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+    [data-theme="dark"] .barcode-filter-toolbar select.form-select option {
+        background-color: #151F28 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .btn-outline-secondary {
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-outline-secondary:hover {
+        background-color: #1E2D3D !important;
+        color: #F8FAFC !important;
+        border-color: #FC8019 !important;
+    }
+
+    /* Main Codes Card & Grid */
+    [data-theme="dark"] .barcode-main-card {
+        background: #101820 !important;
+        border-color: #223447 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    [data-theme="dark"] .barcode-main-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #barcodeVisibleCount {
+        background-color: #151F28 !important;
+        color: #94A3B8 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .barcode-main-head .text-muted {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .barcode-main-head .text-muted strong {
+        color: #F8FAFC !important;
+    }
+
+    /* Barcode Grid Cards */
+    [data-theme="dark"] .barcode-grid-card {
+        background: #151F28 !important;
+        border-color: #223447 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+    [data-theme="dark"] .barcode-grid-card:hover {
+        border-color: #FC8019 !important;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45) !important;
+    }
+    [data-theme="dark"] .barcode-entity-badge {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .barcode-display-frame {
+        background: #0D151D !important;
+        border-color: #223447 !important;
+    }
+    [data-theme="dark"] .barcode-img-box {
+        background: #FFFFFF !important;
+        border-radius: 8px !important;
+        padding: 6px !important;
+    }
+    [data-theme="dark"] .barcode-val-badge {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .barcode-val-badge:hover {
+        background: rgba(252, 128, 25, 0.15) !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .barcode-card-footer {
+        border-top-color: #223447 !important;
+    }
+    [data-theme="dark"] .barcode-card-footer small {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-card-action {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-card-action:hover {
+        background: #1E2D3D !important;
+        color: #F8FAFC !important;
+        border-color: #FC8019 !important;
+    }
+    [data-theme="dark"] .text-dark {
+        color: #F8FAFC !important;
+    }
+
+    /* Batch Print Banner Dark Mode */
+    [data-theme="dark"] .nl-batchprint-bar {
+        background: linear-gradient(135deg, rgba(252, 128, 25, 0.12) 0%, rgba(234, 88, 12, 0.08) 100%) !important;
+        border-color: rgba(252, 128, 25, 0.3) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+    [data-theme="dark"] .nl-batchprint-bar strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-batchprint-bar span {
+        color: #CBD5E1 !important;
+    }
+
+    /* Scan Audit Trail Dark Mode */
+    [data-theme="dark"] .nl-scanlog-card {
+        background: #101820 !important;
+        border-color: #223447 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    [data-theme="dark"] .nl-scanlog-head h3 {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-scanlog-head p {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-scanlog-count {
+        background: rgba(234, 88, 12, 0.15) !important;
+        color: #FB923C !important;
+        border-color: rgba(234, 88, 12, 0.3) !important;
+    }
+    [data-theme="dark"] .nl-scanlog-head-icon {
+        background: rgba(234, 88, 12, 0.16) !important;
+        color: #FB923C !important;
+        border: 1px solid rgba(234, 88, 12, 0.35) !important;
+    }
+    [data-theme="dark"] .nl-scanlog-scroll {
+        border-color: #223447 !important;
+    }
+    [data-theme="dark"] .nl-scanlog-table thead th {
+        background: #151F28 !important;
+        color: #94A3B8 !important;
+        border-bottom: 1px solid #223447 !important;
+    }
+    [data-theme="dark"] .nl-scanlog-table tbody td {
+        border-bottom: 1px solid #1E2D3D !important;
+        color: #E2E8F0 !important;
+    }
+    [data-theme="dark"] .nl-scanlog-table tbody tr:hover {
+        background: rgba(252, 128, 25, 0.06) !important;
+    }
+    [data-theme="dark"] .nl-scanlog-table tbody td code {
+        background: #0D151D !important;
+        color: #FC8019 !important;
+        border: 1px solid #223447 !important;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    [data-theme="dark"] .nl-scanlog-chip {
+        background: rgba(37, 99, 235, 0.15) !important;
+        color: #60A5FA !important;
+        border-color: rgba(37, 99, 235, 0.3) !important;
+    }
+    [data-theme="dark"] .nl-scanlog-table td span.badge.bg-light {
+        background-color: #151F28 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3F4D !important;
+    }
+
+    /* Dark Mode Pagination */
+    [data-theme="dark"] .nl-pagination-wrapper {
+        border-top-color: #223447 !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-pagination-info strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn {
+        background-color: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn:hover:not(.disabled) {
+        background-color: #1E2D3D !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .nl-page-btn.active {
+        background-color: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .nl-page-btn.disabled {
+        background-color: #101820 !important;
+        border-color: #223447 !important;
+        color: #475569 !important;
+    }
+
+    /* Dark Mode Modals */
+    [data-theme="dark"] .modal-content {
+        background-color: #151F28 !important;
+        border: 1px solid #223447 !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+    }
+    [data-theme="dark"] .modal-header {
+        border-bottom-color: #223447 !important;
+    }
+    [data-theme="dark"] .modal-footer {
+        border-top-color: #223447 !important;
+    }
+    [data-theme="dark"] .modal-body label,
+    [data-theme="dark"] .modal-body h5,
+    [data-theme="dark"] .modal-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-body select,
+    [data-theme="dark"] .modal-body input {
+        background-color: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-body select option,
+    [data-theme="dark"] .modal-body select optgroup {
+        background-color: #101820 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-footer .btn-light {
+        background-color: #223447 !important;
+        color: #F8FAFC !important;
+        border: none !important;
     }
 </style>
 
@@ -488,7 +915,7 @@
     <div class="container-fluid py-4">
 
         <!-- Page Header -->
-        <div class="barcode-header-row">
+        <div class="barcode-header-row mb-4">
             <div>
                 <h1 class="barcode-page-title">Barcode &amp; Traceability Registry</h1>
                 <p class="barcode-breadcrumb">
@@ -496,13 +923,8 @@
                     <i class="ti ti-chevron-right" style="font-size: 11px;"></i>
                     <span>Tracking &amp; Scanning</span>
                     <i class="ti ti-chevron-right" style="font-size: 11px;"></i>
-                    <span style="color: #0F172A; font-weight: 500;">Manage Barcodes (FR8.1 &ndash; FR8.6)</span>
+                    <span class="breadcrumb-active" style="font-weight: 500;">Manage Barcodes (FR8.1 &ndash; FR8.6)</span>
                 </p>
-            </div>
-            <div>
-                <button type="button" class="btn-create-code" data-bs-toggle="modal" data-bs-target="#generateBarcodeModal">
-                    <i class="ti ti-qrcode"></i> Generate New Code
-                </button>
             </div>
         </div>
 
@@ -542,7 +964,7 @@
                     </div>
                 </div>
                 <div class="barcode-kpi-sub">
-                    <span class="badge" style="background: #EEF2FF; color: #4F46E5; font-size: 11px;">100% Unique</span>
+                    <span class="barcode-kpi-pill pill-purple">100% Unique</span>
                     <span>Across fleet registry</span>
                 </div>
             </div>
@@ -559,7 +981,7 @@
                     </div>
                 </div>
                 <div class="barcode-kpi-sub">
-                    <span class="badge" style="background: #EFF6FF; color: #2563EB; font-size: 11px;">Asset Tags</span>
+                    <span class="barcode-kpi-pill pill-blue">Asset Tags</span>
                     <span>Port &amp; vessel units</span>
                 </div>
             </div>
@@ -576,7 +998,7 @@
                     </div>
                 </div>
                 <div class="barcode-kpi-sub">
-                    <span class="badge" style="background: #ECFDF5; color: #10B981; font-size: 11px;">Waybills</span>
+                    <span class="barcode-kpi-pill pill-green">Waybills</span>
                     <span>Consignments tracked</span>
                 </div>
             </div>
@@ -593,7 +1015,7 @@
                     </div>
                 </div>
                 <div class="barcode-kpi-sub">
-                    <span class="badge" style="background: #FFF7ED; color: #EA580C; font-size: 11px;">Recent Log</span>
+                    <span class="barcode-kpi-pill pill-orange">Recent Log</span>
                     <span>Terminal verifications</span>
                 </div>
             </div>
@@ -838,7 +1260,7 @@
         <div class="nl-scanlog-card" data-no-tools="true">
             <div class="nl-scanlog-head">
                 <div class="d-flex align-items-center gap-2">
-                    <div style="width: 38px; height: 38px; background: #FFF7ED; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #EA580C; font-size: 18px;">
+                    <div class="nl-scanlog-head-icon" style="width: 38px; height: 38px; background: #FFF7ED; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #EA580C; font-size: 18px;">
                         <i class="ti ti-scan"></i>
                     </div>
                     <div>
@@ -882,6 +1304,13 @@
                                 </c:forEach>
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Scan Audit Trail Pagination -->
+                    <div id="scanLogPagination" class="nl-pagination-wrapper mt-3 pt-3 border-top" style="display: none;">
+                        <div class="nl-pagination-info">
+                            <span>Showing <strong id="scanLogPageStart">1</strong> &ndash; <strong id="scanLogPageEnd">8</strong> of <strong id="scanLogTotalCount">${recentScans.size()}</strong> scans</span>
+                        </div>
+                        <div class="nl-pagination-nav" id="scanLogPageButtons"></div>
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -1039,7 +1468,77 @@
                 }
             });
         }
+
+        // Initialize client-side pagination for Scan Audit Trail
+        initScanLogPagination();
     });
+
+    function initScanLogPagination() {
+        const rows = Array.from(document.querySelectorAll('.nl-scanlog-table tbody tr'));
+        const total = rows.length;
+        const pageSize = 8;
+        const paginationEl = document.getElementById('scanLogPagination');
+        if (!paginationEl) return;
+
+        if (total <= pageSize) {
+            paginationEl.style.display = 'none';
+            rows.forEach(function(r) { r.style.display = ''; });
+            return;
+        }
+
+        paginationEl.style.display = 'flex';
+
+        function showScanPage(page) {
+            const totalPages = Math.ceil(total / pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            const start = (page - 1) * pageSize;
+            const end = Math.min(start + pageSize, total);
+
+            rows.forEach(function(r, idx) {
+                r.style.display = (idx >= start && idx < end) ? '' : 'none';
+            });
+
+            const pageStartEl = document.getElementById('scanLogPageStart');
+            const pageEndEl = document.getElementById('scanLogPageEnd');
+            const totalCountEl = document.getElementById('scanLogTotalCount');
+            if (pageStartEl) pageStartEl.textContent = total > 0 ? (start + 1) : 0;
+            if (pageEndEl) pageEndEl.textContent = end;
+            if (totalCountEl) totalCountEl.textContent = total;
+
+            const nav = document.getElementById('scanLogPageButtons');
+            if (!nav) return;
+            let html = '';
+
+            // Prev Button
+            if (page > 1) {
+                html += '<button type="button" class="nl-page-btn" onclick="window.__showScanPage(' + (page - 1) + ')"><i class="ti ti-chevron-left me-1"></i> Prev</button>';
+            } else {
+                html += '<button type="button" class="nl-page-btn disabled" disabled><i class="ti ti-chevron-left me-1"></i> Prev</button>';
+            }
+
+            // Page numbers
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
+                    html += '<button type="button" class="nl-page-btn ' + (p === page ? 'active' : '') + '" onclick="window.__showScanPage(' + p + ')">' + p + '</button>';
+                } else if (p === page - 2 || p === page + 2) {
+                    html += '<span class="nl-page-dots" style="padding: 0 4px; color: #94A3B8;">&hellip;</span>';
+                }
+            }
+
+            // Next Button
+            if (page < totalPages) {
+                html += '<button type="button" class="nl-page-btn" onclick="window.__showScanPage(' + (page + 1) + ')">Next <i class="ti ti-chevron-right ms-1"></i></button>';
+            } else {
+                html += '<button type="button" class="nl-page-btn disabled" disabled>Next <i class="ti ti-chevron-right ms-1"></i></button>';
+            }
+
+            nav.innerHTML = html;
+        }
+
+        window.__showScanPage = showScanPage;
+        showScanPage(1);
+    }
 
     // Handle missing or 404 barcode image gracefully by switching to vector renderer
     window.handleBarcodeImgError = function(img) {

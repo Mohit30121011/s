@@ -54,14 +54,55 @@ public class ProductDAO {
     }
 
 
-    public void deleteProduct(int productId, int requestingUserId) {
+    public boolean deleteProduct(int productId, int requestingUserId) {
         String sql = "{CALL delete_products(?, ?)}";
         try (Connection conn = DBConnectionManager.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
             cs.setInt(1, productId);
             cs.setInt(2, requestingUserId);
             cs.execute();
-        } catch (Exception e) { e.printStackTrace(); }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public java.util.Map<String, Object> getProductKpis() {
+        java.util.Map<String, Object> kpiMap = new java.util.HashMap<>();
+        String sql = "SELECT COUNT(*) AS total_products, " +
+                     "COUNT(DISTINCT category) AS total_categories, " +
+                     "COALESCE(SUM(unit_price), 0.0) AS total_value, " +
+                     "COALESCE(SUM(unit_cost), 0.0) AS total_cost " +
+                     "FROM products";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                kpiMap.put("totalProducts", rs.getInt("total_products"));
+                kpiMap.put("totalCategories", rs.getInt("total_categories"));
+                kpiMap.put("totalValue", rs.getDouble("total_value"));
+                kpiMap.put("totalCost", rs.getDouble("total_cost"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return kpiMap;
+    }
+
+    public java.util.List<String> getDistinctCategories() {
+        java.util.List<String> cats = new ArrayList<>();
+        String sql = "SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND TRIM(category) != '' ORDER BY category ASC";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                cats.add(rs.getString(1).trim());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return cats;
     }
     
     public void updateProduct(int productId, int requestingUserId, String name, String category, String hsn, String uom, Double cost, Double price) {

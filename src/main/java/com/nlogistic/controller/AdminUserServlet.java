@@ -9,13 +9,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.nlogistic.dao.CustomerDAO;
 import com.nlogistic.dao.UserDAO;
+import com.nlogistic.model.Customer;
 import com.nlogistic.model.User;
 
 @WebServlet({"/admin/users", "/admin/customers"})
 public class AdminUserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private UserDAO userDAO = new UserDAO();
+    private CustomerDAO customerDAO = new CustomerDAO();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Contract Precondition: Verify caller role/permission
@@ -42,6 +45,14 @@ public class AdminUserServlet extends HttpServlet {
             final int myCompany = caller.getCompanyId();
             if (allUsers != null) allUsers.removeIf(u -> u.getCompanyId() != myCompany);
             if (pendingUsers != null) pendingUsers.removeIf(u -> u.getCompanyId() != myCompany);
+        }
+
+        java.util.Map<Integer, Customer> customerMap = customerDAO.getAllCustomersByUserId();
+        request.setAttribute("customerMap", customerMap);
+
+        if (customerQueueView) {
+            if (allUsers != null) allUsers.removeIf(u -> u.getRoleId() != 5 && !customerMap.containsKey(u.getUserId()));
+            if (pendingUsers != null) pendingUsers.removeIf(u -> u.getRoleId() != 5 && !customerMap.containsKey(u.getUserId()));
         }
         com.nlogistic.dao.CompanyDAO cDao = new com.nlogistic.dao.CompanyDAO();
         List<com.nlogistic.model.Company> allComps = cDao.getAllCompanies();
@@ -242,6 +253,7 @@ public class AdminUserServlet extends HttpServlet {
             if (newRoleStr != null && !newRoleStr.trim().isEmpty()) {
                 try {
                     userDAO.assignRole(userId, Integer.parseInt(newRoleStr.trim()));
+                    com.nlogistic.util.AccessRefresh.mark(userId);
                 } catch (Exception ignored) {}
             }
 
@@ -259,6 +271,9 @@ public class AdminUserServlet extends HttpServlet {
 
             String permsCsv = String.join(",", perms);
             boolean ok = userDAO.updateUserPermissions(userId, permsCsv, adminUserId);
+
+            // Take effect on this user's next request rather than at their next login.
+            com.nlogistic.util.AccessRefresh.mark(userId);
 
             // If updating currently logged in user's own permissions, refresh session user immediately
             if (admin.getUserId() == userId) {

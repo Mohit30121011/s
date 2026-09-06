@@ -4,6 +4,526 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
                              http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1"
-         metadata-complete="false">
+         metadata-complete="true">
+
     <display-name>NLogistic</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- Session Configuration -->
+    <session-config>
+        <session-timeout>60</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+    </session-config>
+
+    <!-- Authentication & Security Filter -->
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>com.nlogistic.filter.AuthenticationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Mock Payment Gateway & Mobile QR Sync Servlets -->
+    <servlet>
+        <servlet-name>PaymentGatewayServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.PaymentGatewayServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaymentGatewayServlet</servlet-name>
+        <url-pattern>/payment/initiate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PaymentGatewayServlet</servlet-name>
+        <url-pattern>/payment/status</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PaymentGatewayServlet</servlet-name>
+        <url-pattern>/payment/pay-mock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PaymentGatewayServlet</servlet-name>
+        <url-pattern>/payment/qr</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MobilePaymentServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.MobilePaymentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MobilePaymentServlet</servlet-name>
+        <url-pattern>/pay-mobile</url-pattern>
+    </servlet-mapping>
+
+    <!-- 1. Authentication & User Management Servlets -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.RegisterServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>52428800</max-request-size>
+            <file-size-threshold>2097152</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/register</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ForgotPasswordServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ForgotPasswordServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ForgotPasswordServlet</servlet-name>
+        <url-pattern>/forgot-password</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ResetPasswordServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ResetPasswordServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResetPasswordServlet</servlet-name>
+        <url-pattern>/reset-password</url-pattern>
+    </servlet-mapping>
+
+    <!-- 2. Dashboard & Alert Servlets -->
+    <servlet>
+        <servlet-name>DashboardServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.DashboardServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DashboardServlet</servlet-name>
+        <url-pattern>/dashboard</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ExecutiveDashboardServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ExecutiveDashboardServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ExecutiveDashboardServlet</servlet-name>
+        <url-pattern>/dashboard/executive</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AlertsServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AlertsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AlertsServlet</servlet-name>
+        <url-pattern>/alerts</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>NotificationServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.NotificationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>NotificationServlet</servlet-name>
+        <url-pattern>/notifications</url-pattern>
+    </servlet-mapping>
+
+    <!-- 3. Admin Servlets -->
+    <servlet>
+        <servlet-name>AdminUserServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AdminUserServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminUserServlet</servlet-name>
+        <url-pattern>/admin/users</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminUserServlet</servlet-name>
+        <url-pattern>/admin/customers</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminCompanyServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AdminCompanyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminCompanyServlet</servlet-name>
+        <url-pattern>/admin/companies</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AuditLogServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AuditLogServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuditLogServlet</servlet-name>
+        <url-pattern>/admin/audit-logs</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AuditApprovalsServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AuditApprovalsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuditApprovalsServlet</servlet-name>
+        <url-pattern>/admin/audit-approvals</url-pattern>
+    </servlet-mapping>
+
+    <!-- 4. Customer & Partner Servlets -->
+    <servlet>
+        <servlet-name>CustomerServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.CustomerServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>52428800</max-request-size>
+            <file-size-threshold>2097152</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CustomerServlet</servlet-name>
+        <url-pattern>/customers</url-pattern>
+    </servlet-mapping>
+
+    <!-- 5. Containers & Fleet Servlets -->
+    <servlet>
+        <servlet-name>ContainerCatalogServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ContainerCatalogServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ContainerCatalogServlet</servlet-name>
+        <url-pattern>/containers</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ContainerServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ContainerServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>52428800</max-request-size>
+            <file-size-threshold>2097152</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ContainerServlet</servlet-name>
+        <url-pattern>/containers/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AllocateContainerServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AllocateContainerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AllocateContainerServlet</servlet-name>
+        <url-pattern>/allocate</url-pattern>
+    </servlet-mapping>
+
+    <!-- 6. Shipment Servlets -->
+    <servlet>
+        <servlet-name>ShipmentServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ShipmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ShipmentServlet</servlet-name>
+        <url-pattern>/shipments/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BookShipmentServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.BookShipmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookShipmentServlet</servlet-name>
+        <url-pattern>/book</url-pattern>
+    </servlet-mapping>
+
+    <!-- 7. Ports, Vessels & Pricing Servlets -->
+    <servlet>
+        <servlet-name>PortServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.PortServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PortServlet</servlet-name>
+        <url-pattern>/ports</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>VesselServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.VesselServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VesselServlet</servlet-name>
+        <url-pattern>/vessels</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PricingServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.PricingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PricingServlet</servlet-name>
+        <url-pattern>/pricing/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MasterDataServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.MasterDataServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MasterDataServlet</servlet-name>
+        <url-pattern>/master-data/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- 8. Stock & Inventory Servlets -->
+    <servlet>
+        <servlet-name>StockUploadServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.StockUploadServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>15728640</max-request-size>
+            <file-size-threshold>2097152</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StockUploadServlet</servlet-name>
+        <url-pattern>/upload-stock</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ManualStockServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ManualStockServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManualStockServlet</servlet-name>
+        <url-pattern>/manual-stock</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StockAdjustmentServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.StockAdjustmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StockAdjustmentServlet</servlet-name>
+        <url-pattern>/adjust-stock</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LedgerServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.LedgerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LedgerServlet</servlet-name>
+        <url-pattern>/ledger</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>InventoryServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.InventoryServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>104857600</max-request-size>
+            <file-size-threshold>1048576</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InventoryServlet</servlet-name>
+        <url-pattern>/inventory/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- 9. Compliance & Document Servlets -->
+    <servlet>
+        <servlet-name>ComplianceServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ComplianceServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>15728640</max-file-size>
+            <max-request-size>52428800</max-request-size>
+            <file-size-threshold>2097152</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ComplianceServlet</servlet-name>
+        <url-pattern>/compliance</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ComplianceServlet</servlet-name>
+        <url-pattern>/compliance/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DocumentViewServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.DocumentViewServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DocumentViewServlet</servlet-name>
+        <url-pattern>/compliance-document</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DocumentDownloadServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.DocumentDownloadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DocumentDownloadServlet</servlet-name>
+        <url-pattern>/download</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DownloadErrorServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.DownloadErrorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DownloadErrorServlet</servlet-name>
+        <url-pattern>/download-errors</url-pattern>
+    </servlet-mapping>
+
+    <!-- 10. Billing, Invoicing & Finance Servlets -->
+    <servlet>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.InvoiceServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <url-pattern>/invoices</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <url-pattern>/invoices/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <url-pattern>/invoice-view</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>GenerateInvoiceServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.GenerateInvoiceServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GenerateInvoiceServlet</servlet-name>
+        <url-pattern>/generate-invoice</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BillingServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.BillingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BillingServlet</servlet-name>
+        <url-pattern>/billing</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BillingServlet</servlet-name>
+        <url-pattern>/billing/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RecordPaymentServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.RecordPaymentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RecordPaymentServlet</servlet-name>
+        <url-pattern>/record-payment</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>FinanceServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.FinanceServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FinanceServlet</servlet-name>
+        <url-pattern>/finance/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- 11. Claims Servlets -->
+    <servlet>
+        <servlet-name>ClaimServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ClaimServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>15728640</max-file-size>
+            <max-request-size>52428800</max-request-size>
+            <file-size-threshold>2097152</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ClaimServlet</servlet-name>
+        <url-pattern>/claims</url-pattern>
+    </servlet-mapping>
+
+    <!-- 12. Barcode & Tracking Servlets -->
+    <servlet>
+        <servlet-name>BarcodeServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.BarcodeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BarcodeServlet</servlet-name>
+        <url-pattern>/barcodes</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BarcodeLabelServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.BarcodeLabelServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BarcodeLabelServlet</servlet-name>
+        <url-pattern>/barcodes/label</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BarcodePdfServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.BarcodePdfServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BarcodePdfServlet</servlet-name>
+        <url-pattern>/barcode-pdf</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ScanBarcodeServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.ScanBarcodeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ScanBarcodeServlet</servlet-name>
+        <url-pattern>/scan-barcode</url-pattern>
+    </servlet-mapping>
+
+    <!-- 13. Analytics & Reporting Servlets -->
+    <servlet>
+        <servlet-name>AnalyticsServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.AnalyticsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AnalyticsServlet</servlet-name>
+        <url-pattern>/analytics/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PredictiveGraphServlet</servlet-name>
+        <servlet-class>com.nlogistic.controller.PredictiveGraphServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PredictiveGraphServlet</servlet-name>
+        <url-pattern>/predictive-graph</url-pattern>
+    </servlet-mapping>
+
 </web-app>

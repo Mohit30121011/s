@@ -57,13 +57,14 @@
             border: none;
             padding: 10px 24px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: 50px !important;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
             transition: all 0.15s ease-in-out;
+            box-shadow: 0 3px 10px rgba(252, 128, 25, 0.28);
         }
         .btn-print:hover {
             background-color: #E66F0F;
@@ -73,11 +74,19 @@
             background: #FFFFFF;
             border: 1px solid var(--border-color);
             color: var(--text-dark);
-            padding: 9px 18px;
+            padding: 9px 20px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 50px !important;
             text-decoration: none;
             font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+        .btn-back:hover {
+            background: #F1F5F9;
+            color: #0F172A;
         }
 
         .invoice-header {
@@ -133,10 +142,12 @@
         }
 
         .status-stamp {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             margin-top: 8px;
-            padding: 4px 14px;
-            border-radius: 6px;
+            padding: 5px 14px;
+            border-radius: 50px !important;
             font-size: 0.78rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -265,12 +276,101 @@
             font-weight: 600;
         }
 
+        /* Dark Mode Support for Printable Template */
+        [data-theme="dark"] body {
+            background-color: #080E14 !important;
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .invoice-wrapper {
+            background-color: #101820 !important;
+            border-color: #22303A !important;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45) !important;
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .brand-title {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .invoice-meta h2 {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .meta-row strong {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .meta-row {
+            color: #94A3B8 !important;
+        }
+        [data-theme="dark"] .company-details {
+            color: #94A3B8 !important;
+        }
+        [data-theme="dark"] .parties-grid {
+            background: #151F28 !important;
+            border-color: #2D3F4D !important;
+        }
+        [data-theme="dark"] .party-block h4 {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .party-block p strong {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .party-block p {
+            color: #94A3B8 !important;
+        }
+        [data-theme="dark"] .items-table th {
+            background-color: #0B1520 !important;
+            color: #94A3B8 !important;
+            border-color: #22303A !important;
+        }
+        [data-theme="dark"] .items-table td {
+            color: #F8FAFC !important;
+            border-color: #22303A !important;
+        }
+        [data-theme="dark"] .payment-info strong {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .payment-info {
+            color: #94A3B8 !important;
+        }
+        [data-theme="dark"] .totals-table .amount {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .totals-table tr.grand-total td {
+            border-color: #475569 !important;
+            color: #FC8019 !important;
+        }
+        [data-theme="dark"] .barcode-code {
+            color: #F8FAFC !important;
+        }
+        [data-theme="dark"] .btn-back {
+            background: #151F28 !important;
+            border-color: #2D3F4D !important;
+            color: #CBD5E1 !important;
+        }
+        [data-theme="dark"] .btn-back:hover {
+            background: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+
+        /* Translucent Dark Status Stamps */
+        [data-theme="dark"] .status-paid { background: rgba(16, 185, 129, 0.16) !important; color: #34D399 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; }
+        [data-theme="dark"] .status-partial { background: rgba(245, 158, 11, 0.16) !important; color: #FBBF24 !important; border: 1px solid rgba(245, 158, 11, 0.3) !important; }
+        [data-theme="dark"] .status-overdue { background: rgba(239, 68, 68, 0.16) !important; color: #F87171 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; }
+        [data-theme="dark"] .status-unpaid { background: rgba(100, 116, 139, 0.16) !important; color: #94A3B8 !important; border: 1px solid rgba(100, 116, 139, 0.3) !important; }
+
         @media print {
-            body { background: #FFFFFF; padding: 0; }
-            .action-bar { display: none; }
-            .invoice-wrapper { border: none; box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            body { background: #FFFFFF !important; color: #000000 !important; padding: 0 !important; }
+            .action-bar { display: none !important; }
+            .invoice-wrapper { background: #FFFFFF !important; color: #000000 !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+            .parties-grid { background: #F8FAFC !important; color: #000000 !important; border: 1px solid #E2E8F0 !important; }
+            .items-table th { background-color: #F1F5F9 !important; color: #000000 !important; }
+            .items-table td { color: #000000 !important; }
         }
     </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body>
 
@@ -355,8 +455,8 @@
                     <th style="width: 8%;">#</th>
                     <th style="width: 52%;">Description of Service / Freight</th>
                     <th class="text-right" style="width: 12%;">Qty</th>
-                    <th class="text-right" style="width: 14%;">Rate (&#8377;)</th>
-                    <th class="text-right" style="width: 14%;">Amount (&#8377;)</th>
+                    <th class="text-right" style="width: 14%;">Rate ($ USD)</th>
+                    <th class="text-right" style="width: 14%;">Amount ($ USD)</th>
                 </tr>
             </thead>
             <tbody>
@@ -365,8 +465,8 @@
                         <td>${status.count}</td>
                         <td><strong>${item.description}</strong></td>
                         <td class="text-right">${item.quantity}</td>
-                        <td class="text-right"><fmt:formatNumber value="${item.unitPrice}" minFractionDigits="2"/></td>
-                        <td class="text-right fw-bold"><fmt:formatNumber value="${item.lineTotal}" minFractionDigits="2"/></td>
+                        <td class="text-right">$<fmt:formatNumber value="${item.unitPrice}" minFractionDigits="2"/></td>
+                        <td class="text-right fw-bold">$<fmt:formatNumber value="${item.lineTotal}" minFractionDigits="2"/></td>
                     </tr>
                 </c:forEach>
                 <c:if test="${empty lineItems}">
@@ -374,8 +474,8 @@
                         <td>1</td>
                         <td><strong>Standard Freight &amp; Handling Service</strong></td>
                         <td class="text-right">1</td>
-                        <td class="text-right"><fmt:formatNumber value="${invoice.subtotalAmount}" minFractionDigits="2"/></td>
-                        <td class="text-right fw-bold"><fmt:formatNumber value="${invoice.subtotalAmount}" minFractionDigits="2"/></td>
+                        <td class="text-right">$<fmt:formatNumber value="${invoice.subtotalAmount}" minFractionDigits="2"/></td>
+                        <td class="text-right fw-bold">$<fmt:formatNumber value="${invoice.subtotalAmount}" minFractionDigits="2"/></td>
                     </tr>
                 </c:if>
             </tbody>
@@ -387,14 +487,15 @@
                 Beneficiary: NLogistic Freight &amp; Supply Chain Ltd.<br>
                 Bank: HDFC Bank &bull; A/C: 50200089123400<br>
                 IFSC: HDFC0000240 &bull; Branch: JNPT Port Commercial<br>
-                UPI ID: payments@nlogistic
+                UPI ID: payments@nlogistic<br>
+                <span class="text-muted" style="font-size: 11px;">Exchange Reference: 1 USD &approx; &#8377;84.00 INR</span>
 
                 <c:if test="${not empty payments}">
                     <div style="margin-top: 14px; font-size: 0.76rem;">
                         <strong>Recorded Payment Logs:</strong>
                         <ul style="padding-left: 18px; margin: 4px 0 0;">
                             <c:forEach var="p" items="${payments}">
-                                <li><fmt:formatDate value="${p.paymentDate}" pattern="dd MMM yyyy"/>: &#8377;<fmt:formatNumber value="${p.amountPaid}" minFractionDigits="2"/> via ${p.paymentMode} (${p.transactionRef})</li>
+                                <li><fmt:formatDate value="${p.paymentDate}" pattern="dd MMM yyyy"/>: $<fmt:formatNumber value="${p.amountPaid}" minFractionDigits="2"/> via ${p.paymentMode} (${p.transactionRef})</li>
                             </c:forEach>
                         </ul>
                     </div>
@@ -404,23 +505,29 @@
             <table class="totals-table">
                 <tr>
                     <td>Subtotal:</td>
-                    <td class="amount">&#8377;<fmt:formatNumber value="${invoice.subtotalAmount}" minFractionDigits="2"/></td>
+                    <td class="amount">$<fmt:formatNumber value="${invoice.subtotalAmount}" minFractionDigits="2"/></td>
                 </tr>
                 <tr>
                     <td>Tax / GST:</td>
-                    <td class="amount">&#8377;<fmt:formatNumber value="${invoice.taxAmount}" minFractionDigits="2"/></td>
+                    <td class="amount">$<fmt:formatNumber value="${invoice.taxAmount}" minFractionDigits="2"/></td>
                 </tr>
                 <tr class="grand-total">
                     <td>Total Invoiced:</td>
-                    <td class="amount">&#8377;<fmt:formatNumber value="${invoice.totalAmount}" minFractionDigits="2"/></td>
+                    <td class="amount">
+                        $<fmt:formatNumber value="${invoice.totalAmount}" minFractionDigits="2"/>
+                        <div style="font-size: 11px; font-weight: normal; color: var(--text-muted);">&approx; &#8377;<fmt:formatNumber value="${invoice.totalAmount * 84.0}" minFractionDigits="2"/> INR</div>
+                    </td>
                 </tr>
                 <tr>
                     <td>Amount Paid:</td>
-                    <td class="amount" style="color: #16A34A;">&#8377;<fmt:formatNumber value="${invoice.paidAmount}" minFractionDigits="2"/></td>
+                    <td class="amount" style="color: #16A34A;">$<fmt:formatNumber value="${invoice.paidAmount}" minFractionDigits="2"/></td>
                 </tr>
                 <tr class="balance-due">
                     <td>Balance Outstanding:</td>
-                    <td class="amount">&#8377;<fmt:formatNumber value="${invoice.balanceDue}" minFractionDigits="2"/></td>
+                    <td class="amount">
+                        $<fmt:formatNumber value="${invoice.balanceDue}" minFractionDigits="2"/>
+                        <div style="font-size: 11px; font-weight: normal; color: var(--text-muted);">&approx; &#8377;<fmt:formatNumber value="${invoice.balanceDue * 84.0}" minFractionDigits="2"/> INR</div>
+                    </td>
                 </tr>
             </table>
         </div>

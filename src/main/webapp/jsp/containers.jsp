@@ -17,18 +17,20 @@
         gap: 16px;
     }
 
-    /* Filter & Search Bar */
+    /* Filter & Search Bar - Floating Pill Design (No Outer Container) */
     .filter-bar-card {
-        background: #FFFFFF;
-        border-radius: 12px;
-        border: 1px solid var(--nl-border);
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-        padding: 14px 18px;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
         margin-bottom: 24px;
         display: flex;
         align-items: center;
         gap: 14px;
         flex-wrap: wrap;
+        width: 100%;
+        box-sizing: border-box;
     }
     .filter-search-box {
         position: relative;
@@ -37,31 +39,34 @@
     }
     .filter-search-box i.search-icon {
         position: absolute;
-        left: 14px;
+        left: 18px;
         top: 50%;
         transform: translateY(-50%);
         color: var(--nl-text-muted);
         font-size: 15px;
         pointer-events: none;
+        z-index: 2;
     }
     .filter-search-box input {
         width: 100%;
-        padding: 9px 36px 9px 38px;
+        height: 42px;
+        padding: 0 38px 0 46px;
         border: 1px solid #E2E5EA;
-        border-radius: 8px;
+        border-radius: 50px !important;
         font-size: 13.5px;
         outline: none;
         background: #FFFFFF;
         color: var(--nl-text);
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     }
     .filter-search-box input:focus {
         border-color: #FC8019;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15);
     }
     .filter-search-clear {
         position: absolute;
-        right: 12px;
+        right: 16px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -70,12 +75,66 @@
         font-size: 14px;
         cursor: pointer;
         padding: 0;
+        z-index: 2;
     }
     .filter-search-clear:hover {
         color: #1F2937;
     }
     .filter-select-wrap {
-        min-width: 160px;
+        min-width: 180px;
+        flex: 0 1 auto;
+    }
+    .filter-select-wrap .ts-wrapper {
+        min-width: 180px !important;
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    .filter-select-wrap .ts-control,
+    .filter-select-wrap select.form-select-custom {
+        min-height: 42px !important;
+        height: 42px !important;
+        border-radius: 50px !important;
+        padding: 0 36px 0 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        border: 1px solid #CBD5E1 !important;
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        cursor: pointer !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+    }
+    [data-theme="dark"] .filter-select-wrap .ts-control,
+    [data-theme="dark"] .filter-select-wrap select.form-select-custom,
+    [data-theme="dark"] .filter-bar-card .ts-control {
+        background-color: #151F28 !important;
+        border: 1px solid #334756 !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    }
+    .filter-select-wrap .ts-wrapper.focus .ts-control,
+    .filter-select-wrap .ts-wrapper.dropdown-active .ts-control,
+    .filter-select-wrap .ts-wrapper.input-active .ts-control,
+    .filter-select-wrap select.form-select-custom:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
+    }
+    [data-theme="dark"] .filter-select-wrap .ts-wrapper:hover .ts-control,
+    [data-theme="dark"] .filter-select-wrap .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .filter-select-wrap .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .filter-select-wrap .ts-wrapper.input-active .ts-control,
+    [data-theme="dark"] .filter-select-wrap select.form-select-custom:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+    }
+    .filter-select-wrap .ts-dropdown {
+        border-radius: 12px !important;
+        margin-top: 4px !important;
     }
 
     .btn-add-container {
@@ -83,7 +142,7 @@
         color: #FFFFFF !important;
         border: none;
         padding: 9px 20px;
-        border-radius: 8px;
+        border-radius: 50px !important;
         font-weight: 600;
         font-size: 13.5px;
         display: inline-flex;
@@ -93,6 +152,7 @@
         box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
         transition: all 0.18s ease;
         text-decoration: none;
+        height: 42px;
     }
     .btn-add-container:hover {
         background: #E66F0F;
@@ -101,9 +161,9 @@
     }
 
     .btn-reset-filters {
-        width: 38px;
-        height: 38px;
-        border-radius: 8px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50px !important;
         border: 1px solid #E2E5EA;
         background: #FFFFFF;
         color: var(--nl-text-muted);
@@ -112,12 +172,16 @@
         justify-content: center;
         font-size: 15px;
         cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         transition: all 0.15s ease;
+        flex-shrink: 0;
+        text-decoration: none;
     }
     .btn-reset-filters:hover {
         background: #F8FAFC;
         color: #FC8019;
-        border-color: #CBD5E1;
+        border-color: #FC8019;
+        transform: translateY(-1px);
     }
 
     /* Container Card */
@@ -293,6 +357,7 @@
     }
 
     /* Action Buttons */
+    /* Action Buttons */
     .card-actions-row {
         display: flex;
         align-items: center;
@@ -355,6 +420,148 @@
         border-color: #CBD5E1;
     }
 
+    /* Customer Specification Buttons & Badges */
+    .btn-view-specs {
+        flex: 1;
+        background: #F8FAFC;
+        color: #1E293B !important;
+        border: 1px solid #CBD5E1;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 12.5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        cursor: pointer;
+    }
+    .btn-view-specs:hover {
+        background: #F1F5F9;
+        border-color: #94A3B8;
+        color: #0F172A !important;
+        transform: translateY(-1px);
+    }
+    .btn-ship-spec {
+        flex: 1.2;
+        background: #FC8019;
+        color: #FFFFFF !important;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 12.5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        text-decoration: none;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
+        transition: all 0.18s ease;
+        white-space: nowrap;
+    }
+    .btn-ship-spec:hover {
+        background: #E66F0F;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(252, 128, 25, 0.35);
+    }
+
+    .badge-reefer-temp {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        background: rgba(8, 145, 178, 0.90);
+        color: #FFFFFF;
+        backdrop-filter: blur(4px);
+        font-weight: 700;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        z-index: 2;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .cargo-suitability-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+    .cargo-tag {
+        font-size: 11px;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 50px;
+        background: #F1F5F9;
+        color: #475569;
+        border: 1px solid #E2E8F0;
+        white-space: nowrap;
+    }
+
+    /* Customer Catalog Hero Banner */
+    .customer-catalog-hero {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFF7F2 100%);
+        border: 1px solid #FED7AA;
+        border-radius: 16px;
+        padding: 22px 26px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(252, 128, 25, 0.06);
+    }
+
+    /* Specifications Modal Styling */
+    .spec-card-metric {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        height: 100%;
+    }
+    .spec-card-metric .metric-label {
+        font-size: 11.5px;
+        color: #64748B;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .spec-card-metric .metric-value {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .spec-section-box {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .spec-table {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 13px;
+    }
+    .spec-table th {
+        color: #64748B;
+        font-weight: 600;
+        font-size: 12px;
+        border-bottom: 1px solid #E2E8F0;
+        padding: 8px 10px;
+    }
+    .spec-table td {
+        padding: 8px 10px;
+        color: #1F2937;
+        border-bottom: 1px solid #F1F5F9;
+        font-weight: 500;
+    }
+
     /* Modal Form Customization */
     .modal-content-custom {
         border-radius: 14px;
@@ -373,30 +580,617 @@
         background: #FC8019;
         color: #FFFFFF;
         border: none;
-        padding: 9px 22px;
-        border-radius: 8px;
+        padding: 9px 24px;
+        border-radius: 50px !important;
         font-weight: 600;
         font-size: 13.5px;
-        transition: background-color 0.15s ease;
+        transition: background-color 0.15s ease, transform 0.1s ease;
     }
     .modal-btn-submit:hover {
         background: #E66F0F;
+    }
+    .modal-btn-submit:active {
+        transform: scale(0.98);
+    }
+    .modal-footer .btn {
+        border-radius: 50px !important;
+        padding: 9px 22px !important;
+    }
+
+    /* ==========================================================================
+       ENTERPRISE DARK MODE COMPATIBILITY FOR CONTAINER CATALOG
+       ========================================================================== */
+    [data-theme="dark"] .catalog-header h2 {
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .filter-bar-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .filter-search-box input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .filter-search-box input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+    }
+
+    [data-theme="dark"] .btn-reset-filters {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+
+    [data-theme="dark"] .btn-reset-filters:hover {
+        background: #1E293B !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .container-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    [data-theme="dark"] .container-card:hover {
+        border-color: #2D3F4D !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    [data-theme="dark"] .container-number {
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .container-type-pill {
+        background: #151F28 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3F4D !important;
+    }
+
+    [data-theme="dark"] .specs-list {
+        border-top-color: #22303A !important;
+        border-bottom-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .specs-item-label {
+        color: #94A3B8 !important;
+    }
+
+    [data-theme="dark"] .specs-item-label i {
+        color: #64748B !important;
+    }
+
+    [data-theme="dark"] .specs-item-value {
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .btn-not-available {
+        background: #151F28 !important;
+        color: #64748B !important;
+        border-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .btn-more-actions {
+        background: #151F28 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3F4D !important;
+    }
+
+    [data-theme="dark"] .btn-more-actions:hover {
+        background: #1E293B !important;
+        color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .badge-status-available {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border-color: rgba(16, 185, 129, 0.32) !important;
+    }
+
+    [data-theme="dark"] .badge-status-allocated {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FB923C !important;
+        border-color: rgba(252, 128, 25, 0.32) !important;
+    }
+
+    [data-theme="dark"] .badge-status-intransit {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border-color: rgba(59, 130, 246, 0.32) !important;
+    }
+
+    [data-theme="dark"] .badge-status-maintenance {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border-color: rgba(245, 158, 11, 0.32) !important;
+    }
+
+    [data-theme="dark"] .modal-content-custom {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .modal-header-custom {
+        border-bottom-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .modal-header-custom .modal-title {
+        color: #F8FAFC !important;
+    }
+
+    /* Modal Input & Dropdown Styling (Ensuring Crisp Visible Borders in All Themes, Eliminating Wrapper Double Border) */
+    .modal-body .ts-wrapper,
+    .modal-body .ts-wrapper.form-control,
+    .modal-body .ts-wrapper.form-select,
+    .modal-body .ts-wrapper.form-select-custom,
+    [data-theme="dark"] .modal-body .ts-wrapper,
+    [data-theme="dark"] .modal-body .ts-wrapper.form-control,
+    [data-theme="dark"] .modal-body .ts-wrapper.form-select,
+    [data-theme="dark"] .modal-body .ts-wrapper.form-select-custom {
+        border: none !important;
+        border-width: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        min-height: auto !important;
+        outline: none !important;
+    }
+
+    .modal-body input.form-control,
+    .modal-body select.form-select:not(.tomselected),
+    .modal-body select.form-select-custom:not(.tomselected) {
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 50px !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        min-height: 42px !important;
+        height: 42px !important;
+        font-size: 13.5px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .modal-body textarea.form-control {
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 18px !important;
+        padding: 12px 18px !important;
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        font-size: 13.5px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    /* Modal File Input & Choose File Button (Light Theme) */
+    .modal-body input[type="file"].form-control {
+        padding: 4px 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        cursor: pointer !important;
+        line-height: 1.5 !important;
+        height: 44px !important;
+    }
+
+    .modal-body input[type="file"].form-control::file-selector-button,
+    .modal-body input[type="file"].form-control::-webkit-file-upload-button {
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 50px !important;
+        padding: 6px 16px !important;
+        margin: 0 12px 0 0 !important;
+        background-color: #F1F5F9 !important;
+        color: #1F2937 !important;
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .modal-body input[type="file"].form-control:hover::file-selector-button,
+    .modal-body input[type="file"].form-control:hover::-webkit-file-upload-button {
+        background-color: #E2E8F0 !important;
+        border-color: #94A3B8 !important;
+    }
+
+    .modal-body .ts-control {
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 50px !important;
+        padding-left: 20px !important;
+        padding-right: 36px !important;
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        min-height: 42px !important;
+        font-size: 13.5px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .modal-body input.form-control:focus,
+    .modal-body textarea.form-control:focus,
+    .modal-body select.form-select:not(.tomselected):focus,
+    .modal-body select.form-select-custom:not(.tomselected):focus,
+    .modal-body .ts-wrapper.focus .ts-control,
+    .modal-body .ts-wrapper.dropdown-active .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.18) !important;
+    }
+
+    [data-theme="dark"] .modal-body label {
+        color: #CBD5E1 !important;
+    }
+
+    [data-theme="dark"] .modal-body input.form-control,
+    [data-theme="dark"] .modal-body textarea.form-control,
+    [data-theme="dark"] .modal-body select.form-select:not(.tomselected),
+    [data-theme="dark"] .modal-body select.form-select-custom:not(.tomselected),
+    [data-theme="dark"] .modal-body .ts-control {
+        background-color: #151F28 !important;
+        border: 1px solid #334756 !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    /* Dark Mode: Modal File Input & Choose File Button */
+    [data-theme="dark"] .modal-body input[type="file"].form-control {
+        background-color: #151F28 !important;
+        border: 1px solid #334756 !important;
+        color: #94A3B8 !important;
+    }
+
+    [data-theme="dark"] .modal-body input[type="file"].form-control::file-selector-button,
+    [data-theme="dark"] .modal-body input[type="file"].form-control::-webkit-file-upload-button {
+        background-color: #22303A !important;
+        color: #F8FAFC !important;
+        border: 1px solid #334756 !important;
+    }
+
+    [data-theme="dark"] .modal-body input[type="file"].form-control:hover::file-selector-button,
+    [data-theme="dark"] .modal-body input[type="file"].form-control:hover::-webkit-file-upload-button {
+        background-color: #2D3F4D !important;
+        color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .modal-body input.form-control:hover,
+    [data-theme="dark"] .modal-body textarea.form-control:hover,
+    [data-theme="dark"] .modal-body select.form-select:not(.tomselected):hover,
+    [data-theme="dark"] .modal-body select.form-select-custom:not(.tomselected):hover,
+    [data-theme="dark"] .modal-body .ts-wrapper:hover .ts-control {
+        border-color: #476072 !important;
+    }
+
+    [data-theme="dark"] .modal-body input.form-control:focus,
+    [data-theme="dark"] .modal-body textarea.form-control:focus,
+    [data-theme="dark"] .modal-body select.form-select:not(.tomselected):focus,
+    [data-theme="dark"] .modal-body select.form-select-custom:not(.tomselected):focus,
+    [data-theme="dark"] .modal-body .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .modal-body .ts-wrapper.dropdown-active .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+    }
+
+    [data-theme="dark"] .modal-footer {
+        border-top-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .btn.btn-light {
+        background: #151F28 !important;
+        border-color: #334756 !important;
+        color: #CBD5E1 !important;
+    }
+
+    [data-theme="dark"] .btn.btn-light:hover {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .dropdown-menu {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    [data-theme="dark"] .dropdown-item {
+        color: #CBD5E1 !important;
+    }
+
+    [data-theme="dark"] .dropdown-item:hover {
+        background: #182430 !important;
+        color: #FC8019 !important;
+    }
+
+    [data-theme="dark"] .dropdown-divider {
+        border-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    [data-theme="dark"] #noContainerResults h5 {
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] #noContainerResults div[style*="background: #F1F5F9"] {
+        background: #151F28 !important;
+        color: #64748B !important;
+    }
+
+    [data-theme="dark"] div[style*="background: #FFF2EB"] {
+        background: rgba(252, 128, 25, 0.16) !important;
+    }
+
+    [data-theme="dark"] .nl-pagination-wrapper {
+        background: #101820 !important;
+        border-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .nl-pagination-info strong {
+        color: #F8FAFC !important;
+    }
+
+    /* Container Image Picker & Size Preset Dark Mode */
+    [data-theme="dark"] #imagePickerDropzone {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] #imagePickerDropzone:hover {
+        border-color: #FC8019 !important;
+        background: #182430 !important;
+    }
+    [data-theme="dark"] #imagePickerDropzone > div:first-child {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] #imagePickerDropzone div:nth-child(2) {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #imagePickerDropzone div:nth-child(3) {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] #imagePickerPreview {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] #imagePreviewFilename {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #imagePreviewFilesize {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .badge-size-preset,
+    [data-theme="dark"] .badge[style*="#FFF2EB"] {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.35) !important;
+    }
+
+    /* Dark Mode Customer Specs & Modal Extensions */
+    [data-theme="dark"] .btn-view-specs {
+        background: #151F28 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .btn-view-specs:hover {
+        background: #1E293B !important;
+        color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+    [data-theme="dark"] .cargo-tag {
+        background: #151F28 !important;
+        color: #94A3B8 !important;
+        border-color: #263542 !important;
+    }
+    [data-theme="dark"] .customer-catalog-hero {
+        background: linear-gradient(135deg, #101820 0%, #16202A 100%) !important;
+        border-color: #2D3F4D !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+    [data-theme="dark"] .customer-catalog-hero h3 {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .customer-catalog-hero p {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .badge-iso-standard {
+        background: #151F28 !important;
+        color: #94A3B8 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .hero-step-pill {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .hero-quickstart-box {
+        background: rgba(21, 31, 40, 0.85) !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .hero-quickstart-box .quickstart-title {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .hero-quickstart-box .quickstart-subtitle {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .status-spec-filter-pill {
+        background: rgba(16, 185, 129, 0.15) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34D399 !important;
+    }
+
+    /* Modal Dark Mode Specifications */
+    [data-theme="dark"] #specModalTypeIconWrap {
+        background: rgba(252, 128, 25, 0.18) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.35) !important;
+    }
+    [data-theme="dark"] #containerSpecsModal .badge-certified {
+        background: rgba(16, 185, 129, 0.15) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .spec-card-metric {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .spec-card-metric .metric-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .spec-card-metric .metric-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .spec-section-box {
+        background: #131B24 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .spec-section-box h6 {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .spec-section-box .badge-unit {
+        background: #1C2732 !important;
+        color: #94A3B8 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .spec-table th {
+        color: #94A3B8 !important;
+        border-bottom-color: #22303A !important;
+    }
+    [data-theme="dark"] .spec-table td {
+        color: #CBD5E1 !important;
+        border-bottom-color: #1A252E !important;
+    }
+    [data-theme="dark"] .spec-table td strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .spec-pallet-list span {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .spec-pallet-list strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #specTypeDesc {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] #specClimateControl {
+        color: #38BDF8 !important;
+    }
+    [data-theme="dark"] #containerSpecsModal .cargo-tag {
+        background: #1C2732 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .spec-depot-notice {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .spec-depot-notice #specModalPortName {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .spec-depot-notice .notice-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .badge-workflow-pill {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.35) !important;
+    }
+    [data-theme="dark"] .modal-btn-close {
+        background: #1A242F !important;
+        border: 1px solid #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .modal-btn-close:hover {
+        background: #22303E !important;
+        color: #F8FAFC !important;
+        border-color: #FC8019 !important;
     }
 </style>
 <div class="container-fluid py-2">
     <!-- Catalog Header -->
     <div class="catalog-header">
         <div>
-            <h2 style="font-weight: 700; color: #1F2937; margin-bottom: 4px; font-size: 24px;">Container Master Catalog</h2>
-            <p style="color: var(--nl-text-muted); margin-bottom: 0; font-size: 13px;">Browse, monitor, and allocate shipping container inventory</p>
+            <c:choose>
+                <c:when test="${sessionScope.user.roleId == 5}">
+                    <h2 style="font-weight: 700; color: #1F2937; margin-bottom: 4px; font-size: 24px;">Container Fleet &amp; Technical Specifications</h2>
+                    <p style="color: var(--nl-text-muted); margin-bottom: 0; font-size: 13px;">Browse certified ISO container dimensions, payload limits, and cargo suitability for booking</p>
+                </c:when>
+                <c:otherwise>
+                    <h2 style="font-weight: 700; color: #1F2937; margin-bottom: 4px; font-size: 24px;">Container Master Catalog</h2>
+                    <p style="color: var(--nl-text-muted); margin-bottom: 0; font-size: 13px;">Browse, monitor, and allocate shipping container inventory</p>
+                </c:otherwise>
+            </c:choose>
         </div>
 
-        <c:if test="${sessionScope.user.roleId <= 3}">
-            <button class="btn-add-container" data-bs-toggle="modal" data-bs-target="#addContainerModal" type="button">
-                <i class="ti ti-plus"></i> Add Container
-            </button>
-        </c:if>
+        <c:choose>
+            <c:when test="${sessionScope.user.roleId <= 3}">
+                <button class="btn-add-container" data-bs-toggle="modal" data-bs-target="#addContainerModal" type="button">
+                    <i class="ti ti-plus"></i> Add Container
+                </button>
+            </c:when>
+            <c:when test="${sessionScope.user.roleId == 5}">
+                <a href="${pageContext.request.contextPath}/shipments/create" class="btn-add-container">
+                    <i class="ti ti-plus"></i> Book New Shipment
+                </a>
+            </c:when>
+        </c:choose>
     </div>
+
+    <!-- Customer Educational Workflow Hero (Role 5 Only) -->
+    <c:if test="${sessionScope.user.roleId == 5}">
+        <div class="customer-catalog-hero mb-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge" style="background: rgba(252, 128, 25, 0.15); color: #FC8019; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 10px; border-radius: 6px;">
+                            <i class="ti ti-shield-check me-1"></i> ISO Certified Fleet Master
+                        </span>
+                        <span class="badge badge-iso-standard" style="background: #F1F5F9; color: #475569; font-size: 11px; padding: 5px 10px; border-radius: 6px;">
+                            ISO 668 &bull; ISO 1496-1 Standard
+                        </span>
+                    </div>
+                    <h3 style="font-weight: 700; font-size: 18px; color: #0F172A; margin-bottom: 6px;">
+                        Standardized Fleet Specifications &amp; Allocation Workflow
+                    </h3>
+                    <p style="color: #64748B; font-size: 13px; margin-bottom: 14px; line-height: 1.5; max-width: 720px;">
+                        Review certified tare weights, net payload ratings, volume, and door clearances before placing cargo bookings. When you submit a booking, you specify your required container profile; our Port Operations Dispatch team physically inspects and allocates a dedicated container box at the departure port.
+                    </p>
+                    
+                    <div class="d-flex flex-wrap align-items-center gap-2" style="font-size: 12px; color: #475569;">
+                        <span class="hero-step-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <strong style="color: #10B981;">Step 1:</strong> Select Spec &amp; Dimensions
+                        </span>
+                        <i class="ti ti-arrow-narrow-right text-muted"></i>
+                        <span class="hero-step-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <strong style="color: #2563EB;">Step 2:</strong> Submit Cargo Booking
+                        </span>
+                        <i class="ti ti-arrow-narrow-right text-muted"></i>
+                        <span class="hero-step-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <strong style="color: #FC8019;">Step 3:</strong> Port Dispatch Allocates Box
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <div class="hero-quickstart-box p-3 rounded-3" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(252,128,25,0.2); backdrop-filter: blur(4px);">
+                        <div class="quickstart-title" style="font-size: 11.5px; color: #64748B; font-weight: 500; margin-bottom: 4px;">Direct Booking Quickstart</div>
+                        <div class="quickstart-subtitle" style="font-size: 13px; font-weight: 600; color: #0F172A; margin-bottom: 10px;">Ready with your cargo dimensions?</div>
+                        <a href="${pageContext.request.contextPath}/shipments/create" class="btn btn-sm w-100" style="background: #FC8019; color: #fff; border-radius: 50px; font-weight: 600; padding: 7px 16px;">
+                            <i class="ti ti-plus me-1"></i> Proceed to Booking Form
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c:if>
 
     <!-- Alert Notifications for Add / Update / Error -->
     <c:if test="${param.add == 'true'}">
@@ -459,11 +1253,6 @@
 
     <!--
       Filter & search bar.
-
-      These controls used to filter in JavaScript over the cards already on the
-      page, which was one page of the fleet - so searching for a container that
-      happened to sit on page 4 found nothing. They now submit to the servlet and
-      filter in SQL, and the selections are echoed back from the request.
     -->
     <form method="get" action="${pageContext.request.contextPath}/containers" id="containerFilterForm" class="filter-bar-card">
         <input type="hidden" name="pageSize" value="${pageSize}">
@@ -476,17 +1265,28 @@
             </c:if>
         </div>
 
-        <div class="filter-select-wrap">
-            <select id="statusFilter" name="status" class="form-select form-select-custom no-custom-select"
-                    onchange="document.getElementById('containerFilterForm').submit();">
-                <c:forEach var="st" items="All,Available,Allocated,In-Transit,Under Maintenance">
-                    <option value="${st}" ${statusFilter eq st ? 'selected' : ''}>${st eq 'All' ? 'All Statuses' : st}</option>
-                </c:forEach>
-            </select>
-        </div>
+        <c:choose>
+            <c:when test="${sessionScope.user.roleId == 5}">
+                <div class="filter-select-wrap">
+                    <div class="status-spec-filter-pill d-flex align-items-center gap-2 px-3" style="height: 42px; border-radius: 50px; background: #ECFDF5; border: 1px solid #A7F3D0; font-size: 13px; font-weight: 600; color: #059669; white-space: nowrap;">
+                        <i class="ti ti-circle-check"></i> Available Fleet Specifications
+                    </div>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="filter-select-wrap">
+                    <select id="statusFilter" name="status" class="form-select form-select-custom"
+                            onchange="document.getElementById('containerFilterForm').submit();">
+                        <c:forEach var="st" items="All,Available,Allocated,In-Transit,Under Maintenance">
+                            <option value="${st}" ${statusFilter eq st ? 'selected' : ''}>${st eq 'All' ? 'All Statuses' : st}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </c:otherwise>
+        </c:choose>
 
         <div class="filter-select-wrap">
-            <select id="typeFilter" name="type" class="form-select form-select-custom no-custom-select"
+            <select id="typeFilter" name="type" class="form-select form-select-custom"
                     onchange="document.getElementById('containerFilterForm').submit();">
                 <c:forEach var="ty" items="All,Dry,Reefer,Open Top,Flat Rack,Tank">
                     <option value="${ty}" ${typeFilter eq ty ? 'selected' : ''}>${ty eq 'All' ? 'All Types' : ty}</option>
@@ -516,6 +1316,12 @@
                         <span class="badge-size-pill">${container.size}</span>
 
                         <c:choose>
+                            <%-- Customer Role: Clean Available Specification Pill --%>
+                            <c:when test="${sessionScope.user.roleId == 5}">
+                                <span class="badge-status-pill badge-status-available">
+                                    <i class="ti ti-circle-check"></i> Available Spec
+                                </span>
+                            </c:when>
                             <c:when test="${container.status == 'Available'}">
                                 <span class="badge-status-pill badge-status-available">
                                     <i class="ti ti-circle-check"></i> Available
@@ -537,6 +1343,12 @@
                                 </span>
                             </c:otherwise>
                         </c:choose>
+
+                        <c:if test="${container.type == 'Reefer'}">
+                            <span class="badge-reefer-temp">
+                                <i class="ti ti-snowflake"></i> -25°C to +25°C
+                            </span>
+                        </c:if>
 
                         <c:choose>
                             <c:when test="${not empty container.imageUrl}">
@@ -568,18 +1380,20 @@
                         <div class="container-title-row">
                             <span class="container-number">#${container.containerNumber}</span>
                             <span class="container-type-pill">
-                                <i class="ti ti-truck-delivery"></i> ${container.type}
+                                <c:choose>
+                                    <c:when test="${container.type == 'Reefer'}"><i class="ti ti-snowflake text-info"></i> Reefer</c:when>
+                                    <c:when test="${container.type == 'Open Top'}"><i class="ti ti-cube-unfolded text-warning"></i> Open Top</c:when>
+                                    <c:when test="${container.type == 'Flat Rack'}"><i class="ti ti-layout-grid text-primary"></i> Flat Rack</c:when>
+                                    <c:when test="${container.type == 'Tank'}"><i class="ti ti-droplet text-success"></i> ISO Tank</c:when>
+                                    <c:otherwise><i class="ti ti-box text-secondary"></i> Dry Van</c:otherwise>
+                                </c:choose>
                             </span>
                         </div>
 
                         <!-- Specs List -->
                         <ul class="specs-list">
                             <li class="specs-item">
-                                <span class="specs-item-label"><i class="ti ti-weight"></i> Tare Weight</span>
-                                <span class="specs-item-value"><fmt:formatNumber value="${container.tareWeightKg}" maxFractionDigits="0"/> kg</span>
-                            </li>
-                            <li class="specs-item">
-                                <span class="specs-item-label"><i class="ti ti-packages"></i> Goods Capacity</span>
+                                <span class="specs-item-label"><i class="ti ti-packages"></i> Max Payload</span>
                                 <span class="specs-item-value"><fmt:formatNumber value="${container.goodsCapacityKg}" maxFractionDigits="0"/> kg</span>
                             </li>
                             <li class="specs-item">
@@ -587,8 +1401,22 @@
                                 <span class="specs-item-value"><fmt:formatNumber value="${container.goodsCapacityCbm}" maxFractionDigits="1"/> CBM</span>
                             </li>
                             <li class="specs-item">
-                                <span class="specs-item-label"><i class="ti ti-map-pin"></i> Current Location</span>
+                                <span class="specs-item-label"><i class="ti ti-scale"></i> Tare / Max Gross</span>
+                                <span class="specs-item-value"><fmt:formatNumber value="${container.tareWeightKg}" maxFractionDigits="0"/> / <fmt:formatNumber value="${container.maxGrossWeightKg}" maxFractionDigits="0"/> kg</span>
+                            </li>
+                            <li class="specs-item">
+                                <span class="specs-item-label"><i class="ti ti-pallet"></i> Est. Pallet Fit</span>
                                 <span class="specs-item-value">
+                                    <c:choose>
+                                        <c:when test="${container.size == '20ft'}">~11 Euro Pallets</c:when>
+                                        <c:when test="${container.size == '40ft' || container.size == '40ft HC'}">~24-25 Euro Pallets</c:when>
+                                        <c:otherwise>~27-33 Euro Pallets</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </li>
+                            <li class="specs-item">
+                                <span class="specs-item-label"><i class="ti ti-map-pin"></i> Current Hub</span>
+                                <span class="specs-item-value text-truncate" style="max-width: 130px;" title="${container.portName}, ${container.portCountry}">
                                     <c:choose>
                                         <c:when test="${not empty container.portName}">${container.portName}<c:if test="${not empty container.portCountry}">, ${container.portCountry}</c:if></c:when>
                                         <c:otherwise>—</c:otherwise>
@@ -597,32 +1425,89 @@
                             </li>
                         </ul>
 
+                        <!-- Cargo Suitability Badges -->
+                        <div class="cargo-suitability-row mb-3">
+                            <c:choose>
+                                <c:when test="${container.type == 'Reefer'}">
+                                    <span class="cargo-tag">Cold Chain</span>
+                                    <span class="cargo-tag">Perishables</span>
+                                    <span class="cargo-tag">Pharma</span>
+                                </c:when>
+                                <c:when test="${container.type == 'Open Top'}">
+                                    <span class="cargo-tag">Top-Loading</span>
+                                    <span class="cargo-tag">Over-height</span>
+                                    <span class="cargo-tag">Machinery</span>
+                                </c:when>
+                                <c:when test="${container.type == 'Flat Rack'}">
+                                    <span class="cargo-tag">Out-of-Gauge</span>
+                                    <span class="cargo-tag">Heavy Plant</span>
+                                    <span class="cargo-tag">Vehicles</span>
+                                </c:when>
+                                <c:when test="${container.type == 'Tank'}">
+                                    <span class="cargo-tag">Bulk Liquids</span>
+                                    <span class="cargo-tag">Food Grade</span>
+                                    <span class="cargo-tag">Chemicals</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="cargo-tag">General Cargo</span>
+                                    <span class="cargo-tag">FMCG</span>
+                                    <span class="cargo-tag">Electronics</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+
                         <!-- Bottom Actions -->
                         <div class="card-actions-row">
                             <c:choose>
-                                <%-- Allocation: Super Admin, Company Admin, Operations only --%>
+                                <%-- Customer Role: View Specs + Ship With Spec (NO premature 'Book This Container' direct lock) --%>
+                                <c:when test="${sessionScope.user.roleId == 5}">
+                                    <button type="button" class="btn-view-specs" onclick="openContainerSpecModal({
+                                        id: '${container.containerId}',
+                                        number: '${container.containerNumber}',
+                                        type: '${container.type}',
+                                        size: '${container.size}',
+                                        tare: ${container.tareWeightKg},
+                                        maxGross: ${container.maxGrossWeightKg},
+                                        capKg: ${container.goodsCapacityKg},
+                                        capCbm: ${container.goodsCapacityCbm},
+                                        portName: '${container.portName}',
+                                        portCountry: '${container.portCountry}',
+                                        imageUrl: '${container.imageUrl}'
+                                    })">
+                                        <i class="ti ti-info-circle"></i> Technical Specs
+                                    </button>
+                                    <a href="${pageContext.request.contextPath}/shipments/create?containerId=${container.containerId}" class="btn-ship-spec">
+                                        <i class="ti ti-truck-delivery"></i> Ship With Spec
+                                    </a>
+                                </c:when>
+
+                                <%-- Operations / Admin Roles: Allocate physical container (FR3.3 / FR3.4) --%>
                                 <c:when test="${container.status == 'Available' && sessionScope.user.roleId <= 3}">
                                     <a href="${pageContext.request.contextPath}/allocate?containerId=${container.containerId}" class="btn-allocate">
                                         <span>Allocate</span>
                                         <i class="ti ti-arrow-right"></i>
                                     </a>
                                 </c:when>
-                                <%-- Customers book instead of allocating (FR2.1) --%>
-                                <c:when test="${container.status == 'Available' && sessionScope.user.roleId == 5}">
-                                    <a href="${pageContext.request.contextPath}/shipments/create?containerId=${container.containerId}" class="btn-allocate">
-                                        <span>Book This Container</span>
-                                        <i class="ti ti-arrow-right"></i>
-                                    </a>
-                                </c:when>
-                                <%-- Finance: catalog is read-only --%>
-                                <c:when test="${container.status == 'Available'}">
-                                    <button class="btn-not-available" disabled type="button">
-                                        Available
-                                    </button>
-                                </c:when>
+
+                                <%-- Finance / Other Roles: Read-only catalog with full specs --%>
                                 <c:otherwise>
+                                    <button type="button" class="btn-view-specs flex-grow-1" onclick="openContainerSpecModal({
+                                        id: '${container.containerId}',
+                                        number: '${container.containerNumber}',
+                                        type: '${container.type}',
+                                        size: '${container.size}',
+                                        tare: ${container.tareWeightKg},
+                                        maxGross: ${container.maxGrossWeightKg},
+                                        capKg: ${container.goodsCapacityKg},
+                                        capCbm: ${container.goodsCapacityCbm},
+                                        portName: '${container.portName}',
+                                        portCountry: '${container.portCountry}',
+                                        imageUrl: '${container.imageUrl}'
+                                    })">
+                                        <i class="ti ti-info-circle"></i> View Specs
+                                    </button>
                                     <button class="btn-not-available" disabled type="button">
-                                        Not Available
+                                        ${container.status}
                                     </button>
                                 </c:otherwise>
                             </c:choose>
@@ -633,6 +1518,23 @@
                                         <i class="ti ti-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius: 10px; padding: 6px; border: 1px solid #E2E8F0;">
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="openContainerSpecModal({
+                                                id: '${container.containerId}',
+                                                number: '${container.containerNumber}',
+                                                type: '${container.type}',
+                                                size: '${container.size}',
+                                                tare: ${container.tareWeightKg},
+                                                maxGross: ${container.maxGrossWeightKg},
+                                                capKg: ${container.goodsCapacityKg},
+                                                capCbm: ${container.goodsCapacityCbm},
+                                                portName: '${container.portName}',
+                                                portCountry: '${container.portCountry}',
+                                                imageUrl: '${container.imageUrl}'
+                                            })" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
+                                                <i class="ti ti-info-circle" style="color: #2563EB;"></i> View Full Specs
+                                            </a>
+                                        </li>
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="openUpdateModal({id: '${container.containerId}', number: '${container.containerNumber}', type: '${container.type}', size: '${container.size}', tare: ${container.tareWeightKg}, maxGross: ${container.maxGrossWeightKg}, capKg: ${container.goodsCapacityKg}, capCbm: ${container.goodsCapacityCbm}, status: '${container.status}', portId: '${container.currentPortId}'})" style="border-radius: 6px; padding: 7px 12px; font-size: 13px;">
                                                 <i class="ti ti-pencil" style="color: #FC8019;"></i> Update Container
@@ -708,6 +1610,179 @@
 </div>
 
 
+<!-- Technical Specifications Modal (FR3.1 & FR3.2 Complete ISO Master Spec Sheet) -->
+<div class="modal fade" id="containerSpecsModal" tabindex="-1" aria-labelledby="containerSpecsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-content-custom">
+            <div class="modal-header modal-header-custom">
+                <div class="d-flex align-items-center gap-2">
+                    <div id="specModalTypeIconWrap" style="width: 38px; height: 38px; background: #FFF2EB; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 20px;">
+                        <i class="ti ti-box"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="modal-title mb-0" id="containerSpecsModalLabel" style="font-weight: 700; font-size: 17px;">
+                                <span id="specModalNumber">CONT0000000</span> &bull; <span id="specModalTitleSize">40ft HC</span> <span id="specModalTitleType">Dry</span>
+                            </h5>
+                            <span class="badge badge-certified" style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; font-size: 11px; font-weight: 600;">
+                                <i class="ti ti-check"></i> Certified Fleet Unit
+                            </span>
+                        </div>
+                        <small class="text-muted" style="font-size: 12px;">Standardized International ISO 668 / ISO 1496-1 Container Specification</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <!-- Top Metric Cards Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="spec-card-metric">
+                            <span class="metric-label"><i class="ti ti-packages" style="color: #FC8019;"></i> Net Payload (Max)</span>
+                            <span class="metric-value" id="specModalCapKg">26,730 kg</span>
+                            <small class="text-muted" style="font-size: 11px;">Certified Goods Weight</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="spec-card-metric">
+                            <span class="metric-label"><i class="ti ti-cube" style="color: #2563EB;"></i> Internal Volume</span>
+                            <span class="metric-value" id="specModalCapCbm">67.7 CBM</span>
+                            <small class="text-muted" style="font-size: 11px;">Usable Cargo Cube</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="spec-card-metric">
+                            <span class="metric-label"><i class="ti ti-scale" style="color: #059669;"></i> Max Gross Mass</span>
+                            <span class="metric-value" id="specModalMaxGross">30,480 kg</span>
+                            <small class="text-muted" style="font-size: 11px;">M.G.W. Rating</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="spec-card-metric">
+                            <span class="metric-label"><i class="ti ti-weight" style="color: #7C3AED;"></i> Tare Weight</span>
+                            <span class="metric-value" id="specModalTare">3,750 kg</span>
+                            <small class="text-muted" style="font-size: 11px;">Empty Box Mass</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 1: Dimensions & Door Clearances -->
+                <div class="spec-section-box">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 style="font-weight: 700; font-size: 13.5px; color: #1F2937; margin-bottom: 0;">
+                            <i class="ti ti-ruler-measure me-1" style="color: #FC8019;"></i> ISO Physical Dimensions &amp; Door Clearances
+                        </h6>
+                        <span class="badge badge-unit" style="background: #F1F5F9; color: #475569; font-size: 11px;">Metric &amp; Imperial</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="spec-table">
+                            <thead>
+                                <tr>
+                                    <th>Boundary</th>
+                                    <th>Length</th>
+                                    <th>Width</th>
+                                    <th>Height</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>External Envelope</strong></td>
+                                    <td id="specExtLen">12.19 m (40'0")</td>
+                                    <td id="specExtWid">2.44 m (8'0")</td>
+                                    <td id="specExtHgt">2.89 m (9'6")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Internal Usable</strong></td>
+                                    <td id="specIntLen">12.03 m (39'5")</td>
+                                    <td id="specIntWid">2.35 m (7'8")</td>
+                                    <td id="specIntHgt">2.69 m (8'10")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rear Door Opening</strong></td>
+                                    <td class="text-muted">—</td>
+                                    <td id="specDoorWid">2.34 m (7'8")</td>
+                                    <td id="specDoorHgt">2.58 m (8'5")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section 2: Pallet Fit & Specialized Equipment -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="spec-section-box h-100">
+                            <h6 style="font-weight: 700; font-size: 13.5px; color: #1F2937; margin-bottom: 12px;">
+                                <i class="ti ti-pallet me-1" style="color: #FC8019;"></i> Pallet Loading Capacity
+                            </h6>
+                            <ul class="spec-pallet-list list-unstyled mb-0" style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 8px;">
+                                <li class="d-flex justify-content-between">
+                                    <span>Euro Pallets (1200 &times; 800 mm):</span>
+                                    <strong id="specEuroPallet" style="color: var(--nl-text, #1F2937);">24-25 pallets</strong>
+                                </li>
+                                <li class="d-flex justify-content-between">
+                                    <span>Standard Pallets (1200 &times; 1000 mm):</span>
+                                    <strong id="specIsoPallet" style="color: var(--nl-text, #1F2937);">20-21 pallets</strong>
+                                </li>
+                                <li class="d-flex justify-content-between">
+                                    <span>Floor Loading Strength:</span>
+                                    <strong style="color: var(--nl-text, #1F2937);">Reinforced ISO Timber / Metal</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="spec-section-box h-100">
+                            <h6 style="font-weight: 700; font-size: 13.5px; color: #1F2937; margin-bottom: 12px;">
+                                <i class="ti ti-temperature me-1" style="color: #0891B2;"></i> Climate &amp; Cargo Suitability
+                            </h6>
+                            <div style="font-size: 12.5px; margin-bottom: 8px;">
+                                <span class="text-muted">Temperature Control:</span>
+                                <span id="specClimateControl" style="font-weight: 600; color: #0891B2;">Ambient Weatherproof</span>
+                            </div>
+                            <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;" id="specTypeDesc">
+                                Standard general dry van container for high-density packaged goods.
+                            </div>
+                            <div class="d-flex flex-wrap gap-1" id="specCargoTags">
+                                <!-- Tags injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Port Depot & Operational Dispatch Notice -->
+                <div class="spec-depot-notice p-3 rounded-3" style="background: #F8FAFC; border: 1px dashed #CBD5E1; font-size: 12.5px; color: #475569;">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <div>
+                            <i class="ti ti-map-pin text-danger me-1"></i>
+                            <strong>Current Depot / Station:</strong>
+                            <span id="specModalPortName" style="color: #1F2937; font-weight: 600;">Jebel Ali Port, UAE</span>
+                        </div>
+                        <span class="badge badge-workflow-pill" style="background: #FFF2EB; color: #FC8019; font-weight: 600; font-size: 11px;">
+                            <i class="ti ti-info-circle me-0.5"></i> SRS Decoupled Workflow
+                        </span>
+                    </div>
+                    <div class="notice-desc" style="font-size: 12px; color: #64748B; line-height: 1.4; margin-top: 4px;">
+                        Customer shipment bookings specify required container type and capacity specifications. Port Operations Dispatch physically inspects and allocates a dedicated container box to your cargo during terminal gate-in.
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-light modal-btn-close" data-bs-dismiss="modal" style="border-radius: 50px; font-weight: 500; padding: 9px 22px;">Close</button>
+                <c:if test="${sessionScope.user.roleId == 5}">
+                    <a id="specModalBookBtn" href="#" class="modal-btn-submit text-decoration-none d-inline-flex align-items-center gap-2" style="border-radius: 50px; padding: 9px 24px;">
+                        <i class="ti ti-truck-delivery"></i> Book Shipment With This Spec
+                    </a>
+                </c:if>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Single Reusable Update Container Modal (Zero-Flicker Viewport Anchored) -->
 <div class="modal fade" id="singleUpdateContainerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -729,7 +1804,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Type <span style="color: #FC8019;">*</span></label>
-                            <select name="type" id="updateTypeSelect" class="form-select form-select-custom no-custom-select" required>
+                            <select name="type" id="updateTypeSelect" class="form-select form-select-custom" required>
                                 <option value="Dry">Dry</option>
                                 <option value="Reefer">Reefer</option>
                                 <option value="Open Top">Open Top</option>
@@ -739,7 +1814,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Size <span style="color: #FC8019;">*</span></label>
-                            <select name="size" id="updateSizeSelect" class="form-select form-select-custom no-custom-select" required>
+                            <select name="size" id="updateSizeSelect" class="form-select form-select-custom" required>
                                 <option value="20ft">20ft</option>
                                 <option value="40ft">40ft</option>
                                 <option value="40ft HC">40ft HC</option>
@@ -764,7 +1839,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Status <span style="color: #FC8019;">*</span></label>
-                            <select name="status" id="updateStatusSelect" class="form-select form-select-custom no-custom-select" required>
+                            <select name="status" id="updateStatusSelect" class="form-select form-select-custom" required>
                                 <option value="Available">Available</option>
                                 <option value="In-Transit">In-Transit</option>
                                 <option value="Under Maintenance">Under Maintenance</option>
@@ -773,7 +1848,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Current Assigned Port <span style="color: #FC8019;">*</span></label>
-                            <select name="portId" id="updatePortSelect" class="form-select form-select-custom no-custom-select" required>
+                            <select name="portId" id="updatePortSelect" class="form-select form-select-custom" required>
                                 <option value="" disabled>-- Select Assigned Port --</option>
                                 <c:forEach var="port" items="${ports}">
                                     <option value="${port.portId}">${port.portName} (${port.country})</option>
@@ -787,8 +1862,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                    <button type="submit" class="modal-btn-submit">Save Changes</button>
+                    <button type="button" class="btn btn-light modal-btn-close" data-bs-dismiss="modal" style="border-radius: 50px; font-weight: 500; padding: 9px 22px;">Cancel</button>
+                    <button type="submit" class="modal-btn-submit" style="border-radius: 50px; padding: 9px 24px;">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -826,7 +1901,7 @@
                                     <i class="ti ti-wand"></i> Auto-Generate
                                 </button>
                             </div>
-                            <input type="text" name="containerNumber" id="newContainerNumber" class="form-control" required placeholder="e.g. CONT0000305" style="border-radius: 8px; font-size: 13.5px; text-transform: uppercase;">
+                            <input type="text" name="containerNumber" id="newContainerNumber" class="form-control" required placeholder="e.g. CONT0000305" style="border-radius: 50px; font-size: 13.5px; text-transform: uppercase;">
                         </div>
 
                         <!-- Owner Company (Super Admin selects tenant; Tenant staff defaults to own company) -->
@@ -836,7 +1911,7 @@
                                     <label class="form-label" style="font-weight: 600; font-size: 13px;">
                                         <i class="ti ti-building me-1" style="color: #FC8019;"></i> Owner Company <span style="color: #FC8019;">*</span>
                                     </label>
-                                    <select name="companyId" class="form-select form-select-custom no-custom-select" required>
+                                    <select name="companyId" class="form-select form-select-custom" required>
                                         <c:forEach var="comp" items="${companies}" varStatus="cStatus">
                                             <option value="${comp.companyId}" ${cStatus.first ? 'selected' : ''}>${comp.companyName}</option>
                                         </c:forEach>
@@ -853,7 +1928,7 @@
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">
                                 <i class="ti ti-anchor me-1" style="color: #FC8019;"></i> Current Location (Port) <span style="color: #FC8019;">*</span>
                             </label>
-                            <select name="portId" id="newContainerPort" class="form-select form-select-custom no-custom-select" required>
+                            <select name="portId" id="newContainerPort" class="form-select form-select-custom" required>
                                 <option value="" disabled>-- Select Assigned Port --</option>
                                 <c:forEach var="port" items="${ports}" varStatus="pStatus">
                                     <option value="${port.portId}" ${pStatus.first ? 'selected' : ''}>${port.portName} (${port.country})</option>
@@ -864,7 +1939,7 @@
                         <!-- Type (FR3.1: Dry, Reefer, Open Top, Flat Rack, Tank) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Container Type <span style="color: #FC8019;">*</span></label>
-                            <select name="type" class="form-select form-select-custom no-custom-select" required>
+                            <select name="type" class="form-select form-select-custom" required>
                                 <option value="Dry" selected>Dry (Dry Van / General Cargo)</option>
                                 <option value="Reefer">Reefer (Refrigerated)</option>
                                 <option value="Open Top">Open Top (Top-Loaded Heavy Cargo)</option>
@@ -876,7 +1951,7 @@
                         <!-- Size (FR3.1: 20ft, 40ft, 40ft HC, 45ft) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Standard Size <span style="color: #FC8019;">*</span></label>
-                            <select name="size" id="newContainerSize" class="form-select form-select-custom no-custom-select" required onchange="applyContainerSizePreset(this.value)">
+                            <select name="size" id="newContainerSize" class="form-select form-select-custom" required onchange="applyContainerSizePreset(this.value)">
                                 <option value="20ft">20ft Standard (20' x 8' x 8'6")</option>
                                 <option value="40ft" selected>40ft Standard (40' x 8' x 8'6")</option>
                                 <option value="40ft HC">40ft High Cube (40' x 8' x 9'6")</option>
@@ -920,7 +1995,7 @@
                                     <i class="ti ti-link"></i> <span id="toggleUrlText">Or enter image web URL instead</span>
                                 </a>
                                 <div id="webUrlInputWrapper" style="display: none; margin-top: 6px;">
-                                    <input type="url" name="imageUrl" id="containerWebUrlInput" class="form-control" placeholder="https://example.com/container.jpg" style="border-radius: 8px; font-size: 13px;">
+                                    <input type="url" name="imageUrl" id="containerWebUrlInput" class="form-control" placeholder="https://example.com/container.jpg" style="border-radius: 50px; font-size: 13px;">
                                 </div>
                             </div>
                         </div>
@@ -928,7 +2003,7 @@
                         <!-- Status (FR3.1) -->
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Initial Status <span style="color: #FC8019;">*</span></label>
-                            <select name="status" class="form-select form-select-custom no-custom-select" required>
+                            <select name="status" class="form-select form-select-custom" required>
                                 <option value="Available" selected>Available (Ready for Allocation)</option>
                                 <option value="Under Maintenance">Under Maintenance (Inspection / Repair)</option>
                                 <option value="Allocated">Allocated (Reserved for Shipment)</option>
@@ -942,7 +2017,7 @@
                                 <span style="font-weight: 700; font-size: 12.5px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
                                     <i class="ti ti-scale me-1" style="color: #FC8019;"></i> ISO Weight & Capacity Specifications
                                 </span>
-                                <span class="badge" style="background: #FFF2EB; color: #FC8019; font-size: 11px;">Auto-calculated via Size Preset</span>
+                                <span class="badge badge-size-preset" style="background: #FFF2EB; color: #FC8019; font-size: 11px;">Auto-calculated via Size Preset</span>
                             </div>
                             <hr class="mt-1 mb-2" style="border-color: #E2E8F0;">
                         </div>
@@ -950,31 +2025,31 @@
                         <!-- Tare Weight -->
                         <div class="col-md-3">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Tare Weight (kg) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.1" name="tareWeightKg" id="newTareWeight" class="form-control" required value="3750" style="border-radius: 8px; font-size: 13.5px;">
+                            <input type="number" step="0.1" name="tareWeightKg" id="newTareWeight" class="form-control" required value="3750" style="border-radius: 50px; font-size: 13.5px;">
                         </div>
 
                         <!-- Max Gross Weight -->
                         <div class="col-md-3">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Max Gross (kg) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.1" name="maxGrossWeightKg" id="newMaxGrossWeight" class="form-control" required value="30480" style="border-radius: 8px; font-size: 13.5px;">
+                            <input type="number" step="0.1" name="maxGrossWeightKg" id="newMaxGrossWeight" class="form-control" required value="30480" style="border-radius: 50px; font-size: 13.5px;">
                         </div>
 
                         <!-- Goods Capacity (kg) -->
                         <div class="col-md-3">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Payload Cap. (kg) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.1" name="goodsCapacityKg" id="newGoodsCapacityKg" class="form-control" required value="26730" style="border-radius: 8px; font-size: 13.5px;">
+                            <input type="number" step="0.1" name="goodsCapacityKg" id="newGoodsCapacityKg" class="form-control" required value="26730" style="border-radius: 50px; font-size: 13.5px;">
                         </div>
 
                         <!-- Goods Capacity (CBM) -->
                         <div class="col-md-3">
                             <label class="form-label" style="font-weight: 600; font-size: 13px;">Volume (CBM) <span style="color: #FC8019;">*</span></label>
-                            <input type="number" step="0.1" name="goodsCapacityCbm" id="newGoodsCapacityCbm" class="form-control" required value="67.7" style="border-radius: 8px; font-size: 13.5px;">
+                            <input type="number" step="0.1" name="goodsCapacityCbm" id="newGoodsCapacityCbm" class="form-control" required value="67.7" style="border-radius: 50px; font-size: 13.5px;">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                    <button type="submit" class="modal-btn-submit">Add Container to Catalog</button>
+                    <button type="button" class="btn btn-light modal-btn-close" data-bs-dismiss="modal" style="border-radius: 50px; font-weight: 500; padding: 9px 22px;">Cancel</button>
+                    <button type="submit" class="modal-btn-submit" style="border-radius: 50px; padding: 9px 24px;">Add Container to Catalog</button>
                 </div>
             </form>
         </div>
@@ -983,7 +2058,136 @@
 </div>
 
 <script>
+// ISO Standard Container Specifications Reference Data (ISO 668 / ISO 1496-1)
+const ISO_SPECS = {
+    '20ft': {
+        extLen: "6.06 m (20'0\")", extWid: "2.44 m (8'0\")", extHgt: "2.59 m (8'6\")",
+        intLen: "5.90 m (19'4\")", intWid: "2.35 m (7'8\")", intHgt: "2.39 m (7'10\")",
+        doorWid: "2.34 m (7'8\")", doorHgt: "2.28 m (7'6\")",
+        euroPallets: "11 pallets (1200×800 mm)", isoPallets: "9-10 pallets (1200×1000 mm)"
+    },
+    '40ft': {
+        extLen: "12.19 m (40'0\")", extWid: "2.44 m (8'0\")", extHgt: "2.59 m (8'6\")",
+        intLen: "12.03 m (39'5\")", intWid: "2.35 m (7'8\")", intHgt: "2.39 m (7'10\")",
+        doorWid: "2.34 m (7'8\")", doorHgt: "2.28 m (7'6\")",
+        euroPallets: "24-25 pallets (1200×800 mm)", isoPallets: "20-21 pallets (1200×1000 mm)"
+    },
+    '40ft HC': {
+        extLen: "12.19 m (40'0\")", extWid: "2.44 m (8'0\")", extHgt: "2.89 m (9'6\")",
+        intLen: "12.03 m (39'5\")", intWid: "2.35 m (7'8\")", intHgt: "2.69 m (8'10\")",
+        doorWid: "2.34 m (7'8\")", doorHgt: "2.58 m (8'5\")",
+        euroPallets: "25 pallets (High clearance)", isoPallets: "21 pallets (High clearance)"
+    },
+    '45ft': {
+        extLen: "13.72 m (45'0\")", extWid: "2.44 m (8'0\")", extHgt: "2.89 m (9'6\")",
+        intLen: "13.56 m (44'6\")", intWid: "2.35 m (7'8\")", intHgt: "2.69 m (8'10\")",
+        doorWid: "2.34 m (7'8\")", doorHgt: "2.58 m (8'5\")",
+        euroPallets: "27-33 pallets (Max volume)", isoPallets: "24-26 pallets"
+    }
+};
 
+const TYPE_SPECS = {
+    'Dry': {
+        name: 'Dry Cargo (General Purpose Van)',
+        icon: 'ti-box',
+        iconBg: '#FFF2EB',
+        iconColor: '#FC8019',
+        climate: 'Ambient / Non-temperature controlled',
+        desc: 'Fully enclosed, weatherproof standard corrugated steel container with marine-treated timber flooring designed for standard palletized, carton, and dry cargo.',
+        tags: ['General FMCG', 'Packaged Goods', 'Electronics', 'Apparel & Textiles', 'Machinery Spares']
+    },
+    'Reefer': {
+        name: 'Refrigerated Container (Cold Chain)',
+        icon: 'ti-snowflake',
+        iconBg: '#ECFEFF',
+        iconColor: '#0891B2',
+        climate: '-25.0°C to +25.0°C Precision Microprocessor Control',
+        desc: 'Thermally insulated container with integrated Daikin/Carrier cooling machinery and aluminum T-floor channels for unbroken cold-chain supply.',
+        tags: ['Perishable Fruits & Veg', 'Frozen Seafood & Meat', 'Pharmaceuticals & Vaccines', 'Dairy Products']
+    },
+    'Open Top': {
+        name: 'Open Top Container (Crane Top-Loading)',
+        icon: 'ti-cube-unfolded',
+        iconBg: '#FEF3C7',
+        iconColor: '#D97706',
+        climate: 'Heavy Weatherproof Tarpaulin Covered',
+        desc: 'Equipped with removable roof bows and a swinging rear door header allowing direct overhead gantry crane loading of over-height or heavy cargo.',
+        tags: ['Over-height Machinery', 'Heavy Steel Beams', 'Stone & Marble Slabs', 'Lumber & Timber']
+    },
+    'Flat Rack': {
+        name: 'Flat Rack Container (Heavy & Out-of-Gauge)',
+        icon: 'ti-layout-grid',
+        iconBg: '#F3E8FF',
+        iconColor: '#7C3AED',
+        climate: 'Open Atmosphere Flatbed Platform',
+        desc: 'Reinforced heavy-duty steel platform with folding end stanchions and high-strength lashing rings for out-of-gauge (OOG) industrial equipment.',
+        tags: ['Industrial Turbines', 'Construction Equipment', 'Yachts & Boats', 'Oversized Modules']
+    },
+    'Tank': {
+        name: 'ISO Tank Container (Bulk Liquids)',
+        icon: 'ti-droplet',
+        iconBg: '#ECFDF5',
+        iconColor: '#059669',
+        climate: 'Insulated Steam-Heatable Pressure Vessel',
+        desc: 'Grade 316 stainless steel pressure vessel mounted in standard ISO structural frame with top and bottom valves for food liquids and chemicals.',
+        tags: ['Edible Oils', 'Juice Concentrates', 'Chemical Reagents', 'Industrial Lubricants']
+    }
+};
+
+window.openContainerSpecModal = function(c) {
+    const sizeData = ISO_SPECS[c.size] || ISO_SPECS['40ft'];
+    const typeData = TYPE_SPECS[c.type] || TYPE_SPECS['Dry'];
+
+    document.getElementById('specModalNumber').textContent = '#' + c.number;
+    document.getElementById('specModalTitleSize').textContent = c.size;
+    document.getElementById('specModalTitleType').textContent = c.type;
+
+    const iconWrap = document.getElementById('specModalTypeIconWrap');
+    if (iconWrap) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        iconWrap.style.background = isDark ? 'rgba(252, 128, 25, 0.18)' : typeData.iconBg;
+        iconWrap.style.color = typeData.iconColor;
+        iconWrap.innerHTML = '<i class="ti ' + typeData.icon + '"></i>';
+    }
+
+    document.getElementById('specModalCapKg').textContent = Number(c.capKg || 0).toLocaleString() + ' kg';
+    document.getElementById('specModalCapCbm').textContent = Number(c.capCbm || 0).toLocaleString() + ' CBM';
+    document.getElementById('specModalMaxGross').textContent = Number(c.maxGross || 0).toLocaleString() + ' kg';
+    document.getElementById('specModalTare').textContent = Number(c.tare || 0).toLocaleString() + ' kg';
+
+    document.getElementById('specExtLen').textContent = sizeData.extLen;
+    document.getElementById('specExtWid').textContent = sizeData.extWid;
+    document.getElementById('specExtHgt').textContent = sizeData.extHgt;
+    document.getElementById('specIntLen').textContent = sizeData.intLen;
+    document.getElementById('specIntWid').textContent = sizeData.intWid;
+    document.getElementById('specIntHgt').textContent = sizeData.intHgt;
+    document.getElementById('specDoorWid').textContent = sizeData.doorWid;
+    document.getElementById('specDoorHgt').textContent = sizeData.doorHgt;
+
+    document.getElementById('specEuroPallet').textContent = sizeData.euroPallets;
+    document.getElementById('specIsoPallet').textContent = sizeData.isoPallets;
+
+    document.getElementById('specClimateControl').textContent = typeData.climate;
+    document.getElementById('specTypeDesc').textContent = typeData.desc;
+
+    const tagsContainer = document.getElementById('specCargoTags');
+    if (tagsContainer) {
+        tagsContainer.innerHTML = typeData.tags.map(function(t) {
+            return '<span class="cargo-tag">' + t + '</span>';
+        }).join(' ');
+    }
+
+    const portText = (c.portName ? c.portName : 'Primary Terminal') + (c.portCountry ? (', ' + c.portCountry) : '');
+    document.getElementById('specModalPortName').textContent = portText;
+
+    const bookBtn = document.getElementById('specModalBookBtn');
+    if (bookBtn) {
+        bookBtn.href = '${pageContext.request.contextPath}/shipments/create?containerId=' + c.id;
+    }
+
+    const modalEl = document.getElementById('containerSpecsModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+};
 
 window.handleImageFilePicker = function(input) {
     if (input.files && input.files[0]) {

@@ -41,6 +41,13 @@ public class ContainerCatalogServlet extends HttpServlet {
 
         String statusFilter = request.getParameter("status");
         if (statusFilter == null || statusFilter.trim().isEmpty()) statusFilter = "All";
+
+        // A customer browses this page to find something to book, so they see only
+        // what is bookable. Showing the Allocated and In-Transit containers of every
+        // carrier told them nothing useful and leaked the state of rival fleets.
+        if (com.nlogistic.util.RbacContext.roleId(request) == com.nlogistic.util.RbacContext.CUSTOMER) {
+            statusFilter = "Available";
+        }
         String typeFilter = request.getParameter("type");
         if (typeFilter == null || typeFilter.trim().isEmpty()) typeFilter = "All";
         String search = request.getParameter("search");

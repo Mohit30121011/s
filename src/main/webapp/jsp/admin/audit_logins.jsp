@@ -11,35 +11,148 @@
 
 <style>
     /* ==========================================================================
-       SECURITY & AUTHENTICATION AUDIT TRAIL THEME (MATCHING APPROVALS UI)
+       SECURITY & AUTHENTICATION AUDIT TRAIL THEME (LIGHT & DARK MODE COMPATIBLE)
+       Aligned with shipments.jsp table & enterprise design tokens
        ========================================================================== */
+    :root {
+        --al-primary:        #FC8019;
+        --al-primary-hover:  #E66A05;
+        --al-primary-light:  #FFF3EA;
+        --al-primary-border: #FED7AA;
+
+        --al-card:           #FFFFFF;
+        --al-bg:             #F8FAFC;
+        --al-border:         #E2E8F0;
+        --al-border-hover:   #CBD5E1;
+        --al-text:           #0F172A;
+        --al-text-sub:       #1E293B;
+        --al-muted:          #64748B;
+        --al-surface:        #FAFAFA;
+        --al-surface2:       #F1F5F9;
+        --al-table-head:     #F8FAFC;
+        --al-table-hover:    #F8FAFC;
+        --al-modal-header:   #0F172A;
+
+        --al-pill-live-bg:   #F0FDF4;
+        --al-pill-live-bd:   #BBF7D0;
+        --al-pill-live-text: #166534;
+
+        --al-kpi-emerald-bg: #ECFDF5;
+        --al-kpi-emerald-fg: #059669;
+        --al-kpi-blue-bg:    #EFF6FF;
+        --al-kpi-blue-fg:    #2563EB;
+        --al-kpi-red-bg:     #FEF2F2;
+        --al-kpi-red-fg:     #DC2626;
+        --al-kpi-orange-bg:  #FFF7ED;
+        --al-kpi-orange-fg:  #FC8019;
+
+        --al-badge-success-bg: #ECFDF5;
+        --al-badge-success-bd: #A7F3D0;
+        --al-badge-success-fg: #065F46;
+
+        --al-badge-failed-bg:  #FEF2F2;
+        --al-badge-failed-bd:  #FCA5A5;
+        --al-badge-failed-fg:  #991B1B;
+
+        --al-badge-logout-bg:  #EFF6FF;
+        --al-badge-logout-bd:  #BFDBFE;
+        --al-badge-logout-fg:  #1E40AF;
+
+        --al-badge-reset-bg:   #FFF7ED;
+        --al-badge-reset-bd:   #FED7AA;
+        --al-badge-reset-fg:   #C2410C;
+
+        --al-badge-denied-bg:  #FFF1F2;
+        --al-badge-denied-bd:  #FECDD3;
+        --al-badge-denied-fg:  #BE123C;
+
+        --al-badge-generic-bg: #F1F5F9;
+        --al-badge-generic-bd: #E2E8F0;
+        --al-badge-generic-fg: #334155;
+    }
+
+    [data-theme="dark"] {
+        --al-card:           #101820;
+        --al-bg:             #0B1117;
+        --al-border:         #22303A;
+        --al-border-hover:   #2D3F4D;
+        --al-text:           #F8FAFC;
+        --al-text-sub:       #E2E8F0;
+        --al-muted:          #94A3B8;
+        --al-surface:        #151F28;
+        --al-surface2:       #1C2A37;
+        --al-table-head:     #151F28;
+        --al-table-hover:    #182430;
+        --al-modal-header:   #151F28;
+
+        --al-pill-live-bg:   rgba(16, 185, 129, 0.15);
+        --al-pill-live-bd:   rgba(16, 185, 129, 0.3);
+        --al-pill-live-text: #34D399;
+
+        --al-kpi-emerald-bg: rgba(16, 185, 129, 0.14);
+        --al-kpi-emerald-fg: #34D399;
+        --al-kpi-blue-bg:    rgba(37, 99, 235, 0.14);
+        --al-kpi-blue-fg:    #60A5FA;
+        --al-kpi-red-bg:     rgba(239, 68, 68, 0.14);
+        --al-kpi-red-fg:     #F87171;
+        --al-kpi-orange-bg:  rgba(252, 128, 25, 0.14);
+        --al-kpi-orange-fg:  #FB923C;
+
+        --al-badge-success-bg: rgba(16, 185, 129, 0.14);
+        --al-badge-success-bd: rgba(16, 185, 129, 0.28);
+        --al-badge-success-fg: #34D399;
+
+        --al-badge-failed-bg:  rgba(239, 68, 68, 0.14);
+        --al-badge-failed-bd:  rgba(239, 68, 68, 0.28);
+        --al-badge-failed-fg:  #F87171;
+
+        --al-badge-logout-bg:  rgba(59, 130, 246, 0.14);
+        --al-badge-logout-bd:  rgba(59, 130, 246, 0.28);
+        --al-badge-logout-fg:  #60A5FA;
+
+        --al-badge-reset-bg:   rgba(252, 128, 25, 0.14);
+        --al-badge-reset-bd:   rgba(252, 128, 25, 0.28);
+        --al-badge-reset-fg:   #FB923C;
+
+        --al-badge-denied-bg:  rgba(244, 63, 94, 0.14);
+        --al-badge-denied-bd:  rgba(244, 63, 94, 0.28);
+        --al-badge-denied-fg:  #FB7185;
+
+        --al-badge-generic-bg: #1C2A37;
+        --al-badge-generic-bd: #22303A;
+        --al-badge-generic-fg: #94A3B8;
+    }
+
     .audit-page-container {
         padding: 0 4px 40px;
+        color: var(--al-text);
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     .custom-breadcrumb {
-        display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748B; margin-bottom: 16px;
+        display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--al-muted); margin-bottom: 16px;
     }
-    .custom-breadcrumb a { color: #64748B; text-decoration: none; transition: color 0.15s ease; }
-    .custom-breadcrumb a:hover { color: #FC8019; }
-    .custom-breadcrumb i { font-size: 11px; color: #94A3B8; }
-    .custom-breadcrumb .current { color: #FC8019; font-weight: 600; }
+    .custom-breadcrumb a { color: var(--al-muted); text-decoration: none; transition: color 0.15s ease; }
+    .custom-breadcrumb a:hover { color: var(--al-primary); }
+    .custom-breadcrumb i { font-size: 11px; color: var(--al-muted); }
+    .custom-breadcrumb .current { color: var(--al-text); font-weight: 600; }
 
     /* Top Telemetry Header */
     .telemetry-header-card {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 28px;
+        background: var(--al-card); border: 1px solid var(--al-border); border-radius: 16px; padding: 24px 28px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px;
         display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+        transition: background 0.2s ease, border-color 0.2s ease;
     }
     .telemetry-title-group h1 {
-        font-size: 22px; font-weight: 800; color: #0F172A; margin: 0 0 6px 0;
+        font-size: 22px; font-weight: 800; color: var(--al-text); margin: 0 0 6px 0;
         display: flex; align-items: center; gap: 10px;
     }
     .telemetry-title-group p {
-        font-size: 13.5px; color: #64748B; margin: 0;
+        font-size: 13.5px; color: var(--al-muted); margin: 0;
     }
     .live-monitor-pill {
-        display: inline-flex; align-items: center; gap: 8px; background: #F0FDF4; border: 1px solid #BBF7D0;
-        color: #166534; font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 30px;
+        display: inline-flex; align-items: center; gap: 8px; background: var(--al-pill-live-bg); border: 1px solid var(--al-pill-live-bd);
+        color: var(--al-pill-live-text); font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 30px;
     }
     .live-dot {
         width: 8px; height: 8px; background: #22C55E; border-radius: 50%;
@@ -49,108 +162,126 @@
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.5; transform: scale(1.15); }
     }
+    .btn-refresh-telemetry {
+        background: var(--al-card); border: 1px solid var(--al-border); color: var(--al-text-sub);
+        font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: 8px;
+        display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-refresh-telemetry:hover {
+        border-color: var(--al-primary); color: var(--al-primary); background: var(--al-surface2);
+    }
 
     /* KPI Metrics Cards (4 Columns) */
     .kpi-metric-row {
         display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px;
     }
     .kpi-metric-card {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 22px;
+        background: var(--al-card); border: 1px solid var(--al-border); border-radius: 14px; padding: 20px 22px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .kpi-metric-card:hover {
-        transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); border-color: var(--al-border-hover);
     }
     .kpi-metric-card .kpi-label {
-        font-size: 12.5px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px;
+        font-size: 12px; font-weight: 700; color: var(--al-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
     }
     .kpi-metric-card .kpi-value {
-        font-size: 26px; font-weight: 800; color: #0F172A; line-height: 1; margin-bottom: 4px;
+        font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px;
     }
     .kpi-metric-card .kpi-hint {
-        font-size: 12px; color: #94A3B8;
+        font-size: 12px; color: var(--al-muted); display: flex; align-items: center; gap: 4px;
     }
     .kpi-metric-icon {
         width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
         font-size: 24px; flex-shrink: 0;
     }
-    .kpi-metric-icon.emerald { background: #ECFDF5; color: #059669; }
-    .kpi-metric-icon.blue { background: #EFF6FF; color: #2563EB; }
-    .kpi-metric-icon.red { background: #FEF2F2; color: #DC2626; }
-    .kpi-metric-icon.orange { background: #FFF7ED; color: #FC8019; }
+    .kpi-metric-icon.emerald { background: var(--al-kpi-emerald-bg); color: var(--al-kpi-emerald-fg); }
+    .kpi-metric-icon.blue    { background: var(--al-kpi-blue-bg);    color: var(--al-kpi-blue-fg); }
+    .kpi-metric-icon.red     { background: var(--al-kpi-red-bg);     color: var(--al-kpi-red-fg); }
+    .kpi-metric-icon.orange  { background: var(--al-kpi-orange-bg);  color: var(--al-kpi-orange-fg); }
 
-    /* Main Table Card */
+    /* Main Table Card (Matches shipments.jsp card-panel style) */
     .audit-table-card {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px;
+        background: var(--al-card); border: 1px solid var(--al-border); border-radius: 16px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden;
+        transition: background 0.2s ease, border-color 0.2s ease;
     }
 
     /* Filter Toolbar */
     .audit-filter-toolbar {
-        padding: 18px 24px; border-bottom: 1px solid #F1F5F9; background: #FAFAFA;
+        padding: 18px 24px; border-bottom: 1px solid var(--al-border); background: var(--al-surface);
         display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+        transition: background 0.2s ease, border-color 0.2s ease;
     }
     .audit-search-box {
         position: relative; flex: 1; min-width: 260px; max-width: 380px;
     }
     .audit-search-box input {
         width: 100%; height: 40px; padding: 0 14px 0 38px; font-size: 13.5px;
-        border: 1px solid #CBD5E1; border-radius: 30px; background: #FFFFFF; outline: none; transition: all 0.2s ease;
+        border: 1.5px solid var(--al-border); border-radius: 30px; background: var(--al-card);
+        color: var(--al-text); outline: none; transition: all 0.2s ease;
+    }
+    .audit-search-box input::placeholder {
+        color: var(--al-muted);
     }
     .audit-search-box input:focus {
-        border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15);
+        border-color: var(--al-primary); box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15);
     }
     .audit-search-box i {
-        position: absolute; left: 14px; top: 12px; font-size: 16px; color: #94A3B8; pointer-events: none;
+        position: absolute; left: 14px; top: 12px; font-size: 16px; color: var(--al-muted); pointer-events: none;
     }
 
-    /* Elegant Swiggy Orange Filter Pills (No harsh black) */
+    /* Filter Pills Group */
     .filter-pills-group {
         display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
     }
     .filter-pill-btn {
         padding: 7px 15px; font-size: 13px; font-weight: 600; border-radius: 30px;
-        text-decoration: none; border: 1.5px solid #E2E8F0; background: #FFFFFF; color: #64748B;
+        text-decoration: none; border: 1.5px solid var(--al-border); background: var(--al-card); color: var(--al-muted);
         transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
     }
     .filter-pill-btn:hover {
-        border-color: #CBD5E1; background: #F8FAFC; color: #0F172A;
+        border-color: var(--al-border-hover); background: var(--al-surface2); color: var(--al-text);
     }
     .filter-pill-btn.active {
-        background: #FFF7ED !important;
-        border-color: #FC8019 !important;
-        color: #EA580C !important;
+        background: var(--al-primary-light) !important;
+        border-color: var(--al-primary) !important;
+        color: var(--al-primary) !important;
         font-weight: 700;
-        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.18);
+        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.22);
+    }
+    [data-theme="dark"] .filter-pill-btn.active {
+        background: rgba(252, 128, 25, 0.18) !important;
+        color: #FB923C !important;
     }
     .filter-pill-btn .count {
-        background: #F1F5F9; color: #475569; font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 700;
+        background: var(--al-surface2); color: var(--al-muted); font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 700;
         transition: all 0.2s ease;
     }
     .filter-pill-btn.active .count {
-        background: #FC8019 !important;
+        background: var(--al-primary) !important;
         color: #FFFFFF !important;
     }
 
-    /* Table Styling */
+    /* Table Styling (Matched to shipments.jsp) */
     .audit-table {
         width: 100%; margin: 0; border-collapse: separate; border-spacing: 0;
     }
     .audit-table thead th {
-        background: #F8FAFC; font-size: 12px; font-weight: 700; text-transform: uppercase;
-        color: #475569; letter-spacing: 0.5px; padding: 14px 20px; border-bottom: 1px solid #E2E8F0;
-        white-space: nowrap;
+        background: var(--al-table-head); font-size: 12px; font-weight: 700; text-transform: uppercase;
+        color: var(--al-muted); letter-spacing: 0.5px; padding: 14px 20px; border-bottom: 1px solid var(--al-border);
+        white-space: nowrap; transition: background 0.2s ease, border-color 0.2s ease;
     }
     .audit-table tbody tr {
         transition: background 0.15s ease;
     }
     .audit-table tbody tr:hover {
-        background: #F8FAFC;
+        background: var(--al-table-hover);
     }
     .audit-table tbody td {
-        padding: 16px 20px; vertical-align: middle; font-size: 13.5px; color: #1E293B;
-        border-bottom: 1px solid #F1F5F9;
+        padding: 16px 20px; vertical-align: middle; font-size: 13.5px; color: var(--al-text);
+        border-bottom: 1px solid var(--al-border); transition: border-color 0.2s ease;
     }
 
     /* Event Badges */
@@ -158,80 +289,114 @@
         display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
         border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase;
     }
-    .event-badge.login-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
-    .event-badge.login-failed { background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; }
-    .event-badge.logout { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
-    .event-badge.pwd-reset { background: #FFF7ED; border: 1px solid #FED7AA; color: #C2410C; }
-    .event-badge.access-denied { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; }
-    .event-badge.generic-audit { background: #F1F5F9; border: 1px solid #E2E8F0; color: #334155; }
+    .event-badge.login-success  { background: var(--al-badge-success-bg); border: 1px solid var(--al-badge-success-bd); color: var(--al-badge-success-fg); }
+    .event-badge.login-failed   { background: var(--al-badge-failed-bg);  border: 1px solid var(--al-badge-failed-bd);  color: var(--al-badge-failed-fg); }
+    .event-badge.logout         { background: var(--al-badge-logout-bg);  border: 1px solid var(--al-badge-logout-bd);  color: var(--al-badge-logout-fg); }
+    .event-badge.pwd-reset      { background: var(--al-badge-reset-bg);   border: 1px solid var(--al-badge-reset-bd);   color: var(--al-badge-reset-fg); }
+    .event-badge.access-denied  { background: var(--al-badge-denied-bg);  border: 1px solid var(--al-badge-denied-bd);  color: var(--al-badge-denied-fg); }
+    .event-badge.generic-audit  { background: var(--al-badge-generic-bg); border: 1px solid var(--al-badge-generic-bd); color: var(--al-badge-generic-fg); }
 
-    /* IP & Identifier Badges */
-    .ip-badge {
-        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-        font-size: 12px; background: #F1F5F9; color: #334155; padding: 3px 8px; border-radius: 6px;
-        border: 1px solid #E2E8F0; display: inline-flex; align-items: center; gap: 5px;
+    .role-badge-pill {
+        display: inline-flex; align-items: center; padding: 4px 10px; font-size: 11.5px; font-weight: 600;
+        border-radius: 6px; background: var(--al-surface2); color: var(--al-text-sub); border: 1px solid var(--al-border);
     }
+
     .user-avatar-initial {
         width: 34px; height: 34px; border-radius: 50%; background: #FC8019; color: #FFFFFF;
         display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
-        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); flex-shrink: 0;
     }
     .user-info-box {
         display: flex; align-items: center; gap: 10px;
     }
     .user-name-title {
-        font-weight: 700; color: #0F172A; line-height: 1.2;
+        font-weight: 700; color: var(--al-text); line-height: 1.2;
     }
     .user-email-sub {
-        font-size: 12px; color: #64748B;
+        font-size: 12px; color: var(--al-muted);
     }
 
-    /* Enterprise Pagination Styling (Matching Companies UI) */
+    .btn-forensic-details {
+        background: var(--al-card); border: 1px solid var(--al-border); color: var(--al-text-sub);
+        border-radius: 8px; font-size: 12px; font-weight: 600; padding: 6px 12px;
+        display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-forensic-details:hover {
+        border-color: var(--al-primary); color: var(--al-primary); background: var(--al-surface2);
+    }
+
+    /* Enterprise Pagination Styling (Matched to shipments.jsp) */
     .nl-pagination-wrapper {
         display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
-        padding: 16px 24px; border-top: 1px solid #F1F5F9; background: #FAFAFA;
+        padding: 16px 24px; border-top: 1px solid var(--al-border); background: var(--al-surface);
+        transition: background 0.2s ease, border-color 0.2s ease;
     }
     .nl-pagination-info {
-        font-size: 13px; color: #64748B; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+        font-size: 13px; color: var(--al-muted); display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .nl-pagination-info strong {
+        color: var(--al-text);
     }
     .nl-page-size-select {
-        height: 32px; padding: 0 10px; font-size: 12.5px; border-radius: 8px; border: 1px solid #CBD5E1;
-        background: #FFFFFF; color: #1E293B; font-weight: 600; outline: none; cursor: pointer;
+        height: 32px; padding: 0 10px; font-size: 12.5px; border-radius: 8px; border: 1px solid var(--al-border);
+        background: var(--al-card); color: var(--al-text); font-weight: 600; outline: none; cursor: pointer;
     }
     .nl-pagination-nav {
         display: flex; align-items: center; gap: 6px;
     }
     .nl-page-btn {
-        min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid #E2E8F0;
-        background: #FFFFFF; color: #475569; font-size: 13px; font-weight: 600; display: inline-flex;
+        min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--al-border);
+        background: var(--al-card); color: var(--al-muted); font-size: 13px; font-weight: 600; display: inline-flex;
         align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease;
     }
     .nl-page-btn:hover:not(.disabled) {
-        border-color: #CBD5E1; background: #F8FAFC; color: #0F172A;
+        border-color: var(--al-border-hover); background: var(--al-surface2); color: var(--al-text);
     }
     .nl-page-btn.active {
-        background: #FC8019 !important; border-color: #FC8019 !important; color: #FFFFFF !important;
+        background: var(--al-primary) !important; border-color: var(--al-primary) !important; color: #FFFFFF !important;
         font-weight: 700; box-shadow: 0 2px 8px rgba(252, 128, 25, 0.3);
     }
     .nl-page-btn.disabled {
-        opacity: 0.45; cursor: not-allowed; background: #F8FAFC;
+        opacity: 0.45; cursor: not-allowed; background: var(--al-surface2); border-color: var(--al-border);
     }
 
     /* Modal Styling */
+    .modal-dialog .modal-content {
+        background: var(--al-card) !important; border: 1px solid var(--al-border) !important;
+        border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        color: var(--al-text);
+    }
     .modal-forensic-header {
-        background: #0F172A; color: #FFFFFF; padding: 20px 24px; border-radius: 16px 16px 0 0;
+        background: var(--al-modal-header); color: #FFFFFF; padding: 20px 24px; border-bottom: 1px solid var(--al-border);
     }
     .modal-forensic-body {
-        padding: 24px;
+        padding: 24px; background: var(--al-card);
     }
     .forensic-kv-grid {
         display: grid; grid-template-columns: 140px 1fr; gap: 12px 20px; font-size: 13.5px;
     }
     .forensic-kv-label {
-        font-weight: 600; color: #64748B;
+        font-weight: 600; color: var(--al-muted);
     }
     .forensic-kv-value {
-        color: #0F172A; font-weight: 500; word-break: break-all;
+        color: var(--al-text); font-weight: 500; word-break: break-all;
+    }
+    .forensic-info-box {
+        padding: 12px 16px; border-radius: 10px; font-size: 12px;
+        background: var(--al-surface2) !important; border: 1px solid var(--al-border) !important;
+        color: var(--al-muted) !important;
+    }
+    .modal-footer-custom {
+        border-top: 1px solid var(--al-border); padding: 14px 24px; background: var(--al-surface);
+        display: flex; justify-content: flex-end;
+    }
+    .btn-modal-close {
+        background: var(--al-surface2); border: 1px solid var(--al-border); color: var(--al-text);
+        border-radius: 8px; padding: 7px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-modal-close:hover {
+        background: var(--al-border); color: var(--al-text);
     }
 </style>
 
@@ -262,7 +427,7 @@
                 <span class="live-dot"></span>
                 <span>Active Database Telemetry</span>
             </div>
-            <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload();" title="Refresh Live Data">
+            <button class="btn-refresh-telemetry" onclick="window.location.reload();" title="Refresh Live Data">
                 <i class="ti ti-refresh"></i> Refresh
             </button>
         </div>
@@ -345,7 +510,7 @@
             <!-- Instant Search Input -->
             <div class="audit-search-box">
                 <i class="ti ti-search"></i>
-                <input type="text" id="auditSearchInput" placeholder="Search user, action, IP..." onkeyup="onSearchInput()">
+                <input type="text" id="auditSearchInput" placeholder="Search user, action, log ID..." onkeyup="onSearchInput()">
             </div>
         </div>
 
@@ -359,7 +524,6 @@
                         <th>User Identity</th>
                         <th>Role</th>
                         <th>Security Event</th>
-                        <th>IP Address</th>
                         <th>Target Context</th>
                         <th style="text-align: right;">Forensics</th>
                     </tr>
@@ -377,13 +541,13 @@
                                     data-ip="${log.ipAddress}"
                                     data-search="${log.logId} ${log.username} ${log.email} ${log.action} ${log.ipAddress} ${log.roleName}">
                                     <td>
-                                        <span style="font-weight: 700; color: #475569;">#LOG-${log.logId}</span>
+                                        <span style="font-weight: 700; color: var(--al-muted);">#LOG-${log.logId}</span>
                                     </td>
                                     <td>
-                                        <div style="font-weight: 600; color: #0F172A;">
+                                        <div style="font-weight: 600; color: var(--al-text);">
                                             <fmt:formatDate value="${log.timestamp}" pattern="yyyy-MM-dd HH:mm:ss" />
                                         </div>
-                                        <div style="font-size: 11.5px; color: #94A3B8;">
+                                        <div style="font-size: 11.5px; color: var(--al-muted);">
                                             <i class="ti ti-clock"></i> Local Time
                                         </div>
                                     </td>
@@ -399,7 +563,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark border" style="font-size: 11.5px; font-weight: 600;">
+                                        <span class="role-badge-pill">
                                             ${log.roleName}
                                         </span>
                                     </td>
@@ -448,20 +612,15 @@
                                         </c:choose>
                                     </td>
                                     <td>
-                                        <span class="ip-badge">
-                                            <i class="ti ti-world"></i> ${log.ipAddress != null ? log.ipAddress : '127.0.0.1'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span style="font-size: 12px; color: #64748B;">
+                                        <span style="font-size: 12px; color: var(--al-muted);">
                                             ${log.entityName != null && !log.entityName.isEmpty() ? log.entityName : 'Auth Gateway'}
                                             <c:if test="${log.entityId > 0}"> (#${log.entityId})</c:if>
                                         </span>
                                     </td>
                                     <td style="text-align: right;">
-                                        <button class="btn btn-sm btn-outline-secondary" 
+                                        <button class="btn-forensic-details" 
                                                 onclick="openForensicModal('${log.logId}', '${log.username}', '${log.action}', '${log.ipAddress}', '<fmt:formatDate value="${log.timestamp}" pattern="yyyy-MM-dd HH:mm:ss" />', '${log.roleName}')"
-                                                title="View Forensic Details" style="border-radius: 8px; font-size: 12px; font-weight: 600;">
+                                                title="View Forensic Details">
                                             <i class="ti ti-eye"></i> Details
                                         </button>
                                     </td>
@@ -470,12 +629,12 @@
                         </c:when>
                         <c:otherwise>
                             <tr id="serverEmptyRow">
-                                <td colspan="8" style="text-align: center; padding: 48px 20px;">
-                                    <div style="font-size: 40px; color: #CBD5E1; margin-bottom: 12px;">
+                                <td colspan="7" style="text-align: center; padding: 48px 20px;">
+                                    <div style="font-size: 40px; color: var(--al-border-hover); margin-bottom: 12px;">
                                         <i class="ti ti-shield-check"></i>
                                     </div>
-                                    <h5 style="font-weight: 700; color: #334155; margin-bottom: 6px;">No Security Audit Logs Found</h5>
-                                    <p style="color: #64748B; font-size: 13.5px; margin: 0;">No matching authentication records found in the database.</p>
+                                    <h5 style="font-weight: 700; color: var(--al-text); margin-bottom: 6px;">No Security Audit Logs Found</h5>
+                                    <p style="color: var(--al-muted); font-size: 13.5px; margin: 0;">No matching authentication records found in the database.</p>
                                 </td>
                             </tr>
                         </c:otherwise>
@@ -489,7 +648,7 @@
             <div class="nl-pagination-info">
                 <span>Showing <strong id="auditPageStart">1</strong> to <strong id="auditPageEnd">10</strong> of <strong id="auditTotalRows">0</strong> records</span>
                 <div class="d-inline-flex align-items-center gap-2 ms-2">
-                    <span style="color: #94A3B8; font-size: 12.5px;">Rows per page:</span>
+                    <span style="color: var(--al-muted); font-size: 12.5px;">Rows per page:</span>
                     <select id="auditPageSize" class="nl-page-size-select no-custom-select" onchange="changeAuditPageSize(this.value)">
                         <option value="10" selected>10</option>
                         <option value="25">25</option>
@@ -537,13 +696,13 @@
                     <div class="forensic-kv-value" style="color: #059669; font-weight: 700;">Verified Database Entry</div>
                 </div>
 
-                <div class="p-3 bg-light rounded-3" style="font-size: 12px; color: #475569; border: 1px solid #E2E8F0;">
-                    <i class="ti ti-info-circle text-primary"></i>
+                <div class="forensic-info-box">
+                    <i class="ti ti-info-circle" style="color: var(--al-primary);"></i>
                     This record represents an immutable audit entry logged by NLogistic authentication filter &amp; database stored procedures during runtime.
                 </div>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid #F1F5F9; padding: 12px 24px;">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn-modal-close" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

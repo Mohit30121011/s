@@ -49,43 +49,75 @@
 
 <style>
     /* Invoices Revamped Enterprise Styling */
+    :root {
+        --nl-primary: #FC8019;
+        --nl-primary-hover: #E66F0F;
+        --nl-surface: #FFFFFF;
+        --nl-border: #E2E8F0;
+        --nl-text-main: #0F172A;
+        --nl-text-muted: #64748B;
+    }
+
     .invoices-page-wrapper {
         background-color: #F8FAFC;
         min-height: calc(100vh - 70px);
         padding-bottom: 40px;
     }
 
-    /* Page Header */
-    .invoices-header-row {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
+    /* Frameless Telemetry Header Hero */
+    .telemetry-header-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 0 4px 0 !important;
         margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         flex-wrap: wrap;
         gap: 16px;
     }
-    .invoices-page-title {
-        font-weight: 700;
-        color: #0F172A;
-        font-size: 24px;
-        letter-spacing: -0.02em;
-        margin-bottom: 4px;
-    }
-    .invoices-breadcrumb {
-        font-size: 13px;
-        color: #64748B;
-        margin-bottom: 0;
+    .telemetry-header-left {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 16px;
     }
-
-    .btn-create-invoice {
-        background: linear-gradient(135deg, #FC8019 0%, #E66F0F 100%);
+    .telemetry-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 50% !important;
+        background: rgba(252, 128, 25, 0.12);
+        color: #FC8019;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.18);
+    }
+    .telemetry-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0F172A;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.02em;
+    }
+    .telemetry-desc {
+        color: #64748B;
+        margin: 0;
+        font-size: 13.5px;
+    }
+    .telemetry-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .btn-register-primary {
+        background: #FC8019;
         color: #FFFFFF !important;
         border: none;
-        padding: 9px 20px;
-        border-radius: 8px;
+        padding: 10px 24px;
+        border-radius: 50px !important;
         font-weight: 600;
         font-size: 13.5px;
         display: inline-flex;
@@ -96,10 +128,11 @@
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
     }
-    .btn-create-invoice:hover {
+    .btn-register-primary:hover {
+        background: #E66F0F;
         transform: translateY(-1px);
         box-shadow: 0 6px 18px rgba(252, 128, 25, 0.38);
-        background: linear-gradient(135deg, #FF8E2E 0%, #E66F0F 100%);
+        color: #FFFFFF !important;
     }
 
     /* KPI Cards Grid */
@@ -112,8 +145,8 @@
     .inv-kpi-card {
         background: #FFFFFF;
         border: 1px solid var(--nl-border, #E2E8F0);
-        border-radius: 12px;
-        padding: 18px 20px;
+        border-radius: 16px;
+        padding: 20px 22px;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
         position: relative;
         overflow: hidden;
@@ -121,7 +154,7 @@
     }
     .inv-kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     }
     .inv-kpi-top {
         display: flex;
@@ -130,18 +163,19 @@
         margin-bottom: 12px;
     }
     .inv-kpi-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50% !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 22px;
+        flex-shrink: 0;
     }
-    .inv-kpi-icon.invoiced { background: #EEF2FF; color: #4F46E5; }
-    .inv-kpi-icon.collected { background: #ECFDF5; color: #10B981; }
-    .inv-kpi-icon.pending { background: #FFFBEB; color: #F59E0B; }
-    .inv-kpi-icon.overdue { background: #FEF2F2; color: #EF4444; }
+    .inv-kpi-icon.invoiced { background: rgba(79, 70, 229, 0.12); color: #4F46E5; }
+    .inv-kpi-icon.collected { background: rgba(16, 185, 129, 0.12); color: #10B981; }
+    .inv-kpi-icon.pending { background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+    .inv-kpi-icon.overdue { background: rgba(239, 68, 68, 0.12); color: #EF4444; }
 
     .inv-kpi-label {
         font-size: 11.5px;
@@ -166,55 +200,69 @@
         align-items: center;
         gap: 6px;
     }
+    .inv-kpi-sub .badge,
+    .inv-kpi-pill {
+        border-radius: 50px !important;
+        padding: 4px 10px;
+        font-weight: 600;
+        font-size: 11px;
+    }
+    .inv-kpi-pill.invoiced  { background: #EEF2FF; color: #4F46E5; }
+    .inv-kpi-pill.collected { background: #ECFDF5; color: #059669; }
+    .inv-kpi-pill.pending   { background: #FFFBEB; color: #D97706; }
+    .inv-kpi-pill.overdue   { background: #FEF2F2; color: #DC2626; }
 
     /* Filter & Search Toolbar */
     .inv-filter-toolbar {
         background: #FFFFFF;
         border: 1px solid var(--nl-border, #E2E8F0);
-        border-radius: 12px;
-        padding: 14px 18px;
+        border-radius: 50px !important;
+        padding: 8px 16px;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
         margin-bottom: 22px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 14px;
+        gap: 12px;
     }
     .inv-search-wrap {
         position: relative;
         flex: 1;
-        min-width: 260px;
-        max-width: 420px;
+        min-width: 240px;
+        max-width: 380px;
     }
     .inv-search-wrap i.search-icon {
         position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94A3B8;
-        font-size: 15px;
-        pointer-events: none;
+        left: 18px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: #94A3B8 !important;
+        font-size: 16px !important;
+        pointer-events: none !important;
+        z-index: 5 !important;
     }
+    #invoiceSearchInput,
     .inv-search-input {
-        width: 100%;
-        padding: 9px 36px 9px 38px;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        font-size: 13.5px;
-        outline: none;
-        background: #F8FAFC;
-        color: #0F172A;
-        transition: all 0.15s ease;
+        width: 100% !important;
+        padding: 10px 38px 10px 48px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 50px !important;
+        font-size: 13.5px !important;
+        outline: none !important;
+        background-color: #F8FAFC !important;
+        color: #0F172A !important;
+        transition: all 0.2s ease;
     }
+    #invoiceSearchInput:focus,
     .inv-search-input:focus {
-        background: #FFFFFF;
-        border-color: #FC8019;
-        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+        background-color: #FFFFFF !important;
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12) !important;
     }
     .inv-search-clear {
         position: absolute;
-        right: 12px;
+        right: 16px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -224,6 +272,7 @@
         cursor: pointer;
         padding: 0;
         display: none;
+        z-index: 5;
     }
     .inv-search-clear:hover { color: #0F172A; }
 
@@ -232,15 +281,15 @@
         display: flex;
         align-items: center;
         background: #F1F5F9;
-        padding: 3px;
-        border-radius: 8px;
-        gap: 2px;
+        padding: 4px;
+        border-radius: 50px !important;
+        gap: 3px;
     }
     .inv-tab-btn {
         background: none;
         border: none;
-        padding: 6px 13px;
-        border-radius: 6px;
+        padding: 6px 14px;
+        border-radius: 50px !important;
         font-size: 12.5px;
         font-weight: 600;
         color: #64748B;
@@ -255,13 +304,13 @@
     }
     .inv-tab-btn.active {
         background: #FFFFFF;
-        color: #0F172A;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+        color: #FC8019;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
     }
     .inv-tab-count {
         font-size: 11px;
-        padding: 1px 6px;
-        border-radius: 10px;
+        padding: 2px 7px;
+        border-radius: 50px !important;
         background: rgba(100, 116, 139, 0.12);
         color: #475569;
     }
@@ -270,30 +319,125 @@
         color: #FC8019;
     }
 
-    /* Customer Filter Select */
+    /* Customer Filter Select & TomSelect Pill */
     .inv-customer-select-wrap {
         min-width: 220px;
     }
     .inv-customer-select {
         width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
+        padding: 8px 16px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 50px !important;
         font-size: 13px;
         background-color: #FFFFFF;
         color: #0F172A;
         outline: none;
+        cursor: pointer;
     }
     .inv-customer-select:focus {
         border-color: #FC8019;
         box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
+    }
+    .inv-customer-select-wrap .ts-wrapper.single {
+        border-radius: 50px !important;
+    }
+    .inv-customer-select-wrap .ts-wrapper.single .ts-control {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 50px !important;
+        padding: 8px 20px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #0F172A !important;
+        min-height: 40px !important;
+        box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        transition: all 0.2s ease !important;
+    }
+    .inv-customer-select-wrap .ts-wrapper.single .ts-control input {
+        color: #0F172A !important;
+        font-size: 13px !important;
+    }
+    .inv-customer-select-wrap .ts-wrapper.single .ts-control .item {
+        color: #0F172A !important;
+        font-weight: 600 !important;
+    }
+    .inv-customer-select-wrap .ts-wrapper.single.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
+    }
+
+    /* Table Due Date Styling */
+    .inv-due-date-val {
+        font-weight: 500;
+        color: #1E293B;
+    }
+    .inv-due-sub {
+        color: #64748B;
+    }
+
+    /* Modal Calculation, Balance & QR Panels */
+    .inv-modal-calc-panel {
+        background: #FFF9F5;
+        border: 1px solid #FFD4C2;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+    .inv-calc-row {
+        font-size: 13px;
+        color: #64748B;
+    }
+    .inv-calc-val {
+        color: #0F172A;
+    }
+    .inv-calc-total-row {
+        border-top: 1px dashed #FFD4C2;
+        font-size: 15px;
+    }
+    .inv-calc-total-label {
+        color: #0F172A;
+    }
+    .inv-calc-total-val {
+        color: #FC8019;
+        font-size: 16px;
+    }
+    .inv-modal-balance-panel {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: 12px;
+    }
+    .inv-modal-qr-panel {
+        background: #FFF9F5;
+        border: 1px dashed #FC8019;
+        border-radius: 12px;
+        padding: 16px;
+    }
+    .inv-qr-amount-banner {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+    }
+    .inv-qr-vpa-box {
+        background: #F1F5F9;
+        border-radius: 50px !important;
+        padding: 8px 16px !important;
+        font-size: 12px;
+    }
+    .inv-app-badge {
+        background: #FFFFFF;
+        color: #0F172A;
+        border: 1px solid #E2E8F0;
+        font-size: 10.5px;
+        font-weight: 600;
+        border-radius: 50px !important;
     }
 
     /* Table Container Card */
     .inv-table-card {
         background: #FFFFFF;
         border: 1px solid var(--nl-border, #E2E8F0);
-        border-radius: 12px;
+        border-radius: 16px;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
         overflow: hidden;
     }
@@ -328,10 +472,33 @@
         color: #64748B;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        padding: 12px 18px;
+        padding: 13px 18px;
         border-bottom: 1px solid #E2E8F0;
         border-top: none;
         white-space: nowrap;
+        user-select: none;
+    }
+    .inv-table th.sortable {
+        cursor: pointer;
+        transition: color 0.15s ease, background 0.15s ease;
+    }
+    .inv-table th.sortable:hover {
+        color: #FC8019;
+        background: rgba(252, 128, 25, 0.04);
+    }
+    .inv-table th.sort-active {
+        color: #FC8019;
+    }
+    .inv-table th .sort-indicator {
+        margin-left: 4px;
+        font-size: 13px;
+        opacity: 0.5;
+        vertical-align: middle;
+    }
+    .inv-table th.sortable:hover .sort-indicator,
+    .inv-table th.sort-active .sort-indicator {
+        opacity: 1;
+        color: #FC8019;
     }
     .inv-table td {
         padding: 14px 18px;
@@ -349,22 +516,18 @@
 
     /* Column Specific Styles */
     .inv-code-badge {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-weight: 700;
-        font-size: 13px;
-        color: #0F172A;
-        background: #F1F5F9;
-        padding: 4px 8px;
-        border-radius: 6px;
-        border: 1px solid #E2E8F0;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
+        font-weight: 700;
+        color: #0F172A;
+        font-size: 13.5px;
+        font-family: monospace, monospace;
     }
     .inv-issue-date {
         font-size: 11.5px;
         color: #94A3B8;
-        margin-top: 3px;
+        margin-top: 2px;
     }
 
     .inv-cust-info {
@@ -373,37 +536,36 @@
         gap: 10px;
     }
     .inv-cust-avatar {
-        width: 34px;
-        height: 34px;
-        border-radius: 8px;
-        background: #FFF2EB;
-        color: #FC8019;
-        font-weight: 700;
-        font-size: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #FC8019 0%, #FF9E4A 100%);
+        color: #FFFFFF;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
         flex-shrink: 0;
-        border: 1px solid #FFE0D1;
     }
     .inv-cust-name {
         font-weight: 600;
         color: #0F172A;
-        line-height: 1.3;
+        line-height: 1.2;
     }
 
     .inv-shipment-pill {
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        font-weight: 600;
         color: #2563EB;
         background: #EFF6FF;
         border: 1px solid #DBEAFE;
-        padding: 3px 8px;
-        border-radius: 6px;
+        padding: 4px 10px;
+        border-radius: 50px !important;
         text-decoration: none;
         font-size: 12px;
+        font-weight: 600;
         transition: all 0.15s ease;
     }
     .inv-shipment-pill:hover {
@@ -414,7 +576,7 @@
         font-size: 11.5px;
         color: #64748B;
         margin-top: 4px;
-        max-width: 200px;
+        max-width: 280px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -431,13 +593,13 @@
         margin-top: 2px;
     }
 
-    /* Vibrant Status Badges */
+    /* Vibrant Status Badges - 50px Pill Geometry */
     .inv-status-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 5px 11px;
-        border-radius: 20px;
+        padding: 5px 12px;
+        border-radius: 50px !important;
         font-size: 11.5px;
         font-weight: 700;
         letter-spacing: 0.3px;
@@ -466,19 +628,19 @@
     .inv-status-dot {
         width: 6px;
         height: 6px;
-        border-radius: 50%;
+        border-radius: 50% !important;
         background-color: currentColor;
     }
 
-    /* Action Buttons */
+    /* Action Buttons - 50% Circular & 50px Pill */
     .inv-actions-cell {
         white-space: nowrap;
         text-align: right;
     }
     .btn-inv-action {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50% !important;
         border: 1px solid #E2E8F0;
         background: #FFFFFF;
         color: #475569;
@@ -509,21 +671,95 @@
         background: #10B981;
         color: #FFFFFF !important;
         border: none;
-        padding: 5px 12px;
-        border-radius: 8px;
+        padding: 6px 14px;
+        border-radius: 50px !important;
         font-size: 12.5px;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: 5px;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(16, 185, 129, 0.25);
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
         transition: all 0.15s ease;
     }
     .btn-inv-pay:hover {
         background: #059669;
         transform: translateY(-1px);
         box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Global Enterprise Circular Pagination Bar */
+    .nl-pagination-wrapper {
+        padding: 16px 24px;
+        border-top: 1px solid #F1F5F9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        background: #FFFFFF;
+    }
+    .nl-pagination-info {
+        font-size: 13px;
+        color: #64748B;
+        font-weight: 500;
+    }
+    .nl-pagination-info strong {
+        color: #0F172A;
+        font-weight: 700;
+    }
+    .nl-pagination-nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .nl-page-btn {
+        height: 36px;
+        min-width: 36px;
+        padding: 0 10px;
+        border: 1.5px solid #E2E8F0;
+        background: #FFFFFF;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.18s ease;
+    }
+    .nl-page-btn.nl-page-num {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50% !important;
+    }
+    .nl-page-btn.nl-page-nav-btn {
+        border-radius: 50px !important;
+        padding: 0 16px;
+        gap: 6px;
+    }
+    .nl-page-btn:hover:not(.disabled):not(.active) {
+        border-color: #FC8019;
+        color: #FC8019;
+        background: #FFF3EA;
+    }
+    .nl-page-btn.active {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(252, 128, 25, 0.35);
+    }
+    .nl-page-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    .nl-page-ellipsis {
+        padding: 0 4px;
+        color: #94A3B8;
+        font-weight: 700;
     }
 
     /* Empty State */
@@ -534,7 +770,7 @@
     .inv-empty-icon {
         width: 56px;
         height: 56px;
-        border-radius: 14px;
+        border-radius: 50% !important;
         background: #F1F5F9;
         color: #94A3B8;
         display: inline-flex;
@@ -544,39 +780,441 @@
         margin-bottom: 14px;
     }
 
+    /* Form Controls & Date Picker */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.15s ease;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 20px !important;
+    }
+    .modal-content .btn-close {
+        border-radius: 50% !important;
+    }
+
     /* Override any unwanted card tools */
     .no-card-tools .nl-card-tools,
     .filter-card .nl-card-tools,
     [data-no-tools="true"] .nl-card-tools {
         display: none !important;
     }
+
+    /* ==========================================================================
+       DARK THEME STYLES [data-theme="dark"] FOR INVOICES & BILLING
+       ========================================================================== */
+    [data-theme="dark"] .invoices-page-wrapper {
+        background-color: transparent !important;
+    }
+    [data-theme="dark"] .telemetry-header-card {
+        background: transparent !important;
+        border: none !important;
+    }
+    [data-theme="dark"] .telemetry-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .telemetry-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .telemetry-icon-box {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+
+    /* KPI Cards Dark Mode */
+    [data-theme="dark"] .inv-kpi-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .inv-kpi-card:hover {
+        border-color: #2D3F4D !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45) !important;
+    }
+    [data-theme="dark"] .inv-kpi-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .inv-kpi-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-kpi-sub {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .inv-kpi-pill.invoiced  { background: rgba(79, 70, 229, 0.18) !important; color: #A5B4FC !important; border: 1px solid rgba(79, 70, 229, 0.3) !important; }
+    [data-theme="dark"] .inv-kpi-pill.collected { background: rgba(16, 185, 129, 0.18) !important; color: #34D399 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; }
+    [data-theme="dark"] .inv-kpi-pill.pending   { background: rgba(245, 158, 11, 0.18) !important; color: #FBBF24 !important; border: 1px solid rgba(245, 158, 11, 0.3) !important; }
+    [data-theme="dark"] .inv-kpi-pill.overdue   { background: rgba(239, 68, 68, 0.18) !important; color: #F87171 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; }
+    [data-theme="dark"] .inv-kpi-icon.invoiced { background: rgba(79, 70, 229, 0.18) !important; color: #818CF8 !important; }
+    [data-theme="dark"] .inv-kpi-icon.collected { background: rgba(16, 185, 129, 0.18) !important; color: #34D399 !important; }
+    [data-theme="dark"] .inv-kpi-icon.pending { background: rgba(245, 158, 11, 0.18) !important; color: #FBBF24 !important; }
+    [data-theme="dark"] .inv-kpi-icon.overdue { background: rgba(239, 68, 68, 0.18) !important; color: #F87171 !important; }
+
+    /* Filter Toolbar Dark Mode */
+    [data-theme="dark"] .inv-filter-toolbar {
+        background: #101820 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .search-bar input,
+    [data-theme="dark"] #globalOmniboxInput,
+    [data-theme="dark"] #invoiceSearchInput,
+    [data-theme="dark"] .inv-search-input {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .search-bar input:focus,
+    [data-theme="dark"] #globalOmniboxInput:focus {
+        background-color: #101820 !important;
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .search-bar input::placeholder,
+    [data-theme="dark"] #globalOmniboxInput::placeholder {
+        color: #94A3B8 !important;
+        opacity: 0.85 !important;
+    }
+    [data-theme="dark"] #invoiceSearchInput::placeholder,
+    [data-theme="dark"] .inv-search-input::placeholder {
+        color: #94A3B8 !important;
+        opacity: 0.85 !important;
+    }
+    [data-theme="dark"] #invoiceSearchInput:focus,
+    [data-theme="dark"] .inv-search-input:focus {
+        background-color: #101820 !important;
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-status-tabs {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .inv-tab-btn {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .inv-tab-btn:hover {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-tab-btn.active {
+        background: #22303A !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .inv-tab-count {
+        background: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .inv-tab-btn.active .inv-tab-count {
+        background: rgba(252, 128, 25, 0.2) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .inv-customer-select {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-customer-select-wrap .ts-wrapper.single .ts-control {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-customer-select-wrap .ts-wrapper.single .ts-control input {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-customer-select-wrap .ts-wrapper.single .ts-control .item {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-customer-select-wrap .ts-wrapper.single.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.25) !important;
+    }
+
+    /* Table Due Date in Dark Mode */
+    [data-theme="dark"] .inv-due-date-val {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-due-sub,
+    [data-theme="dark"] .inv-due-sub.text-muted {
+        color: #94A3B8 !important;
+    }
+
+    /* Table Dark Mode */
+    [data-theme="dark"] .inv-table-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45) !important;
+    }
+    [data-theme="dark"] .inv-table-header {
+        background: #101820 !important;
+        border-bottom-color: #22303A !important;
+    }
+    [data-theme="dark"] .inv-table-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-table th {
+        background-color: #0B1520 !important;
+        color: #94A3B8 !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .inv-table th.sortable:hover {
+        color: #FC8019 !important;
+        background-color: rgba(252, 128, 25, 0.1) !important;
+    }
+    [data-theme="dark"] .inv-table th.sort-active {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .inv-table td {
+        background-color: transparent !important;
+        color: #F8FAFC !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .inv-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+    [data-theme="dark"] .inv-code-badge {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-issue-date {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .inv-cust-name {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-amount-main {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-shipment-pill {
+        background: rgba(37, 99, 235, 0.16) !important;
+        border-color: rgba(37, 99, 235, 0.35) !important;
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .inv-cargo-desc {
+        color: #94A3B8 !important;
+    }
+
+    /* Translucent Status Badges in Dark Mode */
+    [data-theme="dark"] .inv-status-badge.status-Paid {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .inv-status-badge.status-Unpaid {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] .inv-status-badge.status-Overdue {
+        background: rgba(239, 68, 68, 0.16) !important;
+        color: #F87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .inv-status-badge.status-Partial {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+
+    /* Action Buttons in Dark Mode */
+    [data-theme="dark"] .btn-inv-action {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-inv-action:hover {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
+        border-color: #475569 !important;
+    }
+    [data-theme="dark"] .btn-inv-action.btn-pdf:hover {
+        background: rgba(37, 99, 235, 0.2) !important;
+        color: #60A5FA !important;
+        border-color: #2563EB !important;
+    }
+    [data-theme="dark"] .btn-inv-action.btn-qr:hover {
+        background: rgba(252, 128, 25, 0.2) !important;
+        color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+
+    /* Pagination in Dark Mode */
+    [data-theme="dark"] .nl-pagination-wrapper {
+        background: #101820 !important;
+        border-top: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .nl-pagination-info {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-pagination-info strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .nl-page-btn:hover:not(.disabled):not(.active) {
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+        background: rgba(252, 128, 25, 0.12) !important;
+    }
+    [data-theme="dark"] .nl-page-btn.active {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Modals in Dark Mode */
+    [data-theme="dark"] .modal-content {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-header {
+        background: #101820 !important;
+        border-bottom-color: #22303A !important;
+    }
+    [data-theme="dark"] .modal-header .modal-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-body {
+        background: #101820 !important;
+    }
+    [data-theme="dark"] .modal-footer {
+        background: #101820 !important;
+        border-top-color: #22303A !important;
+    }
+    [data-theme="dark"] .modal-content .text-dark {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-content .form-label {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .modal-content .form-control,
+    [data-theme="dark"] .modal-content .form-select {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-content .form-control:focus,
+    [data-theme="dark"] .modal-content .form-select:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+    }
+    [data-theme="dark"] .modal-content .btn-light {
+        background-color: #1E2D3D !important;
+        border: 1px solid #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .modal-content .btn-light:hover {
+        background-color: #243447 !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Modal Live Calculation Panel in Dark Mode */
+    [data-theme="dark"] .inv-modal-calc-panel {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .inv-calc-row {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .inv-calc-val {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-calc-total-row {
+        border-top: 1px dashed #2D3F4D !important;
+    }
+    [data-theme="dark"] .inv-calc-total-label {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-calc-total-val {
+        color: #FC8019 !important;
+    }
+
+    /* Modal Balance & QR Panels in Dark Mode */
+    [data-theme="dark"] .inv-modal-balance-panel {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .inv-modal-qr-panel {
+        background: #151F28 !important;
+        border-color: rgba(252, 128, 25, 0.4) !important;
+    }
+    [data-theme="dark"] .inv-modal-qr-panel #qrPayeeText {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-modal-qr-panel .badge {
+        background: rgba(252, 128, 25, 0.18) !important;
+        border-color: rgba(252, 128, 25, 0.3) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .inv-qr-amount-banner {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .inv-qr-vpa-box {
+        background: #1A2633 !important;
+        border: 1px solid #2D3F4D !important;
+    }
+    [data-theme="dark"] .inv-qr-vpa-box #quickQrVpaText {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .inv-app-badge {
+        background: #151F28 !important;
+        color: #F8FAFC !important;
+        border-color: #2D3F4D !important;
+    }
+
+    [data-theme="dark"] .modal-content input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: none !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='4' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' x2='16' y1='2' y2='6'%3E%3C/line%3E%3Cline x1='8' x2='8' y1='2' y2='6'%3E%3C/line%3E%3Cline x1='3' x2='21' y1='10' y2='10'%3E%3C/line%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        cursor: pointer;
+    }
+    [data-theme="dark"] .modal-content .btn-close {
+        filter: invert(1) brightness(0.8);
+    }
 </style>
 
 <div class="invoices-page-wrapper">
     <div class="container-fluid py-4">
 
-        <!-- Page Header -->
-        <div class="invoices-header-row">
-            <div>
-                <h1 class="invoices-page-title">
-                    <c:choose>
-                        <c:when test="${sessionScope.user.roleId == 5}">My Invoices &amp; Payments</c:when>
-                        <c:otherwise>Billing &amp; Invoices</c:otherwise>
-                    </c:choose>
-                </h1>
-                <p class="invoices-breadcrumb">
-                    <span>Dashboard</span>
-                    <i class="ti ti-chevron-right" style="font-size: 11px;"></i>
-                    <span><c:choose><c:when test="${sessionScope.user.roleId == 5}">My Account</c:when><c:otherwise>Finance</c:otherwise></c:choose></span>
-                    <i class="ti ti-chevron-right" style="font-size: 11px;"></i>
-                    <span style="color: #0F172A; font-weight: 500;">Invoices &amp; Statements</span>
-                </p>
+        <!-- Frameless Telemetry Hero Header -->
+        <div class="telemetry-header-card">
+            <div class="telemetry-header-left">
+                <div class="telemetry-icon-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FC8019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="telemetry-title">
+                        <c:choose>
+                            <c:when test="${sessionScope.user.roleId == 5}">My Invoices &amp; Statements</c:when>
+                            <c:otherwise>Billing &amp; Invoices</c:otherwise>
+                        </c:choose>
+                    </h1>
+                    <p class="telemetry-desc">Comprehensive accounts receivable, commercial invoices, and real-time payment settlement ledger</p>
+                </div>
             </div>
 
             <c:if test="${sessionScope.user.roleId != 5}">
-                <button class="btn-create-invoice" data-bs-toggle="modal" data-bs-target="#generateInvoiceModal" type="button">
-                    <i class="ti ti-plus"></i> Generate New Invoice
-                </button>
+                <div class="telemetry-actions">
+                    <button class="btn-register-primary" data-bs-toggle="modal" data-bs-target="#generateInvoiceModal" type="button">
+                        <i class="ti ti-plus"></i> Generate New Invoice
+                    </button>
+                </div>
             </c:if>
         </div>
 
@@ -604,37 +1242,47 @@
 
         <!-- Executive Financial KPI Cards -->
         <div class="inv-kpi-grid">
-            <!-- Card 1: Total Invoiced -->
+            <!-- Card 1: Total Invoiced / Total Billed -->
             <div class="inv-kpi-card" data-no-tools="true">
                 <div class="inv-kpi-top">
                     <div>
-                        <div class="inv-kpi-label">Total Invoiced</div>
-                        <div class="inv-kpi-value">&#8377;<fmt:formatNumber value="${totalInvoiced}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
+                        <div class="inv-kpi-label">
+                            <c:choose>
+                                <c:when test="${sessionScope.user.roleId == 5}">Total Billed</c:when>
+                                <c:otherwise>Total Invoiced</c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="inv-kpi-value">$<fmt:formatNumber value="${totalInvoiced}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
                     </div>
                     <div class="inv-kpi-icon invoiced">
                         <i class="ti ti-receipt-tax"></i>
                     </div>
                 </div>
                 <div class="inv-kpi-sub">
-                    <span class="badge" style="background: #EEF2FF; color: #4F46E5; font-size: 11px;">${invoices.size()} Statements</span>
-                    <span>Issued across accounts</span>
+                    <span class="badge inv-kpi-pill invoiced">${invoices.size()} Statements</span>
+                    <span>&bull; &approx; &#8377;<fmt:formatNumber value="${totalInvoiced * 84.0}" type="number" minFractionDigits="2" maxFractionDigits="2"/> INR</span>
                 </div>
             </div>
 
-            <!-- Card 2: Total Collected / Paid -->
+            <!-- Card 2: Total Paid / Revenue Collected -->
             <div class="inv-kpi-card" data-no-tools="true">
                 <div class="inv-kpi-top">
                     <div>
-                        <div class="inv-kpi-label">Revenue Collected</div>
-                        <div class="inv-kpi-value" style="color: #059669;">&#8377;<fmt:formatNumber value="${totalPaid}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
+                        <div class="inv-kpi-label">
+                            <c:choose>
+                                <c:when test="${sessionScope.user.roleId == 5}">Total Paid</c:when>
+                                <c:otherwise>Revenue Collected</c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="inv-kpi-value" style="color: #059669;">$<fmt:formatNumber value="${totalPaid}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
                     </div>
                     <div class="inv-kpi-icon collected">
                         <i class="ti ti-circle-check"></i>
                     </div>
                 </div>
                 <div class="inv-kpi-sub">
-                    <span class="badge" style="background: #ECFDF5; color: #059669; font-size: 11px;">${countPaid} Settled</span>
-                    <span>Realized in treasury</span>
+                    <span class="badge inv-kpi-pill collected">${countPaid} Settled</span>
+                    <span>&bull; &approx; &#8377;<fmt:formatNumber value="${totalPaid * 84.0}" type="number" minFractionDigits="2" maxFractionDigits="2"/> INR</span>
                 </div>
             </div>
 
@@ -643,15 +1291,15 @@
                 <div class="inv-kpi-top">
                     <div>
                         <div class="inv-kpi-label">Pending Balance</div>
-                        <div class="inv-kpi-value" style="color: #D97706;">&#8377;<fmt:formatNumber value="${totalPending}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
+                        <div class="inv-kpi-value" style="color: #D97706;">$<fmt:formatNumber value="${totalPending}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
                     </div>
                     <div class="inv-kpi-icon pending">
                         <i class="ti ti-clock-hour-4"></i>
                     </div>
                 </div>
                 <div class="inv-kpi-sub">
-                    <span class="badge" style="background: #FFFBEB; color: #D97706; font-size: 11px;">${countUnpaid + countPartial} Open</span>
-                    <span>Awaiting remittance</span>
+                    <span class="badge inv-kpi-pill pending">${countUnpaid + countPartial} Open</span>
+                    <span>&bull; &approx; &#8377;<fmt:formatNumber value="${totalPending * 84.0}" type="number" minFractionDigits="2" maxFractionDigits="2"/> INR</span>
                 </div>
             </div>
 
@@ -659,16 +1307,21 @@
             <div class="inv-kpi-card" data-no-tools="true">
                 <div class="inv-kpi-top">
                     <div>
-                        <div class="inv-kpi-label">Overdue Volume</div>
-                        <div class="inv-kpi-value" style="color: #DC2626;">&#8377;<fmt:formatNumber value="${totalOverdue}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
+                        <div class="inv-kpi-label">
+                            <c:choose>
+                                <c:when test="${sessionScope.user.roleId == 5}">Overdue Balance</c:when>
+                                <c:otherwise>Overdue Volume</c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="inv-kpi-value" style="color: #DC2626;">$<fmt:formatNumber value="${totalOverdue}" type="number" minFractionDigits="2" maxFractionDigits="2"/></div>
                     </div>
                     <div class="inv-kpi-icon overdue">
                         <i class="ti ti-alert-triangle"></i>
                     </div>
                 </div>
                 <div class="inv-kpi-sub">
-                    <span class="badge" style="background: #FEF2F2; color: #DC2626; font-size: 11px;">${countOverdue} Overdue</span>
-                    <span>Requires followup</span>
+                    <span class="badge inv-kpi-pill overdue">${countOverdue} Overdue</span>
+                    <span>&bull; &approx; &#8377;<fmt:formatNumber value="${totalOverdue * 84.0}" type="number" minFractionDigits="2" maxFractionDigits="2"/> INR</span>
                 </div>
             </div>
         </div>
@@ -738,15 +1391,27 @@
             </div>
 
             <div class="table-responsive">
-                <table class="inv-table" id="invoicesDataTable">
+                <table class="inv-table enterprise-table tracking-table" id="invoicesDataTable">
                     <thead>
                         <tr>
-                            <th>Invoice #</th>
-                            <th>Customer</th>
-                            <th>Shipment Detail</th>
-                            <th>Amount &amp; Balance</th>
-                            <th>Status</th>
-                            <th>Due Date</th>
+                            <th class="sortable" onclick="sortInvoicesTable(0, this)">
+                                Invoice # <i class="ti ti-arrows-sort sort-indicator"></i>
+                            </th>
+                            <th class="sortable" onclick="sortInvoicesTable(1, this)">
+                                Customer <i class="ti ti-arrows-sort sort-indicator"></i>
+                            </th>
+                            <th class="sortable" onclick="sortInvoicesTable(2, this)">
+                                Shipment Detail <i class="ti ti-arrows-sort sort-indicator"></i>
+                            </th>
+                            <th class="sortable" onclick="sortInvoicesTable(3, this)">
+                                Amount &amp; Balance <i class="ti ti-arrows-sort sort-indicator"></i>
+                            </th>
+                            <th class="sortable" onclick="sortInvoicesTable(4, this)">
+                                Status <i class="ti ti-arrows-sort sort-indicator"></i>
+                            </th>
+                            <th class="sortable" onclick="sortInvoicesTable(5, this)">
+                                Due Date <i class="ti ti-arrows-sort sort-indicator"></i>
+                            </th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -767,7 +1432,9 @@
                                 data-customer="${fn:toLowerCase(custNameTrim)}"
                                 data-shipment="${inv.shipmentId}"
                                 data-cargo="${fn:toLowerCase(inv.cargoDescription)}"
-                                data-status="${inv.paymentStatus}">
+                                data-status="${inv.paymentStatus}"
+                                data-amount="${invTotal}"
+                                data-due="<fmt:formatDate value='${inv.dueDate}' pattern='yyyy-MM-dd' />">
                                 
                                 <!-- Invoice # -->
                                 <td>
@@ -797,19 +1464,43 @@
 
                                 <!-- Shipment Detail -->
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/live-tracking?id=${inv.shipmentId}" class="inv-shipment-pill" title="Track Shipment #${inv.shipmentId}">
-                                        <i class="ti ti-package"></i>
-                                        <span>#${inv.shipmentId}</span>
-                                    </a>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <a href="${pageContext.request.contextPath}/live-tracking?id=${inv.shipmentId}" class="inv-shipment-pill" title="Track Shipment #${inv.shipmentId}">
+                                            <i class="ti ti-package"></i>
+                                            <span>#${inv.shipmentId}</span>
+                                        </a>
+                                        <c:choose>
+                                            <c:when test="${inv.shipmentStatus == 'Booked'}">
+                                                <span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.28); font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;" title="Awaiting Container Allocation by Operations">
+                                                    <i class="ti ti-clock me-0.5"></i>Pending Allocation
+                                                </span>
+                                            </c:when>
+                                            <c:when test="${not empty inv.containerNumber}">
+                                                <span class="badge" style="background: rgba(252, 128, 25, 0.12); color: #FC8019; border: 1px solid rgba(252, 128, 25, 0.25); font-size: 11px; font-family: monospace, monospace; padding: 3px 7px; border-radius: 6px; font-weight: 600;" title="Allocated Container Box">
+                                                    <i class="ti ti-box me-0.5"></i>#${inv.containerNumber}
+                                                </span>
+                                            </c:when>
+                                        </c:choose>
+                                    </div>
                                     <div class="inv-cargo-desc" title="${inv.cargoDescription}">
                                         <c:out value="${empty inv.cargoDescription ? 'Standard Freight Consignment' : inv.cargoDescription}" />
                                     </div>
+                                    <c:if test="${not empty inv.originPort && not empty inv.destinationPort}">
+                                        <div style="font-size: 11px; color: #94A3B8; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                                            <span>${inv.originPort}</span>
+                                            <i class="ti ti-arrow-narrow-right"></i>
+                                            <span>${inv.destinationPort}</span>
+                                        </div>
+                                    </c:if>
                                 </td>
 
                                 <!-- Amount & Balance -->
                                 <td>
                                     <div class="inv-amount-main">
-                                        &#8377;<fmt:formatNumber value="${invTotal}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
+                                        $<fmt:formatNumber value="${invTotal}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
+                                        <span class="text-muted" style="font-size: 11px; font-weight: 500;">
+                                            (&approx; &#8377;<fmt:formatNumber value="${invTotal * 84.0}" type="number" minFractionDigits="2" maxFractionDigits="2"/>)
+                                        </span>
                                     </div>
                                     <div class="inv-amount-sub">
                                         <c:choose>
@@ -817,11 +1508,11 @@
                                                 <span class="text-success fw-semibold"><i class="ti ti-check"></i> Paid in full</span>
                                             </c:when>
                                             <c:when test="${inv.paymentStatus == 'Partial'}">
-                                                <span class="text-muted">Paid: &#8377;<fmt:formatNumber value="${invPaid}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span> &bull; 
-                                                <span class="text-warning fw-semibold">Bal: &#8377;<fmt:formatNumber value="${invBal}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                                <span class="text-muted">Paid: $<fmt:formatNumber value="${invPaid}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span> &bull; 
+                                                <span class="text-warning fw-semibold">Bal: $<fmt:formatNumber value="${invBal}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="text-danger fw-semibold">Due: &#8377;<fmt:formatNumber value="${invBal}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
+                                                <span class="text-danger fw-semibold">Due: $<fmt:formatNumber value="${invBal}" type="number" minFractionDigits="2" maxFractionDigits="2"/></span>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
@@ -837,19 +1528,19 @@
 
                                 <!-- Due Date -->
                                 <td>
-                                    <div style="font-weight: 500; color: #1E293B;">
+                                    <div class="inv-due-date-val">
                                         <fmt:formatDate value="${inv.dueDate}" pattern="dd MMM yyyy" />
                                     </div>
                                     <div style="font-size: 11px; margin-top: 2px;">
                                         <c:choose>
                                             <c:when test="${inv.paymentStatus == 'Paid'}">
-                                                <span class="text-success">Settled</span>
+                                                <span class="text-success fw-semibold">Settled</span>
                                             </c:when>
                                             <c:when test="${inv.paymentStatus == 'Overdue'}">
                                                 <span class="text-danger fw-semibold"><i class="ti ti-clock-alert me-1"></i>Overdue</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="text-muted">Payment Pending</span>
+                                                <span class="inv-due-sub text-muted">Payment Pending</span>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
@@ -905,6 +1596,16 @@
                     <i class="ti ti-rotate me-1"></i> Clear Filters
                 </button>
             </div>
+
+            <!-- Global Enterprise Circular Pagination Bar -->
+            <div class="nl-pagination-wrapper" id="invoicesPaginationWrapper">
+                <div class="nl-pagination-info" id="invoicesPaginationInfo">
+                    Showing <strong>0</strong> to <strong>0</strong> of <strong>${invoices.size()}</strong> invoices
+                </div>
+                <div class="nl-pagination-nav" id="invoicesPaginationNav">
+                    <!-- Dynamic Circular Page Buttons -->
+                </div>
+            </div>
         </div>
 
     </div>
@@ -958,15 +1659,15 @@
                             <input type="date" name="dueDate" id="genDueDate" class="form-control" required style="border-radius: 8px;">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Base Freight Charges (₹) <span class="text-danger">*</span></label>
+                            <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Base Freight Charges ($ USD) <span class="text-danger">*</span></label>
                             <input type="number" step="0.01" min="0" name="freightCost" id="genFreight" class="form-control" required oninput="recalcInvoiceTotals()" style="border-radius: 8px;">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Handling &amp; Service Charges (₹) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="serviceCharges" id="genService" class="form-control" value="500.00" required oninput="recalcInvoiceTotals()" style="border-radius: 8px;">
+                            <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Handling &amp; Service Charges ($ USD) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" name="serviceCharges" id="genService" class="form-control" value="50.00" required oninput="recalcInvoiceTotals()" style="border-radius: 8px;">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Fuel &amp; Peak Surcharge (₹)</label>
+                            <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Fuel &amp; Peak Surcharge ($ USD)</label>
                             <input type="number" step="0.01" min="0" name="surcharge" id="genSurcharge" class="form-control" value="0.00" oninput="recalcInvoiceTotals()" style="border-radius: 8px;">
                         </div>
                         <div class="col-md-6">
@@ -980,25 +1681,25 @@
                     </div>
 
                     <!-- Live Calculation Panel -->
-                    <div class="mt-4 p-3" style="background: #FFF9F5; border: 1px solid #FFD4C2; border-radius: 10px;">
-                        <div class="d-flex justify-content-between mb-1" style="font-size: 13px; color: #64748B;">
+                    <div class="mt-4 p-3 inv-modal-calc-panel">
+                        <div class="d-flex justify-content-between mb-1 inv-calc-row">
                             <span>Subtotal (Freight + Service + Surcharge)</span>
-                            <strong id="genSubtotal" style="color: #0F172A;">₹0.00</strong>
+                            <strong id="genSubtotal" class="inv-calc-val">$0.00</strong>
                         </div>
-                        <div class="d-flex justify-content-between mb-2" style="font-size: 13px; color: #64748B;">
+                        <div class="d-flex justify-content-between mb-2 inv-calc-row">
                             <span>Estimated GST Tax</span>
-                            <strong id="genTax" style="color: #0F172A;">₹0.00</strong>
+                            <strong id="genTax" class="inv-calc-val">$0.00</strong>
                         </div>
-                        <div class="d-flex justify-content-between pt-2" style="border-top: 1px dashed #FFD4C2; font-size: 15px;">
-                            <strong style="color: #0F172A;">Total Payable Invoice Amount</strong>
-                            <strong id="genTotal" style="color: #FC8019; font-size: 16px;">₹0.00</strong>
+                        <div class="d-flex justify-content-between pt-2 inv-calc-total-row">
+                            <strong class="inv-calc-total-label">Total Payable Invoice Amount</strong>
+                            <strong id="genTotal" class="inv-calc-total-val">$0.00</strong>
                         </div>
                     </div>
                 </div>
 
                 <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                    <button type="submit" class="btn-create-invoice" ${empty eligibleShipments ? 'disabled' : ''}>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 50px !important; font-weight: 500; padding: 9px 22px;">Cancel</button>
+                    <button type="submit" class="btn-register-primary" ${empty eligibleShipments ? 'disabled' : ''} style="padding: 9px 24px;">
                         <i class="ti ti-check"></i> Generate &amp; Save Invoice
                     </button>
                 </div>
@@ -1029,17 +1730,21 @@
                 <input type="hidden" name="invoiceId" id="payInvoiceId">
                 <div class="modal-body p-4">
                     <!-- Balance Banner -->
-                    <div class="p-3 mb-3 d-flex justify-content-between align-items-center" style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px;">
+                    <div class="p-3 mb-3 d-flex justify-content-between align-items-center inv-modal-balance-panel">
                         <div>
                             <span class="text-muted small d-block">Outstanding Balance:</span>
                             <span class="fw-bold text-dark" id="payInvoiceDisplay">Invoice Selected</span>
                         </div>
-                        <span class="fw-bold text-danger fs-4">₹<span id="payBalance">0.00</span></span>
+                        <div class="text-end">
+                            <span class="fw-bold text-danger fs-4">$<span id="payBalance">0.00</span></span>
+                            <div class="text-muted" style="font-size: 11px;">&approx; &#8377;<span id="payBalanceInr">0.00</span> INR (Rate: $1 = ₹84)</div>
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Amount Paid (₹) <span class="text-danger">*</span></label>
+                        <label class="form-label text-dark fw-semibold" style="font-size: 13px;">Amount Paid ($ USD) <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" name="amountPaid" id="amountPaidInput" class="form-control" required oninput="renderInvQr()" style="border-radius: 8px;">
+                        <small class="text-muted" id="amountPaidInrHint" style="font-size: 11px; display: block; margin-top: 3px;">&approx; &#8377;0.00 INR (1 USD = ₹84.00)</small>
                     </div>
 
                     <div class="mb-3">
@@ -1053,7 +1758,7 @@
                     </div>
 
                     <!-- Dynamic Real UPI QR Display -->
-                    <div id="invUpiQr" class="text-center mb-3" style="background: #FFF9F5; border: 1px dashed #FC8019; border-radius: 12px; padding: 16px;">
+                    <div id="invUpiQr" class="text-center mb-3 inv-modal-qr-panel">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <span style="font-size: 11px; font-weight: 700; color: #FC8019; text-transform: uppercase; letter-spacing: 0.5px;">
                                 <i class="ti ti-qrcode me-1"></i> Scan &amp; Pay via UPI
@@ -1096,8 +1801,8 @@
                 </div>
 
                 <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-                    <button type="submit" class="btn btn-success" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 50px !important; font-weight: 500; padding: 9px 22px;">Cancel</button>
+                    <button type="submit" class="btn btn-success" style="border-radius: 50px !important; font-weight: 600; padding: 9px 24px; background: #10B981; border: none;">
                         <i class="ti ti-check me-1"></i> Confirm Settlement
                     </button>
                 </div>
@@ -1109,10 +1814,10 @@
 <!-- Quick Instant QR Code Modal -->
 <div class="modal fade" id="quickQrModal" tabindex="-1" aria-labelledby="quickQrModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px !important; overflow: hidden;">
             <div class="modal-header text-white" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border-bottom: none; padding: 18px 22px;">
                 <div class="d-flex align-items-center gap-3">
-                    <div style="width: 40px; height: 40px; background: rgba(252, 128, 25, 0.2); border: 1px solid rgba(252, 128, 25, 0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 20px;">
+                    <div style="width: 40px; height: 40px; background: rgba(252, 128, 25, 0.2); border: 1px solid rgba(252, 128, 25, 0.4); border-radius: 50% !important; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 20px;">
                         <i class="ti ti-qrcode"></i>
                     </div>
                     <div>
@@ -1120,15 +1825,15 @@
                         <small style="color: #94A3B8; font-size: 11.5px;">Official Verified Merchant UPI QR</small>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="border-radius: 50% !important;"></button>
             </div>
 
             <div class="modal-body p-4 text-center">
                 <!-- Amount Banner -->
-                <div class="p-3 mb-3" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
+                <div class="p-3 mb-3 inv-qr-amount-banner">
                     <div class="text-muted small mb-1" style="font-size: 11.5px;">Outstanding Balance</div>
                     <div class="fw-bold text-dark" style="font-size: 26px; letter-spacing: -0.5px;" id="quickQrAmountDisplay">&#8377;0.00</div>
-                    <div class="badge mt-1" style="background: #FFF2EB; color: #FC8019; border: 1px solid #FFE0D1; font-weight: 600;" id="quickQrInvoiceDisplay">
+                    <div class="badge mt-1" style="background: #FFF2EB; color: #FC8019; border: 1px solid #FFE0D1; font-weight: 600; border-radius: 50px !important; padding: 5px 12px;" id="quickQrInvoiceDisplay">
                         Invoice #INV-000
                     </div>
                 </div>
@@ -1142,33 +1847,34 @@
                 </div>
 
                 <!-- Payee VPA Details -->
-                <div class="p-2 mb-3 d-flex align-items-center justify-content-between" style="background: #F1F5F9; border-radius: 8px; font-size: 12px;">
+                <div class="p-2 mb-3 d-flex align-items-center justify-content-between inv-qr-vpa-box">
                     <div class="text-start">
                         <span class="text-muted d-block" style="font-size: 10px; font-weight: 700; text-transform: uppercase;">UPI ID / VPA</span>
                         <span class="fw-bold text-dark font-monospace" id="quickQrVpaText">nlogistic.billing@icici</span>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" onclick="copyUpiId('nlogistic.billing@icici', this)" style="border-radius: 6px; font-size: 11px; padding: 4px 8px;">
+                    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" onclick="copyUpiId('nlogistic.billing@icici', this)" style="border-radius: 50px !important; font-size: 11px; padding: 4px 10px;">
                         <i class="ti ti-copy"></i> Copy
                     </button>
                 </div>
 
                 <!-- Mobile Intent Direct Link (for smartphone users) -->
-                <a id="quickQrMobileIntentBtn" href="#" class="btn btn-primary w-100 mb-3 d-md-none" style="background: #FC8019; border-color: #FC8019; border-radius: 8px; font-weight: 600; padding: 9px;">
+                <a id="quickQrMobileIntentBtn" href="#" class="btn btn-primary w-100 mb-3 d-md-none" style="background: #FC8019; border-color: #FC8019; border-radius: 50px !important; font-weight: 600; padding: 9px;">
                     <i class="ti ti-external-link me-1"></i> Pay with Installed UPI App
                 </a>
 
                 <!-- Supported Apps Grid -->
                 <div class="d-flex align-items-center justify-content-center gap-1 pt-2" style="border-top: 1px solid #F1F5F9;">
-                    <span class="badge bg-white text-dark border px-2 py-1" style="font-size: 10.5px; font-weight: 600;"><i class="ti ti-brand-google text-primary me-1"></i>GPay</span>
-                    <span class="badge bg-white text-dark border px-2 py-1" style="font-size: 10.5px; font-weight: 600;"><i class="ti ti-bolt text-purple me-1" style="color: #673AB7;"></i>PhonePe</span>
-                    <span class="badge bg-white text-dark border px-2 py-1" style="font-size: 10.5px; font-weight: 600;"><i class="ti ti-wallet text-info me-1"></i>Paytm</span>
-                    <span class="badge bg-white text-dark border px-2 py-1" style="font-size: 10.5px; font-weight: 600;"><i class="ti ti-building-bank text-success me-1"></i>BHIM</span>
+                    <span class="badge inv-app-badge px-2 py-1"><i class="ti ti-brand-google text-primary me-1"></i>GPay</span>
+                    <span class="badge inv-app-badge px-2 py-1"><i class="ti ti-bolt text-purple me-1" style="color: #673AB7;"></i>PhonePe</span>
+                    <span class="badge inv-app-badge px-2 py-1"><i class="ti ti-wallet text-info me-1"></i>Paytm</span>
+                    <span class="badge inv-app-badge px-2 py-1"><i class="ti ti-building-bank text-success me-1"></i>BHIM</span>
+                </div>
                 </div>
             </div>
 
             <div class="modal-footer bg-light border-0 py-2 px-4 justify-content-between">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
-                <button type="button" class="btn btn-sm btn-success" id="quickQrRecordPayBtn" onclick="switchToRecordPayment()" style="border-radius: 8px; font-weight: 600;">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 50px !important; padding: 6px 16px;">Close</button>
+                <button type="button" class="btn btn-sm btn-success" id="quickQrRecordPayBtn" onclick="switchToRecordPayment()" style="border-radius: 50px !important; font-weight: 600; padding: 6px 18px;">
                     <i class="ti ti-cash me-1"></i> Record Settlement
                 </button>
             </div>
@@ -1180,16 +1886,91 @@
 <script>
     // Current Active Status Filter ('ALL', 'Paid', 'Unpaid', 'Overdue', 'Partial')
     let currentStatusFilter = 'ALL';
+    let invoiceCurrentPage = 1;
+    const invoicePageSize = 10;
+    let invoiceSortCol = -1;
+    let invoiceSortAsc = true;
+    let lastMatchingRows = [];
 
     // Status Filter Tab Selection
     window.setStatusFilter = function(status, btn) {
         currentStatusFilter = status;
         document.querySelectorAll('#invStatusTabs .inv-tab-btn').forEach(b => b.classList.remove('active'));
         if (btn) btn.classList.add('active');
+        invoiceCurrentPage = 1;
         applyInvoiceFilters();
     };
 
-    // Real-time Instant Search & Status Filter
+    // Client-side Sorting
+    window.sortInvoicesTable = function(colIndex, th) {
+        if (invoiceSortCol === colIndex) {
+            invoiceSortAsc = !invoiceSortAsc;
+        } else {
+            invoiceSortCol = colIndex;
+            invoiceSortAsc = true;
+        }
+
+        // Update header indicators
+        document.querySelectorAll('#invoicesDataTable thead th.sortable').forEach(header => {
+            header.classList.remove('sort-active');
+            const icon = header.querySelector('.sort-indicator');
+            if (icon) {
+                icon.className = 'ti ti-arrows-sort sort-indicator';
+            }
+        });
+
+        if (th) {
+            th.classList.add('sort-active');
+            const icon = th.querySelector('.sort-indicator');
+            if (icon) {
+                icon.className = (invoiceSortAsc ? 'ti ti-sort-ascending' : 'ti ti-sort-descending') + ' sort-indicator';
+            }
+        }
+
+        const tbody = document.getElementById('invoiceTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr.invoice-row'));
+
+        rows.sort((a, b) => {
+            let valA, valB;
+            switch (colIndex) {
+                case 0: // Invoice ID
+                    valA = parseInt((a.dataset.invId || '').replace(/\D/g, ''), 10) || 0;
+                    valB = parseInt((b.dataset.invId || '').replace(/\D/g, ''), 10) || 0;
+                    break;
+                case 1: // Customer
+                    valA = (a.dataset.customer || '').toLowerCase();
+                    valB = (b.dataset.customer || '').toLowerCase();
+                    break;
+                case 2: // Shipment ID
+                    valA = parseInt(a.dataset.shipment || '0', 10) || 0;
+                    valB = parseInt(b.dataset.shipment || '0', 10) || 0;
+                    break;
+                case 3: // Amount
+                    valA = parseFloat(a.dataset.amount || '0') || 0;
+                    valB = parseFloat(b.dataset.amount || '0') || 0;
+                    break;
+                case 4: // Status
+                    valA = (a.dataset.status || '').toLowerCase();
+                    valB = (b.dataset.status || '').toLowerCase();
+                    break;
+                case 5: // Due Date
+                    valA = (a.dataset.due || '');
+                    valB = (b.dataset.due || '');
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (valA < valB) return invoiceSortAsc ? -1 : 1;
+            if (valA > valB) return invoiceSortAsc ? 1 : -1;
+            return 0;
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+        applyInvoiceFilters();
+    };
+
+    // Real-time Instant Search & Status Filter with Enterprise Pagination
     window.applyInvoiceFilters = function() {
         const query = (document.getElementById('invoiceSearchInput').value || '').trim().toLowerCase();
         const clearBtn = document.getElementById('invSearchClearBtn');
@@ -1198,7 +1979,7 @@
         }
 
         const rows = document.querySelectorAll('#invoiceTableBody tr.invoice-row');
-        let visibleCount = 0;
+        lastMatchingRows = [];
 
         rows.forEach(row => {
             const invId = (row.dataset.invId || '').toLowerCase();
@@ -1218,8 +1999,7 @@
                 cargo.includes(query);
 
             if (matchesStatus && matchesQuery) {
-                row.style.display = '';
-                visibleCount++;
+                lastMatchingRows.push(row);
             } else {
                 row.style.display = 'none';
             }
@@ -1228,18 +2008,87 @@
         // Update counter & empty state
         const countBadge = document.getElementById('visibleInvoiceCount');
         if (countBadge) {
-            countBadge.textContent = visibleCount + ' Visible';
+            countBadge.textContent = lastMatchingRows.length + ' Visible';
         }
 
         const emptyState = document.getElementById('clientNoMatchState');
         if (emptyState) {
-            emptyState.style.display = (visibleCount === 0 && rows.length > 0) ? 'block' : 'none';
+            emptyState.style.display = (lastMatchingRows.length === 0 && rows.length > 0) ? 'block' : 'none';
         }
+
+        renderInvoicesPagination();
+    };
+
+    window.goToInvoicePage = function(page) {
+        invoiceCurrentPage = page;
+        renderInvoicesPagination();
+    };
+
+    window.renderInvoicesPagination = function() {
+        const totalRows = lastMatchingRows.length;
+        const totalPages = Math.ceil(totalRows / invoicePageSize) || 1;
+        if (invoiceCurrentPage > totalPages) invoiceCurrentPage = totalPages;
+        if (invoiceCurrentPage < 1) invoiceCurrentPage = 1;
+
+        const startIdx = (invoiceCurrentPage - 1) * invoicePageSize;
+        const endIdx = startIdx + invoicePageSize;
+
+        // Hide all rows then display only current page slice
+        lastMatchingRows.forEach((row, idx) => {
+            row.style.display = (idx >= startIdx && idx < endIdx) ? '' : 'none';
+        });
+
+        // Update telemetry counter
+        const infoEl = document.getElementById('invoicesPaginationInfo');
+        if (infoEl) {
+            const startDisplay = totalRows === 0 ? 0 : startIdx + 1;
+            const endDisplay = Math.min(totalRows, endIdx);
+            infoEl.innerHTML = 'Showing <strong>' + startDisplay + '</strong> to <strong>' + endDisplay + '</strong> of <strong>' + totalRows + '</strong> invoices';
+        }
+
+        // Render circular buttons
+        const navEl = document.getElementById('invoicesPaginationNav');
+        const wrapperEl = document.getElementById('invoicesPaginationWrapper');
+        if (!navEl) return;
+
+        if (totalRows <= invoicePageSize) {
+            if (wrapperEl) wrapperEl.style.display = totalRows === 0 ? 'none' : 'flex';
+        } else {
+            if (wrapperEl) wrapperEl.style.display = 'flex';
+        }
+
+        let navHtml = '';
+        // Prev button
+        const prevDisabled = invoiceCurrentPage === 1 ? ' disabled' : '';
+        navHtml += '<button type="button" class="nl-page-btn nl-page-nav-btn' + prevDisabled + '" onclick="goToInvoicePage(' + (invoiceCurrentPage - 1) + ')">' +
+                   '<i class="ti ti-chevron-left"></i> Prev</button>';
+
+        // Pages
+        for (let p = 1; p <= totalPages; p++) {
+            if (totalPages > 7) {
+                if (p > 2 && p < totalPages - 1 && Math.abs(p - invoiceCurrentPage) > 1) {
+                    if (p === 3 || p === totalPages - 2) {
+                        navHtml += '<span class="nl-page-ellipsis">&hellip;</span>';
+                    }
+                    continue;
+                }
+            }
+            const activeClass = (p === invoiceCurrentPage) ? ' active' : '';
+            navHtml += '<button type="button" class="nl-page-btn nl-page-num' + activeClass + '" onclick="goToInvoicePage(' + p + ')">' + p + '</button>';
+        }
+
+        // Next button
+        const nextDisabled = invoiceCurrentPage === totalPages ? ' disabled' : '';
+        navHtml += '<button type="button" class="nl-page-btn nl-page-nav-btn' + nextDisabled + '" onclick="goToInvoicePage(' + (invoiceCurrentPage + 1) + ')">' +
+                   'Next <i class="ti ti-chevron-right"></i></button>';
+
+        navEl.innerHTML = navHtml;
     };
 
     window.clearInvoiceSearch = function() {
         const input = document.getElementById('invoiceSearchInput');
         if (input) input.value = '';
+        invoiceCurrentPage = 1;
         applyInvoiceFilters();
     };
 
@@ -1262,9 +2111,18 @@
 
         const balFloat = Math.max(0, parseFloat(balance) || 0);
         document.getElementById('payBalance').innerText = balFloat.toFixed(2);
+        const inrBal = (balFloat * 84.0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const inrEl = document.getElementById('payBalanceInr');
+        if (inrEl) inrEl.innerText = inrBal;
+
         const amtInput = document.getElementById('amountPaidInput');
         amtInput.value = balFloat.toFixed(2);
         amtInput.max = balFloat;
+
+        const hint = document.getElementById('amountPaidInrHint');
+        if (hint) {
+            hint.innerHTML = '&approx; &#8377;' + inrBal + ' INR (Rate: 1 USD = ₹84.00)';
+        }
 
         const modeSel = document.getElementById('invPaymentMode');
         if (modeSel && modeSel.value === 'UPI') {
@@ -1288,10 +2146,11 @@
         const subtotal = num('genFreight') + num('genService') + num('genSurcharge');
         const tax = subtotal * (num('genTaxRate') / 100);
         const total = subtotal + tax;
-        const fmt = (v) => '₹' + v.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        document.getElementById('genSubtotal').textContent = fmt(subtotal);
-        document.getElementById('genTax').textContent = fmt(tax);
-        document.getElementById('genTotal').textContent = fmt(total);
+        const fmt = (v) => '$' + v.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const fmtInr = (v) => ' (≈ ₹' + (v * 84.0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ')';
+        document.getElementById('genSubtotal').innerHTML = fmt(subtotal) + '<small class="text-muted fw-normal" style="font-size:11px">' + fmtInr(subtotal) + '</small>';
+        document.getElementById('genTax').innerHTML = fmt(tax) + '<small class="text-muted fw-normal" style="font-size:11px">' + fmtInr(tax) + '</small>';
+        document.getElementById('genTotal').innerHTML = fmt(total) + '<small class="text-muted fw-normal" style="font-size:11px">' + fmtInr(total) + '</small>';
     };
 
     // Payment Mode Toggle & QR Canvas
@@ -1363,10 +2222,16 @@
 
         const invoiceId = document.getElementById('payInvoiceId').value || '0';
         const amountVal = parseFloat(document.getElementById('amountPaidInput').value) || 0;
-        const cleanAmount = Math.max(0, amountVal).toFixed(2);
+        const cleanAmountUsd = Math.max(0, amountVal);
+        const cleanAmountInr = (cleanAmountUsd * 84.0).toFixed(2);
 
-        // Official NPCI standard UPI URI format
-        const upiUri = 'upi://pay?pa=nlogistic.billing@icici&pn=N%20Logistic%20Freight&am=' + cleanAmount + '&cu=INR&tn=Invoice%20INV-' + invoiceId;
+        const hint = document.getElementById('amountPaidInrHint');
+        if (hint) {
+            hint.innerHTML = '&approx; &#8377;' + parseFloat(cleanAmountInr).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' INR (Rate: 1 USD = ₹84.00)';
+        }
+
+        // Official NPCI standard UPI URI format (UPI uses INR)
+        const upiUri = 'upi://pay?pa=nlogistic.billing@icici&pn=N%20Logistic%20Freight&am=' + cleanAmountInr + '&cu=INR&tn=Invoice%20INV-' + invoiceId;
 
         generateRealQr(el, upiUri, 140);
     };
@@ -1377,15 +2242,19 @@
         currentQuickQrInvoice = { id: invoiceId, balance: balance, customer: customerName };
 
         const balFloat = Math.max(0, parseFloat(balance) || 0);
-        const balFormatted = balFloat.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const balInrFloat = balFloat * 84.0;
+        const balFormattedUsd = balFloat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const balFormattedInr = balInrFloat.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         const amtDisplay = document.getElementById('quickQrAmountDisplay');
-        if (amtDisplay) amtDisplay.innerHTML = '&#8377;' + balFormatted;
+        if (amtDisplay) {
+            amtDisplay.innerHTML = '$' + balFormattedUsd + ' <span style="font-size: 14px; font-weight: 500; color: #64748B;">(&approx; &#8377;' + balFormattedInr + ' INR)</span>';
+        }
 
         const invDisplay = document.getElementById('quickQrInvoiceDisplay');
         if (invDisplay) invDisplay.textContent = 'Invoice #INV-' + invoiceId + ' (' + customerName + ')';
 
-        const upiUri = 'upi://pay?pa=nlogistic.billing@icici&pn=N%20Logistic%20Freight&am=' + balFloat.toFixed(2) + '&cu=INR&tn=Invoice%20INV-' + invoiceId;
+        const upiUri = 'upi://pay?pa=nlogistic.billing@icici&pn=N%20Logistic%20Freight&am=' + balInrFloat.toFixed(2) + '&cu=INR&tn=Invoice%20INV-' + invoiceId;
 
         const intentBtn = document.getElementById('quickQrMobileIntentBtn');
         if (intentBtn) {
@@ -1457,6 +2326,9 @@
 
         const sel = document.getElementById('invPaymentMode');
         if (sel) onInvPaymentModeChange();
+
+        // Initialize enterprise pagination and filter state
+        applyInvoiceFilters();
     });
 
     // Composite reference submission

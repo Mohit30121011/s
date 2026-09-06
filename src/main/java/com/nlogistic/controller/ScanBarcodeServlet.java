@@ -227,32 +227,55 @@ public class ScanBarcodeServlet extends HttpServlet {
                             map.put("Max Gross Weight (kg)", rs.getBigDecimal("max_gross_weight_kg"));
                             map.put("Goods Capacity (kg)", rs.getBigDecimal("goods_capacity_kg"));
                             map.put("Goods Capacity (CBM)", rs.getBigDecimal("goods_capacity_cbm"));
+                            String cImg = rs.getString("image_url");
+                            if (cImg == null || cImg.trim().isEmpty()) {
+                                cImg = "https://images.unsplash.com/photo-1586528116311-ad8ed7abe515?w=600&q=80";
+                            }
+                            map.put("container_photo_url", cImg);
                         }
                     }
                 }
                 break;
             }
             case "Shipment": {
-                String sql = "SELECT s.*, op.port_name AS origin_name, dp.port_name AS dest_name, cu.customer_name "
+                String sql = "SELECT s.*, op.port_name AS origin_name, dp.port_name AS dest_name, cu.customer_name, "
+                           + "cnt.container_number, cnt.type AS container_type, cnt.size AS container_size, cnt.image_url AS container_image, "
+                           + "COALESCE((SELECT expected_arrival_date FROM container_movements WHERE shipment_id = s.shipment_id ORDER BY movement_id DESC LIMIT 1), DATE_ADD(s.booking_date, INTERVAL 14 DAY)) AS eta "
                            + "FROM shipment s "
                            + "LEFT JOIN ports op ON s.origin_port_id = op.port_id "
                            + "LEFT JOIN ports dp ON s.destination_port_id = dp.port_id "
                            + "LEFT JOIN customers cu ON s.customer_id = cu.customer_id "
+                           + "LEFT JOIN containers cnt ON s.container_id = cnt.container_id "
                            + "WHERE s.shipment_id = ?";
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, entityId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            map.put("Shipment ID", rs.getInt("shipment_id"));
+                            map.put("Shipment ID", "#" + rs.getInt("shipment_id"));
                             map.put("Status", rs.getString("status"));
                             map.put("Cargo Description", rs.getString("cargo_description"));
                             map.put("Origin Port", rs.getString("origin_name"));
                             map.put("Destination Port", rs.getString("dest_name"));
                             map.put("Customer", rs.getString("customer_name"));
-                            map.put("Container ID", rs.getInt("container_id"));
-                            map.put("Cargo Weight (kg)", rs.getBigDecimal("cargo_weight_kg"));
-                            map.put("Freight Cost", rs.getBigDecimal("freight_cost"));
+                            String cNum = rs.getString("container_number");
+                            map.put("Container", cNum != null ? "#" + cNum : "Pending Allocation");
+                            String cType = rs.getString("container_type");
+                            String cSize = rs.getString("container_size");
+                            map.put("Container Type", (cSize != null ? cSize + " " : "") + (cType != null ? cType : "Freight Unit"));
+                            map.put("Cargo Weight", rs.getBigDecimal("cargo_weight_kg") + " kg");
+                            map.put("Expected Arrival (ETA)", rs.getDate("eta"));
                             map.put("Booking Date", rs.getDate("booking_date"));
+
+                            String cImg = rs.getString("container_image");
+                            if (cImg == null || cImg.trim().isEmpty()) {
+                                if ("Reefer".equalsIgnoreCase(cType)) cImg = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=600&q=80";
+                                else if ("Flat Rack".equalsIgnoreCase(cType)) cImg = "https://images.unsplash.com/photo-1505777174135-d7247a329d91?w=600&q=80";
+                                else if ("Open Top".equalsIgnoreCase(cType)) cImg = "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=600&q=80";
+                                else cImg = "https://images.unsplash.com/photo-1586528116311-ad8ed7abe515?w=600&q=80";
+                            }
+                            map.put("container_photo_url", cImg);
+                            map.put("eta_formatted", rs.getDate("eta"));
+                            map.put("shipment_id_raw", rs.getInt("shipment_id"));
                         }
                     }
                 }

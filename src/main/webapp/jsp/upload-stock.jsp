@@ -11,11 +11,82 @@
         --nlog-green: #10b981;
         --nlog-purple: #8b5cf6;
         --nlog-yellow: #f59e0b;
-        --card-radius: 12px;
+        --card-radius: 14px;
     }
 
     .page-title { font-weight: 700; color: #0F172A; font-size: 24px; }
     .breadcrumb-text { font-size: 13px; color: #64748b; }
+
+    /* Frameless Stock Header Hero */
+    .stock-header-hero,
+    .telemetry-header-card {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .telemetry-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .telemetry-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 50% !important;
+        background: rgba(252, 128, 25, 0.12);
+        color: #FC8019;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.18);
+    }
+    .telemetry-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0F172A;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.02em;
+    }
+    .telemetry-desc {
+        color: #64748B;
+        margin: 0;
+        font-size: 13.5px;
+    }
+    .telemetry-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .btn-register-primary {
+        background: #FC8019;
+        color: #FFFFFF !important;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 50px !important;
+        font-weight: 600;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(252, 128, 25, 0.28);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+    .btn-register-primary:hover {
+        background: #E66F0F;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(252, 128, 25, 0.38);
+        color: #FFFFFF !important;
+    }
 
     .stat-card {
         background: #fff;
@@ -32,7 +103,7 @@
     .stat-icon {
         width: 48px;
         height: 48px;
-        border-radius: 12px;
+        border-radius: 50% !important;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -49,16 +120,16 @@
     .stat-label { font-size: 13px; color: #64748b; }
 
     .nav-tabs-custom {
-        display: flex; align-items: center; gap: 8px; background: #F8FAFC; padding: 4px;
-        border-radius: 50px; border: 1px solid #E2E8F0; margin-bottom: 24px; width: fit-content; flex-wrap: wrap;
+        display: flex; align-items: center; gap: 8px; background: #F8FAFC; padding: 5px;
+        border-radius: 50px !important; border: 1px solid #E2E8F0; margin-bottom: 24px; width: fit-content; flex-wrap: wrap;
     }
     .nav-tabs-custom .nav-link {
-        background: transparent; border: none; padding: 8px 20px; border-radius: 50px; font-size: 13px; font-weight: 600;
+        background: transparent; border: none; padding: 8px 22px; border-radius: 50px !important; font-size: 13px; font-weight: 600;
         color: #64748B; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center;
     }
     .nav-tabs-custom .nav-link:hover { color: #0F172A; }
     .nav-tabs-custom .nav-link.active {
-        background: #FFFFFF; color: var(--nlog-orange); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); border-bottom: none;
+        background: #FFFFFF; color: var(--nlog-orange); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-bottom: none;
     }
 
     .btn-nlog {
@@ -66,8 +137,8 @@
         color: white;
         font-weight: 600;
         border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
+        border-radius: 50px !important;
+        padding: 10px 24px;
         box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25);
         transition: all 0.18s ease;
     }
@@ -79,20 +150,23 @@
     }
 
     .btn-outline-nlog {
-        border: 1px solid #cbd5e1;
+        border: 1.5px solid #cbd5e1;
         color: #475569;
         background: white;
         font-weight: 600;
-        border-radius: 8px;
-        padding: 10px 20px;
+        border-radius: 50px !important;
+        padding: 10px 22px;
         transition: all 0.18s ease;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
     }
-    .btn-outline-nlog:hover { background: #f8fafc; border-color: #CBD5E1; }
+    .btn-outline-nlog:hover { background: #f8fafc; border-color: #CBD5E1; color: #0F172A; }
 
     /* Drag & Drop */
     .upload-dropzone {
         border: 2px dashed #cbd5e1;
-        border-radius: 12px;
+        border-radius: 16px;
         background-color: #f8fafc;
         padding: 50px 30px;
         text-align: center;
@@ -103,32 +177,35 @@
     .upload-dropzone i { font-size: 44px; color: #94a3b8; margin-bottom: 14px; transition: color 0.3s ease; }
     .upload-dropzone.dragover i { color: var(--nlog-orange); }
 
-    .form-control, .form-select {
+    .form-control, .form-select, .form-select-custom {
         border-color: #e2e8f0;
-        padding: 10px 14px;
-        border-radius: 8px;
+        padding: 10px 16px;
+        border-radius: 50px !important;
         font-size: 13.5px;
     }
-    .form-control:focus, .form-select:focus {
+    textarea.form-control {
+        border-radius: 14px !important;
+    }
+    .form-control:focus, .form-select:focus, .form-select-custom:focus {
         border-color: var(--nlog-orange);
         box-shadow: 0 0 0 0.2rem rgba(252, 128, 25, 0.15);
     }
     .form-label { font-size: 13px; font-weight: 600; color: #334155; }
     .required-asterisk { color: var(--nlog-orange); }
 
-    .badge-success-custom { background-color: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #A7F3D0;}
-    .badge-failed-custom { background-color: #fef2f2; color: #DC2626; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #FECACA;}
-    .badge-warning-custom { background-color: #fffbeb; color: #D97706; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #FDE68A;}
-    .badge-company-custom { background-color: #F1F5F9; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
+    .badge-success-custom { background-color: #ecfdf5; color: #059669; padding: 5px 14px; border-radius: 50px !important; font-size: 12px; font-weight: 600; border: 1px solid #A7F3D0; display: inline-flex; align-items: center; }
+    .badge-failed-custom { background-color: #fef2f2; color: #DC2626; padding: 5px 14px; border-radius: 50px !important; font-size: 12px; font-weight: 600; border: 1px solid #FECACA; display: inline-flex; align-items: center; }
+    .badge-warning-custom { background-color: #fffbeb; color: #D97706; padding: 5px 14px; border-radius: 50px !important; font-size: 12px; font-weight: 600; border: 1px solid #FDE68A; display: inline-flex; align-items: center; }
+    .badge-company-custom { background-color: #F1F5F9; color: #475569; padding: 4px 12px; border-radius: 50px !important; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; }
 
     /* Select wrapper (design system) */
     .select-wrapper { position: relative; width: 100%; }
     .select-wrapper::after {
-        content: ''; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
+        content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
         background-size: contain; background-repeat: no-repeat; pointer-events: none;
     }
-    .select-wrapper select { appearance: none; -webkit-appearance: none; padding-right: 38px; }
+    .select-wrapper select { appearance: none; -webkit-appearance: none; padding-right: 42px !important; border-radius: 50px !important; }
 
     /* Table Toolbar */
     .table-toolbar {
@@ -136,29 +213,393 @@
         padding: 14px 20px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; border-top-left-radius: var(--card-radius); border-top-right-radius: var(--card-radius);
     }
     .search-input-box { position: relative; min-width: 240px; max-width: 340px; }
-    .search-input-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; }
-    .search-input-box input { padding-left: 36px !important; height: 38px; font-size: 13px; border-radius: 8px; border: 1px solid #CBD5E1; width: 100%; }
+    .search-input-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 15px; }
+    .search-input-box input { padding-left: 40px !important; height: 40px; font-size: 13px; border-radius: 50px !important; border: 1px solid #CBD5E1; width: 100%; }
     .search-input-box input:focus { border-color: var(--nlog-orange); outline: none; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15); }
+
+    /* Enterprise Table Architecture */
+    .enterprise-table.tracking-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .enterprise-table.tracking-table th {
+        background-color: #F8FAFC;
+        padding: 14px 18px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #E2E8F0;
+        white-space: nowrap;
+    }
+    .enterprise-table.tracking-table th.sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .enterprise-table.tracking-table th.sortable:hover {
+        background-color: #F1F5F9;
+        color: #FC8019;
+    }
+    .enterprise-table.tracking-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+        font-size: 13.5px;
+    }
+    .enterprise-table.tracking-table tr:hover td {
+        background-color: #F8FAFC;
+    }
+
+    /* Modals & Buttons Pill Geometry */
+    .modal-content { border-radius: 16px !important; overflow: hidden; }
+    .btn-close { border-radius: 50% !important; }
+
+    /* Hide Export/Fullscreen Card Tools Everywhere on this Page */
+    .nl-card-tools,
+    .no-card-tools .nl-card-tools,
+    [data-no-tools="true"] .nl-card-tools,
+    .nl-card-tools-floating {
+        display: none !important;
+    }
+
+    /* Base Target Company Box & Toolbar */
+    .stock-page-container {
+        background: transparent !important;
+    }
+    .stock-target-company-box {
+        background: #F8FAFC;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 16px;
+    }
+    .stock-toolbar-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .stock-filter-label {
+        color: #475569;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .stock-company-picker-wrap {
+        position: relative;
+        min-width: 290px;
+    }
+    .stock-select-search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 6;
+        transition: color 0.15s ease;
+    }
+    .stock-company-picker-wrap:focus-within .stock-select-search-icon {
+        color: #FC8019;
+    }
+    .stock-company-picker-wrap .ts-wrapper.single .ts-control {
+        padding-left: 36px !important;
+        border-radius: 50px !important;
+        font-size: 13px !important;
+        font-weight: 500;
+    }
+
+    /* Restock Button Base & Hover */
+    .btn-restock-action {
+        background: #FFF0E5;
+        color: #FC8019 !important;
+        border: 1px solid #FC8019;
+        border-radius: 50px !important;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 5px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        text-decoration: none;
+    }
+    .btn-restock-action:hover {
+        background: #FC8019;
+        color: #FFFFFF !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(252, 128, 25, 0.28);
+    }
+
+    /* Dark Mode Design Standards */
+    [data-theme="dark"] .container-fluid,
+    [data-theme="dark"] .stock-page-container,
+    [data-theme="dark"] .stock-header-hero,
+    [data-theme="dark"] .telemetry-header-card {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    [data-theme="dark"] .telemetry-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .telemetry-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .card {
+        background: #101820 !important;
+        border: 1px solid #223447 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .card-body {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .stat-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .stat-label {
+        color: #94A3B8 !important;
+    }
+
+    /* KPI Circular Icons in Dark Mode */
+    [data-theme="dark"] .stat-icon.orange {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .stat-icon.green {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .stat-icon.purple {
+        background: rgba(139, 92, 246, 0.16) !important;
+        color: #A78BFA !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    }
+    [data-theme="dark"] .stat-icon.yellow {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+
+    /* Toolbar & Navigation Tabs in Dark Mode */
+    [data-theme="dark"] .nav-tabs-custom {
+        background: #101820 !important;
+        border-color: #223447 !important;
+    }
+    [data-theme="dark"] .nav-tabs-custom .nav-link {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nav-tabs-custom .nav-link:hover {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nav-tabs-custom .nav-link.active {
+        background: #1E293B !important;
+        color: #FC8019 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+    [data-theme="dark"] .stock-filter-label {
+        color: #CBD5E1 !important;
+    }
+
+    /* Target Company Box in Bulk & Manual Upload */
+    [data-theme="dark"] .stock-target-company-box {
+        background-color: #101820 !important;
+        border-color: #223447 !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Dropzone in Dark Mode */
+    [data-theme="dark"] .upload-dropzone {
+        background-color: #101820 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .upload-dropzone:hover,
+    [data-theme="dark"] .upload-dropzone.dragover {
+        border-color: #FC8019 !important;
+        background-color: rgba(252, 128, 25, 0.08) !important;
+    }
+    [data-theme="dark"] .upload-dropzone i {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .upload-dropzone h5 {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .upload-dropzone p {
+        color: #94A3B8 !important;
+    }
+
+    /* Form Controls, Inputs & Selects in Dark Mode */
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select,
+    [data-theme="dark"] .form-select-custom,
+    [data-theme="dark"] .stock-company-select,
+    [data-theme="dark"] .nl-page-size-select {
+        background-color: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .form-control:focus,
+    [data-theme="dark"] .form-select:focus,
+    [data-theme="dark"] .form-select-custom:focus,
+    [data-theme="dark"] .stock-company-select:focus {
+        background-color: #101820 !important;
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .form-control::placeholder {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .form-label {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .input-group-text {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #FC8019 !important;
+        font-weight: 600;
+    }
+    [data-theme="dark"] .text-dark {
+        color: #F8FAFC !important;
+    }
+
+    /* TomSelect Custom Dropdown in Dark Mode */
+    [data-theme="dark"] .select-wrapper .ts-wrapper.single .ts-control {
+        background-color: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-wrapper.single .ts-control .item {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-wrapper.single .ts-control input {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-dropdown {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option:hover,
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option.active {
+        background-color: rgba(252, 128, 25, 0.15) !important;
+        color: #FC8019 !important;
+    }
+
+    /* Buttons & Modals in Dark Mode */
+    [data-theme="dark"] .btn-outline-nlog {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #E2E8F0 !important;
+    }
+    [data-theme="dark"] .btn-outline-nlog:hover {
+        background: #1E2D3D !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .modal-content {
+        background-color: #151F28 !important;
+        border-color: #223447 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .btn-restock-action {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.35) !important;
+    }
+    [data-theme="dark"] .btn-restock-action:hover {
+        background: #FC8019 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.38) !important;
+    }
+
+    /* Tables & Toolbars in Dark Mode */
+    [data-theme="dark"] .enterprise-table.tracking-table th,
+    [data-theme="dark"] #lowStockTable th {
+        background-color: #0B1520 !important;
+        color: #94A3B8 !important;
+        border-bottom-color: #223447 !important;
+    }
+    [data-theme="dark"] .enterprise-table.tracking-table th.sortable:hover {
+        background-color: #151F28 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .enterprise-table.tracking-table td,
+    [data-theme="dark"] #lowStockTable td {
+        border-bottom-color: #1E293B !important;
+        color: #E2E8F0 !important;
+    }
+    [data-theme="dark"] .enterprise-table.tracking-table tr:hover td,
+    [data-theme="dark"] #lowStockTable tr:hover td {
+        background-color: #101820 !important;
+    }
+    [data-theme="dark"] .table-toolbar {
+        background: #101820 !important;
+        border-color: #223447 !important;
+    }
+    [data-theme="dark"] .search-input-box input {
+        background-color: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Badges in Dark Mode */
+    [data-theme="dark"] .badge-company-custom {
+        background: #1E293B !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .badge-success-custom {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #34D399 !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .badge-failed-custom {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #F87171 !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .badge-warning-custom {
+        background: rgba(245, 158, 11, 0.15) !important;
+        color: #FBBF24 !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) brightness(1.2);
+    }
+    [data-theme="dark"] input[type="file"]::file-selector-button {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
+        border: 1px solid #334155 !important;
+        border-radius: 50px !important;
+        min-height: 48px;
+        padding: 6px 14px;
+        margin: 0 14px 0 0 !important;
+    }
 </style>
 
-<div class="container-fluid py-4" style="background-color: #fafafa; min-height: 100vh;">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h1 class="page-title mb-1">Stock &amp; Inventory Management</h1>
-            <div class="breadcrumb-text">Dashboard &nbsp;&gt;&nbsp; Stock &amp; Inventory &nbsp;&gt;&nbsp; Stock Details &amp; Upload</div>
+<div class="container-fluid py-4 stock-page-container">
+    <!-- Frameless Stock Header Hero -->
+    <div class="stock-header-hero mb-4">
+        <div class="telemetry-icon-box">
+            <i class="ti ti-box"></i>
         </div>
-        <div class="d-flex gap-2">
-            <a href="${pageContext.request.contextPath}/assets/templates/stock_template.csv" class="btn btn-outline-nlog" download="stock_template.csv">
-                <i class="ti ti-download me-2"></i>Download CSV Template
-            </a>
-            <button class="btn btn-nlog" onclick="switchTab('bulk')">
-                <i class="ti ti-cloud-upload me-2"></i>Bulk Upload CSV
-            </button>
+        <div>
+            <h1 class="telemetry-title">Stock &amp; Inventory Management</h1>
+            <div class="telemetry-desc">Dashboard &nbsp;&gt;&nbsp; Stock &amp; Inventory &nbsp;&gt;&nbsp; Stock Details &amp; Upload</div>
         </div>
     </div>
-
-    <!-- Stat Cards -->
+<!-- Stat Cards -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="stat-card">
@@ -202,59 +643,47 @@
         </div>
     </div>
 
-    <!-- Company Picker (Super Admin only — allows filtering by company or viewing All Companies) -->
-    <c:if test="${sessionScope.user.roleId == 1}">
-        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--card-radius);">
-            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <label class="mb-0 fw-bold" style="font-size: 13px; color: #475569;">
-                        <i class="ti ti-building me-1" style="color:#FC8019;"></i> Managing stock for:
-                    </label>
-                    <div class="select-wrapper" style="min-width: 320px;">
-                        <select class="form-select-custom" onchange="onCompanyChange(this.value)">
-                            <option value="0" ${selectedCompanyId == 0 ? 'selected' : ''}>All Companies (Enterprise-wide)</option>
-                            <c:forEach var="co" items="${companies}">
-                                <option value="${co.id}" ${selectedCompanyId == co.id ? 'selected' : ''}>${co.name}</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                </div>
-                <c:choose>
-                    <c:when test="${selectedCompanyId == 0}">
-                        <span class="badge" style="background:#FFF0E5; color:#FC8019; font-weight:600; padding:6px 14px; border-radius:20px; font-size:12px;">
-                            <i class="ti ti-world me-1"></i> Multi-Tenant Overview: Showing All Companies
-                        </span>
-                    </c:when>
-                    <c:otherwise>
-                        <c:forEach var="co" items="${companies}">
-                            <c:if test="${co.id == selectedCompanyId}">
-                                <span class="badge" style="background:#ECFDF5; color:#059669; font-weight:600; padding:6px 14px; border-radius:20px; font-size:12px; border:1px solid #A7F3D0;">
-                                    <i class="ti ti-check me-1"></i> Filtered to: ${co.name}
-                                </span>
-                            </c:if>
-                        </c:forEach>
-                    </c:otherwise>
-                </c:choose>
+    <!-- Unified Single-Line Action & Filter Toolbar -->
+    <div class="stock-toolbar-wrap mb-4">
+        <!-- Segmented Navigation Tabs -->
+        <div class="nav-tabs-custom mb-0">
+            <div class="nav-link" onclick="switchTab('manual')" id="tab-manual">
+                <i class="ti ti-square-plus me-2"></i>Manual Entry
+            </div>
+            <div class="nav-link active" onclick="switchTab('bulk')" id="tab-bulk">
+                <i class="ti ti-cloud-upload me-2"></i>Bulk Upload
+            </div>
+            <div class="nav-link" onclick="switchTab('history')" id="tab-history">
+                <i class="ti ti-history me-2"></i>Upload History
+                <c:if test="${not empty fullHistoryList && fullHistoryList.size() > 0}">
+                    <span class="badge bg-secondary ms-2" style="font-size: 10px; border-radius: 10px;">${fullHistoryList.size()}</span>
+                </c:if>
+            </div>
+            <div class="nav-link" onclick="switchTab('overview')" id="tab-overview">
+                <i class="ti ti-chart-bar me-2"></i>Stock Overview
+                <c:if test="${not empty stockList && stockList.size() > 0}">
+                    <span class="badge bg-secondary ms-2" style="font-size: 10px; border-radius: 10px;">${stockList.size()}</span>
+                </c:if>
             </div>
         </div>
-    </c:if>
 
-    <!-- Tabs -->
-    <div class="nav-tabs-custom">
-        <div class="nav-link" onclick="switchTab('manual')" id="tab-manual"><i class="ti ti-square-plus me-2"></i>Manual Entry</div>
-        <div class="nav-link active" onclick="switchTab('bulk')" id="tab-bulk"><i class="ti ti-cloud-upload me-2"></i>Bulk Upload</div>
-        <div class="nav-link" onclick="switchTab('history')" id="tab-history">
-            <i class="ti ti-history me-2"></i>Upload History
-            <c:if test="${not empty fullHistoryList && fullHistoryList.size() > 0}">
-                <span class="badge bg-secondary ms-2" style="font-size: 10px; border-radius: 10px;">${fullHistoryList.size()}</span>
-            </c:if>
-        </div>
-        <div class="nav-link" onclick="switchTab('overview')" id="tab-overview">
-            <i class="ti ti-chart-bar me-2"></i>Stock Overview
-            <c:if test="${not empty stockList && stockList.size() > 0}">
-                <span class="badge bg-secondary ms-2" style="font-size: 10px; border-radius: 10px;">${stockList.size()}</span>
-            </c:if>
-        </div>
+        <!-- Super Admin Company Filter (Unified on the same line, multi-tenant banner removed) -->
+        <c:if test="${sessionScope.user.roleId == 1}">
+            <div class="d-flex align-items-center gap-2">
+                <label class="mb-0 fw-semibold text-nowrap stock-filter-label" style="font-size: 13px;">
+                    <i class="ti ti-building me-1 text-primary"></i> Managing stock for:
+                </label>
+                <div class="select-wrapper stock-company-picker-wrap">
+                    <i class="ti ti-search stock-select-search-icon"></i>
+                    <select class="form-select form-select-sm stock-company-select" id="stockCompanySelect" data-search="true" data-search-placeholder="Search company..." onchange="onCompanyChange(this.value)">
+                        <option value="0" ${selectedCompanyId == 0 ? 'selected' : ''}>All Companies (Enterprise-wide)</option>
+                        <c:forEach var="co" items="${companies}">
+                            <option value="${co.id}" ${selectedCompanyId == co.id ? 'selected' : ''}>${co.name}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+        </c:if>
     </div>
 
     <!-- Alerts -->
@@ -299,7 +728,7 @@
                     <form action="<c:url value='/upload-stock'/>" method="POST" enctype="multipart/form-data" id="uploadForm">
                         <c:choose>
                             <c:when test="${sessionScope.user.roleId == 1}">
-                                <div class="mb-4 p-3" style="background:#F8FAFC; border-radius:10px; border:1px solid #E2E8F0;">
+                                <div class="mb-4 stock-target-company-box">
                                     <label class="form-label mb-1">Target Company <span class="required-asterisk">*</span></label>
                                     <div class="select-wrapper">
                                         <select class="form-select" name="companyId" id="bulkUploadCompanySelect" required>
@@ -321,7 +750,7 @@
 
                         <div class="upload-dropzone mb-4" id="dropzone" onclick="document.getElementById('csvFile').click()">
                             <i class="ti ti-cloud-upload"></i>
-                            <h5 class="fw-bold text-dark">Drag &amp; Drop your CSV file here</h5>
+                            <h5 class="fw-bold mb-1">Drag &amp; Drop your CSV file here</h5>
                             <p class="text-muted small mb-0">or click to browse from your computer (.csv)</p>
                             <input type="file" id="csvFile" name="csvFile" accept=".csv" style="display: none;" onchange="handleFileSelect(event)">
                         </div>
@@ -345,7 +774,7 @@
                     <form action="${pageContext.request.contextPath}/manual-stock" method="POST" id="manualStockForm" novalidate>
                         <c:choose>
                             <c:when test="${sessionScope.user.roleId == 1}">
-                                <div class="mb-3 p-3" style="background:#F8FAFC; border-radius:10px; border:1px solid #E2E8F0;">
+                                <div class="mb-3 stock-target-company-box">
                                     <label class="form-label mb-1">Target Company <span class="required-asterisk">*</span></label>
                                     <div class="select-wrapper">
                                         <select class="form-select" name="companyId" required>
@@ -466,17 +895,17 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table align-middle text-nowrap mb-0" id="historyTable" style="font-size: 13.5px;">
-                            <thead class="text-muted" style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                        <table class="enterprise-table tracking-table align-middle text-nowrap mb-0" id="historyTable" style="font-size: 13.5px;">
+                            <thead>
                                 <tr>
-                                    <th class="fw-semibold px-4 py-3">Date &amp; Time</th>
+                                    <th class="sortable px-4 py-3" onclick="sortHistoryTable(0)">Date &amp; Time <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
                                     <c:if test="${selectedCompanyId == 0}">
-                                        <th class="fw-semibold py-3">Company</th>
+                                        <th class="sortable py-3" onclick="sortHistoryTable(1)">Company <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
                                     </c:if>
-                                    <th class="fw-semibold py-3">File Name</th>
-                                    <th class="fw-semibold text-center py-3">Total Rows</th>
-                                    <th class="fw-semibold text-center py-3">Status</th>
-                                    <th class="fw-semibold px-4 py-3">Uploaded By</th>
+                                    <th class="sortable py-3" onclick="sortHistoryTable(${selectedCompanyId == 0 ? 2 : 1})">File Name <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
+                                    <th class="sortable text-center py-3" onclick="sortHistoryTable(${selectedCompanyId == 0 ? 3 : 2})">Total Rows <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
+                                    <th class="text-center py-3">Status</th>
+                                    <th class="px-4 py-3">Uploaded By</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody">
@@ -564,17 +993,17 @@
 
                     <!-- Stock Table -->
                     <div class="table-responsive">
-                        <table class="table align-middle text-nowrap mb-0" id="stockOverviewTable" style="font-size: 13.5px;">
-                            <thead class="text-muted" style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                        <table class="enterprise-table tracking-table align-middle text-nowrap mb-0" id="stockOverviewTable" style="font-size: 13.5px;">
+                            <thead>
                                 <tr>
-                                    <th class="fw-semibold px-4 py-3">Product Name</th>
+                                    <th class="sortable px-4 py-3" onclick="sortStockTable(0)">Product Name <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
                                     <c:if test="${selectedCompanyId == 0}">
-                                        <th class="fw-semibold py-3">Company</th>
+                                        <th class="sortable py-3" onclick="sortStockTable(1)">Company <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
                                     </c:if>
-                                    <th class="fw-semibold py-3">Warehouse</th>
-                                    <th class="fw-semibold text-end py-3">Qty On Hand</th>
-                                    <th class="fw-semibold text-center py-3">Status</th>
-                                    <th class="fw-semibold text-center px-4 py-3">Action</th>
+                                    <th class="sortable py-3" onclick="sortStockTable(${selectedCompanyId == 0 ? 2 : 1})">Warehouse <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
+                                    <th class="sortable text-end py-3" onclick="sortStockTable(${selectedCompanyId == 0 ? 3 : 2})">Qty On Hand <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
+                                    <th class="text-center py-3">Status</th>
+                                    <th class="text-center px-4 py-3">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="stockTableBody">
@@ -623,7 +1052,7 @@
                                             </c:choose>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <button class="btn btn-sm" style="border: 1px solid #DC2626; color: #DC2626; border-radius: 6px; font-weight:600; font-size:12px; padding: 4px 10px;" onclick="openAdjustModal(${stk.stockId}, '${stk.productName}', ${stk.quantity})">
+                                            <button class="btn btn-sm" style="border: 1.5px solid #DC2626; color: #DC2626; border-radius: 50px !important; font-weight:600; font-size:12px; padding: 5px 14px;" onclick="openAdjustModal(${stk.stockId}, '${stk.productName}', ${stk.quantity})">
                                                 <i class="ti ti-circle-minus me-1"></i> Write-off
                                             </button>
                                         </td>
@@ -722,7 +1151,7 @@
             </div>
             
             <div class="table-responsive">
-                <table class="table align-middle text-nowrap mb-0" style="font-size: 13.5px;">
+                <table class="enterprise-table tracking-table align-middle text-nowrap mb-0" id="lowStockTable" style="font-size: 13.5px;">
                     <thead class="text-muted" style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
                         <tr>
                             <th class="fw-semibold px-4 py-3">Product Name</th>
@@ -736,7 +1165,7 @@
                     </thead>
                     <tbody>
                         <c:forEach var="low" items="${lowStockList}">
-                            <tr style="border-bottom: 1px solid #F1F5F9;">
+                            <tr class="low-stock-row" style="border-bottom: 1px solid #F1F5F9;">
                                 <td class="px-4 py-3">
                                     <div class="fw-bold text-dark">${low.productName}</div>
                                     <div class="text-muted small">HSN: <code>${empty low.hsnCode ? '—' : low.hsnCode}</code></div>
@@ -758,7 +1187,7 @@
                                     </c:choose>
                                 </td>
                                 <td class="px-4 py-3 text-center">
-                                    <button class="btn btn-sm" style="background: #FFF0E5; color: #FC8019; border: 1px solid #FC8019; border-radius: 6px; font-weight: 600; font-size: 12px; padding: 4px 12px;" onclick="prefillManualEntry('${low.productName}', '${low.companyId}')">
+                                    <button class="btn btn-restock-action" onclick="prefillManualEntry('${low.productName}', '${low.companyId}')">
                                         <i class="ti ti-plus me-1"></i> Restock
                                     </button>
                                 </td>
@@ -771,6 +1200,23 @@
                         </c:if>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Global CSS Enterprise Pagination Bar for Low Stock Alerts -->
+            <div class="nl-pagination-wrapper mt-3" id="lowStockPagination" style="display: flex;">
+                <div class="nl-pagination-info">
+                    <span>Showing <strong id="lowStockPageStart">1</strong> to <strong id="lowStockPageEnd">5</strong> of <strong id="lowStockTotalRows">${empty lowStockList ? 0 : lowStockList.size()}</strong> alerts</span>
+                    <div class="d-inline-flex align-items-center gap-2 ms-2">
+                        <span class="text-muted small">Show:</span>
+                        <select class="nl-page-size-select" id="lowStockPageSize" onchange="changeLowStockPageSize(this.value)">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="nl-pagination-nav" id="lowStockPageNav"></div>
             </div>
         </div>
     </div>
@@ -814,8 +1260,8 @@
               </div>
           </div>
           <div class="modal-footer border-0 pt-0">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger px-4">Confirm Write-off</button>
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 50px !important;">Cancel</button>
+            <button type="submit" class="btn btn-danger px-4" style="border-radius: 50px !important;">Confirm Write-off</button>
           </div>
       </form>
     </div>
@@ -824,6 +1270,46 @@
 
 <script>
     let activeTabName = 'bulk';
+
+    
+    // =========================================================================
+    // CLIENT-SIDE SORTING FOR HISTORY & STOCK TABLES
+    // =========================================================================
+    let histSortCol = -1;
+    let histSortAsc = true;
+    function sortHistoryTable(colIndex) {
+        if (histSortCol === colIndex) histSortAsc = !histSortAsc;
+        else { histSortCol = colIndex; histSortAsc = true; }
+        allHistRows.sort((a, b) => {
+            const cellA = a.cells[colIndex] ? a.cells[colIndex].innerText.trim() : '';
+            const cellB = b.cells[colIndex] ? b.cells[colIndex].innerText.trim() : '';
+            const numA = parseFloat(cellA.replace(/[^0-9.-]+/g, ''));
+            const numB = parseFloat(cellB.replace(/[^0-9.-]+/g, ''));
+            if (!isNaN(numA) && !isNaN(numB)) return histSortAsc ? numA - numB : numB - numA;
+            return histSortAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        });
+        const tbody = document.getElementById('historyTableBody');
+        allHistRows.forEach(row => tbody.appendChild(row));
+        updateHistPaginationDisplay();
+    }
+
+    let stockSortCol = -1;
+    let stockSortAsc = true;
+    function sortStockTable(colIndex) {
+        if (stockSortCol === colIndex) stockSortAsc = !stockSortAsc;
+        else { stockSortCol = colIndex; stockSortAsc = true; }
+        matchingStockRows.sort((a, b) => {
+            const cellA = a.cells[colIndex] ? a.cells[colIndex].innerText.trim() : '';
+            const cellB = b.cells[colIndex] ? b.cells[colIndex].innerText.trim() : '';
+            const numA = parseFloat(cellA.replace(/[^0-9.-]+/g, ''));
+            const numB = parseFloat(cellB.replace(/[^0-9.-]+/g, ''));
+            if (!isNaN(numA) && !isNaN(numB)) return stockSortAsc ? numA - numB : numB - numA;
+            return stockSortAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        });
+        const tbody = document.getElementById('stockTableBody');
+        matchingStockRows.forEach(row => tbody.appendChild(row));
+        updateStockPaginationDisplay();
+    }
 
     // Switch Tabs
     function switchTab(tabName) {
@@ -1153,10 +1639,91 @@
         nav.appendChild(nextBtn);
     }
 
+    // =========================================================================
+    // LOW STOCK ALERTS CLIENT-SIDE PAGINATION (GLOBAL CSS)
+    // =========================================================================
+    let lowStockPageSize = 5;
+    let lowStockCurrentPage = 1;
+    let allLowStockRows = [];
+
+    function initLowStockPagination() {
+        allLowStockRows = Array.from(document.querySelectorAll('.low-stock-row'));
+        updateLowStockPaginationDisplay();
+    }
+
+    function changeLowStockPageSize(size) {
+        lowStockPageSize = parseInt(size) || 5;
+        lowStockCurrentPage = 1;
+        updateLowStockPaginationDisplay();
+    }
+
+    function updateLowStockPaginationDisplay() {
+        const total = allLowStockRows.length;
+        const totalPages = Math.ceil(total / lowStockPageSize) || 1;
+        if (lowStockCurrentPage > totalPages) lowStockCurrentPage = totalPages;
+        if (lowStockCurrentPage < 1) lowStockCurrentPage = 1;
+
+        const startIdx = (lowStockCurrentPage - 1) * lowStockPageSize;
+        const endIdx = startIdx + lowStockPageSize;
+
+        allLowStockRows.forEach((row, i) => {
+            row.style.display = (i >= startIdx && i < endIdx) ? '' : 'none';
+        });
+
+        const pageStartEl = document.getElementById('lowStockPageStart');
+        const pageEndEl = document.getElementById('lowStockPageEnd');
+        const totalRowsEl = document.getElementById('lowStockTotalRows');
+        const paginationWrapper = document.getElementById('lowStockPagination');
+
+        if (pageStartEl) pageStartEl.innerText = total === 0 ? 0 : startIdx + 1;
+        if (pageEndEl) pageEndEl.innerText = Math.min(endIdx, total);
+        if (totalRowsEl) totalRowsEl.innerText = total;
+
+        if (paginationWrapper) {
+            paginationWrapper.style.display = total > 0 ? 'flex' : 'none';
+        }
+
+        renderLowStockPaginationButtons(totalPages);
+    }
+
+    function renderLowStockPaginationButtons(totalPages) {
+        const nav = document.getElementById('lowStockPageNav');
+        if (!nav) return;
+        nav.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'nl-page-btn nl-page-nav-btn' + (lowStockCurrentPage === 1 ? ' disabled' : '');
+        prevBtn.disabled = (lowStockCurrentPage === 1);
+        prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i>';
+        prevBtn.onclick = () => { if (lowStockCurrentPage > 1) { lowStockCurrentPage--; updateLowStockPaginationDisplay(); } };
+        nav.appendChild(prevBtn);
+
+        for (let p = 1; p <= totalPages; p++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'nl-page-btn nl-page-num' + (p === lowStockCurrentPage ? ' active' : '');
+            btn.innerText = p;
+            btn.onclick = () => { lowStockCurrentPage = p; updateLowStockPaginationDisplay(); };
+            nav.appendChild(btn);
+        }
+
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'nl-page-btn nl-page-nav-btn' + (lowStockCurrentPage === totalPages ? ' disabled' : '');
+        nextBtn.disabled = (lowStockCurrentPage === totalPages);
+        nextBtn.innerHTML = '<i class="ti ti-chevron-right"></i>';
+        nextBtn.onclick = () => { if (lowStockCurrentPage < totalPages) { lowStockCurrentPage++; updateLowStockPaginationDisplay(); } };
+        nav.appendChild(nextBtn);
+    }
+
     // On DOM Load: Initialize Paginations and URL Tab
     document.addEventListener('DOMContentLoaded', function() {
         initStockPagination();
         initHistPagination();
+        initLowStockPagination();
 
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');

@@ -411,6 +411,7 @@ public class StockUploadServlet extends HttpServlet {
             String errorFilePath = null;
             try (Connection conn = com.nlogistic.util.DBConnectionManager.getConnection()) {
                 conn.setAutoCommit(false);
+                java.util.List<Integer> newStockIds = new ArrayList<>();
                 
                 String checkProduct = "SELECT product_id FROM products WHERE product_name = ?";
                 String insertProduct = "INSERT INTO products (product_name, category, hsn_code, unit_of_measure, unit_cost, unit_price) VALUES (?, ?, ?, ?, ?, ?)";
@@ -490,8 +491,15 @@ public class StockUploadServlet extends HttpServlet {
                             try (ResultSet gkStock = psInsertStock.getGeneratedKeys()) {
                                 if (gkStock.next()) {
                                     stockId = gkStock.getInt(1);
-                                    // FR8.1: auto-generate a barcode for every newly created stock row (bulk upload path)
-                                    com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Stock", stockId, user.getUserId());
+                                    // FR8.1: barcode issued after the commit below.
+                                    //
+                                    // Generating it here silently produced nothing:
+                                    // BarcodeAutoGenerator opens its own connection, and
+                                    // barcode_entity_validation_ins checks that the stock
+                                    // row exists. Inside this still-open transaction that
+                                    // second connection cannot see the row, so the trigger
+                                    // refused every barcode and the failure was swallowed.
+                                    newStockIds.add(stockId);
                                 }
                             }
                         } else {
@@ -557,6 +565,11 @@ public class StockUploadServlet extends HttpServlet {
                 }
                 
                 conn.commit();
+
+                // Now that the rows are visible to other connections, issue their barcodes.
+                for (Integer newStockId : newStockIds) {
+                    com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Stock", newStockId, user.getUserId());
+                }
             }
 
             String msg = String.format("File '%s' processed. Total: %d, Valid: %d, Invalid: %d", fileName, totalRows, validRows, invalidRows);

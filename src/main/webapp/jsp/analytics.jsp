@@ -23,7 +23,18 @@
         --info: #8B5CF6;
         --info-light: #EDE9FE;
     }
-    body { background-color: #F9FAFB; }
+    [data-theme="dark"] {
+        --bg-surface: #101820;
+        --border-color: #22303A;
+        --text-main: #F8FAFC;
+        --text-sub: #94A3B8;
+        --primary-light: rgba(252, 128, 25, 0.14);
+        --success-light: rgba(16, 185, 129, 0.14);
+        --danger-light: rgba(239, 68, 68, 0.14);
+        --warning-light: rgba(245, 158, 11, 0.14);
+        --info-light: rgba(139, 92, 246, 0.14);
+    }
+    body { background-color: var(--nl-bg, #F9FAFB); }
     .dashboard-container { padding: 24px; max-width: 1400px; margin: 0 auto; }
     
     .page-header { margin-bottom: 24px; }
@@ -100,123 +111,131 @@
     /* ===== Filter Bar ===== */
     .filters-bar-wrap {
         margin-bottom: 24px;
+        background: transparent !important;
+        width: 100%;
     }
     .filters-bar-inner {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        background: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0 6px 0 0;
-        overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        justify-content: flex-start;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        flex-wrap: nowrap !important;
+        gap: 12px;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+    }
+    .filters-bar-inner::-webkit-scrollbar {
+        display: none;
     }
     .filters-left {
         display: flex;
         align-items: center;
-        flex: 1;
-        overflow: hidden;
+        flex-wrap: nowrap !important;
+        gap: 12px;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: visible;
     }
     .filter-field {
-        padding: 10px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0 !important;
         min-width: 0;
-        flex: 1;
-        cursor: pointer;
+        flex: 0 0 auto;
+        cursor: default;
     }
     .filter-field-label {
         font-size: 11px;
-        font-weight: 600;
-        color: var(--text-sub);
+        font-weight: 700;
+        color: #FC8019;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
+        letter-spacing: 0.6px;
+        margin-bottom: 0;
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         white-space: nowrap;
     }
     .filter-field-label i {
-        font-size: 11px;
-        color: var(--primary);
+        font-size: 12px;
+        color: #FC8019;
     }
-    .filter-date-btn {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--text-main);
-        white-space: nowrap;
-        gap: 8px;
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        width: 100%;
-    }
-    .filter-date-btn i { color: var(--text-sub); font-size: 11px; flex-shrink: 0; }
-    .filter-date-btn span { overflow: hidden; text-overflow: ellipsis; }
     .filter-select-custom {
-        width: 100%;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 13px;
+        height: 38px;
+        min-width: 145px;
+        max-width: 190px;
+        padding: 0 32px 0 14px;
+        border-radius: 50px;
+        border: 1px solid var(--border-color, #E2E8F0);
+        background-color: #FFFFFF;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        color: var(--text-main, #1E293B);
+        font-size: 12.5px;
         font-weight: 500;
-        color: var(--text-main);
         cursor: pointer;
+        outline: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
         appearance: none;
         -webkit-appearance: none;
-        padding: 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
-    .filter-select-custom:focus { outline: none; }
+    .filter-select-custom:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
+    }
     .filter-divider {
-        width: 1px;
-        height: 36px;
-        background: var(--border-color);
-        flex-shrink: 0;
+        display: none !important;
     }
     .filters-right {
         display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 0 6px 12px;
-        border-left: 1px solid var(--border-color);
-        margin-left: 6px;
+        gap: 8px;
+        margin-left: auto;
+        align-self: center;
+        padding: 0 !important;
+        border: none !important;
         flex-shrink: 0;
     }
-    .filter-btn-reset, .filter-btn-apply, .filter-btn-export {
+    .filter-btn-reset, .filter-btn-export {
+        height: 36px;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 8px 14px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 500;
+        gap: 6px;
+        padding: 0 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
         cursor: pointer;
         border: none;
         text-decoration: none;
-        transition: all 0.18s;
+        transition: all 0.2s ease;
         white-space: nowrap;
+        box-sizing: border-box;
     }
     .filter-btn-reset {
-        background: #F3F4F6;
-        color: var(--text-sub);
+        background: #F1F5F9;
+        color: #64748B;
+        border: 1px solid #E2E8F0;
     }
-    .filter-btn-reset:hover { background: #E5E7EB; color: var(--text-main); }
-    .filter-btn-apply {
-        background: var(--primary);
-        color: #fff;
-    }
-    .filter-btn-apply:hover { background: #FC8019; }
+    .filter-btn-reset:hover { background: #E2E8F0; color: #0F172A; }
     .filter-btn-export {
         background: #FFF7ED;
-        color: var(--primary);
+        color: #FC8019;
         border: 1px solid #FED7AA;
     }
-    .filter-btn-export:hover { background: var(--primary-light); }
-    .filter-field:hover { background: #FAFAFA; }
+    .filter-btn-export:hover { background: rgba(252, 128, 25, 0.15); }
+    .filter-field:hover { background: transparent; }
 
     /* KPI Grid */
     .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -238,6 +257,15 @@
     .trend-text { color: var(--text-sub); font-weight: 400; }
     
     /* Chart Grid */
+    /* Shown when a company genuinely has no data for a chart. Until now the
+       page filled those gaps with invented figures instead. */
+    .nl-chart-empty {
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 10px;
+        color: var(--text-muted); text-align: center; padding: 20px;
+        font-size: 13px; pointer-events: none;
+    }
+    .nl-chart-empty i { font-size: 26px; opacity: 0.55; }
     .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px; }
     .charts-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
     .charts-grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
@@ -295,17 +323,221 @@
 
     /* Date Range Inputs inside filter */
     .filter-date-range-wrap {
-        display: flex; align-items: center; gap: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
     .filter-date-input {
-        border: none; outline: none; background: transparent;
-        font-size: 12px; font-weight: 500; color: var(--text-main);
-        width: 110px; cursor: pointer; padding: 0;
+        border: 1px solid var(--border-color, #E2E8F0);
+        outline: none;
+        background: #FFFFFF;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-main, #1E293B);
+        width: 145px;
+        height: 42px;
+        cursor: pointer;
+        padding: 0 14px;
+        border-radius: 50px;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+    .filter-date-input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
     }
     .filter-date-input::-webkit-calendar-picker-indicator {
-        opacity: 0.4; cursor: pointer; width: 12px; height: 12px;
+        opacity: 0.65;
+        cursor: pointer;
+        width: 14px;
+        height: 14px;
     }
-    .date-sep { color: var(--text-sub); font-size: 12px; flex-shrink: 0; }
+    .date-sep {
+        color: #94A3B8;
+        font-size: 13px;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    /* ===== Chart Card Tools (Fullscreen & Download) ===== */
+    .chart-card-tools {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
+    .chart-tool-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color, #E2E8F0);
+        background: transparent;
+        color: var(--text-sub, #94A3B8);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.18s ease;
+        padding: 0;
+        line-height: 1;
+    }
+    .chart-tool-btn:hover {
+        background: var(--primary-light, rgba(252,128,25,0.12));
+        border-color: var(--primary, #FC8019);
+        color: var(--primary, #FC8019);
+    }
+    /* Fullscreen overlay */
+    .nl-fullscreen-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0,0,0,0.72);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        backdrop-filter: blur(4px);
+        animation: nlFsIn 0.22s ease;
+    }
+    @keyframes nlFsIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    .nl-fullscreen-card {
+        background: var(--bg-surface, #fff);
+        border-radius: 16px;
+        padding: 28px;
+        width: 100%;
+        max-width: 1100px;
+        max-height: calc(100vh - 64px);
+        overflow: auto;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .nl-fullscreen-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+    }
+    .nl-fullscreen-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-sub);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.18s;
+    }
+    .nl-fullscreen-close:hover { background: #EF4444; color: #fff; border-color: #EF4444; }
+    .nl-fullscreen-canvas-wrap {
+        flex: 1;
+        min-height: 400px;
+        position: relative;
+    }
+    [data-theme="dark"] .nl-fullscreen-card {
+        background: #101820;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+    }
+
+    /* Dark Mode Filter Bar */
+    [data-theme="dark"] .filters-bar-wrap,
+    [data-theme="dark"] .filters-bar-inner {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    [data-theme="dark"] .filters-right {
+        border: none !important;
+    }
+    [data-theme="dark"] .filter-field:hover {
+        background: transparent !important;
+    }
+    [data-theme="dark"] .filter-btn-reset {
+        background: #1E293B !important;
+        border: 1px solid #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .filter-btn-reset:hover {
+        background: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .filter-btn-export {
+        background: rgba(252, 128, 25, 0.12) !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .filter-btn-export:hover {
+        background: rgba(252, 128, 25, 0.22) !important;
+    }
+    [data-theme="dark"] .filter-date-input {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        color: #F8FAFC !important;
+        color-scheme: dark;
+    }
+    [data-theme="dark"] .filter-date-input:focus {
+        border-color: #FC8019 !important;
+    }
+    [data-theme="dark"] .filter-select-custom {
+        background-color: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        color: #F8FAFC !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    }
+    [data-theme="dark"] .filter-select-custom option {
+        background-color: #151F28 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .date-sep {
+        color: #64748B !important;
+    }
+
+    /* Dark Mode PLG Chart Tabs */
+    [data-theme="dark"] .chart-tabs {
+        background: #101820 !important;
+        border: 1px solid #223447 !important;
+    }
+    [data-theme="dark"] .chart-tab {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .chart-tab:hover {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .chart-tab.active {
+        background: #1E293B !important;
+        color: #FC8019 !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Dark Mode Gauge Track */
+    [data-theme="dark"] .nl-gauge-track {
+        stroke: #223447 !important;
+    }
+
+    /* Dark Mode Container Filter in Demand Chart */
+    [data-theme="dark"] select[name="forecastType"] {
+        background-color: #101820 !important;
+        color: #F8FAFC !important;
+        border-color: #223447 !important;
+    }
+    [data-theme="dark"] select[name="forecastType"] option {
+        background-color: #101820 !important;
+        color: #F8FAFC !important;
+    }
 
     </style>
 
@@ -317,19 +549,21 @@
         </div>
     </div>
     
-    <form action="${pageContext.request.contextPath}/analytics" method="GET" class="filters-bar-wrap">
+    <form id="analyticsFilterForm" action="${pageContext.request.contextPath}/analytics" method="GET" class="filters-bar-wrap">
         <div class="filters-bar-inner">
             <div class="filters-left">
                 <!-- Date Range -->
-                <div class="filter-field" style="min-width:200px;">
+                <div class="filter-field">
                     <div class="filter-field-label"><i class="fi fi-rr-calendar"></i> Date Range</div>
                     <div class="filter-date-range-wrap">
                         <input type="date" name="dateFrom" class="filter-date-input"
                                value="${not empty filterDateFrom ? filterDateFrom : ''}"
+                               onchange="document.getElementById('analyticsFilterForm').submit()"
                                placeholder="From">
                         <span class="date-sep">&#x2014;</span>
                         <input type="date" name="dateTo" class="filter-date-input"
                                value="${not empty filterDateTo ? filterDateTo : ''}"
+                               onchange="document.getElementById('analyticsFilterForm').submit()"
                                placeholder="To">
                     </div>
                 </div>
@@ -337,7 +571,7 @@
                 <!-- Company -->
                 <div class="filter-field">
                     <div class="filter-field-label"><i class="fi fi-rr-building"></i> Company</div>
-                    <select class="filter-select-custom" name="company">
+                    <select class="filter-select-custom" name="company" onchange="document.getElementById('analyticsFilterForm').submit()">
                         <option value="">All Companies</option>
                         <c:forEach var="co" items="${companies}">
                             <option value="${co[0]}" <c:if test="${filterCompany == co[0]}">selected</c:if>>${co[1]}</option>
@@ -348,7 +582,7 @@
                 <!-- Route -->
                 <div class="filter-field">
                     <div class="filter-field-label"><i class="fi fi-rr-route"></i> Route</div>
-                    <select class="filter-select-custom" name="route">
+                    <select class="filter-select-custom" name="route" onchange="document.getElementById('analyticsFilterForm').submit()">
                         <option value="">All Routes</option>
                         <c:forEach var="rt" items="${routes}">
                             <option value="${rt[0]}" <c:if test="${filterRoute == rt[0]}">selected</c:if>>${rt[1]}</option>
@@ -359,7 +593,7 @@
                 <!-- Product Category -->
                 <div class="filter-field">
                     <div class="filter-field-label"><i class="fi fi-rr-tags"></i> Category</div>
-                    <select class="filter-select-custom" name="category">
+                    <select class="filter-select-custom" name="category" onchange="document.getElementById('analyticsFilterForm').submit()">
                         <option value="">All Categories</option>
                         <c:forEach var="cat" items="${categories}">
                             <option value="${cat}" <c:if test="${filterCategory == cat}">selected</c:if>>${cat}</option>
@@ -372,10 +606,6 @@
                     <i class="fi fi-rr-refresh"></i>
                     <span>Reset</span>
                 </a>
-                <button type="submit" class="filter-btn-apply">
-                    <i class="fi fi-rr-search"></i>
-                    <span>Apply</span>
-                </button>
                 <a href="${pageContext.request.contextPath}/analytics?export=csv" class="filter-btn-export">
                     <i class="fi fi-rr-download"></i>
                     <span>Export</span>
@@ -389,7 +619,7 @@
             <div class="kpi-data">
                 <div class="kpi-title">Active Shipments</div>
                 <div class="kpi-val">${activeShipments != null ? activeShipments : 0}</div>
-                <div class="kpi-trend trend-up"><i class="fi fi-rr-arrow-small-up"></i> 12% <span class="trend-text">vs Apr 2025</span></div>
+                <div class="kpi-trend" style="color:var(--text-muted)">Currently in transit</div>
             </div>
         </div>
         <div class="kpi-card">
@@ -397,7 +627,21 @@
             <div class="kpi-data">
                 <div class="kpi-title">Total Revenue</div>
                 <div class="kpi-val">&#8377; ${String.format("%,.0f", totalRevenue != null ? totalRevenue : 0)}</div>
-                <div class="kpi-trend trend-up"><i class="fi fi-rr-arrow-small-up"></i> 18% <span class="trend-text">vs Apr 2025</span></div>
+                <%-- Real month-on-month movement. These badges used to read a fixed
+                     "12% / 18% / 9% / 32% / 4.2% vs Apr 2025" on every account, in
+                     every month, whether or not the company had any history. --%>
+                <c:choose>
+                    <c:when test="${deltaRevenue != null}">
+                        <div class="kpi-trend ${deltaRevenue >= 0 ? 'trend-up' : 'trend-down'}"
+                             ${deltaRevenue >= 0 ? '' : 'style="color:var(--danger)"'}>
+                            <i class="fi fi-rr-arrow-small-${deltaRevenue >= 0 ? 'up' : 'down'}"></i>
+                            ${deltaRevenue >= 0 ? deltaRevenue : -deltaRevenue}% <span class="trend-text">vs last month</span>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="kpi-trend" style="color:var(--text-muted)">No prior month to compare</div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
         <div class="kpi-card">
@@ -405,7 +649,21 @@
             <div class="kpi-data">
                 <div class="kpi-title">Total Cost</div>
                 <div class="kpi-val">&#8377; ${String.format("%,.0f", totalCost != null ? totalCost : 0)}</div>
-                <div class="kpi-trend trend-down" style="color:var(--danger)"><i class="fi fi-rr-arrow-small-up"></i> 9% <span class="trend-text">vs Apr 2025</span></div>
+                <%-- Real month-on-month movement. These badges used to read a fixed
+                     "12% / 18% / 9% / 32% / 4.2% vs Apr 2025" on every account, in
+                     every month, whether or not the company had any history. --%>
+                <c:choose>
+                    <c:when test="${deltaCost != null}">
+                        <div class="kpi-trend ${deltaCost <= 0 ? 'trend-up' : 'trend-down'}"
+                             ${deltaCost <= 0 ? '' : 'style="color:var(--danger)"'}>
+                            <i class="fi fi-rr-arrow-small-${deltaCost >= 0 ? 'up' : 'down'}"></i>
+                            ${deltaCost >= 0 ? deltaCost : -deltaCost}% <span class="trend-text">vs last month</span>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="kpi-trend" style="color:var(--text-muted)">No prior month to compare</div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
         <div class="kpi-card">
@@ -413,7 +671,21 @@
             <div class="kpi-data">
                 <div class="kpi-title">Net Profit</div>
                 <div class="kpi-val">&#8377; ${String.format("%,.0f", netProfit != null ? netProfit : 0)}</div>
-                <div class="kpi-trend trend-up"><i class="fi fi-rr-arrow-small-up"></i> 32% <span class="trend-text">vs Apr 2025</span></div>
+                <%-- Real month-on-month movement. These badges used to read a fixed
+                     "12% / 18% / 9% / 32% / 4.2% vs Apr 2025" on every account, in
+                     every month, whether or not the company had any history. --%>
+                <c:choose>
+                    <c:when test="${deltaProfit != null}">
+                        <div class="kpi-trend ${deltaProfit >= 0 ? 'trend-up' : 'trend-down'}"
+                             ${deltaProfit >= 0 ? '' : 'style="color:var(--danger)"'}>
+                            <i class="fi fi-rr-arrow-small-${deltaProfit >= 0 ? 'up' : 'down'}"></i>
+                            ${deltaProfit >= 0 ? deltaProfit : -deltaProfit}% <span class="trend-text">vs last month</span>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="kpi-trend" style="color:var(--text-muted)">No prior month to compare</div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
         <div class="kpi-card">
@@ -421,7 +693,7 @@
             <div class="kpi-data">
                 <div class="kpi-title">On-time Delivery</div>
                 <div class="kpi-val">${onTimePct != null ? onTimePct : 0}%</div>
-                <div class="kpi-trend trend-down"><i class="fi fi-rr-arrow-small-down"></i> 4.2% <span class="trend-text">vs Apr 2025</span></div>
+                <div class="kpi-trend" style="color:var(--text-muted)">Across delivered movements</div>
             </div>
         </div>
     </div>
@@ -438,20 +710,37 @@
                         <button class="chart-tab" data-period="quarter">Quarter</button>
                         <button class="chart-tab" data-period="year">Year</button>
                     </div>
-                    <i class="fi fi-rr-menu-dots-vertical" style="color:var(--text-sub); margin-left:8px; cursor:pointer;"></i>
+                    <div class="chart-card-tools">
+                        <button class="chart-tool-btn" title="Download PNG" onclick="nlDownloadChart('plChart','Profit & Loss Trend')">
+                            <i class="fi fi-rr-download"></i>
+                        </button>
+                        <button class="chart-tool-btn" title="Fullscreen" onclick="nlFullscreen('plChart','Profit & Loss Trend (PLG)')">
+                            <i class="fi fi-rr-expand"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="chart-body">
                 <canvas id="plChart"></canvas>
+                <div class="nl-chart-empty" id="plgEmptyNote" style="display:none;"><i class="fi fi-rr-chart-histogram"></i><span>No profit or loss recorded for this period yet.</span></div>
             </div>
         </div>
         
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Top Loss Reasons</h3>
+                <div class="chart-card-tools">
+                    <button class="chart-tool-btn" title="Download PNG" onclick="nlDownloadChart('lossChart','Top Loss Reasons')">
+                        <i class="fi fi-rr-download"></i>
+                    </button>
+                    <button class="chart-tool-btn" title="Fullscreen" onclick="nlFullscreen('lossChart','Top Loss Reasons')">
+                        <i class="fi fi-rr-expand"></i>
+                    </button>
+                </div>
             </div>
             <div class="chart-body">
                 <canvas id="lossChart"></canvas>
+                <div class="nl-chart-empty" id="lossEmptyNote" style="display:none;"><i class="fi fi-rr-chart-histogram"></i><span>No loss events recorded yet.</span></div>
             </div>
         </div>
     </div>
@@ -460,7 +749,11 @@
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Container Utilization</h3>
-                <i class="fi fi-rr-menu-dots-vertical" style="color:var(--text-sub); cursor:pointer;"></i>
+                <div class="chart-card-tools">
+                    <button class="chart-tool-btn" title="Fullscreen" onclick="nlFullscreenGauge('Container Utilization')">
+                        <i class="fi fi-rr-expand"></i>
+                    </button>
+                </div>
             </div>
             <div class="chart-body" style="min-height: 180px;">
                 <div class="gauge-wrapper">
@@ -505,7 +798,14 @@
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Stock Valuation</h3>
-                <i class="fi fi-rr-menu-dots-vertical" style="color:var(--text-sub); cursor:pointer;"></i>
+                <div class="chart-card-tools">
+                    <button class="chart-tool-btn" title="Download PNG" onclick="nlDownloadChart('stockChart','Stock Valuation')">
+                        <i class="fi fi-rr-download"></i>
+                    </button>
+                    <button class="chart-tool-btn" title="Fullscreen" onclick="nlFullscreen('stockChart','Stock Valuation')">
+                        <i class="fi fi-rr-expand"></i>
+                    </button>
+                </div>
             </div>
             <div class="chart-body" style="min-height: 180px;">
                 <canvas id="stockChart"></canvas>
@@ -516,7 +816,8 @@
                     <div class="metric-item-val">&#8377; ${not empty currentStockValue ? String.format("%,.0f", currentStockValue) : "42,15,600"}</div>
                 </div>
                 <div class="metric-item" style="text-align:right">
-                    <div class="metric-item-trend"><i class="fi fi-rr-arrow-small-up"></i> 14% vs Apr 2025</div>
+                    <%-- was a hardcoded "14% vs Apr 2025" --%>
+                    <div class="metric-item-trend" style="color:var(--text-muted)">Current valuation</div>
                 </div>
             </div>
         </div>
@@ -524,10 +825,18 @@
         <div class="chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">ABC Classification Summary</h3>
-                <i class="fi fi-rr-menu-dots-vertical" style="color:var(--text-sub); cursor:pointer;"></i>
+                <div class="chart-card-tools">
+                    <button class="chart-tool-btn" title="Download PNG" onclick="nlDownloadChart('abcChart','ABC Classification Summary')">
+                        <i class="fi fi-rr-download"></i>
+                    </button>
+                    <button class="chart-tool-btn" title="Fullscreen" onclick="nlFullscreen('abcChart','ABC Classification Summary')">
+                        <i class="fi fi-rr-expand"></i>
+                    </button>
+                </div>
             </div>
             <div class="chart-body" style="min-height: 180px;">
                 <canvas id="abcChart"></canvas>
+                <div class="nl-chart-empty" id="abcEmptyNote" style="display:none;"><i class="fi fi-rr-chart-histogram"></i><span>No classified stock yet.</span></div>
             </div>
             <a href="#" class="link-arrow">View Full ABC Analysis &rarr;</a>
         </div>
@@ -548,10 +857,19 @@
                             </c:forEach>
                         </select>
                     </form>
+                    <div class="chart-card-tools">
+                        <button class="chart-tool-btn" title="Download PNG" onclick="nlDownloadChart('demandChart','Demand Forecast')">
+                            <i class="fi fi-rr-download"></i>
+                        </button>
+                        <button class="chart-tool-btn" title="Fullscreen" onclick="nlFullscreen('demandChart','Demand Forecast (Next 6 Quarters)')">
+                            <i class="fi fi-rr-expand"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="chart-body" style="min-height:220px;">
                 <canvas id="demandChart"></canvas>
+                <div class="nl-chart-empty" id="demandEmptyNote" style="display:none;"><i class="fi fi-rr-chart-histogram"></i><span>Not enough shipping history to forecast demand.</span></div>
             </div>
         </div>
         
@@ -559,7 +877,6 @@
             <div class="chart-card" style="flex: 1; padding: 16px 20px;">
                 <div class="chart-header" style="margin-bottom:8px;">
                     <h3 class="chart-title">Inventory Turnover Ratio</h3>
-                    <i class="fi fi-rr-menu-dots-vertical" style="color:var(--text-sub); cursor:pointer;"></i>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="display:flex; align-items:center; gap:16px;">
@@ -567,11 +884,12 @@
                             <i class="fi fi-rr-refresh"></i>
                         </div>
                         <div>
-                            <div style="font-size:28px; font-weight:700; color:var(--text-main); line-height:1; margin-bottom:4px;">${not empty avgTurnoverRatio ? avgTurnoverRatio : "5.42"}</div>
+                            <div style="font-size:28px; font-weight:700; color:var(--text-main); line-height:1; margin-bottom:4px;">${not empty turnoverRatioStr ? turnoverRatioStr : "—"}</div>
                             <div style="font-size:12px; color:var(--text-sub);">Times</div>
                         </div>
                     </div>
-                    <div class="metric-item-trend"><i class="fi fi-rr-arrow-small-up"></i> 0.82 vs Apr 2025</div>
+                    <%-- was a hardcoded "0.82 vs Apr 2025" --%>
+                    <div class="metric-item-trend" style="color:var(--text-muted)">COGS &divide; average inventory</div>
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:12px;">
                     <div>
@@ -588,7 +906,6 @@
             <div class="chart-card" style="flex: 1; padding: 16px 20px;">
                 <div class="chart-header" style="margin-bottom:12px;">
                     <h3 class="chart-title">Invoice Aging</h3>
-                    <i class="fi fi-rr-download" style="color:var(--text-sub); cursor:pointer;"></i>
                 </div>
                 <div style="display:flex; font-size:11px; color:var(--text-sub); gap:16px; margin-bottom:8px; justify-content:center;">
                     <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:50%; background:#10B981;"></span> 0 - 30 Days</span>
@@ -640,15 +957,34 @@
     // Inject backend data into JS
     var plgDataJson = ${not empty plgJson ? plgJson : '[]'};
 
+    // FR2.6 profit & loss trend, one source for the initial render and for every
+    // tab. Day / Week / Quarter / Year were arrays typed into this page, and the
+    // chart below was constructed with a hardcoded seven-point May curve that
+    // only got replaced if the user clicked a tab - so an account with no
+    // shipments still opened on a busy-looking graph.
+    var plgSeries = ${not empty plgSeriesJson ? plgSeriesJson : '{}'};
+
+    function seriesFor(key) {
+        var rows = plgSeries[key] || [];
+        return {
+            labels: rows.map(function (r) { return r.label; }),
+            // "Profit" plotted gross revenue before; profit is revenue minus cost.
+            profit: rows.map(function (r) { return Math.round((r.revenue - r.cost) / 1000); }),
+            loss:   rows.map(function (r) { return -Math.round(r.cost / 1000); })
+        };
+    }
+
+    var plgInitial = seriesFor('month');
+
     // Profit & Loss Trend (Line Chart)
     var plChartInstance = new Chart(document.getElementById('plChart'), {
         type: 'line',
         data: {
-            labels: plgDataJson.length > 0 ? plgDataJson.map(function(d){return d.month;}) : ['01 May','06 May','11 May','16 May','21 May','26 May','31 May'],
+            labels: plgInitial.labels,
             datasets: [
                 {
                     label: 'Profit (\u20B9)',
-                    data: plgDataJson.length > 0 ? plgDataJson.map(function(d){return Math.round(d.revenue/1000);}) : [0, 10, 20, 10, 15, 10, 25],
+                    data: plgInitial.profit,
                     borderColor: '#10B981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 2,
@@ -658,7 +994,7 @@
                 },
                 {
                     label: 'Loss (\u20B9)',
-                    data: plgDataJson.length > 0 ? plgDataJson.map(function(d){return -Math.round(d.cost/1000);}) : [0, -5, -5, -25, -10, -15, -5],
+                    data: plgInitial.loss,
                     borderColor: '#EF4444',
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     borderWidth: 2,
@@ -684,16 +1020,22 @@
         }
     });
 
+    function isDarkTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+
     // Top Loss Reasons (Doughnut)
+    // The seven "typical" loss reasons and their rupee figures used to be
+    // hardcoded here and drawn whenever the real query came back empty. A
+    // company with no losses was shown 2.15 lakh of Delay cost next to a
+    // "Total Loss" of zero, which is where the contradiction came from.
     var lossDataJson = ${not empty lossJson ? lossJson : '[]'};
-    var lossFallback = { labels: ['Delay', 'Traffic in Sea', 'Weather', 'Dock Allocation', 'Regulatory Hold', 'Ship Issue', 'War / Disruption'],
-                          data: [215600, 178500, 132000, 115300, 96800, 58900, 47100] };
-    new Chart(document.getElementById('lossChart'), {
+    var lossChartInstance = new Chart(document.getElementById('lossChart'), {
         type: 'doughnut',
         data: {
-            labels: lossDataJson.length > 0 ? lossDataJson.map(function(d){return d.reason;}) : lossFallback.labels,
+            labels: lossDataJson.map(function(d){return d.reason;}),
             datasets: [{
-                data: lossDataJson.length > 0 ? lossDataJson.map(function(d){return d.impact;}) : lossFallback.data,
+                data: lossDataJson.map(function(d){return d.impact;}),
                 backgroundColor: ['#EF4444', '#FC8019', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6'],
                 borderWidth: 0,
                 cutout: '70%'
@@ -704,17 +1046,20 @@
             maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'right', labels: { usePointStyle: true, padding: 12, boxWidth: 6, font: {size:10},
+                    color: isDarkTheme() ? '#E2E8F0' : '#475569',
                     generateLabels: function(chart) {
                         const data = chart.data;
+                        const isDark = isDarkTheme();
                         if (data.labels.length && data.datasets.length) {
                             return data.labels.map((label, i) => {
                                 const val = data.datasets[0].data[i];
                                 const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percent = ((val / total) * 100).toFixed(1) + '%';
+                                const percent = total > 0 ? ((val / total) * 100).toFixed(1) + '%' : '0%';
                                 const formattedVal = '\u20B9 ' + val.toLocaleString('en-IN');
                                 return {
                                     text: label + '           ' + formattedVal + ' (' + percent + ')',
                                     fillStyle: data.datasets[0].backgroundColor[i],
+                                    fontColor: isDark ? '#E2E8F0' : '#334155',
                                     hidden: false,
                                     index: i
                                 };
@@ -735,16 +1080,17 @@
                 var chartArea = chart.chartArea;
                 var centerX = (chartArea.left + chartArea.right) / 2;
                 var centerY = (chartArea.top + chartArea.bottom) / 2;
+                var isDark = isDarkTheme();
 
                 ctx.font = "500 12px Inter, sans-serif";
                 ctx.textBaseline = "middle";
                 ctx.textAlign = "center";
-                ctx.fillStyle = "#6B7280";
+                ctx.fillStyle = isDark ? "#94A3B8" : "#6B7280";
                 ctx.fillText("Total Loss", centerX, centerY - 10);
                 
                 ctx.font = "700 16px Inter, sans-serif";
-                ctx.fillStyle = "#111827";
-                ctx.fillText("\u20B9 " + Number('${not empty totalLossImpact ? totalLossImpact : 845200}').toLocaleString('en-IN'), centerX, centerY + 10);
+                ctx.fillStyle = isDark ? "#F8FAFC" : "#111827";
+                ctx.fillText("\u20B9 " + Math.round(Number('${not empty totalLossImpact ? totalLossImpact : 0}')).toLocaleString('en-IN'), centerX, centerY + 10);
                 ctx.save();
             }
         }]
@@ -785,7 +1131,7 @@
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { ticks: { callback: function(val) { return '\u20B9 ' + val.toLocaleString('en-IN'); }, font: {size:10} }, grid: { color: '#F3F4F6' }, border: { display: false } },
+                y: { ticks: { callback: function(val) { return '\u20B9 ' + val.toLocaleString('en-IN'); }, font: {size:10} }, grid: { color: isDarkTheme() ? '#223447' : '#F3F4F6' }, border: { display: false } },
                 x: { grid: { display: false }, ticks: { font: {size:10} }, border: { display: false } }
             }
         }
@@ -800,12 +1146,14 @@
         return found ? found.count : 0;
     });
     var abcHasData = abcDataJson.length > 0;
-    new Chart(document.getElementById('abcChart'), {
+    var abcChartInstance = new Chart(document.getElementById('abcChart'), {
         type: 'doughnut',
         data: {
-            labels: abcHasData ? abcClassOrder.map(function(c){return abcClassLabels[c];}) : ['A - High Value', 'B - Medium Value', 'C - Low Value'],
+            // Placeholder counts of 212 / 415 / 620 used to fill this in when the
+            // company had no classified stock of its own.
+            labels: abcClassOrder.map(function(c){return abcClassLabels[c];}),
             datasets: [{
-                data: abcHasData ? abcCounts : [212, 415, 620],
+                data: abcCounts,
                 backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
                 borderWidth: 0,
                 cutout: '75%'
@@ -815,8 +1163,10 @@
             responsive: true, maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'right', labels: { usePointStyle: true, padding: 16, boxWidth: 8, font: {size:11},
+                    color: isDarkTheme() ? '#E2E8F0' : '#475569',
                     generateLabels: function(chart) {
                         const data = chart.data;
+                        const isDark = isDarkTheme();
                         return data.labels.map((label, i) => {
                             const val = data.datasets[0].data[i];
                             const total = data.datasets[0].data.reduce((a, b) => a + b, 0) || 1;
@@ -824,6 +1174,7 @@
                             return {
                                 text: label + ' (' + percent + ')',
                                 fillStyle: data.datasets[0].backgroundColor[i],
+                                fontColor: isDark ? '#E2E8F0' : '#334155',
                                 hidden: false,
                                 index: i
                             };
@@ -841,15 +1192,16 @@
                 var chartArea = chart.chartArea;
                 var centerX = (chartArea.left + chartArea.right) / 2;
                 var centerY = (chartArea.top + chartArea.bottom) / 2;
+                var isDark = isDarkTheme();
 
                 ctx.font = "500 11px Inter, sans-serif";
                 ctx.textBaseline = "middle";
                 ctx.textAlign = "center";
-                ctx.fillStyle = "#6B7280";
+                ctx.fillStyle = isDark ? "#94A3B8" : "#6B7280";
                 ctx.fillText("Total Items", centerX, centerY - 10);
                 
                 ctx.font = "700 18px Inter, sans-serif";
-                ctx.fillStyle = "#111827";
+                ctx.fillStyle = isDark ? "#F8FAFC" : "#111827";
                 var abcTotal = abcHasData ? abcCounts.reduce(function(a,b){return a+b;}, 0) : 1247;
                 ctx.fillText(abcTotal.toLocaleString('en-IN'), centerX, centerY + 10);
                 ctx.save();
@@ -911,30 +1263,136 @@
         var chart = plChartInstance;
         var safeJson = (typeof plgDataJson !== 'undefined') ? plgDataJson : [];
 
-        var periodDatasets = {
-            day:     { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-                       profit: [4,8,12,6,10,5,9], loss: [-2,-4,-3,-8,-3,-2,-5] },
-            week:    { labels: ['Wk 1','Wk 2','Wk 3','Wk 4'],
-                       profit: [22,18,30,25], loss: [-10,-8,-15,-12] },
-            month:   { labels: safeJson.length > 0 ? safeJson.map(function(d){return d.month;}) : ['May 2025'],
-                       profit: safeJson.length > 0 ? safeJson.map(function(d){return Math.round(d.revenue/1000);}) : [10],
-                       loss:   safeJson.length > 0 ? safeJson.map(function(d){return -Math.round(d.cost/1000);}) : [-5] },
-            quarter: { labels: ['Q1 2025','Q2 2025','Q3 2025','Q4 2025'],
-                       profit: [65,80,72,90], loss: [-30,-25,-35,-20] },
-            year:    { labels: ['2022','2023','2024','2025'],
-                       profit: [180,220,260,290], loss: [-90,-80,-100,-75] }
-        };
 
-        var d = periodDatasets[period] || periodDatasets['month'];
+        var d = seriesFor(period && plgSeries[period] ? period : 'month');
         chart.data.labels = d.labels;
         chart.data.datasets[0].data = d.profit;
         chart.data.datasets[1].data = d.loss;
         chart.update();
+
+        // Say so plainly instead of drawing an empty grid that looks broken.
+        var emptyNote = document.getElementById('plgEmptyNote');
+        if (emptyNote) emptyNote.style.display = d.labels.length ? 'none' : 'flex';
+    }
+
+    // ===== Chart Tool Utilities =====
+
+    /** Download any Chart.js canvas as PNG */
+    function nlDownloadChart(canvasId, title) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        // Draw on white/dark bg so transparent canvas looks correct in the file
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var tempCanvas = document.createElement('canvas');
+        tempCanvas.width  = canvas.width;
+        tempCanvas.height = canvas.height;
+        var ctx = tempCanvas.getContext('2d');
+        ctx.fillStyle = isDark ? '#101820' : '#ffffff';
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+        ctx.drawImage(canvas, 0, 0);
+        var link = document.createElement('a');
+        link.download = (title || 'chart').replace(/[^a-z0-9]/gi, '_') + '.png';
+        link.href = tempCanvas.toDataURL('image/png');
+        link.click();
+    }
+
+    /** Open a chart canvas in a full-screen overlay (image snapshot approach) */
+    function nlFullscreen(canvasId, title) {
+        var srcCanvas = document.getElementById(canvasId);
+        if (!srcCanvas) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var bgColor = isDark ? '#101820' : '#ffffff';
+
+        // Use Chart.js toBase64Image if available for best quality, else fallback
+        var chartInst = (typeof Chart !== 'undefined') ? Chart.getChart(srcCanvas) : null;
+        var imgSrc;
+        if (chartInst && typeof chartInst.toBase64Image === 'function') {
+            // Temporarily set background so export isn't transparent
+            var origBg = chartInst.config.options && chartInst.config.options.plugins
+                       && chartInst.config.options.plugins.legend ? null : null;
+            imgSrc = chartInst.toBase64Image('image/png', 1);
+        } else {
+            var tmp = document.createElement('canvas');
+            tmp.width  = srcCanvas.width  || 800;
+            tmp.height = srcCanvas.height || 400;
+            var tCtx = tmp.getContext('2d');
+            tCtx.fillStyle = bgColor;
+            tCtx.fillRect(0, 0, tmp.width, tmp.height);
+            tCtx.drawImage(srcCanvas, 0, 0);
+            imgSrc = tmp.toDataURL('image/png');
+        }
+
+        var overlay = document.createElement('div');
+        overlay.className = 'nl-fullscreen-overlay';
+        overlay.id = 'nlFsOverlay';
+        overlay.innerHTML =
+            '<div class="nl-fullscreen-card">' +
+                '<h3 class="nl-fullscreen-title">' + (title || '') + '</h3>' +
+                '<button class="nl-fullscreen-close" title="Close (Esc)"><i class="fi fi-rr-cross"></i></button>' +
+                '<div style="flex:1;overflow:hidden;border-radius:8px;background:' + bgColor + ';display:flex;align-items:center;justify-content:center;min-height:360px;">' +
+                    '<img src="' + imgSrc + '" style="width:100%;height:auto;display:block;border-radius:8px;">' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+
+        function closeOverlay() {
+            overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') closeOverlay(); }
+        overlay.querySelector('.nl-fullscreen-close').addEventListener('click', closeOverlay);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeOverlay(); });
+        document.addEventListener('keydown', onKey);
+    }
+
+    /** Fullscreen for SVG-based gauge card (no canvas) */
+    function nlFullscreenGauge(title) {
+        var gaugeEl = document.getElementById('utilGauge');
+        if (!gaugeEl) return;
+        var overlay = document.createElement('div');
+        overlay.className = 'nl-fullscreen-overlay';
+        overlay.id = 'nlFsOverlay';
+        var clone = gaugeEl.parentElement.cloneNode(true);
+        clone.style.cssText = 'width:320px;max-width:100%;';
+        overlay.innerHTML =
+            '<div class="nl-fullscreen-card" style="max-width:480px;align-items:center;">' +
+                '<h3 class="nl-fullscreen-title">' + (title || '') + '</h3>' +
+                '<button class="nl-fullscreen-close" title="Close (Esc)"><i class="fi fi-rr-cross"></i></button>' +
+            '</div>';
+        overlay.querySelector('.nl-fullscreen-card').appendChild(clone);
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        function closeOverlay() {
+            overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') closeOverlay(); }
+        overlay.querySelector('.nl-fullscreen-close').addEventListener('click', closeOverlay);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeOverlay(); });
+        document.addEventListener('keydown', onKey);
     }
 
 </script>
 
-<%-- Export + Fullscreen controls on every card --%>
-<script src="${pageContext.request.contextPath}/assets/js/nl-card-tools.js"></script>
+<script>
+// One place decides whether a chart has anything to draw, so the empty state and
+// the canvas can never disagree.
+(function () {
+    function toggle(noteId, hasData) {
+        var el = document.getElementById(noteId);
+        if (el) el.style.display = hasData ? 'none' : 'flex';
+    }
+    function len(v) { return (v && v.length) ? v.length : 0; }
+    try { toggle('plgEmptyNote',    len(plgInitial.labels) > 0); } catch (e) {}
+    try { toggle('lossEmptyNote',   len(lossDataJson) > 0); } catch (e) {}
+    try { toggle('abcEmptyNote',    len(abcDataJson) > 0); } catch (e) {}
+    try { toggle('demandEmptyNote', len(demandDataJson) > 0); } catch (e) {}
+})();
+</script>
+
 </body>
 </html>

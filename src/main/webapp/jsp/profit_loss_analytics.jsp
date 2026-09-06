@@ -26,8 +26,27 @@
         --text-sub: #6B7280;
     }
 
+    [data-theme="dark"] {
+        --border-color: #22303A;
+        --bg-surface: #101820;
+        --text-main: #F8FAFC;
+        --text-sub: #94A3B8;
+    }
+
+    html, body {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
     body {
-        background-color: #F9FAFB;
+        background-color: var(--nl-bg, #F9FAFB);
+    }
+
+    .main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden;
     }
 
     .dashboard-header {
@@ -89,21 +108,32 @@
         padding: 8px 12px;
     }
 
-    /* Filter Bar */
+    /* Filter Bar - No outer container, pure floating pill filters */
     .filter-bar {
-        background: var(--bg-surface);
-        border: none;
-        border-radius: 16px;
-        padding: 20px 24px;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
         display: flex;
-        align-items: center;
-        gap: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 28px;
+        box-shadow: none !important;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    [data-theme="dark"] .filter-bar {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
     .filter-group {
         flex: 1;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -116,79 +146,103 @@
         margin-left: 4px;
     }
 
+    [data-theme="dark"] .filter-label {
+        color: #94A3B8 !important;
+    }
+
+    /* Zero outer container: pure pill-shaped dropdowns */
     .filter-input-wrap {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border: none;
-        border-radius: 10px;
-        padding: 4px 10px;
-        background: #F9FAFB;
-        transition: all 0.2s ease;
-    }
-
-    .filter-input-wrap:focus-within {
-        background: #F9FAFB;
+        background: transparent !important;
         border: none !important;
-        border-color: transparent !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
         box-shadow: none !important;
-        outline: none !important;
+        width: 100% !important;
     }
 
-    .filter-input-wrap i {
-        color: #9CA3AF;
-        font-size: 15px;
-        transition: color 0.2s ease;
+    .filter-input-wrap > i {
+        display: none !important;
     }
 
-    .filter-input-wrap:focus-within i {
-        color: var(--orange-brand);
+    .filter-bar .ts-wrapper,
+    .filter-bar .ts-wrapper.single,
+    .filter-bar .ts-wrapper.form-select-custom {
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
     }
 
-    .filter-input-wrap .ts-wrapper.focus .ts-control,
-    .filter-input-wrap .ts-wrapper.dropdown-active .ts-control,
-    .filter-input-wrap .ts-wrapper.input-active .ts-control,
-    .filter-input-wrap .ts-control.focus {
+    .filter-bar .ts-control,
+    .filter-bar select.form-select-custom {
+        height: 42px !important;
+        min-height: 42px !important;
+        border-radius: 50px !important;
+        padding: 0 36px 0 18px !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        border: 1px solid var(--border-color) !important;
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        display: flex !important;
+        align-items: center !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+        cursor: pointer !important;
+        width: 100% !important;
+    }
+
+    [data-theme="dark"] .filter-bar .ts-control,
+    [data-theme="dark"] .filter-bar select.form-select-custom {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+        box-shadow: none !important;
+    }
+
+    .filter-bar .ts-wrapper.focus .ts-control,
+    .filter-bar .ts-wrapper.dropdown-active .ts-control,
+    .filter-bar .ts-wrapper.input-active .ts-control,
+    .filter-bar .ts-control.focus,
+    .filter-bar select.form-select-custom:focus {
         border-color: #FC8019 !important;
         box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
     }
 
-        .filter-input-wrap select, .filter-input-wrap input {
-        appearance: none;
-        -webkit-appearance: none;
-        border: none;
-        outline: none;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--text-main);
-        width: 100%;
-        background-color: transparent;
-        cursor: pointer;
+    [data-theme="dark"] .filter-bar .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .filter-bar .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .filter-bar .ts-wrapper.input-active .ts-control,
+    [data-theme="dark"] .filter-bar .ts-control.focus,
+    [data-theme="dark"] .filter-bar select.form-select-custom:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.22) !important;
     }
 
-    .filter-input-wrap select {
-        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
-        background-repeat: no-repeat;
-        background-position: right 4px center;
-        background-size: 16px;
-        padding-right: 28px;
+    .filter-bar .ts-dropdown {
+        border-radius: 12px !important;
+        margin-top: 4px !important;
     }
 
+    /* Reset button (Pill-shaped with Dark Mode support) */
     .btn-reset {
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
-        font-size: 14px;
+        font-size: 13.5px;
         font-weight: 600;
         color: #4B5563;
-        background: white;
+        background: #FFFFFF;
         border: 1px solid var(--border-color);
-        border-radius: 10px;
-        padding: 11px 20px;
+        border-radius: 50px !important;
+        height: 42px;
+        padding: 0 22px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         margin-top: 25px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        flex-shrink: 0;
     }
 
     .btn-reset:hover {
@@ -206,12 +260,33 @@
         transform: rotate(-180deg);
     }
 
+    [data-theme="dark"] .btn-reset {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .btn-reset:hover {
+        background: #1E293B !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+
     /* KPI Cards */
     .kpi-row {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
         margin-bottom: 24px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+        .kpi-row {
+            grid-template-columns: 1fr;
+        }
     }
 
     .kpi-card {
@@ -223,6 +298,15 @@
         justify-content: space-between;
         align-items: flex-start;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    [data-theme="dark"] .kpi-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
     }
 
     .kpi-left {
@@ -282,14 +366,23 @@
         width: 100px;
         height: 50px;
         align-self: center;
+        flex-shrink: 0;
     }
 
     /* Charts Row */
     .charts-row {
         display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 24px;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+        gap: 20px;
         margin-bottom: 24px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    @media (max-width: 1200px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
     }
 
     .chart-card {
@@ -298,6 +391,15 @@
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    [data-theme="dark"] .chart-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
     }
 
     .card-header {
@@ -323,6 +425,7 @@
         margin-top: 4px;
     }
 
+    /* Toggles & Dark Mode */
     .toggle-group {
         display: flex;
         border: 1px solid var(--border-color);
@@ -331,49 +434,109 @@
     }
 
     .toggle-btn {
-        padding: 6px 12px;
+        padding: 6px 14px;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text-sub);
-        background: white;
+        background: var(--bg-surface);
         border: none;
         border-right: 1px solid var(--border-color);
         cursor: pointer;
+        transition: all 0.15s ease;
     }
     .toggle-btn:last-child { border-right: none; }
     .toggle-btn.active { color: var(--orange-brand); background: #FFF7ED; }
 
-    /* Custom Table */
-    .table-container {
+    [data-theme="dark"] .toggle-group {
+        border-color: #22303A !important;
+        background: #151F28 !important;
+    }
+
+    [data-theme="dark"] .toggle-btn {
+        background: #151F28 !important;
+        color: #94A3B8 !important;
+        border-right-color: #22303A !important;
+    }
+
+    [data-theme="dark"] .toggle-btn:hover {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .toggle-btn.active {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        font-weight: 600 !important;
+    }
+
+    [data-theme="dark"] .btn-outline-custom {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+
+    [data-theme="dark"] .btn-outline-custom:hover {
+        background: #1E293B !important;
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+    }
+
+    /* Standard Tracking Table Styling (Matching All Shipments) */
+    .tracking-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0 16px;
-        margin-top: -16px; /* offset spacing */
+        border-spacing: 0;
     }
-
-    .table-container th {
+    .tracking-table th {
         font-size: 12px;
-        font-weight: 500;
-        color: var(--text-sub);
+        color: var(--text-muted, #64748B);
+        font-weight: 600;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border-color, #E2E8F0);
         text-align: left;
-        padding: 0 24px 8px 24px;
-        border-bottom: 1px solid var(--border-color);
+        background: #F9FAFB;
+        vertical-align: middle;
+    }
+    .tracking-table th:first-child { border-top-left-radius: 8px; }
+    .tracking-table th:last-child { border-top-right-radius: 8px; }
+
+    .tracking-table td {
+        padding: 18px 24px;
+        font-size: 14px;
+        color: var(--text-dark, #1E293B);
+        font-weight: 500;
+        border-bottom: 1px solid var(--border-color, #E2E8F0);
+        vertical-align: middle;
+        background: transparent;
+        transition: background-color 0.15s ease;
+    }
+    .tracking-table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+    .tracking-table tbody tr:hover {
+        background-color: #F9FAFB;
+        cursor: pointer;
+    }
+    .tracking-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
-    .table-container td {
-        background: var(--bg-surface);
-        padding: 20px 24px;
-        font-size: 14px;
-        color: var(--text-main);
-        font-weight: 500;
+    [data-theme="dark"] .tracking-table th {
+        background-color: #0E151C !important;
+        color: #94A3B8 !important;
+        border-bottom: 1px solid #22303A !important;
     }
-    
-    /* Simulate rounded rows */
-    .table-container tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
-    .table-container tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
-    .table-container tr td:not(:first-child):not(:last-child) { border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
-    
-    .table-container tr:hover td { background: #F9FAFB; cursor: pointer; }
+    [data-theme="dark"] .tracking-table td {
+        background-color: transparent !important;
+        color: #F8FAFC !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+    [data-theme="dark"] .tracking-table tbody tr:last-child td {
+        border-bottom: none !important;
+    }
 
     /* Progress Bar */
     .progress-bar-wrap {
@@ -390,6 +553,10 @@
         overflow: hidden;
     }
 
+    [data-theme="dark"] .progress-track {
+        background: #1E293B !important;
+    }
+
     .progress-fill {
         height: 100%;
         border-radius: 3px;
@@ -398,37 +565,86 @@
     .progress-fill.green { background: var(--green-brand); }
     .progress-fill.red { background: var(--red-brand); }
 
+    /* Loss Reason Breakdown Layout (Zero Scrollbar) */
+    .loss-breakdown-body {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        min-height: 170px;
+        width: 100%;
+    }
+
+    .donut-chart-wrapper {
+        width: 150px;
+        height: 150px;
+        min-width: 150px;
+        max-width: 150px;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .loss-total {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+        z-index: 2;
+    }
+    .loss-total-label { font-size: 11px; font-weight: 500; color: var(--text-sub); }
+    .loss-total-val { font-size: 14.5px; font-weight: 700; color: var(--text-main); }
+
     .chart-legend {
         display: flex;
         flex-direction: column;
         gap: 12px;
-        margin-top: 24px;
+        margin-top: 0;
+        flex: 1;
+        min-width: 0;
+        overflow: visible !important;
     }
 
     .legend-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 12px;
+        gap: 10px;
+        font-size: 12.5px;
         color: var(--text-main);
+        min-width: 0;
+        width: 100%;
     }
-    .legend-left { display: flex; align-items: center; gap: 8px; }
-    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .legend-right { display: flex; gap: 16px; font-weight: 500;}
-    .legend-pct { color: var(--text-sub); width: 40px; text-align: right;}
-
-    .loss-total {
-        text-align: center;
-        margin-top: -120px;
-        margin-bottom: 90px;
+    .legend-left {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        pointer-events: none;
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+        font-weight: 500;
+        overflow: hidden;
     }
-    .loss-total-label { font-size: 12px; font-weight: 500; color: var(--text-main); }
-    .loss-total-val { font-size: 16px; font-weight: 700; color: var(--text-main); }
+    .legend-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+    .legend-pct { color: var(--text-sub); min-width: 44px; text-align: right; font-weight: 500; font-size: 12px; }
 
     .bottom-hint {
         font-size: 12px;
@@ -441,17 +657,21 @@
         margin-top: 16px;
     }
 
+    [data-theme="dark"] .bottom-hint {
+        border-top-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+
 </style>
 
 <div class="main-content" id="dashboardContent">
     <div class="dashboard-header">
         <div>
-            <div class="page-title">Profit & Loss Analytics <i class="fas fa-info-circle"></i></div>
+            <div class="page-title">Profit & Loss Analytics</div>
             <div class="breadcrumb">Dashboard > Finance > <span>Profit & Loss</span></div>
         </div>
         <div class="header-actions">
             <button type="button" class="btn-outline-custom" onclick="exportDashboardToPDF()"><i class="fa-solid fa-download"></i> Export</button>
-            <button class="btn-outline-custom btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
         </div>
     </div>
 
@@ -459,40 +679,31 @@
     <form class="filter-bar" method="GET" action="${pageContext.request.contextPath}/finance/profit-loss">
         <div class="filter-group">
             <div class="filter-label">Company</div>
-            <div class="filter-input-wrap">
-                <i class="fa-regular fa-building"></i>
-                <select class="form-select-custom" name="companyId" onchange="this.form.submit()">
-                    <option value="">All Companies</option>
-                    <c:forEach var="comp" items="${companies}">
-                        <option value="${comp.companyId}" <c:if test="${comp.companyId == selectedCompany}">selected</c:if>>${comp.companyName}</option>
-                    </c:forEach>
-                </select>
-            </div>
+            <select class="form-select-custom" name="companyId" onchange="this.form.submit()">
+                <option value="">All Companies</option>
+                <c:forEach var="comp" items="${companies}">
+                    <option value="${comp.companyId}" <c:if test="${comp.companyId == selectedCompany}">selected</c:if>>${comp.companyName}</option>
+                </c:forEach>
+            </select>
         </div>
         <div class="filter-group">
             <div class="filter-label">Route (Origin or Destination)</div>
-            <div class="filter-input-wrap">
-                <i class="fa-solid fa-route"></i>
-                <select class="form-select-custom" name="routeId" onchange="this.form.submit()">
-                    <option value="">All Routes</option>
-                    <c:forEach var="port" items="${ports}">
-                        <option value="${port.portId}" <c:if test="${port.portId == selectedRoute}">selected</c:if>>${port.portName}</option>
-                    </c:forEach>
-                </select>
-            </div>
+            <select class="form-select-custom" name="routeId" onchange="this.form.submit()">
+                <option value="">All Routes</option>
+                <c:forEach var="port" items="${ports}">
+                    <option value="${port.portId}" <c:if test="${port.portId == selectedRoute}">selected</c:if>>${port.portName}</option>
+                </c:forEach>
+            </select>
         </div>
         <div class="filter-group">
             <div class="filter-label">Time Period</div>
-            <div class="filter-input-wrap">
-                <i class="far fa-calendar-alt"></i>
-                <select class="form-select-custom" name="dateRange"  onchange="this.form.submit()">
-                    <option value="">All Time</option>
-                    <option value="2026-09-01 to 2026-09-30" <c:if test="${selectedDateRange == '2026-09-01 to 2026-09-30'}">selected</c:if>>This Month (Sep 2026)</option>
-                    <option value="2026-08-01 to 2026-08-31" <c:if test="${selectedDateRange == '2026-08-01 to 2026-08-31'}">selected</c:if>>Last Month (Aug 2026)</option>
-                    <option value="2026-07-01 to 2026-09-30" <c:if test="${selectedDateRange == '2026-07-01 to 2026-09-30'}">selected</c:if>>Q3 2026 (Jul-Sep)</option>
-                    <option value="2026-01-01 to 2026-12-31" <c:if test="${selectedDateRange == '2026-01-01 to 2026-12-31'}">selected</c:if>>This Year (2026)</option>
-                </select>
-            </div>
+            <select class="form-select-custom" name="dateRange"  onchange="this.form.submit()">
+                <option value="">All Time</option>
+                <option value="2026-09-01 to 2026-09-30" <c:if test="${selectedDateRange == '2026-09-01 to 2026-09-30'}">selected</c:if>>This Month (Sep 2026)</option>
+                <option value="2026-08-01 to 2026-08-31" <c:if test="${selectedDateRange == '2026-08-01 to 2026-08-31'}">selected</c:if>>Last Month (Aug 2026)</option>
+                <option value="2026-07-01 to 2026-09-30" <c:if test="${selectedDateRange == '2026-07-01 to 2026-09-30'}">selected</c:if>>Q3 2026 (Jul-Sep)</option>
+                <option value="2026-01-01 to 2026-12-31" <c:if test="${selectedDateRange == '2026-01-01 to 2026-12-31'}">selected</c:if>>This Year (2026)</option>
+            </select>
         </div>
         <a href="${pageContext.request.contextPath}/finance/profit-loss" class="btn-reset" style="text-decoration: none;"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</a>
     </form>
@@ -563,7 +774,7 @@
         <div class="chart-card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">Net Profit / Loss Trend <i class="fas fa-info-circle"></i></div>
+                    <div class="card-title">Net Profit / Loss Trend</div>
                     <div class="card-subtitle">All values in USD</div>
                 </div>
                 <div style="display: flex; gap: 12px; align-items: center;">
@@ -572,10 +783,9 @@
                         <button type="button" class="toggle-btn" id="btnTrendQuarterly" onclick="toggleTrend('quarterly')">Quarterly</button>
                         <button type="button" class="toggle-btn" id="btnTrendYearly" onclick="toggleTrend('yearly')">Yearly</button>
                     </div>
-                    <button type="button" class="btn-outline-custom btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                 </div>
             </div>
-            <div style="height: 300px; position: relative;">
+            <div style="height: 300px; position: relative; width: 100%; min-width: 0; max-width: 100%; overflow: hidden;">
                 <canvas id="trendChart"></canvas>
             </div>
         </div>
@@ -583,14 +793,14 @@
         <!-- Donut Chart -->
         <div class="chart-card">
             <div class="card-header">
-                <div class="card-title">Loss Reason Breakdown <i class="fas fa-info-circle"></i></div>
+                <div class="card-title">Loss Reason Breakdown</div>
                 <div class="toggle-group">
                     <button type="button" class="toggle-btn active" id="btnByCost" onclick="toggleLossBreakdown('cost')">By Cost</button>
                     <button type="button" class="toggle-btn" id="btnByShipments" onclick="toggleLossBreakdown('shipments')">By Shipments</button>
                 </div>
             </div>
-            <div style="display: flex; gap: 24px;">
-                <div style="width: 180px; height: 180px; position: relative;">
+            <div class="loss-breakdown-body">
+                <div class="donut-chart-wrapper">
                     <canvas id="donutChart"></canvas>
                     <div class="loss-total">
                         <div class="loss-total-label" id="lossTotalLabel">Total Loss</div>
@@ -603,7 +813,7 @@
                         <div class="loss-total-val" id="lossTotalVal">$ <fmt:formatNumber value="${totalLoss}" type="number" groupingUsed="true" maxFractionDigits="0"/></div>
                     </div>
                 </div>
-                <div class="chart-legend" style="flex: 1; margin-top: 0; overflow-y: auto; max-height: 250px;">
+                <div class="chart-legend">
                     <c:set var="colors" value="#FC8019,#3B82F6,#8B5CF6,#EAB308,#06B6D4,#EC4899,#EF4444,#78716C" />
                     <c:forEach var="item" items="${lossBreakdown}" varStatus="status">
                         <c:set var="pctCost" value="${totalLoss > 0 ? (item.totalImpact / totalLoss) * 100 : 0}" />
@@ -620,7 +830,7 @@
                         </c:choose>
                         
                         <div class="legend-item">
-                            <div class="legend-left"><div class="legend-dot" style="background: ${dotColor};"></div> ${item.reasonName}</div>
+                            <div class="legend-left"><div class="legend-dot" style="background: ${dotColor};"></div> <span class="legend-name">${item.reasonName}</span></div>
                             <div class="legend-right">
                                 <div id="legendVal_${status.index}">$<fmt:formatNumber value="${item.totalImpact}" type="number" groupingUsed="true" maxFractionDigits="0"/></div>
                                 <div class="legend-pct" id="legendPct_${status.index}">(<fmt:formatNumber value="${pctCost}" type="number" groupingUsed="true" minFractionDigits="1" maxFractionDigits="1"/>%)</div>
@@ -639,59 +849,60 @@
     </div>
 
     <!-- Table Section -->
-    <div class="chart-card">
-        <div class="card-header" style="margin-bottom: 32px;">
-            <div class="card-title">Profit & Loss Summary <i class="fas fa-info-circle"></i></div>
+    <div class="card" style="padding: 0; overflow: hidden; margin-top: 24px;">
+        <div class="card-header" style="padding: 20px 24px 16px 24px; margin-bottom: 0; border-bottom: 1px solid var(--border-color);">
+            <div class="card-title" style="margin-bottom: 0;">Profit & Loss Summary</div>
             <div style="display: flex; gap: 12px;">
                 <button type="button" class="btn-outline-custom" onclick="exportDashboardToPDF()"><i class="fa-solid fa-download"></i> Export</button>
-                <button class="btn-outline-custom btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </div>
         </div>
 
-        <table class="table-container">
-            <thead>
-                <tr>
-                    <th>Company</th>
-                    <th>Total Revenue<br><span style="font-size: 11px; font-weight: 400;">Freight + Service</span></th>
-                    <th>Total Cost<br><span style="font-size: 11px; font-weight: 400;">All Costs</span></th>
-                    <th>Net Profit / Loss</th>
-                    <th style="width: 150px;">Profit Margin</th>
-                    <th>vs Previous Period</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <c:forEach var="item" items="${companySummary}">
-                    <tr onclick="window.location.href='${pageContext.request.contextPath}/finance/shipment-drilldown?id=1'" style="cursor: pointer;">
-                        <td style="font-weight: 600;">${item.companyName}</td>
-                        <td>$ <fmt:formatNumber value="${item.totalRevenue}" type="number" groupingUsed="true" maxFractionDigits="0"/></td>
-                        <td>$ <fmt:formatNumber value="${item.totalCost}" type="number" groupingUsed="true" maxFractionDigits="0"/></td>
-                        <td style="color: ${item.netProfitLoss >= 0 ? 'var(--green-brand)' : 'var(--red-brand)'}; font-weight: 600;">
-                            ${item.netProfitLoss >= 0 ? '$ ' : '-$ '}
-                            <fmt:formatNumber value="${item.netProfitLoss >= 0 ? item.netProfitLoss : -item.netProfitLoss}" type="number" groupingUsed="true" maxFractionDigits="0"/>
-                        </td>
-                        <td>
-                            <div class="progress-bar-wrap">
-                                <span style="font-size: 13px;">${item.profitMargin}%</span>
-                                <div class="progress-track">
-                                    <div class="progress-fill ${item.profitMargin >= 0 ? 'green' : 'red'}" style="width: ${item.profitMargin >= 0 ? (item.profitMargin > 100 ? 100 : item.profitMargin * 2.5) : (item.profitMargin < -100 ? 100 : -item.profitMargin * 2.5)}%;"></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="${item.vsPreviousPeriod >= 0 ? 'trend-up' : 'trend-down'}">
-                            <i class="fa-solid ${item.vsPreviousPeriod >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i> 
-                            ${item.vsPreviousPeriod >= 0 ? item.vsPreviousPeriod : -item.vsPreviousPeriod}%
-                        </td>
-                        <td style="color: var(--text-sub); text-align: right;"><i class="fa-solid fa-chevron-right"></i></td>
-                    </tr>
-                </c:forEach>
-                <c:if test="${empty companySummary}">
+        <div class="table-responsive" style="overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch;">
+            <table class="tracking-table" style="min-width: 720px; width: 100%;">
+                <thead>
                     <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-sub); padding: 32px;">No company financial summary found for current filters.</td>
+                        <th>Company</th>
+                        <th>Total Revenue<br><span style="font-size: 11px; font-weight: 400;">Freight + Service</span></th>
+                        <th>Total Cost<br><span style="font-size: 11px; font-weight: 400;">All Costs</span></th>
+                        <th>Net Profit / Loss</th>
+                        <th style="width: 150px;">Profit Margin</th>
+                        <th>vs Previous Period</th>
+                        <th></th>
                     </tr>
-                </c:if>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <c:forEach var="item" items="${companySummary}">
+                        <tr onclick="window.location.href='${pageContext.request.contextPath}/finance/shipment-drilldown?id=1'" style="cursor: pointer;">
+                            <td style="font-weight: 600;">${item.companyName}</td>
+                            <td>$ <fmt:formatNumber value="${item.totalRevenue}" type="number" groupingUsed="true" maxFractionDigits="0"/></td>
+                            <td>$ <fmt:formatNumber value="${item.totalCost}" type="number" groupingUsed="true" maxFractionDigits="0"/></td>
+                            <td style="color: ${item.netProfitLoss >= 0 ? 'var(--green-brand)' : 'var(--red-brand)'}; font-weight: 600;">
+                                ${item.netProfitLoss >= 0 ? '$ ' : '-$ '}
+                                <fmt:formatNumber value="${item.netProfitLoss >= 0 ? item.netProfitLoss : -item.netProfitLoss}" type="number" groupingUsed="true" maxFractionDigits="0"/>
+                            </td>
+                            <td>
+                                <div class="progress-bar-wrap">
+                                    <span style="font-size: 13px;">${item.profitMargin}%</span>
+                                    <div class="progress-track">
+                                        <div class="progress-fill ${item.profitMargin >= 0 ? 'green' : 'red'}" style="width: ${item.profitMargin >= 0 ? (item.profitMargin > 100 ? 100 : item.profitMargin * 2.5) : (item.profitMargin < -100 ? 100 : -item.profitMargin * 2.5)}%;"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="${item.vsPreviousPeriod >= 0 ? 'trend-up' : 'trend-down'}">
+                                <i class="fa-solid ${item.vsPreviousPeriod >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i> 
+                                ${item.vsPreviousPeriod >= 0 ? item.vsPreviousPeriod : -item.vsPreviousPeriod}%
+                            </td>
+                            <td style="color: var(--text-sub); text-align: right;"><i class="fa-solid fa-chevron-right"></i></td>
+                        </tr>
+                    </c:forEach>
+                    <c:if test="${empty companySummary}">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-sub); padding: 32px;">No company financial summary found for current filters.</td>
+                        </tr>
+                    </c:if>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>
@@ -912,29 +1123,58 @@
               responsive: true,
               maintainAspectRatio: false,
               cutout: '70%',
+              onHover: function(event, activeElements) {
+                  const centerWrap = document.querySelector('.loss-total');
+                  if (centerWrap) {
+                      if (activeElements && activeElements.length > 0) {
+                          centerWrap.style.opacity = '0';
+                      } else {
+                          centerWrap.style.opacity = '1';
+                      }
+                  }
+              },
               plugins: {
                   legend: { display: false },
                   tooltip: {
-                      backgroundColor: '#111827',
-                      padding: 10,
+                      backgroundColor: '#1E293B',
+                      borderColor: '#334155',
+                      borderWidth: 1,
+                      titleColor: '#F8FAFC',
+                      bodyColor: '#CBD5E1',
+                      padding: 8,
+                      boxPadding: 4,
+                      usePointStyle: true,
+                      cornerRadius: 8,
                       callbacks: {
+                          title: function(items) {
+                              return items.length > 0 ? (items[0].label || '') : '';
+                          },
                           label: function(context) {
-                              let label = context.label || '';
-                              if (label) label += ': ';
                               if (context.parsed !== null) {
+                                  const total = lossItemsData.reduce((acc, curr) => acc + (currentLossMode === 'cost' ? curr.cost : curr.shipments), 0);
+                                  const pct = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
                                   if (currentLossMode === 'cost') {
-                                      label += '$' + context.parsed.toLocaleString();
+                                      return ' $' + Math.round(context.parsed).toLocaleString() + ' (' + pct + '%)';
                                   } else {
-                                      label += context.parsed.toLocaleString() + ' shipments';
+                                      return ' ' + context.parsed.toLocaleString() + (context.parsed === 1 ? ' shipment' : ' shipments') + ' (' + pct + '%)';
                                   }
                               }
-                              return label;
+                              return '';
                           }
                       }
                   }
               }
           }
       });
+
+      const donutCanvas = document.getElementById('donutChart');
+      if (donutCanvas && !donutCanvas.dataset.hoverBound) {
+          donutCanvas.dataset.hoverBound = 'true';
+          donutCanvas.addEventListener('mouseleave', function() {
+              const centerWrap = document.querySelector('.loss-total');
+              if (centerWrap) centerWrap.style.opacity = '1';
+          });
+      }
   }
 
   function toggleLossBreakdown(mode) {

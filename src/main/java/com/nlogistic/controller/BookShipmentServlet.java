@@ -98,11 +98,14 @@ public class BookShipmentServlet extends HttpServlet {
                     }
                 }
                 
-                // 3. Call allocate_container stored procedure to enforce logic
-                try (CallableStatement cs = conn.prepareCall("{call allocate_container(?, ?)}")) {
-                    cs.setInt(1, shipmentId);
-                    cs.setInt(2, containerId);
-                    cs.execute();
+                // 3. Record initial movement status = 'Booked' (FR2.2 Milestone 1)
+                // Container allocation is explicitly deferred to Company Operations / Admin (UC 4, FR3.3, FR3.4)
+                String insertMove = "INSERT INTO container_movements (shipment_id, status, updated_by, checkpoint_location) "
+                                  + "VALUES (?, 'Booked', ?, 'Booking Confirmed - Awaiting Container Allocation by Operations')";
+                try (PreparedStatement ps = conn.prepareStatement(insertMove)) {
+                    ps.setInt(1, shipmentId);
+                    ps.setInt(2, user.getUserId());
+                    ps.executeUpdate();
                 }
                 
                 conn.commit();

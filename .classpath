@@ -12,4 +12,6 @@
 	<classpathentry kind="output" path="build/classes"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/javax.mail-1.6.2.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/activation-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/mohit/Downloads/apache-tomcat-8.5.99-windows-x64/apache-tomcat-8.5.99/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="C:/Users/mohit/Downloads/apache-tomcat-8.5.99-windows-x64/apache-tomcat-8.5.99/lib/jsp-api.jar"/>
 </classpath>

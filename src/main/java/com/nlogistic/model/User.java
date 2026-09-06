@@ -132,11 +132,16 @@ public class User {
             case 1: // Super Admin
                 return "dashboard,tracking,shipments,plg,invoicing,inventory,claims,compliance,users,settings";
             case 2: // Company Admin
-                return "dashboard,tracking,shipments,plg,invoicing,inventory,claims,compliance,users";
+                // "settings" governs Pricing and the Predictive Graph. It was missing
+                // here and from Finance below, while both the filter's role table and
+                // the sidebar grant those pages to roles 1, 2 and 4 - so the two gates
+                // could never both pass and the pricing engine was reachable by the
+                // Super Admin alone.
+                return "dashboard,tracking,shipments,plg,invoicing,inventory,claims,compliance,users,settings";
             case 3: // Operations Staff
                 return "dashboard,tracking,shipments,inventory,claims,compliance";
             case 4: // Finance Staff
-                return "dashboard,plg,invoicing,claims";
+                return "dashboard,plg,invoicing,claims,settings";
             case 5: // Customer
                 return "dashboard,tracking,shipments,invoicing,claims,compliance";
             default:

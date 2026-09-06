@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" session="true" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:include page="/jsp/layout/header.jsp" />
 <style>
@@ -25,17 +25,29 @@
     .select-wrapper:focus-within::after {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
     }
+
+    /* Prevent any outer wrapper from rendering double/nested borders */
+    .ts-wrapper,
+    .ts-wrapper.single,
+    .ts-wrapper.form-select-custom,
+    .ts-wrapper.form-select,
     .select-wrapper .ts-wrapper,
-    .select-wrapper .ts-wrapper.single {
+    .select-wrapper .ts-wrapper.single,
+    .select-wrapper .ts-wrapper.form-select-custom,
+    .select-wrapper .ts-wrapper.form-select {
         width: 100% !important;
         border: none !important;
+        outline: none !important;
         background: transparent !important;
         padding: 0 !important;
         box-shadow: none !important;
+        border-radius: 0 !important;
     }
+
+    /* Single authoritative pill border container */
     .select-wrapper .ts-control,
     .select-wrapper .ts-wrapper.single .ts-control,
-    .select-wrapper .form-select-custom {
+    select.form-select-custom:not(.tomselected) {
         width: 100% !important;
         border: 1.5px solid #E2E8F0 !important;
         border-radius: 50px !important;
@@ -49,15 +61,111 @@
         cursor: pointer !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
         transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+        outline: none !important;
     }
+
+    /* Inner input and items must NEVER have their own borders, outlines or backgrounds */
+    .select-wrapper .ts-control input,
+    .select-wrapper .ts-control > input,
+    .select-wrapper .ts-control .item,
+    .ts-control input,
+    .ts-control > input {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 14px !important;
+    }
+
     .select-wrapper .ts-control.focus,
     .select-wrapper .ts-wrapper.single.focus .ts-control,
-    .select-wrapper .form-select-custom:focus {
+    .select-wrapper .ts-wrapper.single.input-active .ts-control,
+    .select-wrapper .ts-wrapper.single.dropdown-active .ts-control,
+    select.form-select-custom:not(.tomselected):focus {
         border-color: #FC8019 !important;
         box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+        outline: none !important;
     }
     .select-wrapper .ts-wrapper.single .ts-control:after {
         display: none !important;
+    }
+
+    /* Ensure the selected item is ALWAYS immediately visible in the input tag upon selecting */
+    .select-wrapper .ts-control .item,
+    .select-wrapper .ts-wrapper.single .ts-control .item,
+    .select-wrapper .ts-wrapper.single.focus .ts-control .item,
+    .select-wrapper .ts-wrapper.single.input-active .ts-control .item,
+    .select-wrapper .ts-wrapper.single.dropdown-active .ts-control .item,
+    .select-wrapper .ts-wrapper.single.has-items .ts-control .item {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #0F172A !important;
+        font-weight: 500 !important;
+    }
+
+    [data-theme="dark"] .card-custom {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .card-header-custom {
+        border-bottom-color: #1A252E !important;
+    }
+    [data-theme="dark"] .card-header-custom h5 {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .form-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.single .ts-control,
+    [data-theme="dark"] select.form-select-custom:not(.tomselected),
+    [data-theme="dark"] .form-control-custom {
+        background-color: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .select-wrapper .ts-control input {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .ts-dropdown {
+        background-color: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+    [data-theme="dark"] .ts-dropdown .option {
+        color: #F8FAFC !important;
+        border-bottom-color: #1A252E !important;
+    }
+    [data-theme="dark"] .ts-dropdown .option:hover,
+    [data-theme="dark"] .ts-dropdown .active {
+        background-color: #1C2A37 !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .btn-cancel {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .btn-cancel:hover {
+        background: #1C2A37 !important;
+        border-color: #2D3F4D !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .select-wrapper::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394A3B8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+    [data-theme="dark"] .route-arrow .circle {
+        background: rgba(252, 128, 25, 0.18) !important;
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .route-arrow .line {
+        background-image: linear-gradient(to right, transparent 50%, #FC8019 50%) !important;
     }
 </style>
 
@@ -129,26 +237,47 @@
 
             <!-- Container -->
             <div class="col-md-6">
-                <label class="form-label">Container ID <span class="required">*</span></label>
-                <div class="select-wrapper">
-                    <select class="form-select-custom form-select" name="containerId" required>
-                        <%-- Preselected when the user arrived from a catalog card --%>
-                        <c:if test="${empty preselectedContainerId}">
-                            <option value="" disabled selected>Search and select container</option>
-                        </c:if>
-                        <c:forEach var="cont" items="${containers}">
-                            <option value="${cont.containerId}"
-                                <c:if test="${cont.containerId == preselectedContainerId}">selected</c:if>>${cont.containerNumber} (${cont.type})</option>
-                        </c:forEach>
-                    </select>
-                    <c:if test="${not empty preselectedContainer}">
-                        <div style="font-size:11.5px; color:var(--text-sub); margin-top:6px;">
-                            <i class="ti ti-check"></i>
-                            ${preselectedContainer.containerNumber} selected from the catalog
-                            &bull; max ${preselectedContainer.maxGrossWeightKg} kg / ${preselectedContainer.goodsCapacityCbm} CBM
+                <c:choose>
+                    <c:when test="${sessionScope.user.roleId == 5}">
+                        <label class="form-label">Requested Container Specification <span class="required">*</span></label>
+                        <div class="select-wrapper">
+                            <select class="form-select-custom form-select" name="containerId" required>
+                                <c:if test="${empty preselectedContainerId}">
+                                    <option value="" disabled selected>Select container type &amp; size for freight quote</option>
+                                </c:if>
+                                <c:forEach var="cont" items="${containers}">
+                                    <option value="${cont.containerId}"
+                                        <c:if test="${cont.containerId == preselectedContainerId}">selected</c:if>>
+                                        ${cont.size} ${cont.type} (Max ${cont.goodsCapacityKg > 0 ? cont.goodsCapacityKg : cont.maxGrossWeightKg} kg / ${cont.goodsCapacityCbm} CBM)
+                                    </option>
+                                </c:forEach>
+                            </select>
+                            <div style="font-size:12px; color:#D97706; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 7px 12px; margin-top: 8px;">
+                                <i class="ti ti-info-circle me-1"></i> <strong>Rate &amp; Capacity Tier:</strong> Physical container will be inspected and allocated by Operations Dispatch upon booking confirmation.
+                            </div>
                         </div>
-                    </c:if>
-                </div>
+                    </c:when>
+                    <c:otherwise>
+                        <label class="form-label">Container Fleet ID <span class="required">*</span></label>
+                        <div class="select-wrapper">
+                            <select class="form-select-custom form-select" name="containerId" required>
+                                <c:if test="${empty preselectedContainerId}">
+                                    <option value="" disabled selected>Search and select container</option>
+                                </c:if>
+                                <c:forEach var="cont" items="${containers}">
+                                    <option value="${cont.containerId}"
+                                        <c:if test="${cont.containerId == preselectedContainerId}">selected</c:if>>${cont.containerNumber} (${cont.size} ${cont.type} - ${cont.portName})</option>
+                                </c:forEach>
+                            </select>
+                            <c:if test="${not empty preselectedContainer}">
+                                <div style="font-size:11.5px; color:var(--text-sub); margin-top:6px;">
+                                    <i class="ti ti-check"></i>
+                                    ${preselectedContainer.containerNumber} selected &bull; max ${preselectedContainer.maxGrossWeightKg} kg / ${preselectedContainer.goodsCapacityCbm} CBM
+                                </div>
+                            </c:if>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
 
@@ -342,7 +471,14 @@
         <div class="form-actions border-top mt-5 pt-4">
             <a href="${pageContext.request.contextPath}/shipments" class="btn btn-cancel" style="text-decoration:none;">Cancel</a>
             <button type="submit" class="btn btn-confirm">
-                <i class="fa-solid fa-lock" style="font-size: 12px;"></i> Confirm & Book Shipment
+                <c:choose>
+                    <c:when test="${sessionScope.user.roleId == 5}">
+                        <i class="ti ti-calculator"></i> Proceed to Pricing &amp; Payment
+                    </c:when>
+                    <c:otherwise>
+                        <i class="ti ti-check"></i> Confirm &amp; Book Shipment
+                    </c:otherwise>
+                </c:choose>
             </button>
         </div>
 
@@ -424,13 +560,23 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.form-select-custom').forEach((el) => {
-            new TomSelect(el, {
+            const ts = new TomSelect(el, {
                 create: false,
                 sortField: {
                     field: "text",
                     direction: "asc"
                 },
-                dropdownParent: 'body'
+                dropdownParent: 'body',
+                closeAfterSelect: true
+            });
+            // When an option is selected, immediately close and blur so the input shows the selected text instantly!
+            ts.on('item_add', function() {
+                this.close();
+                this.blur();
+            });
+            ts.on('change', function() {
+                this.close();
+                this.blur();
             });
         });
     });

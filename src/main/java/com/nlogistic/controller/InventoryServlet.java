@@ -33,7 +33,30 @@ public class InventoryServlet extends HttpServlet {
         String pathInfo = request.getPathInfo();
         
         if (pathInfo == null || pathInfo.equals("/products")) {
-            request.setAttribute("products", productDAO.getAllProducts());
+            java.util.List<Product> products = productDAO.getAllProducts();
+            request.setAttribute("products", products);
+
+            int totalProducts = (products != null) ? products.size() : 0;
+            java.util.Set<String> categoriesSet = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            double totalValue = 0.0;
+            double totalCost = 0.0;
+
+            if (products != null) {
+                for (Product p : products) {
+                    if (p.getCategory() != null && !p.getCategory().trim().isEmpty()) {
+                        categoriesSet.add(p.getCategory().trim());
+                    }
+                    totalValue += p.getUnitPrice();
+                    totalCost += p.getUnitCost();
+                }
+            }
+
+            request.setAttribute("kpiTotalProducts", totalProducts);
+            request.setAttribute("kpiTotalCategories", categoriesSet.size());
+            request.setAttribute("kpiTotalValue", totalValue);
+            request.setAttribute("kpiTotalCost", totalCost);
+            request.setAttribute("categoriesSet", categoriesSet);
+
             request.getRequestDispatcher("/jsp/products.jsp").forward(request, response);
         } else if (pathInfo.equals("/stock")) {
             // RBAC: warehouse stock is tenant-owned. A Super Admin sees everything;
@@ -125,6 +148,9 @@ public class InventoryServlet extends HttpServlet {
                 try (InputStream fileContent = filePart.getInputStream()) {
                     int companyId = currentUser != null ? currentUser.getCompanyId() : 0;
                     int userId = currentUser != null ? currentUser.getUserId() : 0;
+                    if (companyId <= 0) {
+                        companyId = 1;
+                    }
                     int uploadId = stockDAO.uploadStockCsv(companyId, userId, fileName, fileContent);
                     if (uploadId != -1) {
                         response.sendRedirect(request.getContextPath() + "/inventory/stock?success=true&uploadId=" + uploadId);
@@ -142,8 +168,12 @@ public class InventoryServlet extends HttpServlet {
                     idStr = request.getParameter("productId");
                 }
                 int productId = Integer.parseInt(idStr);
-                productDAO.deleteProduct(productId, currentUser != null ? currentUser.getUserId() : 0);
-                response.sendRedirect(request.getContextPath() + "/inventory/products?success=deleted");
+                boolean deleted = productDAO.deleteProduct(productId, currentUser != null ? currentUser.getUserId() : 0);
+                if (deleted) {
+                    response.sendRedirect(request.getContextPath() + "/inventory/products?success=deleted");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/inventory/products?error=delete_failed");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 response.sendRedirect(request.getContextPath() + "/inventory/products?error=delete_failed");

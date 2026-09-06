@@ -1,4 +1,4 @@
-﻿        </div> <!-- Close content-area -->
+        </div> <!-- Close content-area -->
     </main> <!-- Close main-wrapper -->
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
@@ -114,21 +114,57 @@
                     const shouldSort = (el.dataset.sort === 'asc');
                     const firstOption = el.options[0];
                     const defaultPlaceholder = firstOption ? firstOption.text.trim() : 'Select...';
+                    const forceSearch = (el.dataset.search === 'true' || el.classList.contains('enable-search') || el.classList.contains('has-search'));
+                    const noSearch = !forceSearch && (el.dataset.noSearch === 'true' || el.options.length <= 4 || el.classList.contains('no-search'));
                     try {
                         const ts = new TomSelect(el, {
                             create: false,
                             sortField: shouldSort ? { field: "text", direction: "asc" } : null,
                             dropdownParent: 'body',
                             allowEmptyOption: true,
+                            controlInput: noSearch ? null : undefined,
                             placeholder: defaultPlaceholder,
+                            closeAfterSelect: true,
                             onInitialize: function() {
-                                this.on('dropdown_open', () => this.positionDropdown());
+                                this.on('dropdown_open', () => {
+                                    this.positionDropdown();
+                                    if (this.control_input) {
+                                        if (!this.control_input.dataset.origPlaceholder && this.control_input.placeholder) {
+                                            this.control_input.dataset.origPlaceholder = this.control_input.placeholder;
+                                        }
+                                        this.control_input.placeholder = el.dataset.searchPlaceholder || '';
+                                    }
+                                });
+                                this.on('dropdown_close', () => {
+                                    if (this.control_input && this.control_input.dataset.origPlaceholder) {
+                                        this.control_input.placeholder = this.control_input.dataset.origPlaceholder;
+                                    }
+                                });
+                                this.on('focus', () => {
+                                    if (this.control_input) {
+                                        if (!this.control_input.dataset.origPlaceholder && this.control_input.placeholder) {
+                                            this.control_input.dataset.origPlaceholder = this.control_input.placeholder;
+                                        }
+                                        this.control_input.placeholder = el.dataset.searchPlaceholder || '';
+                                    }
+                                });
+                                this.on('blur', () => {
+                                    if (this.control_input && this.control_input.dataset.origPlaceholder) {
+                                        this.control_input.placeholder = this.control_input.dataset.origPlaceholder;
+                                    }
+                                });
                             }
                         });
                         if (el.value && !ts.getValue()) {
                             ts.setValue(el.value);
                         }
+                        ts.on('item_add', function() {
+                            this.close();
+                            this.blur();
+                        });
                         ts.on('change', function(val) {
+                            this.close();
+                            this.blur();
                             if (typeof el.onchange === 'function') {
                                 try { el.onchange(); } catch(e) { console.error(e); }
                             }
@@ -141,6 +177,23 @@
             });
         }
         initCustomSelects();
+
+        // Global: Auto-clear placeholder on click/focus for all inputs & textareas, restore on blur
+        document.addEventListener('focusin', function(e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+                if (e.target.placeholder) {
+                    e.target.dataset.placeholderBackup = e.target.placeholder;
+                    e.target.placeholder = '';
+                }
+            }
+        });
+        document.addEventListener('focusout', function(e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+                if (e.target.dataset.placeholderBackup) {
+                    e.target.placeholder = e.target.dataset.placeholderBackup;
+                }
+            }
+        });
 
         // Auto-refresh and re-sync any TomSelect dropdowns inside Bootstrap modals
         document.addEventListener('shown.bs.modal', function(event) {

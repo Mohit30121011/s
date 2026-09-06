@@ -21,15 +21,23 @@
     .custom-breadcrumb i { font-size: 11px; color: #94A3B8; }
     .custom-breadcrumb .current { color: #FC8019; font-weight: 600; }
 
-    /* Telemetry Header Card */
+    /* Telemetry Header (Frameless - Outer Container Removed) */
     .telemetry-header-card {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 28px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px;
-        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 4px 0 20px 0 !important;
+        box-shadow: none !important;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
     }
     .telemetry-header-left { display: flex; align-items: center; gap: 16px; }
     .telemetry-icon-box {
-        width: 52px; height: 52px; border-radius: 14px;
+        width: 52px; height: 52px; border-radius: 50% !important;
         background: #FFF0E5;
         display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 26px;
         box-shadow: 0 4px 12px rgba(252, 128, 25, 0.15); flex-shrink: 0;
@@ -38,12 +46,12 @@
     .telemetry-subtitle { font-size: 13.5px; color: #64748B; margin: 0; }
 
     .btn-add-vessel {
-        background: #FC8019; color: #FFFFFF; border: none; font-weight: 600; font-size: 13.5px;
+        background: #FC8019; color: #FFFFFF !important; border: none; font-weight: 600; font-size: 13.5px;
         padding: 10px 22px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px;
         box-shadow: 0 4px 12px rgba(252, 128, 25, 0.28); transition: all 0.2s ease; cursor: pointer; text-decoration: none;
     }
     .btn-add-vessel:hover {
-        background: #E67012; color: #FFFFFF; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(252, 128, 25, 0.36);
+        background: #E67012; color: #FFFFFF !important; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(252, 128, 25, 0.36);
     }
 
     /* KPI Grid */
@@ -59,16 +67,38 @@
     .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); border-color: #CBD5E1; }
     .kpi-label { font-size: 12px; font-weight: 600; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
     .kpi-value { font-size: 24px; font-weight: 800; color: #0F172A; line-height: 1; }
-    .kpi-icon-pill { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .kpi-val-blue { color: #2563EB; }
+    .kpi-val-green { color: #059669; }
+    .kpi-val-orange { color: #FC8019; }
+    .kpi-val-amber { color: #D97706; }
+    .kpi-unit { font-size: 14px; font-weight: 600; color: #64748B; margin-left: 2px; }
+
+    .kpi-icon-pill { width: 44px; height: 44px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .kpi-icon-pill.blue { background: #EFF6FF; color: #2563EB; }
     .kpi-icon-pill.green { background: #ECFDF5; color: #059669; }
     .kpi-icon-pill.orange { background: #FFF0E5; color: #FC8019; }
     .kpi-icon-pill.amber { background: #FFFBEB; color: #D97706; }
 
+    /* Unified Vessels Table Panel (Matching All Shipments & Rate Governance) */
+    .vessels-table-panel {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
     /* Toolbar: Filters & Real-Time Search */
     .vessels-toolbar {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px 14px 0 0; padding: 16px 24px;
-        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid #F1F5F9;
+        background: #FFFFFF;
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        border-bottom: 1px solid #F1F5F9;
     }
     .toolbar-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: 1; }
     
@@ -83,13 +113,14 @@
         background: #FFFFFF !important; border-color: #FC8019 !important; box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.14) !important;
     }
 
-    /* Capacity Filter Dropdown Wrap (No awkward text wrapping) */
+    /* Capacity Filter Dropdown Wrap (Pill Shaped) */
     .capacity-filter-wrap {
         min-width: 270px !important;
         position: relative !important;
     }
     .capacity-filter-wrap .ts-wrapper,
-    .capacity-filter-wrap .ts-control {
+    .capacity-filter-wrap .ts-control,
+    .capacity-filter-wrap select {
         min-width: 270px !important;
         white-space: nowrap !important;
         height: 42px !important;
@@ -98,6 +129,12 @@
         align-items: center !important;
         padding-left: 18px !important;
         padding-right: 36px !important;
+        border-radius: 50px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background-color: #FFFFFF !important;
+        color: #1E293B !important;
     }
     .capacity-filter-wrap .ts-control .item {
         white-space: nowrap !important;
@@ -108,53 +145,110 @@
         color: #1E293B !important;
         line-height: 1 !important;
     }
+    .capacity-filter-wrap .ts-wrapper.dropdown-active .ts-control,
+    .capacity-filter-wrap .ts-wrapper.focus .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
+    }
     .ts-dropdown {
         min-width: 280px !important;
         white-space: nowrap !important;
+        border-radius: 12px !important;
+        padding: 6px !important;
     }
     .ts-dropdown .option {
         white-space: nowrap !important;
         font-size: 13px !important;
-        padding: 10px 18px !important;
+        padding: 9px 16px !important;
+        border-radius: 8px !important;
     }
 
     .toolbar-count-badge {
         font-size: 12.5px; font-weight: 600; color: #64748B; background: #F8FAFC; border: 1px solid #E2E8F0;
-        padding: 6px 14px; border-radius: 50px; display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 6px;
     }
 
-    /* Table Panel */
-    .vessels-table-panel {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-top: none; border-radius: 0 0 16px 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); overflow: hidden;
+    /* Table Component (Matching All Shipments) */
+    .vessels-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0;
     }
-    .vessels-table { width: 100%; border-collapse: collapse; margin: 0; }
     .vessels-table th {
-        background: #F8FAFC; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #64748B;
-        text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; text-align: left;
+        background: #F9FAFB;
+        padding: 16px 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #E2E8F0;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
     }
-    .vessels-table th i { margin-right: 4px; color: #94A3B8; font-size: 13px; }
+    .vessels-table th i { margin-right: 5px; color: #94A3B8; font-size: 13px; }
+    .vessels-table th.sortable,
+    .tracking-table th.sortable {
+        cursor: pointer !important;
+        user-select: none !important;
+        transition: color 0.15s ease, background-color 0.15s ease !important;
+    }
+    .vessels-table th.sortable:hover,
+    .tracking-table th.sortable:hover {
+        color: #FC8019 !important;
+        background-color: #FFF7F2 !important;
+    }
+    .sort-indicator {
+        font-size: 12px !important;
+        opacity: 0.55;
+        vertical-align: -1px;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .vessels-table th.sortable:hover .sort-indicator,
+    .tracking-table th.sortable:hover .sort-indicator {
+        opacity: 1 !important;
+        color: #FC8019 !important;
+    }
+    .vessels-table th.sort-active,
+    .tracking-table th.sort-active {
+        color: #FC8019 !important;
+    }
+    .vessels-table th.sort-active .sort-indicator,
+    .tracking-table th.sort-active .sort-indicator {
+        opacity: 1 !important;
+        color: #FC8019 !important;
+    }
     .vessels-table td {
-        padding: 16px 20px; border-bottom: 1px solid #F1F5F9; vertical-align: middle;
-        font-size: 13.5px; color: #1E293B; transition: background-color 0.12s ease;
+        padding: 16px 20px;
+        border-bottom: 1px solid #E2E8F0;
+        vertical-align: middle;
+        font-size: 13.5px;
+        color: #1E293B;
+        font-weight: 500;
+        background: transparent;
+        transition: background-color 0.15s ease;
     }
-    .vessel-row:hover td { background-color: #FAFAFA; }
+    .vessel-row:hover td { background-color: #F8FAFC; }
+    .vessel-row:last-child td { border-bottom: none; }
 
     /* Vessel Cell Avatar & Info */
     .vessel-cell { display: flex; align-items: center; gap: 14px; }
     .vessel-avatar {
-        width: 42px; height: 42px; border-radius: 12px; background: #FFF0E5;
+        width: 42px; height: 42px; border-radius: 50% !important; background: #FFF0E5;
         color: #FC8019; font-size: 20px; display: flex; align-items: center; justify-content: center;
         box-shadow: 0 2px 6px rgba(252, 128, 25, 0.18); flex-shrink: 0;
     }
     .vessel-name-title { font-size: 14px; font-weight: 700; color: #0F172A; line-height: 1.3; }
     .vessel-meta-badge { font-size: 11.5px; color: #64748B; font-weight: 500; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
 
-    /* IMO Monospace Badge */
+    /* IMO Monospace Badge (Pill-Shaped) */
     .imo-badge {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+        font-size: 12px; font-weight: 600; padding: 5px 14px !important; border-radius: 50px !important;
         background: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; display: inline-flex; align-items: center; gap: 5px;
+        letter-spacing: 0.3px;
     }
 
     /* Vessel Class Badges */
@@ -190,10 +284,10 @@
     .status-pill-dot.standby { background: #7C3AED; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2); }
     .status-pill-dot.decommissioned { background: #DC2626; box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2); }
 
-    /* Action Buttons */
+    /* Action Buttons (Circular) */
     .actions-flex { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
     .btn-action-icon {
-        width: 34px; height: 34px; border-radius: 8px; border: 1px solid #E2E8F0; background: #FFFFFF;
+        width: 34px; height: 34px; border-radius: 50% !important; border: 1px solid #E2E8F0; background: #FFFFFF;
         color: #64748B; display: inline-flex; align-items: center; justify-content: center; font-size: 15px;
         transition: all 0.15s ease; cursor: pointer; text-decoration: none;
     }
@@ -210,25 +304,82 @@
     .empty-state-title { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
     .empty-state-desc { font-size: 13.5px; color: #64748B; max-width: 420px; margin: 0 auto 16px; }
 
-    /* Pagination Bar */
-    .pagination-bar {
-        padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
-        background: #FFFFFF; border-top: 1px solid #F1F5F9; font-size: 13px; color: #64748B;
+    /* Global Enterprise Circular Pagination */
+    .nl-pagination-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 16px 24px;
+        background: #FFFFFF;
+        border-top: 1px solid #F1F3F6;
     }
-    .page-btn {
-        background: #FFFFFF; border: 1.5px solid #E2E8F0; color: #475569; font-size: 12.5px;
-        font-weight: 600; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;
+    .nl-pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: #64748B;
     }
-    .page-btn:hover:not(:disabled) { border-color: #FC8019; color: #FC8019; background: #FFF0E5; }
-    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .page-numbers-wrap { display: flex; align-items: center; gap: 6px; }
-    .page-num-pill {
-        width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
-        border-radius: 8px; font-weight: 700; font-size: 12.5px; cursor: pointer; border: 1px solid transparent;
-        color: #64748B; transition: all 0.15s ease;
+    .nl-pagination-info strong {
+        color: #1F2937;
+        font-weight: 700;
     }
-    .page-num-pill:hover { background: #F1F5F9; color: #0F172A; }
-    .page-num-pill.active { background: #FC8019; color: #FFFFFF; box-shadow: 0 2px 6px rgba(252, 128, 25, 0.25); }
+    .nl-pagination-nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .nl-page-btn {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 50px !important;
+        border: 1.5px solid #E2E8F0;
+        background: #FFFFFF;
+        color: #4B5563;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+    }
+    .nl-page-btn.nl-page-num {
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important; /* Pure Circular */
+    }
+    .nl-page-btn:hover:not(.disabled) {
+        border-color: #FC8019;
+        color: #FC8019;
+        background: #FFF0E5;
+    }
+    .nl-page-btn.active {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 6px rgba(252, 128, 25, 0.3) !important;
+    }
+    .nl-page-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    /* Suppress card tools buttons */
+    .nl-card-tools,
+    .no-card-tools .nl-card-tools,
+    [data-no-tools="true"] .nl-card-tools {
+        display: none !important;
+    }
 
     /* ==========================================================================
        ENTERPRISE MODAL STYLING (ADD / EDIT / DELETE)
@@ -251,7 +402,7 @@
         display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
     }
     .modal-hero-icon {
-        width: 46px; height: 46px; border-radius: 12px; background: #FFF0E5; color: #FC8019;
+        width: 46px; height: 46px; border-radius: 50% !important; background: #FFF0E5; color: #FC8019;
         display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
         box-shadow: 0 2px 8px rgba(252, 128, 25, 0.2);
     }
@@ -262,7 +413,7 @@
     .modal-hero-desc { font-size: 13px; color: #64748B; margin: 0; line-height: 1.4; }
     .btn-modal-close {
         background: transparent; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;
-        padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;
         transition: color 0.15s ease, background-color 0.15s ease;
     }
     .btn-modal-close:hover { color: #0F172A; background-color: #F1F5F9; }
@@ -273,7 +424,6 @@
         font-size: 12.5px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;
     }
 
-    /* Absolute Input + Lead Icon (Bulletproof No-Overlap Styling) */
     .field-input-wrap {
         position: relative !important;
         width: 100% !important;
@@ -293,8 +443,8 @@
         width: 20px !important;
         height: 20px !important;
     }
-    .field-input-wrap input.field-input,
-    .field-input-wrap input,
+    .field-input-wrap > input.field-input,
+    .field-input-wrap > input,
     input.field-input {
         padding-left: 50px !important;
         padding-right: 20px !important;
@@ -310,17 +460,82 @@
         transition: all 0.2s ease !important;
         box-sizing: border-box !important;
     }
-    .field-input-wrap input.field-input:focus,
-    .field-input-wrap input:focus {
+    .field-input-wrap > input.field-input:focus,
+    .field-input-wrap > input:focus {
         border-color: #FC8019 !important;
         box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
     }
+
+    /* Modal Select & TomSelect Dropdown (Light Mode) */
+    .field-input-wrap select.form-select-custom,
+    .field-input-wrap .ts-wrapper,
+    .field-input-wrap .ts-wrapper.form-select-custom {
+        width: 100% !important;
+        position: relative !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    .field-input-wrap select.form-select-custom,
+    .field-input-wrap .ts-control {
+        height: 48px !important;
+        min-height: 48px !important;
+        padding: 0 42px 0 20px !important;
+        border-radius: 50px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 18px center !important;
+        background-size: 14px 14px !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+    }
+    .field-input-wrap select.form-select-custom:focus,
+    .field-input-wrap .ts-wrapper.focus .ts-control,
+    .field-input-wrap .ts-wrapper.dropdown-active .ts-control,
+    .field-input-wrap .ts-control.focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+        background-color: #FFFFFF !important;
+    }
+    .field-input-wrap .ts-control input {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+        color: inherit !important;
+        font-size: 13.5px !important;
+    }
+    .field-input-wrap .ts-control .item {
+        color: #0F172A !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+    .field-input-wrap .ts-wrapper.single .ts-control::after {
+        display: none !important;
+    }
+
     .field-helper { font-size: 11.5px; color: #94A3B8; margin-top: 5px; }
 
     /* Quick Preset Chips */
     .preset-chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .preset-chip {
-        font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 50px;
+        font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 50px !important;
         background: #F8FAFC; border: 1px solid #E2E8F0; color: #64748B; cursor: pointer;
         transition: all 0.15s ease;
     }
@@ -351,7 +566,518 @@
     .btn-modal-danger:hover {
         background: #B91C1C; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(220, 38, 38, 0.36);
     }
-</style>
+
+    /* ==========================================================================
+       DARK THEME STYLES [data-theme="dark"]
+       ========================================================================== */
+    [data-theme="dark"] .custom-breadcrumb a {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb a:hover {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb span {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .custom-breadcrumb .current {
+        color: #FC8019 !important;
+    }
+
+    /* Header in Dark Mode (Frameless) */
+    [data-theme="dark"] .telemetry-header-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    [data-theme="dark"] .telemetry-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .telemetry-subtitle {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .telemetry-icon-box {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+        box-shadow: 0 2px 10px rgba(252, 128, 25, 0.2) !important;
+    }
+
+    /* Badges & Buttons in Dark Mode */
+    [data-theme="dark"] .toolbar-count-badge {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .toolbar-count-badge i {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .btn-add-vessel {
+        box-shadow: 0 4px 16px rgba(252, 128, 25, 0.35) !important;
+    }
+
+    /* Alerts in Dark Mode */
+    [data-theme="dark"] .alert-success {
+        background: rgba(16, 185, 129, 0.12) !important;
+        border-color: rgba(16, 185, 129, 0.25) !important;
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .alert-danger {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border-color: rgba(239, 68, 68, 0.25) !important;
+        color: #F87171 !important;
+    }
+
+    /* 4 KPI Metric Cards in Dark Mode */
+    [data-theme="dark"] .kpi-card {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .kpi-card:hover {
+        border-color: #2D3F4D !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45) !important;
+    }
+    [data-theme="dark"] .kpi-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .kpi-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .kpi-val-blue { color: #60A5FA !important; }
+    [data-theme="dark"] .kpi-val-green { color: #34D399 !important; }
+    [data-theme="dark"] .kpi-val-orange { color: #FC8019 !important; }
+    [data-theme="dark"] .kpi-val-amber { color: #FBBF24 !important; }
+    [data-theme="dark"] .kpi-unit {
+        color: #64748B !important;
+    }
+
+    /* KPI Icon Badges in Dark Mode (Eliminates blinding white boxes) */
+    [data-theme="dark"] .kpi-icon-pill.blue {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.green {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.orange {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FB923C !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.amber {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+
+    /* Table Panel & Toolbar (Matching All Shipments) in Dark Mode */
+    [data-theme="dark"] .vessels-table-panel,
+    [data-theme="dark"] .vessels-table-panel.tracking-card {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    [data-theme="dark"] .vessels-toolbar {
+        background: #101820 !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+
+    /* Toolbar Search & Select in Dark Mode */
+    [data-theme="dark"] .table-search-input {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .table-search-input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.18) !important;
+    }
+    [data-theme="dark"] .table-search-wrap i {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .capacity-filter-wrap .ts-control,
+    [data-theme="dark"] .capacity-filter-wrap select {
+        background-color: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+    [data-theme="dark"] .capacity-filter-wrap .ts-control .item {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .ts-dropdown,
+    [data-theme="dark"] .capacity-filter-wrap .ts-dropdown {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55) !important;
+    }
+    [data-theme="dark"] .ts-dropdown .option,
+    [data-theme="dark"] .capacity-filter-wrap .ts-dropdown .option {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .ts-dropdown .option:hover,
+    [data-theme="dark"] .ts-dropdown .option.active,
+    [data-theme="dark"] .capacity-filter-wrap .ts-dropdown .option:hover,
+    [data-theme="dark"] .capacity-filter-wrap .ts-dropdown .option.active {
+        background-color: #1E2D3D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .ts-dropdown .option.selected,
+    [data-theme="dark"] .capacity-filter-wrap .ts-dropdown .option.selected {
+        background-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    /* Table Headers & Rows in Dark Mode */
+    [data-theme="dark"] .table-responsive,
+    [data-theme="dark"] .vessels-table,
+    [data-theme="dark"] .tracking-table {
+        background-color: #101820 !important;
+    }
+    [data-theme="dark"] .vessels-table th,
+    [data-theme="dark"] .tracking-table th {
+        background-color: #0E151C !important;
+        color: #94A3B8 !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .vessels-table th i,
+    [data-theme="dark"] .tracking-table th i {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .vessels-table th.sortable:hover,
+    [data-theme="dark"] .tracking-table th.sortable:hover {
+        color: #FC8019 !important;
+        background-color: rgba(252, 128, 25, 0.1) !important;
+    }
+    [data-theme="dark"] .vessels-table th.sort-active,
+    [data-theme="dark"] .tracking-table th.sort-active {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .sort-indicator {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .vessels-table th.sortable:hover .sort-indicator,
+    [data-theme="dark"] .vessels-table th.sort-active .sort-indicator,
+    [data-theme="dark"] .tracking-table th.sortable:hover .sort-indicator,
+    [data-theme="dark"] .tracking-table th.sort-active .sort-indicator {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .vessels-table td,
+    [data-theme="dark"] .tracking-table td {
+        background-color: transparent !important;
+        color: #F8FAFC !important;
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .vessel-row:hover td {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+    [data-theme="dark"] .vessel-row:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* Badges & Cell Components in Dark Mode */
+    [data-theme="dark"] .imo-badge {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .vessel-avatar {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .vessel-name-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .vessel-meta-badge {
+        color: #94A3B8 !important;
+    }
+
+    /* Classification Pills in Dark Mode */
+    [data-theme="dark"] .class-pill.ulcv {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .class-pill.post-panamax {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] .class-pill.panamax {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+    [data-theme="dark"] .class-pill.feeder {
+        background: rgba(148, 163, 184, 0.16) !important;
+        color: #94A3B8 !important;
+        border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    }
+
+    /* Capacity Progress in Dark Mode */
+    [data-theme="dark"] .capacity-text {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .capacity-text span:last-child {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .capacity-bar-track {
+        background: #1E293B !important;
+    }
+
+    /* Status Pills in Dark Mode */
+    [data-theme="dark"] .status-pill.active {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill-dot.active {
+        background: #34D399 !important;
+        box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.25) !important;
+    }
+    [data-theme="dark"] .status-pill.maintenance {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #FBBF24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill-dot.maintenance {
+        background: #FBBF24 !important;
+        box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.25) !important;
+    }
+    [data-theme="dark"] .status-pill.drydock {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #60A5FA !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill-dot.drydock {
+        background: #60A5FA !important;
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.25) !important;
+    }
+    [data-theme="dark"] .status-pill.standby {
+        background: rgba(167, 139, 250, 0.16) !important;
+        color: #C084FC !important;
+        border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill-dot.standby {
+        background: #C084FC !important;
+        box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.25) !important;
+    }
+    [data-theme="dark"] .status-pill.decommissioned {
+        background: rgba(239, 68, 68, 0.16) !important;
+        color: #F87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill-dot.decommissioned {
+        background: #F87171 !important;
+        box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.25) !important;
+    }
+
+    /* Action Buttons in Dark Mode */
+    [data-theme="dark"] .btn-action-icon {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-action-icon:hover {
+        background: #1E293B !important;
+        border-color: #3E5468 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .btn-action-icon.edit:hover {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+    [data-theme="dark"] .btn-action-icon.delete:hover {
+        background: rgba(239, 68, 68, 0.16) !important;
+        color: #F87171 !important;
+        border-color: #DC2626 !important;
+    }
+
+    /* Pagination in Dark Mode */
+    [data-theme="dark"] .nl-pagination-wrapper {
+        background: #101820 !important;
+        border-top: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .nl-pagination-info {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-pagination-info strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .nl-page-btn:hover:not(.disabled):not(.active) {
+        border-color: #FC8019 !important;
+        color: #FC8019 !important;
+        background: rgba(252, 128, 25, 0.12) !important;
+    }
+    [data-theme="dark"] .nl-page-btn.active {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .nl-page-btn.disabled {
+        opacity: 0.35 !important;
+        border-color: #22303A !important;
+    }
+
+    /* Modals in Dark Mode */
+    [data-theme="dark"] .custom-modal-dialog {
+        background: #151F28 !important;
+        border: 1px solid #2D3F4D !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+    }
+    [data-theme="dark"] .modal-hero-icon {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+    }
+    [data-theme="dark"] .modal-hero-icon.danger {
+        background: rgba(239, 68, 68, 0.16) !important;
+        color: #F87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .modal-hero-header {
+        border-bottom: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .modal-hero-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-hero-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-modal-close {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-modal-close:hover {
+        color: #F8FAFC !important;
+        background-color: #1E293B !important;
+    }
+    [data-theme="dark"] .field-label {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .field-helper {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .field-input-wrap > input.field-input,
+    [data-theme="dark"] .field-input-wrap > input,
+    [data-theme="dark"] input.field-input {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .field-input-wrap > input:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.22) !important;
+    }
+    [data-theme="dark"] .field-input-wrap i {
+        color: #94A3B8 !important;
+    }
+
+    /* Modal Select & TomSelect in Dark Mode (Active, Focus, Normal) */
+    [data-theme="dark"] .field-input-wrap select.form-select-custom,
+    [data-theme="dark"] .field-input-wrap .ts-control,
+    [data-theme="dark"] .field-input-wrap .ts-wrapper .ts-control,
+    [data-theme="dark"] .field-input-wrap .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .field-input-wrap .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .field-input-wrap .ts-control.focus,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-control,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.focus .ts-control,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.dropdown-active .ts-control {
+        background-color: #101820 !important;
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FC8019' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 18px center !important;
+        background-size: 14px 14px !important;
+    }
+
+    [data-theme="dark"] .field-input-wrap select.form-select-custom:focus,
+    [data-theme="dark"] .field-input-wrap .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .field-input-wrap .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .field-input-wrap .ts-control.focus,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.focus .ts-control,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.dropdown-active .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.22) !important;
+        background-color: #101820 !important;
+        background: #101820 !important;
+    }
+
+    [data-theme="dark"] .field-input-wrap .ts-control .item,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-control .item {
+        color: #F8FAFC !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+    }
+
+    [data-theme="dark"] .field-input-wrap .ts-control input,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-control input {
+        color: #F8FAFC !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+    }
+
+    [data-theme="dark"] select.form-select-custom option {
+        background-color: #151F28 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .preset-chip {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .preset-chip:hover {
+        background: rgba(252, 128, 25, 0.16) !important;
+        color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+    [data-theme="dark"] .modal-form-footer {
+        border-top: 1px solid #22303A !important;
+    }
+    [data-theme="dark"] .btn-modal-cancel {
+        background: #101820 !important;
+        border-color: #2D3F4D !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .btn-modal-cancel:hover {
+        background: #1E293B !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #deleteVesselModal p {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] #deleteVesselNameDisplay {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #deleteVesselImoDisplay {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .empty-state-box {
+        background: transparent !important;
+    }
+    [data-theme="dark"] .empty-state-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .empty-state-desc {
+        color: #94A3B8 !important;
+    }</style>
 
 <div class="vessels-page-container">
     
@@ -414,7 +1140,7 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Active Fleet Size</div>
-                <div class="kpi-value" style="color: #2563EB;">${totalFleetCount}</div>
+                <div class="kpi-value kpi-val-blue">${totalFleetCount}</div>
             </div>
             <div class="kpi-icon-pill blue">
                 <i class="ti ti-ship"></i>
@@ -423,8 +1149,8 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Total Fleet Capacity</div>
-                <div class="kpi-value" style="color: #059669;">
-                    <fmt:formatNumber value="${totalTeuCapacity}" pattern="#,###" /> <span style="font-size: 14px; font-weight: 600; color: #64748B;">TEU</span>
+                <div class="kpi-value kpi-val-green">
+                    <fmt:formatNumber value="${totalTeuCapacity}" pattern="#,###" /> <span class="kpi-unit">TEU</span>
                 </div>
             </div>
             <div class="kpi-icon-pill green">
@@ -434,8 +1160,8 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Average Carrier Payload</div>
-                <div class="kpi-value" style="color: #FC8019;">
-                    <fmt:formatNumber value="${avgCapacity}" pattern="#,###" /> <span style="font-size: 14px; font-weight: 600; color: #64748B;">TEU</span>
+                <div class="kpi-value kpi-val-orange">
+                    <fmt:formatNumber value="${avgCapacity}" pattern="#,###" /> <span class="kpi-unit">TEU</span>
                 </div>
             </div>
             <div class="kpi-icon-pill orange">
@@ -445,7 +1171,7 @@
         <div class="kpi-card">
             <div>
                 <div class="kpi-label">Ultra Large Fleet (ULCV)</div>
-                <div class="kpi-value" style="color: #D97706;">${ulcvCount}</div>
+                <div class="kpi-value kpi-val-amber">${ulcvCount}</div>
             </div>
             <div class="kpi-icon-pill amber">
                 <i class="ti ti-award"></i>
@@ -453,46 +1179,46 @@
         </div>
     </div>
 
-    <!-- Toolbar: Search & Filter -->
-    <div class="vessels-toolbar">
-        <div class="toolbar-left">
-            <!-- Search Box -->
-            <div class="table-search-wrap">
-                <i class="ti ti-search"></i>
-                <input type="text" id="vesselSearchInput" class="table-search-input" placeholder="Search vessels by name, IMO, or ID..." oninput="handleFilter()">
+    <!-- Unified Vessels Table Panel (Matching All Shipments & Rate Governance) -->
+    <div class="vessels-table-panel card tracking-card no-card-tools" data-no-tools="true" style="padding: 0; overflow: hidden; border-radius: 16px;">
+        <!-- Toolbar: Search & Filter -->
+        <div class="vessels-toolbar">
+            <div class="toolbar-left">
+                <!-- Search Box -->
+                <div class="table-search-wrap">
+                    <i class="ti ti-search"></i>
+                    <input type="text" id="vesselSearchInput" class="table-search-input" placeholder="Search vessels by name, IMO, or ID..." oninput="handleFilter()">
+                </div>
+
+                <!-- Capacity Tier Filter (Wrapped in capacity-filter-wrap with no text wrapping) -->
+                <div class="capacity-filter-wrap">
+                    <select id="capacityFilter" class="form-select-custom" onchange="handleFilter()">
+                        <option value="ALL">All Vessel Classes</option>
+                        <option value="FEEDER">Feeder (&lt; 3,000 TEU)</option>
+                        <option value="PANAMAX">Panamax (3,000 - 10,000 TEU)</option>
+                        <option value="POST_PANAMAX">Post-Panamax (10,000 - 14,000 TEU)</option>
+                        <option value="ULCV">Ultra Large (&gt;= 14,000 TEU)</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Capacity Tier Filter (Wrapped in capacity-filter-wrap with no text wrapping) -->
-            <div class="capacity-filter-wrap">
-                <select id="capacityFilter" class="form-select-custom" onchange="handleFilter()">
-                    <option value="ALL">All Vessel Classes</option>
-                    <option value="FEEDER">Feeder (&lt; 3,000 TEU)</option>
-                    <option value="PANAMAX">Panamax (3,000 - 10,000 TEU)</option>
-                    <option value="POST_PANAMAX">Post-Panamax (10,000 - 14,000 TEU)</option>
-                    <option value="ULCV">Ultra Large (&gt;= 14,000 TEU)</option>
-                </select>
+            <div class="d-flex align-items-center gap-2">
+                <span class="toolbar-count-badge" id="showingCountBadge">
+                    <i class="ti ti-list"></i> Showing ${totalFleetCount} Vessels
+                </span>
             </div>
         </div>
 
-        <div class="d-flex align-items-center gap-2">
-            <span class="toolbar-count-badge" id="showingCountBadge">
-                <i class="ti ti-list"></i> Showing ${totalFleetCount} Vessels
-            </span>
-        </div>
-    </div>
-
-    <!-- Vessels Table Panel -->
-    <div class="vessels-table-panel">
         <div class="table-responsive">
-            <table class="vessels-table" id="vesselsTable">
+            <table class="vessels-table tracking-table" id="vesselsTable">
                 <thead>
                     <tr>
-                        <th style="padding-left: 24px; width: 110px;"><i class="ti ti-hash"></i> Vessel ID</th>
-                        <th><i class="ti ti-ship"></i> Vessel &amp; Identity</th>
-                        <th><i class="ti ti-shield-check"></i> IMO Number</th>
-                        <th><i class="ti ti-category"></i> Classification</th>
-                        <th style="width: 200px;"><i class="ti ti-box-seam"></i> Capacity (TEU)</th>
-                        <th><i class="ti ti-activity"></i> Status</th>
+                        <th class="sortable" onclick="sortVesselsTable(0)" style="padding-left: 24px; width: 120px;"><i class="ti ti-hash"></i> Vessel ID <i class="ti ti-arrows-sort sort-indicator ms-1"></i></th>
+                        <th class="sortable" onclick="sortVesselsTable(1)"><i class="ti ti-ship"></i> Vessel &amp; Identity <i class="ti ti-arrows-sort sort-indicator ms-1"></i></th>
+                        <th class="sortable" onclick="sortVesselsTable(2)"><i class="ti ti-shield-check"></i> IMO Number <i class="ti ti-arrows-sort sort-indicator ms-1"></i></th>
+                        <th class="sortable" onclick="sortVesselsTable(3)"><i class="ti ti-category"></i> Classification <i class="ti ti-arrows-sort sort-indicator ms-1"></i></th>
+                        <th class="sortable" onclick="sortVesselsTable(4)" style="width: 200px;"><i class="ti ti-box-seam"></i> Capacity (TEU) <i class="ti ti-arrows-sort sort-indicator ms-1"></i></th>
+                        <th class="sortable" onclick="sortVesselsTable(5)"><i class="ti ti-activity"></i> Status <i class="ti ti-arrows-sort sort-indicator ms-1"></i></th>
                         <th style="padding-right: 24px; text-align: right;"><i class="ti ti-settings"></i> Actions</th>
                     </tr>
                 </thead>
@@ -507,7 +1233,7 @@
                             
                             <!-- Vessel ID -->
                             <td style="padding-left: 24px;">
-                                <span class="imo-badge" style="background: #F8FAFC; color: #64748B;">
+                                <span class="imo-badge vsl-id-badge">
                                     VSL-${v.vesselId}
                                 </span>
                             </td>
@@ -644,17 +1370,13 @@
             </button>
         </div>
 
-        <!-- Pagination Bar -->
-        <div class="pagination-bar" id="vesselsPagination">
-            <div id="pageInfoText">Showing page 1 of 1</div>
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="page-btn" id="prevPageBtn" onclick="changePage(-1)">
-                    <i class="ti ti-chevron-left me-1"></i> Previous
-                </button>
-                <div class="page-numbers-wrap" id="pageNumbersWrap"></div>
-                <button type="button" class="page-btn" id="nextPageBtn" onclick="changePage(1)">
-                    Next <i class="ti ti-chevron-right ms-1"></i>
-                </button>
+        <!-- Global Enterprise Circular Pagination Bar -->
+        <div class="nl-pagination-wrapper" id="vesselsPagination">
+            <div class="nl-pagination-info">
+                <span>Showing <strong id="vesselPageStart">1</strong> to <strong id="vesselPageEnd">10</strong> of <strong id="vesselTotalRows">${totalFleetCount}</strong> Vessels</span>
+            </div>
+            <div class="nl-pagination-nav" id="vesselsPageNav">
+                <!-- Dynamically generated circular pagination buttons -->
             </div>
         </div>
     </div>
@@ -908,9 +1630,14 @@
         const emptyState = document.getElementById('emptyStateBox');
         const pagination = document.getElementById('vesselsPagination');
         const countBadge = document.getElementById('showingCountBadge');
+        const pageStartEl = document.getElementById('vesselPageStart');
+        const pageEndEl = document.getElementById('vesselPageEnd');
+        const totalRowsEl = document.getElementById('vesselTotalRows');
 
         const totalMatches = matchingVesselRows.length;
-        countBadge.innerHTML = '<i class="ti ti-list"></i> Showing ' + totalMatches + ' of ' + allVesselRows.length + ' Vessels';
+        if (countBadge) {
+            countBadge.innerHTML = '<i class="ti ti-list"></i> Showing ' + totalMatches + ' of ' + allVesselRows.length + ' Vessels';
+        }
 
         if (totalMatches === 0) {
             table.style.display = 'none';
@@ -924,51 +1651,162 @@
         emptyState.style.display = 'none';
         pagination.style.display = 'flex';
 
-        const totalPages = Math.ceil(totalMatches / pageSize);
+        const totalPages = Math.ceil(totalMatches / pageSize) || 1;
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
 
         const startIndex = (currentPage - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
+        const endIndex = Math.min(startIndex + pageSize, totalMatches);
 
         allVesselRows.forEach(row => row.style.display = 'none');
         matchingVesselRows.slice(startIndex, endIndex).forEach(row => {
             row.style.display = '';
         });
 
-        // Update pagination text
-        document.getElementById('pageInfoText').textContent = 
-            'Showing ' + (startIndex + 1) + ' - ' + Math.min(endIndex, totalMatches) + ' of ' + totalMatches + ' Vessels (Page ' + currentPage + ' of ' + totalPages + ')';
+        // Update pagination counter elements
+        if (pageStartEl) pageStartEl.textContent = (startIndex + 1);
+        if (pageEndEl) pageEndEl.textContent = endIndex;
+        if (totalRowsEl) totalRowsEl.textContent = totalMatches;
 
-        document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
-        document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
-
-        // Build Page Numbers
-        const numbersWrap = document.getElementById('pageNumbersWrap');
-        numbersWrap.innerHTML = '';
-        
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
-        if (endPage - startPage < 4) {
-            startPage = Math.max(1, endPage - 4);
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            const btn = document.createElement('div');
-            btn.className = 'page-num-pill' + (i === currentPage ? ' active' : '');
-            btn.textContent = i;
-            btn.onclick = (function(pageNum) {
-                return function() {
-                    currentPage = pageNum;
-                    renderPage();
-                };
-            })(i);
-            numbersWrap.appendChild(btn);
-        }
+        renderPageButtons(totalPages);
     }
 
-    function changePage(delta) {
-        currentPage += delta;
+    function renderPageButtons(totalPages) {
+        const pageNav = document.getElementById('vesselsPageNav');
+        if (!pageNav) return;
+        pageNav.innerHTML = '';
+
+        if (totalPages <= 1) {
+            return;
+        }
+
+        // Prev Button
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === 1 ? ' disabled' : '');
+        prevBtn.innerHTML = '<i class="ti ti-chevron-left"></i> Prev';
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+            }
+        });
+        pageNav.appendChild(prevBtn);
+
+        // Circular Numeric Buttons with Ellipsis
+        let pages = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 4) {
+                pages = [1, 2, 3, 4, 5, '...', totalPages];
+            } else if (currentPage >= totalPages - 3) {
+                pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+            } else {
+                pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+            }
+        }
+
+        pages.forEach(p => {
+            if (p === '...') {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'nl-page-ellipsis';
+                ellipsis.textContent = '…';
+                pageNav.appendChild(ellipsis);
+            } else {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'nl-page-btn nl-page-num' + (p === currentPage ? ' active' : '');
+                btn.textContent = p;
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentPage !== p) {
+                        currentPage = p;
+                        renderPage();
+                    }
+                });
+                pageNav.appendChild(btn);
+            }
+        });
+
+        // Next Button
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'nl-page-btn nl-page-nav-btn' + (currentPage === totalPages ? ' disabled' : '');
+        nextBtn.innerHTML = 'Next <i class="ti ti-chevron-right"></i>';
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPage();
+            }
+        });
+        pageNav.appendChild(nextBtn);
+    }
+
+    let vesselSortDirections = [true, true, true, true, true, true];
+
+    function sortVesselsTable(columnIndex) {
+        const isAscending = vesselSortDirections[columnIndex];
+        vesselSortDirections[columnIndex] = !isAscending;
+
+        // Reset all sort indicators
+        const headers = document.querySelectorAll('#vesselsTable thead th.sortable');
+        headers.forEach((th) => {
+            th.classList.remove('sort-active');
+            const icon = th.querySelector('.sort-indicator');
+            if (icon) {
+                icon.className = 'ti ti-arrows-sort sort-indicator ms-1';
+            }
+        });
+
+        // Set active sort indicator on clicked column
+        if (headers[columnIndex]) {
+            headers[columnIndex].classList.add('sort-active');
+            const icon = headers[columnIndex].querySelector('.sort-indicator');
+            if (icon) {
+                icon.className = isAscending ? 'ti ti-sort-ascending sort-indicator ms-1' : 'ti ti-sort-descending sort-indicator ms-1';
+            }
+        }
+
+        const sortFn = (rowA, rowB) => {
+            if (columnIndex === 0) {
+                const valA = parseInt(rowA.getAttribute('data-id') || '0', 10);
+                const valB = parseInt(rowB.getAttribute('data-id') || '0', 10);
+                return isAscending ? valA - valB : valB - valA;
+            } else if (columnIndex === 1) {
+                const valA = (rowA.getAttribute('data-name') || '').toLowerCase();
+                const valB = (rowB.getAttribute('data-name') || '').toLowerCase();
+                return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            } else if (columnIndex === 2) {
+                const valA = (rowA.getAttribute('data-imo') || '').toLowerCase();
+                const valB = (rowB.getAttribute('data-imo') || '').toLowerCase();
+                return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            } else if (columnIndex === 3) {
+                const valA = (rowA.children[3] ? rowA.children[3].innerText : '').trim().toLowerCase();
+                const valB = (rowB.children[3] ? rowB.children[3].innerText : '').trim().toLowerCase();
+                return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            } else if (columnIndex === 4) {
+                const valA = parseInt(rowA.getAttribute('data-capacity') || '0', 10);
+                const valB = parseInt(rowB.getAttribute('data-capacity') || '0', 10);
+                return isAscending ? valA - valB : valB - valA;
+            } else if (columnIndex === 5) {
+                const valA = (rowA.children[5] ? rowA.children[5].innerText : '').trim().toLowerCase();
+                const valB = (rowB.children[5] ? rowB.children[5].innerText : '').trim().toLowerCase();
+                return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            }
+            return 0;
+        };
+
+        allVesselRows.sort(sortFn);
+        matchingVesselRows.sort(sortFn);
+
+        const tbody = document.getElementById('vesselsTableBody');
+        if (tbody) {
+            allVesselRows.forEach(row => tbody.appendChild(row));
+        }
+
         renderPage();
     }
 

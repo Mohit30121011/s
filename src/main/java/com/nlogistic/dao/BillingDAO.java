@@ -24,11 +24,12 @@ public class BillingDAO {
     public List<Invoice> getAllInvoices() {
         List<Invoice> list = new ArrayList<>();
         String sql = "SELECT bi.*, c.customer_name, u.email AS customer_email, u.phone AS customer_phone, "
-                   + "s.cargo_description, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
+                   + "s.cargo_description, s.status AS shipment_status, cnt.container_number, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
                    + "FROM BILLING_INVOICES bi "
                    + "JOIN CUSTOMERS c ON bi.customer_id = c.customer_id "
                    + "LEFT JOIN USERS u ON c.user_id = u.user_id "
                    + "JOIN SHIPMENT s ON bi.shipment_id = s.shipment_id "
+                   + "LEFT JOIN CONTAINERS cnt ON s.container_id = cnt.container_id "
                    + "LEFT JOIN PORTS p_orig ON s.origin_port_id = p_orig.port_id "
                    + "LEFT JOIN PORTS p_dest ON s.destination_port_id = p_dest.port_id "
                    + "ORDER BY bi.invoice_id DESC";
@@ -61,11 +62,12 @@ public class BillingDAO {
      */
     public Invoice getInvoiceById(int invoiceId) {
         String sql = "SELECT bi.*, c.customer_name, u.email AS customer_email, u.phone AS customer_phone, "
-                   + "s.cargo_description, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
+                   + "s.cargo_description, s.status AS shipment_status, cnt.container_number, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
                    + "FROM BILLING_INVOICES bi "
                    + "JOIN CUSTOMERS c ON bi.customer_id = c.customer_id "
                    + "LEFT JOIN USERS u ON c.user_id = u.user_id "
                    + "JOIN SHIPMENT s ON bi.shipment_id = s.shipment_id "
+                   + "LEFT JOIN CONTAINERS cnt ON s.container_id = cnt.container_id "
                    + "LEFT JOIN PORTS p_orig ON s.origin_port_id = p_orig.port_id "
                    + "LEFT JOIN PORTS p_dest ON s.destination_port_id = p_dest.port_id "
                    + "WHERE bi.invoice_id = ?";
@@ -233,8 +235,12 @@ public class BillingDAO {
             }
 
             String status = "Unpaid";
-            if (totalPaid >= totalAmount && totalAmount > 0) {
+            if (totalPaid >= (totalAmount - 0.05) && totalAmount > 0) {
                 status = "Paid";
+                if (totalPaid > totalAmount) {
+                    // Normalize exact paid amount
+                    totalPaid = totalAmount;
+                }
             } else if (totalPaid > 0) {
                 status = "Partial";
             }
@@ -418,11 +424,12 @@ public class BillingDAO {
     public List<Invoice> getBillingHistory(int customerId) {
         List<Invoice> list = new ArrayList<>();
         String sql = "SELECT bi.*, c.customer_name, u.email AS customer_email, u.phone AS customer_phone, "
-                   + "s.cargo_description, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
+                   + "s.cargo_description, s.status AS shipment_status, cnt.container_number, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
                    + "FROM BILLING_INVOICES bi "
                    + "JOIN CUSTOMERS c ON bi.customer_id = c.customer_id "
                    + "LEFT JOIN USERS u ON c.user_id = u.user_id "
                    + "JOIN SHIPMENT s ON bi.shipment_id = s.shipment_id "
+                   + "LEFT JOIN CONTAINERS cnt ON s.container_id = cnt.container_id "
                    + "LEFT JOIN PORTS p_orig ON s.origin_port_id = p_orig.port_id "
                    + "LEFT JOIN PORTS p_dest ON s.destination_port_id = p_dest.port_id "
                    + "WHERE bi.customer_id = ? "
@@ -484,7 +491,9 @@ public class BillingDAO {
             inv.setCustomerName(rs.getString("customer_name"));
             inv.setCustomerEmail(rs.getString("customer_email"));
             inv.setCustomerPhone(rs.getString("customer_phone"));
+            inv.setContainerNumber(rs.getString("container_number"));
             inv.setCargoDescription(rs.getString("cargo_description"));
+            inv.setShipmentStatus(rs.getString("shipment_status"));
             inv.setOriginPort(rs.getString("origin_port"));
             inv.setDestinationPort(rs.getString("dest_port"));
         } catch (SQLException ignored) {}
@@ -498,7 +507,7 @@ public class BillingDAO {
 
     private static final String INVOICE_SELECT =
           "SELECT bi.*, c.customer_name, u.email AS customer_email, u.phone AS customer_phone, "
-        + "s.cargo_description, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
+        + "s.cargo_description, s.status AS shipment_status, cnt.container_number, p_orig.port_name AS origin_port, p_dest.port_name AS dest_port "
         + "FROM BILLING_INVOICES bi "
         + "JOIN CUSTOMERS c ON bi.customer_id = c.customer_id "
         + "LEFT JOIN USERS u ON c.user_id = u.user_id "

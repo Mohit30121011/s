@@ -9,7 +9,9 @@ import java.sql.Types;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CustomerDAO {
     
@@ -50,6 +52,22 @@ public class CustomerDAO {
             e.printStackTrace(); 
         }
         return list;
+    }
+
+    public Map<Integer, Customer> getAllCustomersByUserId() {
+        Map<Integer, Customer> map = new HashMap<>();
+        String sql = "SELECT * FROM customers";
+        try (Connection conn = DBConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Customer c = mapCustomer(rs);
+                map.put(c.getUserId(), c);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
     /**

@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%-- MVC2: this view renders only. All data and every POST action are
      handled by AdminUserServlet (/admin/customers). The previous inline
      controller scriptlet duplicated that logic and bypassed the audited
@@ -249,6 +250,92 @@
         font-size: 12px; color: #64748B; display: inline-flex; align-items: center; gap: 5px;
     }
 
+    /* KYC Verification Badge & Button */
+    .btn-kyc-doc {
+        background: #EFF6FF;
+        border: 1.5px solid #BFDBFE;
+        color: #1D4ED8 !important;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 11.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 1px 2px rgba(29, 78, 216, 0.05);
+    }
+    .btn-kyc-doc:hover {
+        background: #DBEAFE;
+        border-color: #3B82F6;
+        color: #1E40AF !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.16);
+    }
+    .btn-kyc-doc i { font-size: 13px; }
+
+    .kyc-pill.missing {
+        background: #FFFBEB;
+        border: 1.5px solid #FDE68A;
+        color: #D97706 !important;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 11.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .kyc-pill.missing i { font-size: 13px; }
+
+    /* KYC Modal */
+    .kyc-modal-dialog {
+        max-width: 820px !important;
+        width: 90% !important;
+        text-align: left !important;
+        padding: 26px 28px !important;
+    }
+    .kyc-user-meta-bar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 14px 0;
+    }
+    .kyc-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .kyc-meta-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .kyc-meta-value {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #0F172A;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .kyc-preview-container {
+        width: 100%;
+        height: 420px;
+        background: #F1F5F9;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
     /* Contact Details Chips */
     .contact-cell { display: flex; flex-direction: column; gap: 4px; }
     .contact-link { display: inline-flex; align-items: center; gap: 6px; color: #475569; font-size: 12.5px; text-decoration: none; transition: color 0.15s ease; }
@@ -409,6 +496,19 @@
         box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
     }
 
+    .edit-modal-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #EFF6FF;
+        color: #2563EB;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
     .select-wrapper {
         position: relative;
         width: 100%;
@@ -425,6 +525,9 @@
         background-size: contain;
         background-repeat: no-repeat;
         pointer-events: none;
+    }
+    .select-wrapper:has(.ts-wrapper)::after {
+        display: none !important;
     }
     .form-select-custom, .select-wrapper select {
         appearance: none;
@@ -444,6 +547,484 @@
         border-color: #FC8019;
         box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12);
     }
+
+    /* ==========================================================================
+       DARK THEME OVERRIDES FOR CUSTOMERS GOVERNANCE
+       Matches shipments.jsp table & enterprise design tokens
+       ========================================================================== */
+    [data-theme="dark"] .approvals-page-container {
+        color: #F8FAFC;
+    }
+    [data-theme="dark"] .custom-breadcrumb a {
+        color: #94A3B8;
+    }
+    [data-theme="dark"] .custom-breadcrumb a:hover {
+        color: #FC8019;
+    }
+    [data-theme="dark"] .custom-breadcrumb i {
+        color: #64748B;
+    }
+    [data-theme="dark"] .custom-breadcrumb .current {
+        color: #FB923C;
+    }
+
+    /* Telemetry Header */
+    [data-theme="dark"] .telemetry-header-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    }
+    [data-theme="dark"] .telemetry-icon-box {
+        background: rgba(252, 128, 25, 0.15) !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+        color: #FB923C !important;
+    }
+    [data-theme="dark"] .telemetry-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .telemetry-subtitle {
+        color: #94A3B8 !important;
+    }
+
+    /* 4-Column KPI Stats Cards */
+    [data-theme="dark"] .kpi-card {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    }
+    [data-theme="dark"] .kpi-card:hover {
+        background: #151F28 !important;
+        border-color: #2D3F4D !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+    [data-theme="dark"] .kpi-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .kpi-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.amber {
+        background: rgba(217, 119, 6, 0.15) !important;
+        color: #F59E0B !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.green {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.red {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #F87171 !important;
+    }
+    [data-theme="dark"] .kpi-icon-pill.blue {
+        background: rgba(37, 99, 235, 0.15) !important;
+        color: #60A5FA !important;
+    }
+
+    /* Filter Toolbar & Tabs */
+    [data-theme="dark"] .approvals-toolbar {
+        background: #101820 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .nav-tabs-pill {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .tab-pill-btn {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .tab-pill-btn:hover {
+        color: #F8FAFC !important;
+        background: #1C2A37 !important;
+    }
+    [data-theme="dark"] .tab-pill-btn.active {
+        background: rgba(252, 128, 25, 0.18) !important;
+        color: #FB923C !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+    }
+    [data-theme="dark"] .tab-counter {
+        background: #1C2A37 !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .tab-pill-btn.active .tab-counter {
+        background: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Search Input */
+    [data-theme="dark"] .table-search-input {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .table-search-input:focus {
+        background: #182430 !important;
+        border-color: #FC8019 !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.2) !important;
+    }
+    [data-theme="dark"] .table-search-wrap i {
+        color: #64748B !important;
+    }
+
+    /* Table Panel & Table */
+    [data-theme="dark"] .approvals-table-panel {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    }
+    [data-theme="dark"] .approvals-table th {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .approvals-table th i {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] .approvals-table td {
+        border-color: #22303A !important;
+        color: #E2E8F0 !important;
+        background: transparent !important;
+    }
+    [data-theme="dark"] .customer-row:hover td {
+        background-color: #182430 !important;
+    }
+    [data-theme="dark"] .customer-name-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .customer-meta-badge {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .role-badge {
+        background: #1C2A37 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3F4D !important;
+    }
+    [data-theme="dark"] .company-name-chip {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .contact-link {
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] .contact-link:hover {
+        color: #FC8019 !important;
+    }
+    [data-theme="dark"] .contact-link i {
+        color: #64748B !important;
+    }
+
+    /* Status Pills */
+    [data-theme="dark"] .status-pill.pending {
+        background: rgba(217, 119, 6, 0.15) !important;
+        color: #F59E0B !important;
+        border-color: rgba(217, 119, 6, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill.active {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #34D399 !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .status-pill.suspended {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #F87171 !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* Action Buttons in Table */
+    [data-theme="dark"] .btn-approval-reject {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+        color: #F87171 !important;
+    }
+    [data-theme="dark"] .btn-approval-reject:hover {
+        background: rgba(239, 68, 68, 0.22) !important;
+        border-color: #EF4444 !important;
+        color: #FCA5A5 !important;
+    }
+    [data-theme="dark"] .btn-approval-edit {
+        background: rgba(37, 99, 235, 0.12) !important;
+        border-color: rgba(37, 99, 235, 0.35) !important;
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .btn-approval-edit:hover {
+        background: rgba(37, 99, 235, 0.22) !important;
+        border-color: #3B82F6 !important;
+        color: #93C5FD !important;
+    }
+    [data-theme="dark"] .btn-approval-delete {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+        color: #F87171 !important;
+    }
+    [data-theme="dark"] .btn-approval-delete:hover {
+        background: rgba(239, 68, 68, 0.22) !important;
+        border-color: #EF4444 !important;
+        color: #FCA5A5 !important;
+    }
+
+    /* Empty state */
+    [data-theme="dark"] .empty-caught-up-card {
+        background: #101820 !important;
+    }
+    [data-theme="dark"] .empty-shield-icon-box {
+        background: rgba(16, 185, 129, 0.15) !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+        color: #34D399 !important;
+    }
+    [data-theme="dark"] .empty-caught-up-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .empty-caught-up-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .btn-view-all-tenants {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .btn-view-all-tenants:hover {
+        background: #182430 !important;
+        border-color: #2D3F4D !important;
+    }
+
+    /* Modals in Dark Mode */
+    [data-theme="dark"] .nl-modal-dialog,
+    [data-theme="dark"] .modal-content {
+        background: #101820 !important;
+        border: 1px solid #22303A !important;
+        color: #F8FAFC !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+    }
+    [data-theme="dark"] .nl-modal-close {
+        background: #151F28 !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-modal-close:hover {
+        background: #1C2A37 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-modal-title,
+    [data-theme="dark"] .modal-title {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-modal-desc {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-modal-btn.cancel {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-modal-btn.cancel:hover {
+        background: #1C2A37 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .btn-kyc-doc {
+        background: rgba(37, 99, 235, 0.14) !important;
+        border-color: rgba(37, 99, 235, 0.35) !important;
+        color: #60A5FA !important;
+        box-shadow: none !important;
+    }
+    [data-theme="dark"] .btn-kyc-doc:hover {
+        background: rgba(37, 99, 235, 0.25) !important;
+        border-color: #3B82F6 !important;
+        color: #93C5FD !important;
+    }
+    [data-theme="dark"] .kyc-pill.missing {
+        background: rgba(217, 119, 6, 0.15) !important;
+        border-color: rgba(217, 119, 6, 0.35) !important;
+        color: #F59E0B !important;
+    }
+    [data-theme="dark"] .kyc-preview-container {
+        background: #0B1118 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .kyc-user-meta-bar {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] .kyc-meta-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .kyc-meta-value {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .edit-modal-icon-box {
+        background: rgba(37, 99, 235, 0.15) !important;
+        border: 1px solid rgba(37, 99, 235, 0.3) !important;
+        color: #60A5FA !important;
+    }
+    [data-theme="dark"] .nl-modal-icon-box.danger {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #F87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .nl-modal-icon-box.success {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #34D399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .modal-form-label {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .modal-form-input,
+    [data-theme="dark"] .form-select-custom,
+    [data-theme="dark"] .select-wrapper select {
+        background: #151F28 !important;
+        background-color: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .modal-form-input:focus,
+    [data-theme="dark"] .form-select-custom:focus,
+    [data-theme="dark"] .select-wrapper select:focus {
+        background: #182430 !important;
+        background-color: #182430 !important;
+        border-color: #FC8019 !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Modal Select & TomSelect in Dark Mode (Active, Focus, Normal) */
+    [data-theme="dark"] .select-wrapper select.form-select-custom,
+    [data-theme="dark"] .select-wrapper .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.single .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.input-active .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-control.focus,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-control,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.focus .ts-control,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.dropdown-active .ts-control,
+    [data-theme="dark"] .ts-wrapper.single .ts-control,
+    [data-theme="dark"] .ts-control,
+    [data-theme="dark"] .ts-control.focus,
+    [data-theme="dark"] .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .ts-wrapper.input-active .ts-control {
+        background-color: #151F28 !important;
+        background: #151F28 !important;
+        border: 1.5px solid #2D3F4D !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .select-wrapper select.form-select-custom:focus,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.focus .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-wrapper.dropdown-active .ts-control,
+    [data-theme="dark"] .select-wrapper .ts-control.focus,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.focus .ts-control,
+    [data-theme="dark"] .ts-wrapper.form-select-custom.dropdown-active .ts-control,
+    [data-theme="dark"] .ts-wrapper.single.focus .ts-control,
+    [data-theme="dark"] .ts-wrapper.single.dropdown-active .ts-control {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.22) !important;
+        background-color: #182430 !important;
+        background: #182430 !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-control .item,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-control .item,
+    [data-theme="dark"] .ts-control .item,
+    [data-theme="dark"] .ts-control .item:not(.active) {
+        color: #F8FAFC !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-control input,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-control input,
+    [data-theme="dark"] .ts-control input {
+        color: #F8FAFC !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-dropdown,
+    [data-theme="dark"] .ts-wrapper.form-select-custom .ts-dropdown,
+    [data-theme="dark"] .ts-dropdown {
+        background: #101820 !important;
+        background-color: #101820 !important;
+        border: 1px solid #2D3F4D !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+        border-radius: 12px !important;
+        padding: 6px !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option,
+    [data-theme="dark"] .ts-dropdown .option {
+        color: #94A3B8 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        background: transparent !important;
+        border-bottom: none !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option:hover,
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option.active,
+    [data-theme="dark"] .ts-dropdown .option:hover,
+    [data-theme="dark"] .ts-dropdown .option.active {
+        background: #1E2D3D !important;
+        background-color: #1E2D3D !important;
+        color: #F8FAFC !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-dropdown .option.selected,
+    [data-theme="dark"] .ts-dropdown .option.selected {
+        background: #FC8019 !important;
+        background-color: #FC8019 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="dark"] .select-wrapper .ts-wrapper.single .ts-control::after {
+        border-color: #94A3B8 transparent transparent transparent !important;
+    }
+
+    [data-theme="dark"] .select-wrapper::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394A3B8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+
+    /* Pagination in Dark Mode */
+    [data-theme="dark"] .nl-pagination-wrapper {
+        background: #151F28 !important;
+        border-top-color: #22303A !important;
+    }
+    [data-theme="dark"] .nl-pagination-info {
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-pagination-info strong {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-size-select {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn {
+        background: #101820 !important;
+        border-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] .nl-page-btn:hover:not(.disabled) {
+        background: #182430 !important;
+        border-color: #2D3F4D !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .nl-page-btn.active {
+        background: #FC8019 !important;
+        border-color: #FC8019 !important;
+        color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .nl-page-btn.disabled {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #475569 !important;
+    }
+
 
 </style>
 
@@ -566,7 +1147,7 @@
                 <thead>
                     <tr>
                         <th style="padding-left: 24px;"><i class="ti ti-user"></i> Customer / User</th>
-                        <th><i class="ti ti-briefcase"></i> Role &amp; Tenant</th>
+                        <th><i class="ti ti-file-certificate"></i> KYC Verification</th>
                         <th><i class="ti ti-address-book"></i> Contact Info</th>
                         <th><i class="ti ti-calendar"></i> Registered Date</th>
                         <th><i class="ti ti-activity"></i> Status</th>
@@ -575,9 +1156,10 @@
                 </thead>
                 <tbody id="customersTableBody">
                     <c:forEach var="u" items="${allUsers}">
+                        <c:set var="cust" value="${customerMap[u.userId]}" />
                         <tr class="customer-row"
                             data-status="${u.status}"
-                            data-search="${u.username.toLowerCase()} ${u.email.toLowerCase()} ${u.phone} ${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId].toLowerCase() : ''}">
+                            data-search="${u.username.toLowerCase()} ${u.email.toLowerCase()} ${u.phone} ${not empty cust ? cust.address.toLowerCase() : ''} ${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId].toLowerCase() : ''}">
                             
                             <!-- Customer Name + Avatar -->
                             <td style="padding-left: 24px;">
@@ -590,37 +1172,58 @@
                                         <div class="customer-name-title">${u.username}</div>
                                         <div class="customer-meta-badge">
                                             <i class="ti ti-hash"></i> USR-${u.userId}
+                                            <c:if test="${not empty cust}">
+                                                &bull; CUST-${cust.customerId}
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
                             </td>
 
-                            <!-- Role & Tenant -->
+                            <!-- KYC Document & Verification Status -->
                             <td>
-                                <div class="role-tenant-wrap">
-                                    <span class="role-badge">
-                                        <c:choose>
-                                            <c:when test="${u.roleId == 1}">
-                                                <i class="ti ti-shield"></i> Super Admin
-                                            </c:when>
-                                            <c:when test="${u.roleId == 2}">
-                                                <i class="ti ti-building"></i> Company Admin
-                                            </c:when>
-                                            <c:when test="${u.roleId == 5}">
-                                                <i class="ti ti-user-check"></i> Customer / Client
-                                            </c:when>
-                                            <c:otherwise>
-                                                <i class="ti ti-user"></i> Staff (Role ${u.roleId})
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </span>
-                                    <c:if test="${not empty u.companyId && u.companyId > 0}">
-                                        <span class="company-name-chip">
-                                            <i class="ti ti-building" style="color: #94A3B8; font-size: 13px;"></i>
-                                            <span>${not empty companyNameMap[u.companyId] ? companyNameMap[u.companyId] : 'Tenant CMP-'.concat(u.companyId)}</span>
-                                        </span>
-                                    </c:if>
-                                </div>
+                                <c:choose>
+                                    <c:when test="${not empty cust && not empty cust.kycDocPath}">
+                                        <c:set var="rawKyc" value="${cust.kycDocPath}" />
+                                        <c:set var="kycIdx" value="${rawKyc.indexOf('uploads/kyc/')}" />
+                                        <c:set var="cleanKycPath" value="${kycIdx >= 0 ? rawKyc.substring(kycIdx) : rawKyc}" />
+                                        <c:set var="fullKycUrl" value="${cleanKycPath.startsWith('http') ? cleanKycPath : pageContext.request.contextPath.concat('/').concat(cleanKycPath)}" />
+                                        <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
+                                            <button type="button" class="btn-kyc-doc"
+                                                    data-doc-url="${fullKycUrl}"
+                                                    data-username="${fn:escapeXml(u.username)}"
+                                                    data-address="${fn:escapeXml(not empty cust.address ? cust.address : 'N/A')}"
+                                                    data-email="${fn:escapeXml(u.email)}"
+                                                    data-user-id="${u.userId}"
+                                                    data-status="${u.status}"
+                                                    onclick="openKycModalFromBtn(this)"
+                                                    title="Click to inspect and verify uploaded KYC document">
+                                                <i class="ti ti-file-certificate"></i>
+                                                <span>View KYC Doc</span>
+                                            </button>
+                                            <c:if test="${not empty cust.address}">
+                                                <span style="font-size: 11.5px; color: #64748B; display: inline-flex; align-items: center; gap: 4px;" title="${cust.address}">
+                                                    <i class="ti ti-map-pin" style="font-size: 12px; color: #94A3B8;"></i>
+                                                    <span>${cust.address.length() > 24 ? cust.address.substring(0, 24).concat('...') : cust.address}</span>
+                                                </span>
+                                            </c:if>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
+                                            <span class="kyc-pill missing" title="No KYC verification document uploaded">
+                                                <i class="ti ti-alert-triangle"></i>
+                                                <span>Not Uploaded</span>
+                                            </span>
+                                            <c:if test="${not empty cust && not empty cust.address}">
+                                                <span style="font-size: 11.5px; color: #64748B; display: inline-flex; align-items: center; gap: 4px;" title="${cust.address}">
+                                                    <i class="ti ti-map-pin" style="font-size: 12px; color: #94A3B8;"></i>
+                                                    <span>${cust.address.length() > 24 ? cust.address.substring(0, 24).concat('...') : cust.address}</span>
+                                                </span>
+                                            </c:if>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
 
                             <!-- Contact Details -->
@@ -793,7 +1396,7 @@
                 <i class="ti ti-x"></i>
             </button>
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">
+                <div class="edit-modal-icon-box">
                     <i class="ti ti-user-edit"></i>
                 </div>
                 <div>
@@ -851,11 +1454,158 @@
         </div>
     </div>
 
+    <!-- Custom KYC Document Viewer Modal -->
+    <div id="kycPreviewModal" class="nl-modal-backdrop" style="display: none;">
+        <div class="nl-modal-dialog kyc-modal-dialog">
+            <button type="button" class="nl-modal-close" onclick="closeKycModal()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <div class="edit-modal-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <i class="ti ti-file-certificate"></i>
+                </div>
+                <div>
+                    <h5 class="nl-modal-title" style="margin: 0; font-size: 17px; text-align: left;">Customer KYC Document Inspection</h5>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B; text-align: left;">Verify uploaded government identification / regulatory documentation</p>
+                </div>
+            </div>
+
+            <!-- Customer Meta Info Bar -->
+            <div class="kyc-user-meta-bar">
+                <div class="kyc-meta-item">
+                    <span class="kyc-meta-label">Customer Account</span>
+                    <span class="kyc-meta-value" id="kycModalCustomerName">—</span>
+                </div>
+                <div class="kyc-meta-item">
+                    <span class="kyc-meta-label">Email Address</span>
+                    <span class="kyc-meta-value" id="kycModalCustomerEmail">—</span>
+                </div>
+                <div class="kyc-meta-item">
+                    <span class="kyc-meta-label">Registered Address</span>
+                    <span class="kyc-meta-value" id="kycModalCustomerAddress">—</span>
+                </div>
+                <div class="kyc-meta-item">
+                    <span class="kyc-meta-label">Account Status</span>
+                    <span class="kyc-meta-value" id="kycModalCustomerStatus">—</span>
+                </div>
+            </div>
+
+            <!-- Document Preview Frame -->
+            <div class="kyc-preview-container">
+                <iframe id="kycIframe" src="" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
+                <img id="kycImage" src="" alt="KYC Document Preview" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;" />
+                <div id="kycFallback" style="display: none; text-align: center; padding: 40px 20px;">
+                    <i class="ti ti-file-text" style="font-size: 48px; color: #64748B; margin-bottom: 12px; display: inline-block;"></i>
+                    <h6 style="color: #F8FAFC; margin-bottom: 6px;">Document Ready for Review</h6>
+                    <p style="color: #94A3B8; font-size: 13px; margin-bottom: 16px;">This document format is best viewed externally or downloaded.</p>
+                    <a id="kycDirectLinkBtn" href="#" target="_blank" class="btn-kyc-doc" style="font-size: 13px; padding: 8px 20px;">
+                        <i class="ti ti-external-link"></i> Open In New Tab
+                    </a>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="nl-modal-actions" style="margin-top: 18px; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <a id="kycDownloadBtn" href="#" target="_blank" class="nl-modal-btn cancel" download style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                        <i class="ti ti-download"></i> Download Original
+                    </a>
+                    <a id="kycExternalBtn" href="#" target="_blank" class="nl-modal-btn cancel" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                        <i class="ti ti-external-link"></i> Full Screen
+                    </a>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;" id="kycModalActionButtons">
+                    <button type="button" class="nl-modal-btn cancel" onclick="closeKycModal()">Close</button>
+                    <!-- Quick Approve Form -->
+                    <form method="POST" action="${pageContext.request.contextPath}/admin/customers" id="kycQuickApproveForm" style="display: inline; margin: 0;">
+                        <input type="hidden" name="userId" id="kycApproveUserId" value="">
+                        <input type="hidden" name="action" value="accept">
+                        <button type="submit" class="nl-modal-btn confirm" style="background: #10B981 !important; color: #FFFFFF !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);">
+                            <i class="ti ti-check"></i> Approve KYC &amp; Activate
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
 
     let pendingFormToSubmit = null;
+
+    function openKycModalFromBtn(btn) {
+        if (!btn) return;
+        const docUrl = btn.getAttribute('data-doc-url') || '';
+        const username = btn.getAttribute('data-username') || '—';
+        const address = btn.getAttribute('data-address') || '—';
+        const email = btn.getAttribute('data-email') || '—';
+        const userId = btn.getAttribute('data-user-id') || '';
+        const status = btn.getAttribute('data-status') || '—';
+        openKycModal(docUrl, username, address, email, userId, status);
+    }
+
+    function openKycModal(docUrl, username, address, email, userId, status) {
+        const modal = document.getElementById('kycPreviewModal');
+        if (!modal) {
+            console.error("KYC modal element '#kycPreviewModal' not found in DOM");
+            return;
+        }
+
+        const nameEl = document.getElementById('kycModalCustomerName');
+        const emailEl = document.getElementById('kycModalCustomerEmail');
+        const addrEl = document.getElementById('kycModalCustomerAddress');
+        const statEl = document.getElementById('kycModalCustomerStatus');
+        const userInp = document.getElementById('kycApproveUserId');
+
+        if (nameEl) nameEl.textContent = username || '—';
+        if (emailEl) emailEl.textContent = email || '—';
+        if (addrEl) addrEl.textContent = address || '—';
+        if (statEl) statEl.textContent = status || '—';
+        if (userInp) userInp.value = userId || '';
+
+        const iframe = document.getElementById('kycIframe');
+        const img = document.getElementById('kycImage');
+        const fallback = document.getElementById('kycFallback');
+        const downloadBtn = document.getElementById('kycDownloadBtn');
+        const directLinkBtn = document.getElementById('kycDirectLinkBtn');
+        const externalBtn = document.getElementById('kycExternalBtn');
+
+        if (downloadBtn) downloadBtn.href = docUrl || '#';
+        if (directLinkBtn) directLinkBtn.href = docUrl || '#';
+        if (externalBtn) externalBtn.href = docUrl || '#';
+
+        const lowerUrl = (docUrl || '').toLowerCase();
+        if (lowerUrl.endsWith('.jpg') || lowerUrl.endsWith('.jpeg') || lowerUrl.endsWith('.png') || lowerUrl.endsWith('.webp') || lowerUrl.endsWith('.gif')) {
+            if (iframe) { iframe.style.display = 'none'; iframe.src = ''; }
+            if (img) { img.src = docUrl; img.style.display = 'block'; }
+            if (fallback) fallback.style.display = 'none';
+        } else if (lowerUrl.endsWith('.pdf')) {
+            if (img) { img.style.display = 'none'; img.src = ''; }
+            if (iframe) { iframe.src = docUrl; iframe.style.display = 'block'; }
+            if (fallback) fallback.style.display = 'none';
+        } else {
+            if (img) img.style.display = 'none';
+            if (iframe) iframe.style.display = 'none';
+            if (fallback) fallback.style.display = 'block';
+        }
+
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+    }
+
+    function closeKycModal() {
+        const modal = document.getElementById('kycPreviewModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.getElementById('kycIframe').src = '';
+            document.getElementById('kycImage').src = '';
+        }, 200);
+    }
 
     function openEditCustomerModal(data) {
         document.getElementById('editUserId').value = data.userId || '';
@@ -864,7 +1614,12 @@
         document.getElementById('editPhone').value = data.phone || '';
         document.getElementById('editAddress').value = data.address || '';
         if (document.getElementById('editRoleId')) {
-            document.getElementById('editRoleId').value = data.roleId || '5';
+            const roleEl = document.getElementById('editRoleId');
+            if (roleEl.tomselect) {
+                roleEl.tomselect.setValue(data.roleId ? String(data.roleId) : '5');
+            } else {
+                roleEl.value = data.roleId || '5';
+            }
         }
 
         const modal = document.getElementById('editCustomerModal');

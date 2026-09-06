@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <c:set var="hideSidebar" value="true" scope="request" />
 <c:set var="hideTopHeader" value="true" scope="request" />
@@ -410,16 +410,18 @@
     .nl-form-icon-circle:hover {
         transform: scale(1.08) rotate(5deg);
     }
-    .nl-form-title {
+    .nl-form-title,
+    [data-theme="dark"] .nl-split-right .nl-form-title {
         font-size: 28px;
         font-weight: 800;
-        color: #0F172A;
+        color: #0F172A !important;
         letter-spacing: -0.5px;
         margin-bottom: 6px;
     }
-    .nl-form-subtitle {
+    .nl-form-subtitle,
+    [data-theme="dark"] .nl-split-right .nl-form-subtitle {
         font-size: 14px;
-        color: #64748B;
+        color: #64748B !important;
         line-height: 1.45;
     }
 
