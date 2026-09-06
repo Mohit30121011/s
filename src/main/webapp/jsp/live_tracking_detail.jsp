@@ -759,28 +759,71 @@
     }
     .container-hero-wrapper {
         position: relative;
-        border-radius: 12px;
+        border-radius: 14px;
         overflow: hidden;
-        height: 200px;
-        background: #0F172A;
+        height: 270px;
+        background: #0B132B;
         margin-bottom: 18px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 16px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .container-hero-bg-blur {
+        position: absolute;
+        inset: -20px;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        object-fit: cover;
+        filter: blur(22px) brightness(0.4) saturate(1.3);
+        transform: scale(1.08);
+        z-index: 1;
+        pointer-events: none;
     }
     .container-hero-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
+        position: relative;
+        z-index: 2;
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: zoom-in;
     }
     .container-hero-wrapper:hover .container-hero-img {
-        transform: scale(1.03);
+        transform: scale(1.04);
     }
     .container-overlay-badge {
-        padding: 6px 14px;
+        padding: 5px 12px;
         border-radius: 50px;
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 700;
-        letter-spacing: 0.5px;
-        backdrop-filter: blur(8px);
+        letter-spacing: 0.3px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .btn-zoom-photo {
+        background: rgba(255, 255, 255, 0.92) !important;
+        color: #0F172A !important;
+        border-radius: 50px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        padding: 4px 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        backdrop-filter: blur(8px) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-zoom-photo:hover {
+        background: #FFFFFF !important;
+        transform: scale(1.05) !important;
+        color: #FC8019 !important;
     }
     .container-spec-grid {
         display: grid;
@@ -1149,24 +1192,34 @@
             <c:choose>
                 <%-- Allocated Container with Real Image & Specifications --%>
                 <c:when test="${not empty shipment.containerNumber && shipment.status != 'Booked'}">
-                    <div class="container-hero-wrapper">
-                        <img src="${shipment.containerImage}" alt="Container ${shipment.containerNumber}" class="container-hero-img" onerror="this.src='https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80'">
-                        <div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 2;">
-                            <span class="container-overlay-badge" style="background: rgba(16, 185, 129, 0.9); color: #FFFFFF; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
+                    <c:set var="rawImg" value="${shipment.containerImage}" />
+                    <c:set var="cleanImg" value="${fn:startsWith(rawImg, 'http') || fn:startsWith(rawImg, '/') ? rawImg : pageContext.request.contextPath.concat('/').concat(rawImg)}" />
+                    <div class="container-hero-wrapper" onclick="openContainerPhotoModal('${cleanImg}')" title="Click to view high-resolution photo">
+                        <img src="${cleanImg}" alt="Container ${shipment.containerNumber}" class="container-hero-bg-blur" onerror="this.src='https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80'">
+                        <img src="${cleanImg}" alt="Container ${shipment.containerNumber}" class="container-hero-img" onerror="this.src='https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80'">
+                        
+                        <div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 3; pointer-events: none;">
+                            <span class="container-overlay-badge" style="background: rgba(16, 185, 129, 0.92); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.25);">
                                 <i class="ti ti-circle-check me-1"></i> Physical Asset Assigned
                             </span>
-                            <span class="container-overlay-badge" style="background: rgba(15, 23, 42, 0.85); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.2);">
-                                <i class="ti ti-box me-1"></i> ${shipment.containerSize} &bull; ${shipment.containerType}
-                            </span>
+                            <div style="display: flex; gap: 8px; pointer-events: auto;">
+                                <span class="container-overlay-badge" style="background: rgba(15, 23, 42, 0.88); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.25);">
+                                    <i class="ti ti-box me-1"></i> ${shipment.containerSize} &bull; ${shipment.containerType}
+                                </span>
+                                <button type="button" class="btn-zoom-photo" onclick="event.stopPropagation(); openContainerPhotoModal('${cleanImg}');" title="Expand Photo">
+                                    <i class="ti ti-zoom-in"></i> Inspect
+                                </button>
+                            </div>
                         </div>
-                        <div style="position: absolute; bottom: 12px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 2;">
-                            <div style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 8px; color: #FFFFFF;">
+                        
+                        <div style="position: absolute; bottom: 12px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 3; pointer-events: none;">
+                            <div style="background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 8px; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15);">
                                 <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">ISO Container Identifier</div>
-                                <div style="font-weight: 800; font-size: 16px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;">
+                                <div style="font-weight: 800; font-size: 15px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; color: #FC8019;">
                                     ${shipment.containerNumber}
                                 </div>
                             </div>
-                            <div style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; color: #FFFFFF; font-size: 12px;">
+                            <div style="background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; color: #FFFFFF; font-size: 12px; border: 1px solid rgba(255,255,255,0.15);">
                                 <i class="ti ti-map-pin text-warning me-1"></i> ${shipment.originPort} &rarr; ${shipment.destPort}
                             </div>
                         </div>
@@ -1192,7 +1245,7 @@
                         </div>
                         <div class="container-spec-box">
                             <div class="container-spec-label"><i class="ti ti-box-model-2"></i> Cargo Weight</div>
-                            <div class="container-spec-val" style="color: #FC8019;"><fmt:formatNumber value="${shipment.cargoWeight}" maxFractionDigits="0"/> kg</div>
+                            <div class="container-spec-val" style="color: #FC8019;"><fmt:formatNumber value="${not empty shipment.cargoWeightKg ? shipment.cargoWeightKg : shipment.cargoWeight}" maxFractionDigits="0"/> kg</div>
                         </div>
                         <div class="container-spec-box">
                             <div class="container-spec-label"><i class="ti ti-file-description"></i> Manifest Cargo</div>
@@ -1675,10 +1728,54 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+<c:set var="resolvedBarcodeVal" value="${not empty barcode ? barcode.barcodeValue : 'SHI-'.concat(shipment.shipmentId)}" />
+<c:set var="resolvedScanUrl" value="${not empty scanUrl ? scanUrl : pageContext.request.scheme.concat('://').concat(pageContext.request.serverName).concat(':').concat(pageContext.request.serverPort).concat(pageContext.request.contextPath).concat('/barcode-pdf?value=').concat(resolvedBarcodeVal)}" />
+
+<!-- High-Resolution Container Photo Inspection Lightbox Modal -->
+<div class="modal fade" id="containerPhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); background: #0B132B; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 16px 20px;">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(252, 128, 25, 0.15); color: #FC8019; display: flex; align-items: center; justify-content: center;">
+                        <i class="ti ti-container"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title text-white mb-0" style="font-weight: 700; font-size: 15px;">Container Physical Asset Inspection</h6>
+                        <small style="color: #94A3B8; font-size: 11.5px;">ISO Unit: <strong class="text-warning">${shipment.containerNumber}</strong> &bull; ${shipment.containerSize} ${shipment.containerType}</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center" style="background: #020617; position: relative; min-height: 380px; display: flex; align-items: center; justify-content: center;">
+                <img src="" id="containerModalImg" alt="Full Container Photo" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 4px;">
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center" style="background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(255,255,255,0.1); padding: 12px 20px;">
+                <div class="text-white" style="font-size: 12px;">
+                    <i class="ti ti-map-pin text-warning me-1"></i> Current Depot: <strong>${shipment.originPort}</strong>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-light px-3" data-bs-dismiss="modal" style="border-radius: 50px;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- QR Code and JsBarcode libraries for Live Shipment Tracking -->
 <script src="${pageContext.request.contextPath}/assets/js/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
 <script>
+function openContainerPhotoModal(imgSrc) {
+    const modalImg = document.getElementById('containerModalImg');
+    if (modalImg) {
+        modalImg.src = imgSrc || 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80';
+    }
+    const modalEl = document.getElementById('containerPhotoModal');
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+}
+
 function copyBarcodeToken() {
     const val = document.getElementById('activeBarcodeVal')?.innerText?.trim();
     if (val) {
@@ -1688,8 +1785,8 @@ function copyBarcodeToken() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const barcodeVal = '${not empty barcode ? barcode.barcodeValue : "SHI-".concat(shipment.shipmentId)}';
-    const scanUrl = '${not empty scanUrl ? scanUrl : pageContext.request.scheme.concat("://").concat(pageContext.request.serverName).concat(":").concat(pageContext.request.serverPort).concat(pageContext.request.contextPath).concat("/barcode-pdf?value=").concat(not empty barcode ? barcode.barcodeValue : "SHI-".concat(shipment.shipmentId))}';
+    const barcodeVal = '${resolvedBarcodeVal}';
+    const scanUrl = '${resolvedScanUrl}';
     
     // 1. Render Fallback QR Code (encodes the direct mobile scan URL, NOT plain text!)
     const qrContainer = document.getElementById('shipmentQrCanvas');

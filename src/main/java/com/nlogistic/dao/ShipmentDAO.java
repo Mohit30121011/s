@@ -91,6 +91,8 @@ public class ShipmentDAO {
         public void setCargoDescription(String cargoDescription) { this.cargoDescription = cargoDescription; }
         public double getCargoWeightKg() { return cargoWeightKg; }
         public void setCargoWeightKg(double cargoWeightKg) { this.cargoWeightKg = cargoWeightKg; }
+        public double getCargoWeight() { return cargoWeightKg; }
+        public void setCargoWeight(double cargoWeight) { this.cargoWeightKg = cargoWeight; }
         public double getCargoVolumeCbm() { return cargoVolumeCbm; }
         public void setCargoVolumeCbm(double cargoVolumeCbm) { this.cargoVolumeCbm = cargoVolumeCbm; }
         public double getTareWeightKg() { return tareWeightKg; }
