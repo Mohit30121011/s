@@ -326,7 +326,8 @@ public class AuthenticationFilter implements Filter {
         if (path.startsWith("/shipment") || path.startsWith("/container")
                 || path.startsWith("/book") || path.startsWith("/claims")
                 || path.startsWith("/invoices") || path.startsWith("/view-invoice")
-                || path.startsWith("/compliance") || path.startsWith("/dashboard")
+                || path.startsWith("/compliance") || path.startsWith("/compliance-document")
+                || path.startsWith("/dashboard")
                 || path.startsWith("/profile") || path.startsWith("/logout")
                 || path.startsWith("/download-document") || path.startsWith("/jsp/")) {
             return true;
@@ -348,7 +349,7 @@ public class AuthenticationFilter implements Filter {
         if (path.endsWith("/jsp/admin/companies.jsp"))       return "/admin/companies";
         if (path.endsWith("/jsp/admin/audit_logins.jsp"))    return "/admin/audit-logs";
         if (path.endsWith("/jsp/admin/audit_approvals.jsp")) return "/admin/audit-approvals";
-        if (path.endsWith("/jsp/doc-viewer.jsp"))            return "/compliance-document";
+        if (path.endsWith("/jsp/doc-viewer.jsp"))            return "/compliance/view";
         if (path.endsWith("/jsp/ports.jsp"))                 return "/ports";
         if (path.endsWith("/jsp/vessels.jsp"))               return "/vessels";
         if (path.endsWith("/jsp/products.jsp"))              return "/inventory/products";

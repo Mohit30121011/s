@@ -753,7 +753,8 @@
         transition: background 0.2s ease, border-color 0.2s ease;
     }
     [data-theme="dark"] .container-asset-card,
-    [data-theme="dark"] .barcode-tracking-card {
+    [data-theme="dark"] .barcode-tracking-card,
+    [data-theme="dark"] .compliance-hub-card {
         background: #16202A !important;
         border-color: #22303A !important;
     }
@@ -1367,6 +1368,206 @@
     </div>
 </div>
 
+<!-- ==========================================================================
+     GOVERNMENT REGULATORY COMPLIANCE & MARITIME DEPARTURE CLEARANCE HUB (FR5.1 - FR5.4)
+     ========================================================================== -->
+<div class="card-panel compliance-hub-card no-card-tools mt-4 mb-4" data-no-tools="true">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-3 border-bottom" style="border-color: var(--border-color) !important;">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(252, 128, 25, 0.12); color: #FC8019; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid rgba(252, 128, 25, 0.25);">
+                <i class="ti ti-shield-check"></i>
+            </div>
+            <div>
+                <h5 style="margin: 0; font-weight: 700; color: var(--text-dark); font-size: 16px;">
+                    Government Regulatory Compliance &amp; Maritime Departure Clearance
+                </h5>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                    Mandatory maritime documentation, e-filing records, and departure gatekeeper precondition (FR5.1 - FR5.4)
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="${pageContext.request.contextPath}/compliance" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius: 50px; font-weight: 600; font-size: 12.5px; padding: 6px 14px;">
+                <i class="ti ti-folder"></i> Compliance Hub
+            </a>
+
+            <c:if test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3}">
+                <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#uploadComplianceModal" style="border-radius: 50px; font-weight: 600; font-size: 12.5px; padding: 6px 14px;">
+                    <i class="ti ti-upload"></i> Upload Document
+                </button>
+
+                <form action="${pageContext.request.contextPath}/compliance/auto-approve" method="POST" class="d-inline" onsubmit="return confirm('Auto-provision & approve all 5 mandatory maritime compliance certificates for this shipment?');">
+                    <input type="hidden" name="shipmentId" value="${shipment.shipmentId}">
+                    <input type="hidden" name="redirectUrl" value="${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-${shipment.shipmentId}">
+                    <button type="submit" class="btn btn-sm text-white d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, #10B981, #059669); border: none; border-radius: 50px; font-weight: 600; font-size: 12.5px; padding: 6px 14px;">
+                        <i class="ti ti-sparkles"></i> Auto-Approve All (FR5.3)
+                    </button>
+                </form>
+            </c:if>
+        </div>
+    </div>
+
+    <!-- Departure Clearance Banner (FR5.3 Gatekeeper) -->
+    <div class="departure-clearance-banner mb-4 p-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-3"
+         style="background: ${canDepart ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.08)'}; border: 1px solid ${canDepart ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'};">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: ${canDepart ? '#10B981' : '#EF4444'}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+                <i class="ti ${canDepart ? 'ti-check' : 'ti-ban'}"></i>
+            </div>
+            <div>
+                <div style="font-weight: 700; font-size: 14px; color: ${canDepart ? '#065F46' : '#991B1B'};">
+                    ${canDepart ? 'VESSEL DEPARTURE PERMITTED &bull; ALL CLEAR' : 'VESSEL DEPARTURE BLOCKED &bull; REGULATORY HOLD ACTIVE'}
+                </div>
+                <div style="font-size: 12px; color: ${canDepart ? '#047857' : '#B91C1C'}; margin-top: 1px;">
+                    ${canDepart ? 'All mandatory compliance documents are verified, valid, and approved. Movement to \'Departed\' is permitted.' : 'Mandatory maritime certificates are missing, pending review, or expired. Trigger safeguards prevent departure.'}
+                </div>
+            </div>
+        </div>
+        <div>
+            <span class="badge" style="font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 50px; background: ${canDepart ? '#10B981' : '#EF4444'}; color: #FFFFFF;">
+                ${canDepart ? 'Cleared (FR5.3 Met)' : 'Precondition Blocked'}
+            </span>
+        </div>
+    </div>
+
+    <!-- Compliance Documents Table -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0;">
+            <thead style="background: rgba(248, 250, 252, 0.8); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">
+                <tr>
+                    <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); border-top-left-radius: 8px;">Document Type</th>
+                    <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Reference Serial</th>
+                    <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Issuing Authority</th>
+                    <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Validity / Expiry</th>
+                    <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Status</th>
+                    <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); text-align: center;">Certificate</th>
+                    <c:if test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3}">
+                        <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); text-align: end; border-top-right-radius: 8px;">Staff Action</th>
+                    </c:if>
+                </tr>
+            </thead>
+            <tbody>
+                <c:choose>
+                    <c:when test="${not empty complianceDocs}">
+                        <c:forEach var="cdoc" items="${complianceDocs}">
+                            <tr>
+                                <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color);">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(252, 128, 25, 0.1); color: #FC8019; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                                            <i class="ti ti-file-text"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 13.5px; color: var(--text-dark);">${cdoc.docType}</div>
+                                            <small class="text-muted" style="font-size: 11px;">Shipment #SHP-${cdoc.shipmentId}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color);">
+                                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 12.5px; color: var(--text-dark);">
+                                        ${cdoc.docNumber}
+                                    </span>
+                                </td>
+                                <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted);">
+                                    ${cdoc.issuingAuthority}
+                                </td>
+                                <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px;">
+                                    <c:choose>
+                                        <c:when test="${not empty cdoc.expiryDate}">
+                                            <span class="${cdoc.status == 'Expired' ? 'text-danger fw-bold' : 'text-dark'}">
+                                                <fmt:formatDate value="${cdoc.expiryDate}" pattern="MMM dd, yyyy" />
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="text-muted">Permanent</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color);">
+                                    <c:choose>
+                                        <c:when test="${cdoc.status == 'Approved'}">
+                                            <span class="badge" style="background: rgba(16, 185, 129, 0.14); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 50px;">
+                                                <i class="ti ti-circle-check me-1"></i> Approved
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${cdoc.status == 'Expired'}">
+                                            <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 50px;">
+                                                <i class="ti ti-alert-triangle me-1"></i> Expired
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${cdoc.status == 'Rejected'}">
+                                            <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 50px;">
+                                                <i class="ti ti-circle-x me-1"></i> Rejected
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge" style="background: rgba(245, 158, 11, 0.14); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 50px;">
+                                                <i class="ti ti-clock-pause me-1"></i> Pending
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); text-align: center;">
+                                    <a href="${pageContext.request.contextPath}/jsp/doc-viewer.jsp?id=${cdoc.docId}"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-dark px-3 py-1 d-inline-flex align-items-center gap-1.5"
+                                       style="border-radius: 8px; font-size: 12.5px; font-weight: 600; white-space: nowrap;"
+                                       title="View Official Digital Compliance Certificate">
+                                        <i class="ti ti-certificate text-primary"></i> Certificate
+                                    </a>
+                                </td>
+                                <c:if test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3}">
+                                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); text-align: end;">
+                                        <div class="d-inline-flex gap-1">
+                                            <c:if test="${cdoc.status != 'Approved'}">
+                                                <form action="${pageContext.request.contextPath}/compliance/review" method="POST" class="d-inline">
+                                                    <input type="hidden" name="docId" value="${cdoc.docId}">
+                                                    <input type="hidden" name="status" value="Approved">
+                                                    <input type="hidden" name="redirectUrl" value="${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-${shipment.shipmentId}">
+                                                    <button type="submit" class="btn btn-sm btn-success text-white py-1 px-2.5" style="border-radius: 6px; font-size: 12px; font-weight: 600;" title="Approve">
+                                                        <i class="ti ti-check"></i>
+                                                    </button>
+                                                </form>
+                                            </c:if>
+                                            <c:if test="${cdoc.status != 'Rejected'}">
+                                                <form action="${pageContext.request.contextPath}/compliance/review" method="POST" class="d-inline">
+                                                    <input type="hidden" name="docId" value="${cdoc.docId}">
+                                                    <input type="hidden" name="status" value="Rejected">
+                                                    <input type="hidden" name="redirectUrl" value="${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-${shipment.shipmentId}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2.5" style="border-radius: 6px; font-size: 12px; font-weight: 600;" title="Reject">
+                                                        <i class="ti ti-x"></i>
+                                                    </button>
+                                                </form>
+                                            </c:if>
+                                        </div>
+                                    </td>
+                                </c:if>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="7" class="text-center py-4" style="color: var(--text-muted); font-size: 13.5px;">
+                                <div class="my-2">
+                                    <i class="ti ti-file-alert text-warning mb-2" style="font-size: 28px; display: block;"></i>
+                                    No compliance documents attached to this shipment yet.
+                                </div>
+                                <c:if test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3}">
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadComplianceModal" style="border-radius: 50px; font-size: 12px; font-weight: 600;">
+                                            <i class="ti ti-upload me-1"></i> Upload First Document
+                                        </button>
+                                    </div>
+                                </c:if>
+                            </td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="panels-grid">
     <%-- FR2.3: Operations and Admins (Super Admin Role 1, Company Admin Role 2, Ops Role 3) record checkpoints. Strictly hidden from Finance (Role 4) and Customers (Role 5). --%>
     <c:if test="${not empty sessionScope.user and (sessionScope.user.roleId == 1 or sessionScope.user.roleId == 2 or sessionScope.user.roleId == 3)}">
@@ -1756,6 +1957,76 @@ document.addEventListener("DOMContentLoaded", function() {
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-light px-3" data-bs-dismiss="modal" style="border-radius: 50px;">Close</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Upload Compliance Document Directly for Shipment (FR5.1, FR5.2) -->
+<div class="modal fade" id="uploadComplianceModal" tabindex="-1" aria-labelledby="uploadComplianceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; background: var(--card-bg);">
+            <div class="modal-header" style="background: rgba(252, 128, 25, 0.08); border-bottom: 1px solid var(--border-color);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ti ti-file-upload text-primary" style="font-size: 22px;"></i>
+                    <h5 class="modal-title fw-bold" id="uploadComplianceModalLabel" style="font-size: 16px; color: var(--text-dark);">
+                        Attach Compliance Document &bull; #SHP-${shipment.shipmentId}
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="${pageContext.request.contextPath}/compliance/upload" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="shipmentId" value="${shipment.shipmentId}">
+                    <input type="hidden" name="redirectUrl" value="${pageContext.request.contextPath}/shipments/tracking/detail?id=SHP-${shipment.shipmentId}">
+
+                    <div class="mb-3">
+                        <label class="form-label field-label" style="font-size: 13px; font-weight: 600;">Document Classification <span class="text-danger">*</span></label>
+                        <select name="docType" class="form-select" required style="border-radius: 10px; font-size: 13.5px;">
+                            <option value="" disabled selected>Select mandatory classification...</option>
+                            <option value="Customs Declaration">Customs Declaration (Mandatory)</option>
+                            <option value="Import/Export License">Import/Export License (Mandatory)</option>
+                            <option value="Certificate of Origin">Certificate of Origin (Mandatory)</option>
+                            <option value="Insurance Certificate">Insurance Certificate (Mandatory)</option>
+                            <option value="Inspection Certificate">Inspection Certificate (Mandatory)</option>
+                            <option value="Dangerous Goods Declaration">Dangerous Goods Declaration</option>
+                            <option value="Bill of Lading">Bill of Lading</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label field-label" style="font-size: 13px; font-weight: 600;">Document Serial / Reference # <span class="text-danger">*</span></label>
+                        <input type="text" name="docNumber" class="form-control" placeholder="e.g. CD-2026-${shipment.shipmentId}-01" required style="border-radius: 10px; font-size: 13.5px;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label field-label" style="font-size: 13px; font-weight: 600;">Issuing Authority <span class="text-danger">*</span></label>
+                        <input type="text" name="issuingAuthority" class="form-control" value="Port Maritime & Customs Authority" required style="border-radius: 10px; font-size: 13.5px;">
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label field-label" style="font-size: 12.5px; font-weight: 600;">Issue Date</label>
+                            <input type="date" name="issueDate" class="form-control" style="border-radius: 10px; font-size: 13px;">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label field-label" style="font-size: 12.5px; font-weight: 600;">Expiry Date</label>
+                            <input type="date" name="expiryDate" class="form-control" style="border-radius: 10px; font-size: 13px;">
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label field-label" style="font-size: 13px; font-weight: 600;">Document File (PDF / Image)</label>
+                        <input type="file" name="docFile" class="form-control" accept=".pdf,.png,.jpg,.jpeg" style="border-radius: 10px; font-size: 13px;">
+                        <small class="text-muted">Optional: System will generate official electronic filing if empty.</small>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: rgba(248, 250, 252, 0.6); border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 50px; font-size: 13px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 50px; font-size: 13px; font-weight: 600; padding: 7px 20px;">
+                        <i class="ti ti-upload me-1"></i> Upload Document
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -122,6 +122,11 @@ public class ShipmentServlet extends HttpServlet {
                     request.setAttribute("shipment", shipmentDAO.getShipmentById(id));
                     request.setAttribute("logs", shipmentDAO.getMovementLogs(id));
 
+                    // Government Compliance Documents & Departure Clearance status (FR5.1 - FR5.4)
+                    com.nlogistic.dao.ComplianceDAO complianceDAO = new com.nlogistic.dao.ComplianceDAO();
+                    request.setAttribute("complianceDocs", complianceDAO.getByShipment(id));
+                    request.setAttribute("canDepart", complianceDAO.canShipmentDepart(id));
+
                     // Official scannable barcode & direct mobile scan URL
                     BarcodeDAO barcodeDAO = new BarcodeDAO();
                     com.nlogistic.model.BarcodeEntry barcode = barcodeDAO.findByEntity("Shipment", id);

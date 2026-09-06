@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
-@WebServlet({"/compliance", "/compliance/*"})
+@WebServlet({"/compliance", "/compliance/*", "/compliance-document"})
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2, // 2 MB
     maxFileSize = 1024 * 1024 * 15,      // 15 MB
@@ -40,6 +40,7 @@ public class ComplianceServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String servletPath = request.getServletPath();
         String pathInfo = request.getPathInfo();
 
         // AJAX Departure Clearance Check API
@@ -53,6 +54,44 @@ public class ComplianceServlet extends HttpServlet {
             } catch (Exception e) {
                 response.getWriter().write("{\"error\":\"Invalid shipment ID\"}");
             }
+            return;
+        }
+
+        // Dedicated Compliance Certificate Viewer endpoint (FR5.1, FR5.2)
+        if ("/compliance-document".equals(servletPath) || (pathInfo != null && (pathInfo.equals("/view") || pathInfo.equals("/certificate") || pathInfo.equals("/viewer")))) {
+            int docId = 0;
+            String idStr = request.getParameter("id");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                idStr = request.getParameter("docId");
+            }
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                try {
+                    docId = Integer.parseInt(idStr.trim());
+                } catch (NumberFormatException ignored) {}
+            }
+            ComplianceDocument doc = null;
+            if (docId > 0) {
+                doc = complianceDAO.getDocumentById(docId);
+            }
+            if (doc != null) {
+                final int cmplRole = com.nlogistic.util.RbacContext.roleId(request);
+                final Integer cmplCompany = com.nlogistic.util.RbacContext.companyId(request);
+                final Integer cmplCustomer = com.nlogistic.util.RbacContext.customerId(request);
+                if (cmplRole != com.nlogistic.util.RbacContext.SUPER_ADMIN &&
+                    !shipmentDAO.canAccessShipment(doc.getShipmentId(), cmplRole, cmplCompany, cmplCustomer)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: You cannot view this compliance document.");
+                    return;
+                }
+                request.setAttribute("doc", doc);
+                request.setAttribute("canDepart", complianceDAO.canShipmentDepart(doc.getShipmentId()));
+            }
+            request.getRequestDispatcher("/jsp/doc-viewer.jsp").forward(request, response);
+            return;
+        }
+
+        // Support Auto-Approve via GET shortcut as well
+        if (pathInfo != null && (pathInfo.equals("/auto-approve") || pathInfo.equals("/autoApprove"))) {
+            doPost(request, response);
             return;
         }
 
@@ -175,9 +214,15 @@ public class ComplianceServlet extends HttpServlet {
                 e.printStackTrace();
                 session.setAttribute("errorMessage", "Error uploading document: " + e.getMessage());
             }
-            response.sendRedirect(request.getContextPath() + "/compliance");
+                String redirectUrl = request.getParameter("redirectUrl");
+                if (redirectUrl != null && !redirectUrl.trim().isEmpty() && !redirectUrl.contains("\r") && !redirectUrl.contains("\n")) {
+                    response.sendRedirect(redirectUrl);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/compliance");
+                }
+                return;
 
-        } else if (pathInfo != null && pathInfo.equals("/review")) {
+        } else if (pathInfo != null && (pathInfo.equals("/review") || "reviewDoc".equals(request.getParameter("action")))) {
             // FR5.2 / CLAUDE.md S4: approving or rejecting a compliance document is
             // an Admin + Operations decision. Finance and Customers may only view.
             if (com.nlogistic.util.RbacContext.roleId(request) > 3) {
@@ -188,6 +233,9 @@ public class ComplianceServlet extends HttpServlet {
             try {
                 int docId = Integer.parseInt(request.getParameter("docId"));
                 String status = request.getParameter("status"); // Approved or Rejected
+                if (status == null || status.trim().isEmpty()) {
+                    status = request.getParameter("newStatus");
+                }
                 boolean success = complianceDAO.reviewDocument(docId, status);
                 if (success) {
                     session.setAttribute("successMessage", "Document status updated to " + status + ".");
@@ -198,7 +246,40 @@ public class ComplianceServlet extends HttpServlet {
                 e.printStackTrace();
                 session.setAttribute("errorMessage", "Error updating document: " + e.getMessage());
             }
-            response.sendRedirect(request.getContextPath() + "/compliance");
+            String redirectUrl = request.getParameter("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.trim().isEmpty() && !redirectUrl.contains("\r") && !redirectUrl.contains("\n")) {
+                response.sendRedirect(redirectUrl);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/compliance");
+            }
+            return;
+
+        } else if (pathInfo != null && (pathInfo.equals("/auto-approve") || pathInfo.equals("/autoApprove") || "autoApprove".equals(request.getParameter("action")))) {
+            // FR5.1 - FR5.4: auto-provision & approve mandatory docs for instant departure clearance
+            if (com.nlogistic.util.RbacContext.roleId(request) > 3) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "Access Denied: your role cannot approve compliance documents.");
+                return;
+            }
+            try {
+                int shipmentId = Integer.parseInt(request.getParameter("shipmentId"));
+                boolean success = complianceDAO.autoApproveMandatoryDocs(shipmentId, userId);
+                if (success) {
+                    session.setAttribute("successMessage", "All 5 mandatory maritime compliance certificates provisioned & APPROVED. Vessel is CLEARED for departure!");
+                } else {
+                    session.setAttribute("errorMessage", "Failed to auto-approve mandatory documents.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("errorMessage", "Error auto-approving documents: " + e.getMessage());
+            }
+            String redirectUrl = request.getParameter("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.trim().isEmpty() && !redirectUrl.contains("\r") && !redirectUrl.contains("\n")) {
+                response.sendRedirect(redirectUrl);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/compliance");
+            }
+            return;
 
         } else if (pathInfo != null && pathInfo.equals("/delete")) {
             // Deleting a compliance document destroys departure-clearance evidence.
@@ -220,9 +301,20 @@ public class ComplianceServlet extends HttpServlet {
                 e.printStackTrace();
                 session.setAttribute("errorMessage", "Error deleting document: " + e.getMessage());
             }
-            response.sendRedirect(request.getContextPath() + "/compliance");
+            String redirectUrl = request.getParameter("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.trim().isEmpty() && !redirectUrl.contains("\r") && !redirectUrl.contains("\n")) {
+                response.sendRedirect(redirectUrl);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/compliance");
+            }
+            return;
         } else {
-            response.sendRedirect(request.getContextPath() + "/compliance");
+            String redirectUrl = request.getParameter("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.trim().isEmpty() && !redirectUrl.contains("\r") && !redirectUrl.contains("\n")) {
+                response.sendRedirect(redirectUrl);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/compliance");
+            }
         }
     }
 }
