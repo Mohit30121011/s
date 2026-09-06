@@ -106,9 +106,9 @@ public class ShipmentServlet extends HttpServlet {
                 } else if (pathInfo.equals("/tracking/detail")) {
             // Live Tracking Timeline Detail View
             String idParam = request.getParameter("id");
-            if (idParam != null && idParam.startsWith("SHP-")) {
+            if (idParam != null && !idParam.trim().isEmpty()) {
                 try {
-                    int id = Integer.parseInt(idParam.substring(4).trim());
+                    int id = idParam.startsWith("SHP-") ? Integer.parseInt(idParam.substring(4).trim()) : Integer.parseInt(idParam.trim());
                     // IDOR guard: refuse a shipment the caller does not own / does not
                     // belong to their tenant, rather than rendering someone else's cargo.
                     if (!shipmentDAO.canAccessShipment(id,
@@ -121,6 +121,19 @@ public class ShipmentServlet extends HttpServlet {
                     }
                     request.setAttribute("shipment", shipmentDAO.getShipmentById(id));
                     request.setAttribute("logs", shipmentDAO.getMovementLogs(id));
+
+                    // Official scannable barcode & direct mobile scan URL
+                    BarcodeDAO barcodeDAO = new BarcodeDAO();
+                    com.nlogistic.model.BarcodeEntry barcode = barcodeDAO.findByEntity("Shipment", id);
+                    if (barcode == null) {
+                        User caller = com.nlogistic.util.RbacContext.user(request);
+                        int genBy = (caller != null) ? caller.getUserId() : 1;
+                        com.nlogistic.util.BarcodeAutoGenerator.generateFor(request, "Shipment", id, genBy);
+                        barcode = barcodeDAO.findByEntity("Shipment", id);
+                    }
+                    request.setAttribute("barcode", barcode);
+                    String scanUrl = com.nlogistic.util.BarcodeUtil.buildScanUrl(request, barcode != null ? barcode.getBarcodeValue() : ("SHI-" + id));
+                    request.setAttribute("scanUrl", scanUrl);
                 } catch (NumberFormatException e) {
                     // ignore, let JSP handle null shipment
                 }
@@ -372,13 +385,10 @@ public class ShipmentServlet extends HttpServlet {
             // GAP-M2-02: recording movement is an Operations & Admin duty. Company Admin (Role 2),
             // Operations staff (Role 3), and Super Admin (Role 1) can record checkpoints.
             int csRole = com.nlogistic.util.RbacContext.roleId(request);
-            if (csRole > 3) {
-                User currU = (User) session.getAttribute("user");
-                if (currU == null || !currU.hasPermission("tracking")) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                            "Access Denied: only Operations staff and Admins may record movement checkpoints.");
-                    return;
-                }
+            if (csRole > 3 || csRole <= 0) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "Access Denied: only Operations staff and Admins (Roles 1-3) may record movement checkpoints.");
+                return;
             }
             try {
                 int shipmentId = Integer.parseInt(shipmentIdStr);

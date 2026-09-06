@@ -203,6 +203,9 @@
         gap: 24px;
         margin-bottom: 24px;
     }
+    .panels-grid > .card-panel:only-child {
+        grid-column: 1 / -1;
+    }
     @media (max-width: 992px) {
         .panels-grid { grid-template-columns: 1fr; }
     }
@@ -1243,7 +1246,7 @@
                     </div>
                     <div>
                         <div style="font-weight: 700; font-size: 15px; color: var(--text-dark);">Traceability Barcode</div>
-                        <div style="font-size: 11.5px; color: var(--text-muted);">Scannable optical token for handheld terminals</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted);">Scannable optical token for handheld terminals &amp; mobile phones</div>
                     </div>
                 </div>
                 <span class="badge bg-primary" style="font-size: 11px; padding: 5px 10px; border-radius: 50px;">
@@ -1254,7 +1257,19 @@
             <!-- Barcode and QR Visual Box -->
             <div class="barcode-display-box">
                 <div class="d-flex justify-content-center align-items-center mb-3">
-                    <div id="shipmentQrCanvas" style="width: 120px; height: 120px; background: #FFFFFF; padding: 6px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center;"></div>
+                    <c:choose>
+                        <c:when test="${not empty barcode.imagePath}">
+                            <img src="${pageContext.request.contextPath}${barcode.imagePath}?v=2"
+                                 alt="${barcode.barcodeValue}"
+                                 id="shipmentRealBarcodeImg"
+                                 style="width: 120px; height: 120px; object-fit: contain; border-radius: 8px; background: #FFFFFF; padding: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+                                 onerror="this.style.display='none'; document.getElementById('shipmentQrCanvas').style.display='flex';">
+                            <div id="shipmentQrCanvas" style="display: none; width: 120px; height: 120px; background: #FFFFFF; padding: 6px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); align-items: center; justify-content: center;"></div>
+                        </c:when>
+                        <c:otherwise>
+                            <div id="shipmentQrCanvas" style="width: 120px; height: 120px; background: #FFFFFF; padding: 6px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center;"></div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
                 <div class="text-center mb-3" style="background: #FFFFFF; padding: 6px; border-radius: 8px; display: inline-block; max-width: 100%; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
@@ -1263,9 +1278,9 @@
 
                 <div>
                     <div class="barcode-pill">
-                        <i class="ti ti-barcode text-primary"></i>
-                        <span>SHP-${shipment.shipmentId}</span>
-                        <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 ms-1" onclick="navigator.clipboard.writeText('SHP-${shipment.shipmentId}'); alert('Shipment ID copied: SHP-${shipment.shipmentId}');" title="Copy to clipboard">
+                        <i class="ti ti-qrcode text-primary"></i>
+                        <span id="activeBarcodeVal">${not empty barcode ? barcode.barcodeValue : 'SHI-'.concat(shipment.shipmentId)}</span>
+                        <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 ms-1" onclick="copyBarcodeToken();" title="Copy to clipboard">
                             <i class="ti ti-copy" style="font-size: 15px; color: #FC8019;"></i>
                         </button>
                     </div>
@@ -1274,20 +1289,34 @@
 
             <!-- Action buttons -->
             <div class="d-flex flex-column gap-2 mt-auto">
-                <a href="${pageContext.request.contextPath}/scan-barcode?value=SHP-${shipment.shipmentId}" class="btn btn-outline-primary w-100" style="border-radius: 50px; font-weight: 600; font-size: 13px; padding: 9px 16px;">
-                    <i class="ti ti-scan me-1"></i> Scan with Handheld Barcode Scanner
+                <a href="${pageContext.request.contextPath}/barcode-pdf?value=${not empty barcode ? barcode.barcodeValue : 'SHI-'.concat(shipment.shipmentId)}" target="_blank" class="btn btn-outline-primary w-100" style="border-radius: 50px; font-weight: 600; font-size: 13px; padding: 9px 16px;">
+                    <i class="ti ti-file-text me-1"></i> Open Official Waybill &amp; Spec Report (PDF)
                 </a>
-                <button type="button" onclick="window.print()" class="btn btn-light w-100" style="border-radius: 50px; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border-color); padding: 8px 16px;">
-                    <i class="ti ti-printer me-1"></i> Print Waybill / Barcode Label
-                </button>
+                <c:choose>
+                    <c:when test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3}">
+                        <a href="${pageContext.request.contextPath}/scan-barcode?value=${not empty barcode ? barcode.barcodeValue : 'SHI-'.concat(shipment.shipmentId)}" class="btn btn-light w-100" style="border-radius: 50px; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border-color); padding: 8px 16px;">
+                            <i class="ti ti-scan me-1"></i> Scan with Handheld Barcode Scanner
+                        </a>
+                        <c:if test="${not empty barcode}">
+                            <a href="${pageContext.request.contextPath}/barcodes/label?barcodeId=${barcode.barcodeId}" target="_blank" class="btn btn-light w-100" style="border-radius: 50px; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border-color); padding: 8px 16px;">
+                                <i class="ti ti-printer me-1"></i> Print Thermal Shipping Label
+                            </a>
+                        </c:if>
+                    </c:when>
+                    <c:otherwise>
+                        <button type="button" onclick="window.print()" class="btn btn-light w-100" style="border-radius: 50px; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border-color); padding: 8px 16px;">
+                            <i class="ti ti-printer me-1"></i> Print Live Tracking Summary
+                        </button>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>
 </div>
 
 <div class="panels-grid">
-    <%-- FR2.3: Operations and Admins (Super Admin Role 1, Company Admin Role 2, Ops Role 3) record checkpoints. --%>
-    <c:if test="${sessionScope.user.roleId <= 3 || sessionScope.roleId <= 3 || sessionScope.user.roleId == 1 || sessionScope.user.roleId == 2 || sessionScope.user.roleId == 3 || sessionScope.roleId == 1 || sessionScope.roleId == 2 || sessionScope.roleId == 3 || sessionScope.user.hasPermission('tracking')}">
+    <%-- FR2.3: Operations and Admins (Super Admin Role 1, Company Admin Role 2, Ops Role 3) record checkpoints. Strictly hidden from Finance (Role 4) and Customers (Role 5). --%>
+    <c:if test="${not empty sessionScope.user and (sessionScope.user.roleId == 1 or sessionScope.user.roleId == 2 or sessionScope.user.roleId == 3)}">
     <!-- Live Form Panel: Record Next Checkpoint -->
     <div class="card-panel record-checkpoint-card no-card-tools" data-no-tools="true" style="margin-bottom: 0;">
         <div class="panel-header">
@@ -1650,16 +1679,26 @@ document.addEventListener("DOMContentLoaded", function() {
 <script src="${pageContext.request.contextPath}/assets/js/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
 <script>
+function copyBarcodeToken() {
+    const val = document.getElementById('activeBarcodeVal')?.innerText?.trim();
+    if (val) {
+        navigator.clipboard.writeText(val);
+        alert('Traceability Barcode Token copied: ' + val);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const codeVal = 'SHP-${shipment.shipmentId}';
+    const barcodeVal = '${not empty barcode ? barcode.barcodeValue : "SHI-".concat(shipment.shipmentId)}';
+    const scanUrl = '${not empty scanUrl ? scanUrl : pageContext.request.scheme.concat("://").concat(pageContext.request.serverName).concat(":").concat(pageContext.request.serverPort).concat(pageContext.request.contextPath).concat("/barcode-pdf?value=").concat(not empty barcode ? barcode.barcodeValue : "SHI-".concat(shipment.shipmentId))}';
     
-    // 1. Render QR Code
+    // 1. Render Fallback QR Code (encodes the direct mobile scan URL, NOT plain text!)
     const qrContainer = document.getElementById('shipmentQrCanvas');
     if (qrContainer) {
+        qrContainer.innerHTML = '';
         if (typeof QRCode !== 'undefined') {
             try {
                 new QRCode(qrContainer, {
-                    text: codeVal,
+                    text: scanUrl,
                     width: 108,
                     height: 108,
                     colorDark: "#0F172A",
@@ -1668,10 +1707,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } catch (err) {
                 console.warn('QR Code init fallback:', err);
-                qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=' + encodeURIComponent(codeVal) + '" alt="QR" style="width:108px;height:108px;border-radius:4px;"/>';
+                qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=' + encodeURIComponent(scanUrl) + '" alt="QR" style="width:108px;height:108px;border-radius:4px;"/>';
             }
         } else {
-            qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=' + encodeURIComponent(codeVal) + '" alt="QR" style="width:108px;height:108px;border-radius:4px;"/>';
+            qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=' + encodeURIComponent(scanUrl) + '" alt="QR" style="width:108px;height:108px;border-radius:4px;"/>';
         }
     }
     
@@ -1679,10 +1718,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const svg1D = document.getElementById('shipment1DBarcode');
     if (svg1D && typeof JsBarcode !== 'undefined') {
         try {
-            JsBarcode(svg1D, codeVal, {
+            JsBarcode(svg1D, barcodeVal, {
                 format: "CODE128",
                 lineColor: "#0F172A",
-                width: 1.6,
+                width: 1.5,
                 height: 38,
                 displayValue: false,
                 margin: 2

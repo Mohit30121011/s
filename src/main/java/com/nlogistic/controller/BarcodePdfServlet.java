@@ -118,7 +118,7 @@ public class BarcodePdfServlet extends HttpServlet {
             // 4. Stream real PDF binary with attachment disposition for mobile download
             String filename = entityType + "-" + entityId + "-Report.pdf";
             String mode = request.getParameter("mode");
-            String disposition = "view".equalsIgnoreCase(mode) ? "inline" : "attachment";
+            String disposition = "download".equalsIgnoreCase(mode) ? "attachment" : "inline";
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", disposition + "; filename=\"" + filename + "\"");
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
