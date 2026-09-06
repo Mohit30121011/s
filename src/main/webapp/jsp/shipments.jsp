@@ -336,29 +336,231 @@
         box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
 
-    /* Container Allocation Workbench Modal */
-    [data-theme="dark"] #allocateContainerModal .modal-content {
-        background: #151F28 !important;
-        border-color: #2D3F4D !important;
-        color: #F8FAFC !important;
+    /* ========================================================
+       CONTAINER ALLOCATION WORKBENCH MASTER DESIGN SYSTEM
+       ======================================================== */
+    #allocateContainerModal .modal-content {
+        border-radius: 16px !important;
+        border: 1px solid #E2E8F0 !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+        overflow: hidden !important;
+        background: #FFFFFF !important;
     }
-    [data-theme="dark"] #allocateContainerModal .modal-footer {
-        background: #101820 !important;
-        border-color: #2D3F4D !important;
+    #allocateContainerModal .modal-header {
+        background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 20px 26px !important;
     }
-    [data-theme="dark"] #allocateContainerModal table thead th {
-        background: #1B2733 !important;
-        border-color: #2D3F4D !important;
+    #allocateContainerModal .modal-header .modal-title {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 17px !important;
+        letter-spacing: -0.2px !important;
+    }
+    #allocateContainerModal .modal-header small {
         color: #94A3B8 !important;
+        font-size: 12px !important;
+        display: block !important;
+        margin-top: 2px !important;
     }
-    [data-theme="dark"] #allocateContainerModal table td {
+    #allocateContainerModal .modal-header .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%) !important;
+        opacity: 0.85 !important;
+        transition: opacity 0.2s ease, transform 0.2s ease !important;
+    }
+    #allocateContainerModal .modal-header .btn-close:hover {
+        opacity: 1 !important;
+        transform: scale(1.08) !important;
+    }
+    #allocateContainerModal .alloc-cargo-card {
+        background: rgba(245, 158, 11, 0.08) !important;
+        border: 1px solid rgba(245, 158, 11, 0.25) !important;
+        border-radius: 12px !important;
+        padding: 16px 20px !important;
+    }
+    #allocateContainerModal .alloc-cargo-card .alloc-shipment-pill {
+        background: rgba(252, 128, 25, 0.15) !important;
+        color: #D97706 !important;
+        border: 1px solid rgba(252, 128, 25, 0.3) !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        padding: 4px 10px !important;
+        border-radius: 6px !important;
+    }
+    #allocateContainerModal .alloc-table-wrapper {
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    }
+    #allocateContainerModal table thead th {
+        background: #F8FAFC !important;
+        color: #64748B !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        border-bottom: 1.5px solid #E2E8F0 !important;
+        padding: 12px 16px !important;
+    }
+    #allocateContainerModal table tbody td {
+        padding: 12px 16px !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #F1F5F9 !important;
+        transition: background-color 0.15s ease !important;
+        color: #0F172A !important;
+    }
+    #allocateContainerModal table tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+    #allocateContainerModal table tbody tr:hover {
+        background-color: #F8FAFC !important;
+    }
+    #allocateContainerModal table tbody tr.selected-row,
+    #allocateContainerModal table tbody tr:has(input[type="radio"]:checked) {
+        background-color: rgba(252, 128, 25, 0.08) !important;
+    }
+    #allocateContainerModal input[type="radio"].form-check-input {
+        width: 18px !important;
+        height: 18px !important;
+        cursor: pointer !important;
+    }
+    #allocateContainerModal input[type="radio"].form-check-input:checked {
+        background-color: #FC8019 !important;
+        border-color: #FC8019 !important;
+    }
+    #allocateContainerModal .alloc-type-pill {
+        background: #F1F5F9 !important;
+        color: #334155 !important;
+        border: 1px solid #CBD5E1 !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        border-radius: 6px !important;
+        padding: 3px 8px !important;
+    }
+    #allocateContainerModal .alloc-input-remarks {
+        border-radius: 50px !important;
+        padding: 10px 20px !important;
+        font-size: 13.5px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        transition: border-color 0.2s, box-shadow 0.2s !important;
+        outline: none !important;
+    }
+    #allocateContainerModal .alloc-input-remarks:focus {
+        border-color: #FC8019 !important;
+        box-shadow: 0 0 0 3.5px rgba(252, 128, 25, 0.16) !important;
+    }
+    #allocateContainerModal .modal-footer {
+        background: #F8FAFC !important;
+        border-top: 1px solid #E2E8F0 !important;
+        padding: 16px 24px !important;
+    }
+    #allocateContainerModal .btn-alloc-cancel {
+        background: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+        color: #475569 !important;
+        padding: 9px 22px !important;
+        border-radius: 50px !important;
+        font-weight: 500 !important;
+        font-size: 13px !important;
+        transition: all 0.18s ease !important;
+    }
+    #allocateContainerModal .btn-alloc-cancel:hover {
+        background: #F1F5F9 !important;
+        color: #0F172A !important;
+    }
+    #allocateContainerModal .btn-alloc-confirm {
+        background: linear-gradient(135deg, #FC8019 0%, #FF6600 100%) !important;
+        border: none !important;
+        color: #FFFFFF !important;
+        padding: 9px 24px !important;
+        border-radius: 50px !important;
+        font-weight: 600 !important;
+        font-size: 13.5px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(252, 128, 25, 0.25) !important;
+        transition: all 0.18s ease !important;
+    }
+    #allocateContainerModal .btn-alloc-confirm:hover:not(:disabled) {
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(252, 128, 25, 0.35) !important;
+    }
+    #allocateContainerModal .btn-alloc-confirm:disabled {
+        opacity: 0.55 !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    /* Dark Mode Overrides */
+    [data-theme="dark"] #allocateContainerModal .modal-content {
+        background: #121A22 !important;
         border-color: #243240 !important;
         color: #F8FAFC !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
     }
-    [data-theme="dark"] #allocateContainerModal .form-control {
-        background: #18232F !important;
-        border-color: #2D3F4D !important;
+    [data-theme="dark"] #allocateContainerModal .modal-header {
+        background: #0B1117 !important;
+        border-bottom-color: #1A252E !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .modal-header .modal-title {
         color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .alloc-cargo-card {
+        background: rgba(245, 158, 11, 0.12) !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .alloc-cargo-card strong,
+    [data-theme="dark"] #allocateContainerModal .alloc-cargo-card span {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .alloc-table-wrapper {
+        border-color: #22303A !important;
+    }
+    [data-theme="dark"] #allocateContainerModal table thead th {
+        background: #151F28 !important;
+        border-bottom-color: #22303A !important;
+        color: #94A3B8 !important;
+    }
+    [data-theme="dark"] #allocateContainerModal table tbody td {
+        border-bottom-color: #1C2732 !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #allocateContainerModal table tbody tr:hover {
+        background-color: #18232F !important;
+    }
+    [data-theme="dark"] #allocateContainerModal table tbody tr.selected-row,
+    [data-theme="dark"] #allocateContainerModal table tbody tr:has(input[type="radio"]:checked) {
+        background-color: rgba(252, 128, 25, 0.15) !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .alloc-type-pill {
+        background: #1C2732 !important;
+        color: #CBD5E1 !important;
+        border-color: #2D3D4D !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .alloc-input-remarks {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .alloc-input-remarks::placeholder {
+        color: #64748B !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .modal-footer {
+        background: #0E151D !important;
+        border-top-color: #1A252E !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .btn-alloc-cancel {
+        background: #151F28 !important;
+        border-color: #22303A !important;
+        color: #CBD5E1 !important;
+    }
+    [data-theme="dark"] #allocateContainerModal .btn-alloc-cancel:hover {
+        background: #1E2B38 !important;
+        color: #FC8019 !important;
     }
     [data-theme="dark"] .status-badge.Booked {
         background: rgba(2, 132, 199, 0.18) !important;
@@ -369,11 +571,6 @@
         background: rgba(245, 158, 11, 0.18) !important;
         color: #FBBF24 !important;
         border: 1px solid rgba(245, 158, 11, 0.35) !important;
-    }
-    [data-theme="dark"] #allocateContainerModal .badge.bg-light {
-        background: #243240 !important;
-        color: #E2E8F0 !important;
-        border-color: #33475B !important;
     }
 </style>
 
@@ -609,18 +806,18 @@
 <!-- Container Allocation Workbench Modal (FR3.3 / FR3.4) -->
 <div class="modal fade" id="allocateContainerModal" tabindex="-1" aria-labelledby="allocateContainerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
-            <div class="modal-header" style="background: linear-gradient(135deg, #1E293B, #0F172A); color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 18px 24px;">
+        <div class="modal-content">
+            <div class="modal-header">
                 <div class="d-flex align-items-center gap-3">
-                    <div style="width: 42px; height: 42px; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #F59E0B; font-size: 20px;">
+                    <div style="width: 42px; height: 42px; background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #FC8019; font-size: 20px;">
                         <i class="ti ti-box"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title mb-0" id="allocateContainerModalLabel" style="font-weight: 700; font-size: 17px; color: #FFFFFF;">Container Allocation Workbench</h5>
-                        <small style="color: #94A3B8; font-size: 12px;">SRS FR3.3 &amp; FR3.4 &bull; Physical fleet assignment &amp; capacity verification</small>
+                        <h5 class="modal-title mb-0" id="allocateContainerModalLabel">Container Allocation Workbench</h5>
+                        <small>SRS FR3.3 &amp; FR3.4 &bull; Physical fleet assignment &amp; capacity verification</small>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <form action="${pageContext.request.contextPath}/shipments/allocateContainer" method="POST" id="allocateForm">
@@ -637,25 +834,25 @@
                     <!-- Content container -->
                     <div id="allocContent" style="display: none;">
                         <!-- Shipment Cargo Specs Card -->
-                        <div class="p-3 mb-4" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px;">
+                        <div class="alloc-cargo-card mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                                <span style="font-weight: 700; font-size: 14px; color: var(--text-dark);">
-                                    Shipment <span id="allocShipmentBadge" class="badge bg-warning text-dark px-2 py-1 ms-1">#SHP-</span>
+                                <span style="font-weight: 700; font-size: 14px;">
+                                    Shipment <span id="allocShipmentBadge" class="alloc-shipment-pill ms-1">#SHP-</span>
                                 </span>
-                                <span id="allocCustomerName" style="font-size: 13px; font-weight: 600; color: var(--text-dark);">Customer</span>
+                                <span id="allocCustomerName" style="font-size: 13.5px; font-weight: 700;">Customer</span>
                             </div>
                             <div class="row g-2 pt-2 border-top" style="border-color: rgba(245,158,11,0.2) !important; font-size: 13px;">
                                 <div class="col-sm-6">
                                     <span style="color: var(--text-muted);"><i class="ti ti-map-pin me-1" style="color: #FC8019;"></i>Route:</span>
-                                    <strong id="allocRoute" class="ms-1" style="color: var(--text-dark);">Origin &rarr; Dest</strong>
+                                    <strong id="allocRoute" class="ms-1">Origin &rarr; Dest</strong>
                                 </div>
                                 <div class="col-sm-3">
                                     <span style="color: var(--text-muted);"><i class="ti ti-weight me-1" style="color: #3B82F6;"></i>Weight:</span>
-                                    <strong id="allocWeight" class="ms-1" style="color: var(--text-dark);">0 kg</strong>
+                                    <strong id="allocWeight" class="ms-1">0 kg</strong>
                                 </div>
                                 <div class="col-sm-3">
                                     <span style="color: var(--text-muted);"><i class="ti ti-dimensions me-1" style="color: #10B981;"></i>Volume:</span>
-                                    <strong id="allocVolume" class="ms-1" style="color: var(--text-dark);">0 CBM</strong>
+                                    <strong id="allocVolume" class="ms-1">0 CBM</strong>
                                 </div>
                             </div>
                         </div>
@@ -668,11 +865,11 @@
                             <span id="allocContainerCount" class="badge bg-secondary" style="font-size: 11px;">0 Available</span>
                         </div>
 
-                        <div class="table-responsive mb-3" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 10px;">
+                        <div class="table-responsive alloc-table-wrapper mb-3" style="max-height: 280px; overflow-y: auto;">
                             <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
-                                <thead style="background: #F8FAFC; position: sticky; top: 0; z-index: 2;">
+                                <thead style="position: sticky; top: 0; z-index: 2;">
                                     <tr>
-                                        <th style="width: 45px; text-align: center;">Pick</th>
+                                        <th style="width: 50px; text-align: center;">Pick</th>
                                         <th>Container No</th>
                                         <th>Type &amp; Size</th>
                                         <th>Current Depot</th>
@@ -691,7 +888,7 @@
                             <label class="form-label fw-semibold" style="font-size: 13px; color: var(--text-dark);">
                                 Dispatch Remarks / Depot Inspection Note (Optional)
                             </label>
-                            <input type="text" name="remarks" id="allocRemarks" class="form-control" placeholder="e.g. Assigned from Nhava Sheva Yard 3 &bull; Visual inspection verified" style="font-size: 13px; border-radius: 8px;">
+                            <input type="text" name="remarks" id="allocRemarks" class="form-control alloc-input-remarks w-100" placeholder="e.g. Assigned from Nhava Sheva Yard 3 &bull; Visual inspection verified">
                         </div>
                     </div>
 
@@ -702,10 +899,11 @@
                     </div>
                 </div>
 
-                <div class="modal-footer" style="background: #F8FAFC; border-top: 1px solid var(--border-color); padding: 14px 24px;">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-2" data-bs-dismiss="modal" style="font-size: 13px; border-radius: 50px;">Cancel</button>
-                    <button type="submit" id="allocSubmitBtn" class="btn btn-warning text-dark fw-bold px-4 py-2" style="font-size: 13px; border-radius: 50px; background: #F59E0B; border: none;" disabled>
-                        <i class="ti ti-check me-1"></i> Confirm &amp; Allocate Container
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-alloc-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="allocSubmitBtn" class="btn btn-alloc-confirm" disabled>
+                        <i class="ti ti-check"></i>
+                        <span>Confirm &amp; Allocate Container</span>
                     </button>
                 </div>
             </form>
@@ -980,6 +1178,14 @@ function openAllocationWorkbench(shipmentId) {
 
             let firstValidSelected = false;
 
+            function handleAllocRadioChange(radio) {
+                document.getElementById('allocSubmitBtn').disabled = false;
+                document.querySelectorAll('#allocContainerTbody tr').forEach(row => row.classList.remove('selected-row'));
+                if (radio && radio.checked) {
+                    radio.closest('tr')?.classList.add('selected-row');
+                }
+            }
+
             containers.forEach(c => {
                 const tr = document.createElement('tr');
                 const fits = c.fitsAll;
@@ -987,13 +1193,13 @@ function openAllocationWorkbench(shipmentId) {
 
                 let badgeHtml = '';
                 if (fits) {
-                    badgeHtml += '<span class="badge bg-success text-white px-2 py-1"><i class="ti ti-check me-1"></i>Fits Cargo</span>';
+                    badgeHtml += '<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); font-weight: 600; font-size: 11px; padding: 4px 9px; border-radius: 50px;"><i class="ti ti-check me-1"></i>Fits Cargo</span>';
                 } else {
-                    badgeHtml += '<span class="badge bg-danger text-white px-2 py-1"><i class="ti ti-x me-1"></i>Over Capacity</span>';
+                    badgeHtml += '<span class="badge" style="background: rgba(239, 68, 68, 0.12); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 600; font-size: 11px; padding: 4px 9px; border-radius: 50px;"><i class="ti ti-x me-1"></i>Over Capacity</span>';
                 }
 
                 if (matchesOrigin) {
-                    badgeHtml += '<span class="badge bg-info text-dark px-2 py-1 ms-1"><i class="ti ti-map-pin me-1"></i>At Origin</span>';
+                    badgeHtml += '<span class="badge ms-1" style="background: rgba(59, 130, 246, 0.12); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.25); font-weight: 600; font-size: 11px; padding: 4px 9px; border-radius: 50px;"><i class="ti ti-map-pin me-1"></i>At Origin</span>';
                 }
 
                 const radioAttr = fits ? '' : 'disabled';
@@ -1001,25 +1207,37 @@ function openAllocationWorkbench(shipmentId) {
                 if (fits && !firstValidSelected) {
                     firstValidSelected = true;
                     document.getElementById('allocSubmitBtn').disabled = false;
+                    tr.classList.add('selected-row');
                 }
 
+                tr.style.cursor = fits ? 'pointer' : 'not-allowed';
+                tr.onclick = function(e) {
+                    if (fits && e.target.type !== 'radio') {
+                        const r = tr.querySelector('input[type="radio"]');
+                        if (r && !r.checked) {
+                            r.checked = true;
+                            handleAllocRadioChange(r);
+                        }
+                    }
+                };
+
                 tr.innerHTML = '<td style="text-align: center;">' +
-                        '<input type="radio" name="containerId" value="' + c.containerId + '" class="form-check-input" ' + radioAttr + ' ' + isChecked + ' onchange="document.getElementById(\'allocSubmitBtn\').disabled = false;">' +
+                        '<input type="radio" name="containerId" value="' + c.containerId + '" class="form-check-input" ' + radioAttr + ' ' + isChecked + ' onchange="handleAllocRadioChange(this);">' +
                     '</td>' +
                     '<td>' +
-                        '<strong style="font-family: monospace; color: #FC8019;">#' + c.containerNumber + '</strong>' +
-                        '<div style="font-size: 11px; color: var(--text-muted);">' + (c.ownerCompanyName || '') + '</div>' +
+                        '<strong style="font-family: monospace; color: #FC8019; font-size: 13.5px;">#' + c.containerNumber + '</strong>' +
+                        '<div style="font-size: 11.5px; color: var(--text-muted);">' + (c.ownerCompanyName || '') + '</div>' +
                     '</td>' +
                     '<td>' +
-                        '<span class="badge bg-light text-dark border">' + c.type + '</span> ' +
-                        '<span class="badge bg-light text-dark border">' + c.size + '</span>' +
+                        '<span class="badge alloc-type-pill me-1">' + c.type + '</span>' +
+                        '<span class="badge alloc-type-pill">' + c.size + '</span>' +
                     '</td>' +
                     '<td>' +
-                        '<div><i class="ti ti-building-warehouse text-secondary me-1"></i>' + c.portName + '</div>' +
+                        '<div style="font-weight: 600; font-size: 13px;"><i class="ti ti-building-warehouse text-primary me-1"></i>' + c.portName + '</div>' +
                         '<div style="font-size: 11px; color: var(--text-muted);">' + (c.portCountry || '') + '</div>' +
                     '</td>' +
                     '<td>' +
-                        '<div>Max: <strong>' + (c.goodsCapacityKg || c.maxGrossWeightKg || 0).toLocaleString() + ' kg</strong></div>' +
+                        '<div style="font-size: 12.5px;">Max: <strong style="font-weight: 700;">' + (c.goodsCapacityKg || c.maxGrossWeightKg || 0).toLocaleString() + ' kg</strong></div>' +
                         '<div style="font-size: 11.5px; color: var(--text-muted);">Vol: <strong>' + (c.goodsCapacityCbm || 0) + ' CBM</strong></div>' +
                     '</td>' +
                     '<td style="text-align: center;">' +
